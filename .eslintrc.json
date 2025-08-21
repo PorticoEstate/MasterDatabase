@@ -1,0 +1,19 @@
+{
+  "root": true,
+  "env": {
+    "es6": true,
+    "node": true,
+    "browser": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "rules": {
+    "brace-style": ["error", "allman", { "allowSingleLine": true }],
+    "curly": ["error", "all"],
+    "indent": ["error", "tab", { "SwitchCase": 1 }],
+    "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+    "semi": ["error", "always"]
+  }
+}

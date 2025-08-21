@@ -1,0 +1,22 @@
+# clang-format configuration to use Allman braces and tabs of width 4
+# Applies to C, C++, Objective-C, Java, JavaScript, TypeScript, C# when using clang-format
+
+BasedOnStyle: LLVM
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBraces: Allman
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForIndentation
