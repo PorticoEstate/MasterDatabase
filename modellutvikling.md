@@ -73,3 +73,41 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 
 Dette dokumentet skal brukes som input til AI-generert modellutvikling og systemdesign.
 
+
+---
+
+## 9. Matrikkel: Datauttak via Kartverket (Eiendomsdata)
+
+Oppsummert fra Kartverket: «Elektronisk tilgang til eiendomsdata» (<https://kartverket.no/api-og-data/eiendomsdata>):
+
+- Tilgang: Data er gratis, men regulert. Det kreves lovlig behandlingsgrunnlag og avtale med Kartverket før utlevering av data fra grunnbok og matrikkel.
+- Tilgangsnivå: Ulike virksomhetskategorier får ulikt omfang av opplysninger. Databehandlere kan få tilgang når de videreformidler til behandlingsansvarlige med grunnlag.
+- Forpliktelser: Krav til tekniske og organisatoriske tiltak, videreføringsplikt til kunder, og etterlevelse av personvernregelverk. Brudd kan medføre stenging av tilgang.
+- Bruksbegrensninger: Ikke lov å bruke til reklame/markedsføring uten samtykke.
+- Søknad: Tilgang søkes via nettskjema (<https://kartverket.no/api-og-data/eiendomsdata/soknad-api-tilgang>). Kartverket vurderer vilkår for utlevering.
+- Katalog: Tjenester/datasett finnes i Geonorge kartkatalog og API-oversikt.
+
+Plan for data-pull i dette prosjektet:
+
+1. Juridisk og tilgang
+
+- Avklare behandlingsgrunnlag og inngå avtale med Kartverket.
+- Etablere Maskinporten-klient og evt. mTLS/IP-tilgang etter krav.
+
+1. Tjenestevalg
+
+- Adresse/lett oppslag: Adresse-API (offentlig) for adresser og koordinater.
+- Autorative matrikkeldata: Matrikkel Web Services (SOAP) og/eller WFS/WMS (lisensiert).
+- Masseoppdatering: Periodiske uttrekk via Geonorge/FTP der det er hensiktsmessig.
+
+1. ETL og modelltilpasning
+
+- Hente data til «staging», validere, normalisere og mappe til master-IDer.
+- Feltvis prioritet: Sett Matrikkel som autorativ for identitet (gnr/bnr/fnr/snr, bygningsnummer, adresser).
+- Proveniens: lagre kilde, sist oppdatert og autorativ-status per felt.
+
+1. Drift
+
+- Håndtere rate limits og feil via retry/backoff og idempotente oppdateringer.
+- Loggføre og revidere tilgang i henhold til avtale og utleveringsforskrift.
+
