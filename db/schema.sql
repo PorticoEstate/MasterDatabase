@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS bygning
 (
     bygg_id     BIGSERIAL PRIMARY KEY,
     bygningsnr  BIGINT UNIQUE,
-    matrikkelenhet_id BIGINT REFERENCES matrikkelenhet(enhet_id) ON DELETE CASCADE,
     bydel_id    BIGINT REFERENCES bydel(bydel_id) ON DELETE SET NULL,
     bygningstype TEXT,
     status      TEXT,
@@ -92,8 +91,7 @@ CREATE TABLE IF NOT EXISTS bygning
 CREATE INDEX IF NOT EXISTS ix_bygning_bydel
     ON bygning (bydel_id);
 
-CREATE INDEX IF NOT EXISTS ix_bygning_matrikkelenhet
-    ON bygning (matrikkelenhet_id);
+-- relasjon til matrikkelenhet håndteres via koblingstabellen bygning_matrikkelenhet
 
 -- Fløy
 CREATE TABLE IF NOT EXISTS floy
