@@ -194,3 +194,70 @@ CREATE TABLE IF NOT EXISTS rom_detaljer
 );
 
 -- Note: Triggers to auto-update updated_at can be added in a later migration.
+
+-- Uteområder (park, lekeplass, ballbane m.m.)
+CREATE TABLE IF NOT EXISTS uteomrade
+(
+	uteomrade_id	BIGSERIAL PRIMARY KEY,
+	bydel_id		BIGINT REFERENCES bydel(bydel_id) ON DELETE SET NULL,
+	navn			TEXT NOT NULL,
+	omradetype		TEXT NOT NULL CHECK (omradetype IN ('park','lekeplass','fotballbane','idrettsanlegg','grontomrade','torg','friomrade')),
+	status			TEXT,
+	geom_wkt		TEXT, -- WKT Polygon i EPSG:25833
+	lon			DOUBLE PRECISION CHECK (lon IS NULL OR (lon >= -180 AND lon <= 180)),
+	lat			DOUBLE PRECISION CHECK (lat IS NULL OR (lat >= -90 AND lat <= 90)),
+	srid			INTEGER DEFAULT 4258,
+	ekstern_id		TEXT, -- ID fra kommunal WFS/Geonorge/OSM
+	egenskaper		JSONB,
+	-- Proveniens
+	kilde			TEXT,
+	kilde_ref		TEXT,
+	sist_oppdatert	TIMESTAMPTZ,
+	autorativ		BOOLEAN DEFAULT FALSE,
+	created_at		TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at		TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_uteomrade_bydel
+	ON uteomrade (bydel_id);
+
+CREATE INDEX IF NOT EXISTS ix_uteomrade_type
+	ON uteomrade (omradetype);
+
+CREATE INDEX IF NOT EXISTS ix_uteomrade_lon_lat
+	ON uteomrade (lon, lat);
+
+-- Kobling til matrikkelenhet (mange-til-mange)
+CREATE TABLE IF NOT EXISTS uteomrade_matrikkelenhet
+(
+	uteomrade_id	BIGINT NOT NULL REFERENCES uteomrade(uteomrade_id) ON DELETE CASCADE,
+	enhet_id		BIGINT NOT NULL REFERENCES matrikkelenhet(enhet_id) ON DELETE CASCADE,
+	merknad			TEXT,
+	PRIMARY KEY (uteomrade_id, enhet_id)
+);
+
+-- Adkomstpunkter til uteområde (innganger, porter, parkering)
+CREATE TABLE IF NOT EXISTS adkomstpunkt
+(
+	adkomstpunkt_id	BIGSERIAL PRIMARY KEY,
+	uteomrade_id		BIGINT NOT NULL REFERENCES uteomrade(uteomrade_id) ON DELETE CASCADE,
+	gate_id			BIGINT REFERENCES gate(gate_id) ON DELETE SET NULL,
+	type			TEXT NOT NULL CHECK (type IN ('inngang','port','rampe','parkering','annet')),
+	beskrivelse		TEXT,
+	lon			DOUBLE PRECISION CHECK (lon IS NULL OR (lon >= -180 AND lon <= 180)),
+	lat			DOUBLE PRECISION CHECK (lat IS NULL OR (lat >= -90 AND lat <= 90)),
+	srid			INTEGER DEFAULT 4258,
+	-- Proveniens
+	kilde			TEXT,
+	kilde_ref		TEXT,
+	sist_oppdatert	TIMESTAMPTZ,
+	autorativ		BOOLEAN DEFAULT FALSE,
+	created_at		TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at		TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_uteomrade
+	ON adkomstpunkt (uteomrade_id);
+
+CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_lon_lat
+	ON adkomstpunkt (lon, lat);

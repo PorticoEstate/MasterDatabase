@@ -12,6 +12,7 @@ Key choices
 - Spatial (no PostGIS): `bygning.geom_wkt` stores WKT Polygon in EPSG:25833; `adresse.lon`/`lat` with `srid` (default 4258/ETRS89). Can be migrated to PostGIS later.
 - Natural keys: `matrikkelenhet` unique key across `(kommune_id, gnr, bnr, fnr, snr)` with COALESCE to handle NULLs; `bygning.bygningsnr` unique.
 - Constraints & indexes: checks on numeric IDs, unique indices for typical lookups, GiST for spatial.
+- Outdoor areas: `uteomrade` under `bydel` with type, WKT outline and lon/lat; many-to-many to `matrikkelenhet` via `uteomrade_matrikkelenhet`; `adkomstpunkt` for entrances.
 
 How to apply
 
@@ -22,8 +23,10 @@ Mapping notes
 - `matrikkelenhet.enhetstype`: one of `grunneiendom`, `festegrunn`, `jordsameie`, `seksjon`.
 - `adresse.adressetype`: `vegadresse` or `matrikkeladresse`.
 - `bruksenhet.snr`: section/unit number where applicable.
+- `uteomrade.omradetype`: one of `park`, `lekeplass`, `fotballbane`, `idrettsanlegg`, `grontomrade`, `torg`, `friomrade`.
 
 Next steps
 
 - Add migration tooling (e.g., Flyway or dbmate) and seed scripts.
 - Create staging tables for raw Matrikkel pulls and a small rules engine to set `autorativ` per field.
+- Add ETL to import municipal WFS/OSM layers for parks/playgrounds/ball courts into `uteomrade` and link parcels.
