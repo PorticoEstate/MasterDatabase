@@ -5,6 +5,11 @@ CREATE TABLE IF NOT EXISTS kommune
     kommunenr   CHAR(4) UNIQUE NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
     navn        TEXT NOT NULL,
     geom_wkt    TEXT,
+    ekstern_id  TEXT,
+    kilde       TEXT,
+    kilde_ref   TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ BOOLEAN DEFAULT FALSE,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -17,6 +22,11 @@ CREATE TABLE IF NOT EXISTS bydel
     navn        TEXT NOT NULL,
     bydelnr     INTEGER,
     geom_wkt    TEXT,
+    ekstern_id  TEXT,
+    kilde       TEXT,
+    kilde_ref   TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ BOOLEAN DEFAULT FALSE,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT uniq_bydel_per_kommune UNIQUE (kommune_id, navn)
@@ -34,23 +44,36 @@ CREATE TABLE IF NOT EXISTS matrikkelenhet
     bruksnr     INTEGER NOT NULL,
     festenr     INTEGER,
     seksjonsnr  INTEGER,
+    anleggsnr   INTEGER,
     enhetstype  TEXT NOT NULL CHECK (enhetstype IN ('grunneiendom','festegrunn','seksjon','anleggseiendom')),
     areal_m2    NUMERIC(12,2),
     geom_wkt    TEXT,
+    ekstern_id  TEXT,
+    kilde       TEXT,
+    kilde_ref   TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ BOOLEAN DEFAULT FALSE,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Ensure uniqueness across nullable festenr/seksjonsnr using an expression index
 CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelenhet
-    ON matrikkelenhet (kommunenr, gardsnr, bruksnr, COALESCE(festenr, 0), COALESCE(seksjonsnr, 0));
+    ON matrikkelenhet (
+        kommunenr,
+        gardsnr,
+        bruksnr,
+        COALESCE(festenr, 0),
+        COALESCE(seksjonsnr, 0),
+        COALESCE(anleggsnr, 0)
+    );
 
 -- Bygning
 CREATE TABLE IF NOT EXISTS bygning
 (
     bygg_id     BIGSERIAL PRIMARY KEY,
     bygningsnr  BIGINT UNIQUE,
-    matrikkelenhet_id BIGINT NOT NULL REFERENCES matrikkelenhet(enhet_id) ON DELETE CASCADE,
+    matrikkelenhet_id BIGINT REFERENCES matrikkelenhet(enhet_id) ON DELETE CASCADE,
     bydel_id    BIGINT REFERENCES bydel(bydel_id) ON DELETE SET NULL,
     bygningstype TEXT,
     status      TEXT,
@@ -58,7 +81,10 @@ CREATE TABLE IF NOT EXISTS bygning
     kilde       TEXT,
     kilde_ref   TEXT,
     sist_oppdatert TIMESTAMPTZ,
-    autorativ   BOOLEAN DEFAULT FALSE,
+    autoritativ BOOLEAN DEFAULT FALSE,
+    byggeaar    INTEGER,
+    antall_etasjer INTEGER,
+    bra_m2      NUMERIC(12,2),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -102,15 +128,16 @@ CREATE TABLE IF NOT EXISTS bruksenhet
 (
     bruksenhet_id   BIGSERIAL PRIMARY KEY,
     matrikkelenhet_id BIGINT NOT NULL REFERENCES matrikkelenhet(enhet_id) ON DELETE CASCADE,
-    bygg_id         BIGINT NOT NULL REFERENCES bygning(bygg_id) ON DELETE CASCADE,
+    bygg_id         BIGINT REFERENCES bygning(bygg_id) ON DELETE CASCADE,
     etasje_id       BIGINT REFERENCES etasje(etasje_id) ON DELETE SET NULL,
     snr             INTEGER,
+    bruksenhetsnr   TEXT,
     areal_m2        NUMERIC(10,2),
     brukstype       TEXT,
     kilde           TEXT,
     kilde_ref       TEXT,
     sist_oppdatert  TIMESTAMPTZ,
-    autorativ       BOOLEAN DEFAULT FALSE,
+    autoritativ     BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -155,7 +182,8 @@ CREATE TABLE IF NOT EXISTS adresse
     bruksenhet_id BIGINT REFERENCES bruksenhet(bruksenhet_id) ON DELETE CASCADE,
     uteomraade_id BIGINT,
     adressetype TEXT NOT NULL CHECK (adressetype IN ('vegadresse','matrikkeladresse')),
-    gate_id     BIGINT NOT NULL REFERENCES gate(gate_id) ON DELETE CASCADE,
+    gate_id     BIGINT REFERENCES gate(gate_id) ON DELETE CASCADE,
+    matrikkelenhet_id BIGINT REFERENCES matrikkelenhet(enhet_id) ON DELETE CASCADE,
     husnr       TEXT,
     bokstav     CHAR(1),
     postnummer  CHAR(4) CHECK (postnummer ~ '^[0-9]{4}$'),
@@ -167,7 +195,14 @@ CREATE TABLE IF NOT EXISTS adresse
     kilde       TEXT,
     kilde_ref   TEXT,
     sist_oppdatert TIMESTAMPTZ,
-    autorativ   BOOLEAN DEFAULT FALSE,
+    autoritativ BOOLEAN DEFAULT FALSE,
+    CONSTRAINT chk_adresse_type_gate_parcel
+        CHECK (
+            (adressetype = 'vegadresse' AND gate_id IS NOT NULL)
+            OR (adressetype = 'matrikkeladresse' AND matrikkelenhet_id IS NOT NULL)
+        ),
+    CONSTRAINT chk_adresse_lon_lat_both
+        CHECK ((lon IS NULL AND lat IS NULL) OR (lon IS NOT NULL AND lat IS NOT NULL)),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -198,7 +233,7 @@ CREATE TABLE IF NOT EXISTS uteomraade
     kilde         TEXT,
     kilde_ref     TEXT,
     sist_oppdatert TIMESTAMPTZ,
-    autorativ     BOOLEAN DEFAULT FALSE,
+    autoritativ   BOOLEAN DEFAULT FALSE,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -227,7 +262,9 @@ CREATE TABLE IF NOT EXISTS adkomstpunkt
     kilde           TEXT,
     kilde_ref       TEXT,
     sist_oppdatert  TIMESTAMPTZ,
-    autorativ       BOOLEAN DEFAULT FALSE,
+    autoritativ     BOOLEAN DEFAULT FALSE,
+    CONSTRAINT chk_adkomstpunkt_lon_lat_both
+        CHECK ((lon IS NULL AND lat IS NULL) OR (lon IS NOT NULL AND lat IS NOT NULL)),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -240,3 +277,29 @@ CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_gate
 
 CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_lon_lat
     ON adkomstpunkt (lon, lat);
+
+-- M:N kobling mellom bygning og matrikkelenhet
+CREATE TABLE IF NOT EXISTS bygning_matrikkelenhet
+(
+    bygg_id   BIGINT NOT NULL REFERENCES bygning(bygg_id) ON DELETE CASCADE,
+    enhet_id  BIGINT NOT NULL REFERENCES matrikkelenhet(enhet_id) ON DELETE CASCADE,
+    rolle     TEXT, -- f.eks. 'hovedtomt', 'tilleggsareal'
+    dekningsgrad NUMERIC(5,2), -- prosentvis dekning av bygg på enheten, valgfritt
+    PRIMARY KEY (bygg_id, enhet_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_bygning_matrikkelenhet_enhet
+    ON bygning_matrikkelenhet (enhet_id);
+
+-- Indekser for adresse for effektiv oppslag
+CREATE INDEX IF NOT EXISTS ix_adresse_gate
+    ON adresse (gate_id);
+
+CREATE INDEX IF NOT EXISTS ix_adresse_matrikkelenhet
+    ON adresse (matrikkelenhet_id);
+
+CREATE INDEX IF NOT EXISTS ix_adresse_postnummer
+    ON adresse (postnummer);
+
+CREATE INDEX IF NOT EXISTS ix_adresse_lon_lat
+    ON adresse (lon, lat);
