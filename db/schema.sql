@@ -38,9 +38,12 @@ CREATE TABLE IF NOT EXISTS matrikkelenhet
     areal_m2    NUMERIC(12,2),
     geom_wkt    TEXT,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uniq_matrikkelenhet UNIQUE (kommunenr, gardsnr, bruksnr, COALESCE(festenr,0), COALESCE(seksjonsnr,0))
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Ensure uniqueness across nullable festenr/seksjonsnr using an expression index
+CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelenhet
+    ON matrikkelenhet (kommunenr, gardsnr, bruksnr, COALESCE(festenr, 0), COALESCE(seksjonsnr, 0));
 
 -- Bygning
 CREATE TABLE IF NOT EXISTS bygning
@@ -187,7 +190,6 @@ CREATE TABLE IF NOT EXISTS uteomraade
 (
     uteomraade_id BIGSERIAL PRIMARY KEY,
     matrikkelenhet_id BIGINT REFERENCES matrikkelenhet(enhet_id) ON DELETE SET NULL,
-    bygg_id       BIGINT REFERENCES bygning(bygg_id) ON DELETE SET NULL,
     bydel_id      BIGINT REFERENCES bydel(bydel_id) ON DELETE SET NULL,
     type_id       BIGINT NOT NULL REFERENCES uteomraade_type(type_id),
     navn          TEXT NOT NULL,
@@ -210,3 +212,31 @@ CREATE INDEX IF NOT EXISTS ix_uteomraade_type
 
 CREATE INDEX IF NOT EXISTS ix_uteomraade_bydel
     ON uteomraade (bydel_id);
+
+-- Adkomstpunkt til uteområde (inngang/port/rampe/parkering)
+CREATE TABLE IF NOT EXISTS adkomstpunkt
+(
+    adkomstpunkt_id BIGSERIAL PRIMARY KEY,
+    uteomraade_id   BIGINT NOT NULL REFERENCES uteomraade(uteomraade_id) ON DELETE CASCADE,
+    gate_id         BIGINT REFERENCES gate(gate_id) ON DELETE SET NULL,
+    type            TEXT NOT NULL CHECK (type IN ('inngang','port','rampe','parkering','annet')),
+    beskrivelse     TEXT,
+    lon             DOUBLE PRECISION CHECK (lon IS NULL OR (lon >= -180 AND lon <= 180)),
+    lat             DOUBLE PRECISION CHECK (lat IS NULL OR (lat >= -90 AND lat <= 90)),
+    srid            INTEGER DEFAULT 4258,
+    kilde           TEXT,
+    kilde_ref       TEXT,
+    sist_oppdatert  TIMESTAMPTZ,
+    autorativ       BOOLEAN DEFAULT FALSE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_uteomraade
+    ON adkomstpunkt (uteomraade_id);
+
+CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_gate
+    ON adkomstpunkt (gate_id);
+
+CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_lon_lat
+    ON adkomstpunkt (lon, lat);
