@@ -157,3 +157,74 @@ Denne modellen støtter innlesing og forvaltning av bygningskomponenter (arkitek
   - Integrerbar: GlobalId (`ifc_guid`) gjør det lett å synkronisere mot kildemodellen.
   - Sammenkoblet: Lokasjon via bygg/etasje/rom gir god forankring i masterdatamodellen uten hard PostGIS-avhengighet.
 
+### 10.1 Ekstern ID på IFC-produkt (ifc_product.ekstern_id)
+
+`ekstern_id` brukes til å knytte produkter/utstyr til eksterne kilder (FDV/BAS/SD/ERP/CMMS, sensorer o.l.) og til å modellere objekter som ikke er klassifisert i IFC.
+
+- Formål
+  - Stabil teknisk nøkkel fra kildesystemet (f.eks. «fdv:ahu:1»).
+  - Muliggjør oppdateringer via upsert uten IFC GlobalId.
+  - Støtter flere kilder samtidig ved å kombinere med `kilde`.
+
+- Nøkkel og indeks
+  - Det finnes indeks på `(kilde, ekstern_id)` for raske oppslag.
+  - Ikke krev unik `ekstern_id` globalt; bruk alltid sammen med `kilde`.
+
+- Matching- og upsert-regler (anbefalt)
+  1. Finn eksisterende produkt på `ifc_guid` når tilgjengelig (primær nøkkel for IFC-baserte objekter).
+  2. Hvis ikke funnet, forsøk match på `(kilde, ekstern_id)`.
+  3. Hvis fortsatt ikke funnet, opprett nytt `ifc_product` med `entity` (f.eks. "CustomEquipment"), sett `ekstern_id` og `kilde`, og legg egenskaper i `properties_json`.
+  4. Ved senere import: oppdater samme rad via `(kilde, ekstern_id)`.
+
+- Sammenfletting av dubletter
+  - Dersom samme fysiske objekt får både `ifc_guid` og `(kilde, ekstern_id)` på ulike rader, bør de flettes: behold raden med `ifc_guid`, kopier egenskaper og referanser, og oppdater/videreskriv `(kilde, ekstern_id)` til denne raden.
+
+- Beste praksis
+  - Ikke lagre personinformasjon i `ekstern_id`; hold det som en teknisk identifikator.
+  - Bruk `classification`/`product_classification` for å plassere ikke-IFC-objekter i kjente kodeverk (NS 3451/TFM), selv om `entity` er generisk.
+  - Oppgi `entity` og `predefined_type` konsekvent (for søk/filtrering), også for ikke-IFC-kilder.
+
+### 10.2 Eksempel: ikke-IFC-objekt med normaliserte egenskaper
+
+Dette eksemplet oppretter et FDV-objekt uten IFC GUID, legger egenskaper i et egenskapssett og oppdaterer dem idempotent.
+
+```sql
+-- 1) Opprett et egenskapssett (engangsoperasjon)
+INSERT INTO ifc_property_set (name, description)
+VALUES ('FDV_Common', 'Egenskaper fra FDV-system');
+
+-- 2) Opprett produktet (ikke-IFC) med ekstern nøkkel fra kilden
+INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
+VALUES (
+  'CustomEquipment',
+  'Ventilasjonsaggregat AHU-1',
+  'AHU-1',
+  '{"effekt_kw":5.5, "produsent":"X"}',
+  'FDV',
+  'fdv:ahu:1'
+);
+
+-- 3) Normaliser utvalgte egenskaper for spørringer/rapportering
+INSERT INTO ifc_property (pset_id, product_id, name, value_text, value_num)
+SELECT p.pset_id, pr.product_id, v.name, v.value_text, v.value_num
+FROM (SELECT pset_id FROM ifc_property_set WHERE name='FDV_Common') p,
+   (SELECT product_id FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1') pr,
+   (VALUES
+    ('Produsent', 'X', NULL::NUMERIC),
+    ('Effekt_kW', NULL::TEXT, 5.5::NUMERIC)
+   ) AS v(name, value_text, value_num)
+ON CONFLICT (pset_id, product_id, name)
+DO UPDATE SET value_text = EXCLUDED.value_text,
+        value_num  = EXCLUDED.value_num;
+
+-- 4) (Valgfritt) Plasser objektet i modellen
+INSERT INTO ifc_product_location (product_id, bygg_id, etasje_id, rom_id)
+SELECT product_id, 1, NULL, 10
+FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1';
+```
+
+Tips:
+
+- Bruk `properties_json` for hele Pset-innholdet, og speil kun søkbare nøkler i `ifc_property`.
+- Sørg for konsekvente navn/units (f.eks. `Effekt_kW`).
+

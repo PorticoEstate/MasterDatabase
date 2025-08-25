@@ -217,3 +217,74 @@ This model supports importing and managing building components (architecture/str
   - Scalable: JSONB for flexible IFC properties, with normalized tables when queries demand it.
   - Interoperable: unique `ifc_guid` makes it straightforward to synchronize with the source model.
   - Connected: location via building/floor/room grounds IFC products in the master data model without a hard PostGIS dependency.
+
+### 10.1 External ID on IFC product (ifc_product.ekstern_id)
+
+`ekstern_id` links products/equipment to external sources (FM/BAS/BMS/ERP/CMMS, sensors, etc.) and supports items not classified in IFC.
+
+- Purpose
+  - Stable technical key from the source system (e.g., "fdv:ahu:1").
+  - Enables idempotent upserts without an IFC GlobalId.
+  - Supports multiple sources by pairing with `kilde` (source).
+
+- Key and index
+  - An index exists on `(kilde, ekstern_id)` for fast lookups.
+  - Do not require `ekstern_id` to be globally unique; always qualify with `kilde`.
+
+- Matching and upsert strategy (recommended)
+  1. Attempt to match on `ifc_guid` when present (primary identity for IFC-derived objects).
+  2. If not found, match on `(kilde, ekstern_id)`.
+  3. If still not found, insert a new `ifc_product` with a generic `entity` (e.g., "CustomEquipment"), set `ekstern_id` and `kilde`, and store attributes in `properties_json`.
+  4. On subsequent imports, update the same row via `(kilde, ekstern_id)`.
+
+- Duplicate merge
+  - If the same physical asset ends up as two rows (one with `ifc_guid`, another with `(kilde, ekstern_id)`), merge them: keep the row with `ifc_guid`, copy properties/links, and reassign `(kilde, ekstern_id)` to that row.
+
+- Best practices
+  - Do not store personal data in `ekstern_id`; keep it as a technical identifier.
+  - Use `classification`/`product_classification` to position non-IFC items in known schemes (NS 3451/TFM), even if `entity` is generic.
+  - Provide consistent `entity` and `predefined_type` values for search/filtering, also for non-IFC sources.
+
+### 10.2 Example: non-IFC asset with normalized properties
+
+This example creates an FM asset without an IFC GUID, adds properties in a property set, and upserts them idempotently.
+
+```sql
+-- 1) Create a property set (one-time)
+INSERT INTO ifc_property_set (name, description)
+VALUES ('FDV_Common', 'Properties from FM system');
+
+-- 2) Create the asset (non-IFC) with an external key from the source
+INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
+VALUES (
+  'CustomEquipment',
+  'Air Handling Unit AHU-1',
+  'AHU-1',
+  '{"power_kw":5.5, "manufacturer":"X"}',
+  'FDV',
+  'fdv:ahu:1'
+);
+
+-- 3) Normalize selected properties for querying/reporting
+INSERT INTO ifc_property (pset_id, product_id, name, value_text, value_num)
+SELECT p.pset_id, pr.product_id, v.name, v.value_text, v.value_num
+FROM (SELECT pset_id FROM ifc_property_set WHERE name='FDV_Common') p,
+   (SELECT product_id FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1') pr,
+   (VALUES
+    ('Manufacturer', 'X', NULL::NUMERIC),
+    ('Power_kW', NULL::TEXT, 5.5::NUMERIC)
+   ) AS v(name, value_text, value_num)
+ON CONFLICT (pset_id, product_id, name)
+DO UPDATE SET value_text = EXCLUDED.value_text,
+        value_num  = EXCLUDED.value_num;
+
+-- 4) (Optional) Place the asset in the model
+INSERT INTO ifc_product_location (product_id, bygg_id, etasje_id, rom_id)
+SELECT product_id, 1, NULL, 10
+FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1';
+```
+
+Tips:
+
+- Use `properties_json` for the full Pset content, and mirror only query-critical keys into `ifc_property`.
+- Keep names/units consistent (e.g., `Power_kW`).

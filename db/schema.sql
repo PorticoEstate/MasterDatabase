@@ -340,6 +340,7 @@ CREATE TABLE IF NOT EXISTS ifc_product
     lat            DOUBLE PRECISION CHECK (lat IS NULL OR (lat BETWEEN -90 AND 90)),
     srid           INTEGER DEFAULT 4258,
     properties_json JSONB,
+    ekstern_id     TEXT, -- external ID from FDV/BAS/ERP/CMMS/etc.
     kilde          TEXT,
     kilde_ref      TEXT,
     sist_oppdatert TIMESTAMPTZ,
@@ -349,6 +350,9 @@ CREATE TABLE IF NOT EXISTS ifc_product
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS ix_ifc_product_ekstern
+    ON ifc_product (kilde, ekstern_id);
 
 CREATE INDEX IF NOT EXISTS ix_ifc_product_entity
     ON ifc_product (entity);
