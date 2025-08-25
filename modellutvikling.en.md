@@ -180,3 +180,40 @@ Plan for this project (data pull):
 ---
 
 This document is the English translation of `modellutvikling.md` with an added section (9) detailing options and patterns for pulling cadastral (Matrikkel) data.
+
+---
+
+## 10. IFC modeling of building components and equipment
+
+This model supports importing and managing building components (architecture/structure, HVAC, electrical, etc.) and equipment identified and classified as IFC objects. It is designed to work without PostGIS for now, using WKT and/or lon/lat for geometry.
+
+- Key elements
+  - `ifc_type` (IfcTypeObject): type/product families (e.g., IfcDoor, IfcUnitaryEquipment) with optional `ifc_guid` for the type, `entity`, `predefined_type`, and default properties in `properties_json`.
+  - `ifc_product` (IfcProduct): instances with `ifc_guid` (GlobalId), `entity`, `predefined_type`, name/tag/serial number, optional `geom_wkt` and/or `lon`/`lat` (with `srid`), and free-form properties in `properties_json`. Can reference `ifc_type`.
+  - `ifc_product_location`: placement/containment in the building structure via FKs to `bygning`/`floy`/`etasje`/`rom` (building/wing/floor/room), with `placement_json` for local transform (IfcLocalPlacement). Requirement: at least one of these references must be set.
+  - `ifc_system` and `ifc_product_system`: systems (HVAC, ELEC, PLUMB) and product membership in systems.
+  - `ifc_rel_aggregates`: parent–child (assembly) relations between products.
+  - `classification` and `product_classification`: mapping to external classification schemes (e.g., NS 3451, TFM, OmniClass).
+  - Optional normalized property layer: `ifc_property_set` and `ifc_property` for properties that need efficient querying by key (in addition to the JSON on type/instance).
+
+- Relation to the rest of the model
+  - Building: IFC products link to `bygning` via `ifc_product_location.bygg_id`, and can be narrowed to `floy`, `etasje`, and/or `rom`.
+  - Room/Floor/Wing: enables analysis of components at the right level (room inventory, floor maps, wing-specific overviews) without requiring PostGIS.
+  - Cadastral/parcel: linkage primarily via the building/room hierarchy. Where needed, products in outdoor areas can be modeled as separate products and associated to `uteomraade` via address/position (or captured in properties) until a dedicated link is introduced.
+  - Provenance: all tables include `kilde` (source), `kilde_ref`, `sist_oppdatert` (last_updated), and `autoritativ` to power the rule engine.
+
+- Geometry and coordinates
+  - `geom_wkt` can store simple geometry in WKT. `lon`/`lat` with `srid` can be used for points. Use a consistent SRID (4258 ETRS89 in this model).
+  - When PostGIS is introduced, these columns can be migrated/complemented with geometry types and spatial indexes.
+
+- Usage pattern (example)
+  1. Parse IFC and create rows in `ifc_type` for each unique `entity`/`predefined_type` combination (store Pset defaults in `properties_json`).
+  2. Create `ifc_product` for each instance with `ifc_guid`; reference `ifc_type` where applicable; store Pset values in `properties_json`.
+  3. Place instances via `ifc_product_location`, pointing to the appropriate `bygning`/`etasje`/`rom`.
+  4. Associate equipment to `ifc_system` (via `ifc_product_system`) and build assemblies in `ifc_rel_aggregates`.
+  5. Apply external classifications in `classification`/`product_classification`.
+
+- Benefits
+  - Scalable: JSONB for flexible IFC properties, with normalized tables when queries demand it.
+  - Interoperable: unique `ifc_guid` makes it straightforward to synchronize with the source model.
+  - Connected: location via building/floor/room grounds IFC products in the master data model without a hard PostGIS dependency.

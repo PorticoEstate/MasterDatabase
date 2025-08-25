@@ -3,11 +3,13 @@
 ---
 
 ## 1. Målsetting
+
 Etablere en masterdatabase som integrerer data fra flere lignende databaseinstanser (lokale databaser med bygnings- og anleggsdata) og supplerer med informasjon fra autoritative registre som matrikkelen og det nasjonale anleggsregisteret.
 
 ---
 
 ## 2. Datakilder
+
 - **Matrikkel**: Autorativ for bygningsnummer, gatenummer, husnummer, eiendomsdata
 - **Lokale driftsdatabaser**: Anleggsdetaljer, bookingstatus, driftsmeldinger, tekniske data
 - **Nasjonalt anleggsregister**: Strukturert katalog over tekniske installasjoner
@@ -19,6 +21,7 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 ---
 
 ## 3. Masterdatabasefunksjoner
+
 - Unik identitet for hvert bygg/anlegg via koplingstabeller
 - Datavask og validering (inkl. versjonssporing og kvalitetskontroll)
 - Sporing av datakilde og oppdateringsansvar
@@ -27,17 +30,21 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 ---
 
 ## 4. API-krav
+
 ### Intern API
+
 - Synkronisering med underliggende databaser
 - Push/pull av oppdaterte metadata
 
 ### Ekstern API
+
 - Integrasjon med nasjonalt anleggsregister
 - Eksterne forespørselssvar og oppdateringsprotokoller
 
 ---
 
 ## 5. Kontekstuell forespørselshåndtering
+
 - En forespørsel (som leie eller skade) skal rutes til riktig fagsystem basert på type og kontekst.
 - Alle henvendelser opererer på samme bygg-ID.
 - Systemet må kunne trigge hendelser mot riktig applikasjon og vise status tilbake i masterdatabasegrensesnittet.
@@ -45,6 +52,7 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 ---
 
 ## 6. Kart- og temabasert søk
+
 - Bruk av spatial database (f.eks. PostGIS)
 - Filtrering på tematiske kriterier:
   - Befolkningstetthet
@@ -55,6 +63,7 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 ---
 
 ## 7. Autorative regler og datasynkronisering
+
 - Matrikkeldata har høyest prioritet for eiendomsidentifikasjon
 - Anleggsregister og lokale databaser kan ha ulik aktualitet for forskjellige datatyper
 - Hver datakomponent merkes med:
@@ -65,6 +74,7 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 ---
 
 ## 8. Sikkerhet og tilgang
+
 - Tilgangsstyring på fagsystemnivå
 - Lesesporing og endringslogg
 - Mulighet for godkjenningsflyt ved datamodifikasjoner
@@ -110,4 +120,40 @@ Plan for data-pull i dette prosjektet:
 
 - Håndtere rate limits og feil via retry/backoff og idempotente oppdateringer.
 - Loggføre og revidere tilgang i henhold til avtale og utleveringsforskrift.
+
+
+## 10. IFC-modellering av bygningskomponenter og utstyr
+
+Denne modellen støtter innlesing og forvaltning av bygningskomponenter (arkitektur/bygg, VVS, elektro, etc.) og utstyr som er identifisert og klassifisert som IFC-objekter. Løsningen er laget for å fungere uten PostGIS (inntil videre), med mulighet for geometri som WKT og/eller lon/lat.
+
+- Nøkkelelementer
+  - `ifc_type` (IfcTypeObject): typer/produkt-familier (f.eks. IfcDoor, IfcUnitaryEquipment) med valgfri `ifc_guid` for type, `entity`, `predefined_type`, og standard egenskaper i `properties_json`.
+  - `ifc_product` (IfcProduct): instanser med `ifc_guid` (GlobalId), `entity`, `predefined_type`, navn/tagg/serienr, valgfri `geom_wkt` og/eller `lon`/`lat` (med `srid`), samt frie egenskaper i `properties_json`. Kan lenkes til `ifc_type`.
+  - `ifc_product_location`: plassering/tilhørighet i byggstrukturen via FK til `bygning`/`floy`/`etasje`/`rom`, og `placement_json` for lokal transformasjon (IfcLocalPlacement). Krav: minst én av disse referansene må være satt.
+  - `ifc_system` og `ifc_product_system`: systemer (HVAC, EL, VVS) og medlemskap for produkter i systemer.
+  - `ifc_rel_aggregates`: foreldre–barn-relasjoner (assemblies) mellom produkter.
+  - `classification` og `product_classification`: kopling til eksterne klassifikasjonsskjema (f.eks. NS 3451, TFM, OmniClass).
+  - Valgfritt normalisert egenskapslag: `ifc_property_set` og `ifc_property` for egenskaper som må kunne spørres effektivt per nøkkel (i tillegg til `properties_json` på type/instans).
+
+- Relasjon til resten av modellen
+  - Bygning: IFC-produkter knyttes til `bygning` via `ifc_product_location.bygg_id` og kan presiseres videre til `floy`, `etasje` og/eller `rom`.
+  - Rom/Etasje/Fløy: gjør det mulig å analysere komponenter på riktig nivå (romliste, etasjekart, fløyspesifikk oversikt) uten PostGIS.
+  - Matrikkel/eiendom: kobling går primært via bygg- og romhierarkiet. Der det er behov, kan produkter i uteområder modelleres som egne produkter og lenkes til `uteomraade` via adresse/posisjon (alternativt beskrives i egenskaper) inntil en dedikert kobling ønskes.
+  - Proveniens: alle tabeller har feltene `kilde`, `kilde_ref`, `sist_oppdatert`, `autoritativ` for sporing og regelmotor.
+
+- Geometri og koordinater
+  - `geom_wkt` kan lagre enkel geometri i WKT. `lon`/`lat` med `srid` kan brukes for punkter. Konsistent SRID anbefales (4258 ETRS89 i denne modellen).
+  - Når PostGIS tas i bruk, kan kolonnene migreres/komplementeres med geometrityper og romlige indekser.
+
+- Bruksmønster (eksempel)
+  1. Les IFC og opprett rader i `ifc_type` for hver unik kombinasjon av `entity`/`predefined_type` (sett `properties_json` med Pset-defaults).
+  2. Opprett `ifc_product` for hver instans med `ifc_guid`, referer til `ifc_type` ved behov, og lagre Pset-verdier i `properties_json`.
+  3. Plasser instanser via `ifc_product_location` og pek til riktig `bygning`/`etasje`/`rom`.
+  4. Knytt utstyr inn i `ifc_system` (via `ifc_product_system`) og bygg assemblies i `ifc_rel_aggregates`.
+  5. Legg på eksterne klassifikasjoner i `classification`/`product_classification`.
+
+- Fordeler
+  - Skalerbar: JSONB for fri struktur i IFC-egenskaper, og normaliserte tabeller der spørringer krever det.
+  - Integrerbar: GlobalId (`ifc_guid`) gjør det lett å synkronisere mot kildemodellen.
+  - Sammenkoblet: Lokasjon via bygg/etasje/rom gir god forankring i masterdatamodellen uten hard PostGIS-avhengighet.
 
