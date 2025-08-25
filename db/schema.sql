@@ -301,3 +301,149 @@ CREATE INDEX IF NOT EXISTS ix_adresse_postnummer
 
 CREATE INDEX IF NOT EXISTS ix_adresse_lon_lat
     ON adresse (lon, lat);
+
+-- IFC: Type definitions (IfcTypeObject)
+CREATE TABLE IF NOT EXISTS ifc_type
+(
+    type_id        BIGSERIAL PRIMARY KEY,
+    ifc_guid       CHAR(22) UNIQUE,
+    entity         TEXT NOT NULL,          -- e.g., 'IfcDoor','IfcWall','IfcUnitaryEquipment'
+    predefined_type TEXT,
+    name           TEXT,
+    description    TEXT,
+    properties_json JSONB,
+    kilde          TEXT,
+    kilde_ref      TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ    BOOLEAN DEFAULT FALSE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_ifc_type_entity
+    ON ifc_type (entity);
+
+-- IFC: Product instances (IfcProduct)
+CREATE TABLE IF NOT EXISTS ifc_product
+(
+    product_id     BIGSERIAL PRIMARY KEY,
+    ifc_guid       CHAR(22) UNIQUE,
+    entity         TEXT NOT NULL,
+    predefined_type TEXT,
+    name           TEXT,
+    tag            TEXT,
+    serial_no      TEXT,
+    type_id        BIGINT REFERENCES ifc_type(type_id) ON DELETE SET NULL,
+    status         TEXT,
+    geom_wkt       TEXT,
+    lon            DOUBLE PRECISION CHECK (lon IS NULL OR (lon BETWEEN -180 AND 180)),
+    lat            DOUBLE PRECISION CHECK (lat IS NULL OR (lat BETWEEN -90 AND 90)),
+    srid           INTEGER DEFAULT 4258,
+    properties_json JSONB,
+    kilde          TEXT,
+    kilde_ref      TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ    BOOLEAN DEFAULT FALSE,
+    CONSTRAINT chk_ifc_product_lon_lat_both
+        CHECK ((lon IS NULL AND lat IS NULL) OR (lon IS NOT NULL AND lat IS NOT NULL)),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_ifc_product_entity
+    ON ifc_product (entity);
+
+-- Location/containment of product within building structure
+CREATE TABLE IF NOT EXISTS ifc_product_location
+(
+    product_id     BIGINT PRIMARY KEY REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    bygg_id        BIGINT REFERENCES bygning(bygg_id) ON DELETE SET NULL,
+    floy_id        BIGINT REFERENCES floy(floy_id) ON DELETE SET NULL,
+    etasje_id      BIGINT REFERENCES etasje(etasje_id) ON DELETE SET NULL,
+    rom_id         BIGINT REFERENCES rom(rom_id) ON DELETE SET NULL,
+    placement_json JSONB,
+    ref_elevation  NUMERIC(10,2),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_ifc_loc_parent
+        CHECK (bygg_id IS NOT NULL OR floy_id IS NOT NULL OR etasje_id IS NOT NULL OR rom_id IS NOT NULL)
+);
+
+CREATE INDEX IF NOT EXISTS ix_ifc_loc_bygg
+    ON ifc_product_location (bygg_id);
+CREATE INDEX IF NOT EXISTS ix_ifc_loc_etasje
+    ON ifc_product_location (etasje_id);
+CREATE INDEX IF NOT EXISTS ix_ifc_loc_rom
+    ON ifc_product_location (rom_id);
+
+-- Systems (e.g., HVAC loop, electrical circuit) and membership
+CREATE TABLE IF NOT EXISTS ifc_system
+(
+    system_id      BIGSERIAL PRIMARY KEY,
+    name           TEXT NOT NULL,
+    system_type    TEXT,
+    description    TEXT,
+    kilde          TEXT,
+    kilde_ref      TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ    BOOLEAN DEFAULT FALSE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS ifc_product_system
+(
+    product_id     BIGINT NOT NULL REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    system_id      BIGINT NOT NULL REFERENCES ifc_system(system_id) ON DELETE CASCADE,
+    rolle          TEXT,
+    PRIMARY KEY (product_id, system_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_ifc_product_system_system
+    ON ifc_product_system (system_id);
+
+-- Product aggregation (assemblies): parent-child structure
+CREATE TABLE IF NOT EXISTS ifc_rel_aggregates
+(
+    parent_product_id BIGINT NOT NULL REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    child_product_id  BIGINT NOT NULL REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    role              TEXT,
+    PRIMARY KEY (parent_product_id, child_product_id)
+);
+
+-- External classifications (NS 3451, TFM, Omniclass) mapped to products
+CREATE TABLE IF NOT EXISTS classification
+(
+    class_id       BIGSERIAL PRIMARY KEY,
+    scheme         TEXT NOT NULL,
+    code           TEXT NOT NULL,
+    title          TEXT,
+    UNIQUE (scheme, code)
+);
+
+CREATE TABLE IF NOT EXISTS product_classification
+(
+    product_id     BIGINT NOT NULL REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    class_id       BIGINT NOT NULL REFERENCES classification(class_id) ON DELETE CASCADE,
+    PRIMARY KEY (product_id, class_id)
+);
+
+-- Optional: normalized property sets beyond JSONB
+CREATE TABLE IF NOT EXISTS ifc_property_set
+(
+    pset_id        BIGSERIAL PRIMARY KEY,
+    name           TEXT NOT NULL,
+    description    TEXT
+);
+
+CREATE TABLE IF NOT EXISTS ifc_property
+(
+    property_id    BIGSERIAL PRIMARY KEY,
+    pset_id        BIGINT NOT NULL REFERENCES ifc_property_set(pset_id) ON DELETE CASCADE,
+    product_id     BIGINT NOT NULL REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    name           TEXT NOT NULL,
+    value_text     TEXT,
+    value_num      NUMERIC,
+    value_json     JSONB,
+    UNIQUE (pset_id, product_id, name)
+);
