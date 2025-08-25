@@ -288,3 +288,43 @@ Tips:
 
 - Use `properties_json` for the full Pset content, and mirror only query-critical keys into `ifc_property`.
 - Keep names/units consistent (e.g., `Power_kW`).
+
+### 10.3 Example: playground equipment placed on an outdoor area
+
+This shows a playground device placed directly on an outdoor area (outside buildings), with optional coordinates.
+
+```sql
+-- 1) Create product (generic or IFC-classified)
+INSERT INTO ifc_product (entity, predefined_type, name, properties_json, kilde, ekstern_id, lon, lat)
+VALUES (
+    'CustomEquipment',           -- or e.g., 'IfcFurnishingElement'
+    'PLAY_EQUIPMENT',
+    'Play equipment – swing',
+    '{"material":"wood","age_6_12":true}',
+    'FDV',
+    'fdv:play:swing:001',
+    10.7461, 59.9127             -- optional position (ETRS89/EPSG:4258)
+);
+
+-- 2) Place it on an outdoor area (provide correct uteomraade_id)
+INSERT INTO ifc_product_location (product_id, uteomraade_id)
+SELECT product_id, 42  -- replace 42 with actual uteomraade_id
+FROM ifc_product
+WHERE kilde='FDV' AND ekstern_id='fdv:play:swing:001';
+
+-- 3) (Optional) Classify in a custom scheme or known code system
+INSERT INTO classification (scheme, code, title)
+VALUES ('CUSTOM','PLAY_EQUIPMENT','Play equipment')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO product_classification (product_id, class_id)
+SELECT p.product_id, c.class_id
+FROM ifc_product p, classification c
+WHERE p.kilde='FDV' AND p.ekstern_id='fdv:play:swing:001'
+  AND c.scheme='CUSTOM' AND c.code='PLAY_EQUIPMENT';
+```
+
+Notes:
+
+- `ifc_product_location` supports `uteomraade_id` in addition to building/wing/floor/room. At least one of these must be set.
+- Coordinates (`lon`/`lat`) are optional but useful for maps and nearest-access.

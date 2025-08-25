@@ -228,3 +228,43 @@ Tips:
 - Bruk `properties_json` for hele Pset-innholdet, og speil kun søkbare nøkler i `ifc_property`.
 - Sørg for konsekvente navn/units (f.eks. `Effekt_kW`).
 
+### 10.3 Eksempel: lekeapparat plassert på uteområde
+
+Dette viser et lekeapparat som plasseres direkte på et uteområde (utenfor bygg), med valgfri posisjon.
+
+```sql
+-- 1) Opprett produkt (kan være generisk eller IFC-klassifisert)
+INSERT INTO ifc_product (entity, predefined_type, name, properties_json, kilde, ekstern_id, lon, lat)
+VALUES (
+    'CustomEquipment',           -- eller f.eks. 'IfcFurnishingElement'
+    'PLAY_EQUIPMENT',
+    'Lekeapparat – huske',
+    '{"materiale":"tre","alder_6_12":true}',
+    'FDV',
+    'fdv:play:huske:001',
+    10.7461, 59.9127             -- valgfritt: posisjon (ETRS89/EPSG:4258)
+);
+
+-- 2) Plasser det på et uteområde (angi riktig uteomraade_id)
+INSERT INTO ifc_product_location (product_id, uteomraade_id)
+SELECT product_id, 42  -- erstatt 42 med faktisk uteomraade_id
+FROM ifc_product
+WHERE kilde='FDV' AND ekstern_id='fdv:play:huske:001';
+
+-- 3) (Valgfritt) Klassifiser i eget skjema eller kjent kodeverk
+INSERT INTO classification (scheme, code, title)
+VALUES ('CUSTOM','PLAY_EQUIPMENT','Lekeapparat')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO product_classification (product_id, class_id)
+SELECT p.product_id, c.class_id
+FROM ifc_product p, classification c
+WHERE p.kilde='FDV' AND p.ekstern_id='fdv:play:huske:001'
+  AND c.scheme='CUSTOM' AND c.code='PLAY_EQUIPMENT';
+```
+
+Merk:
+
+- `ifc_product_location` støtter `uteomraade_id` i tillegg til bygg/fløy/etasje/rom. Minst én av disse må være satt.
+- Koordinater (`lon`/`lat`) er valgfrie, men nyttige for kart og nærmeste-adkomst.
+

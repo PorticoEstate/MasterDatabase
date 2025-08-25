@@ -365,12 +365,15 @@ CREATE TABLE IF NOT EXISTS ifc_product_location
     floy_id        BIGINT REFERENCES floy(floy_id) ON DELETE SET NULL,
     etasje_id      BIGINT REFERENCES etasje(etasje_id) ON DELETE SET NULL,
     rom_id         BIGINT REFERENCES rom(rom_id) ON DELETE SET NULL,
+    uteomraade_id  BIGINT REFERENCES uteomraade(uteomraade_id) ON DELETE SET NULL,
     placement_json JSONB,
     ref_elevation  NUMERIC(10,2),
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT chk_ifc_loc_parent
-        CHECK (bygg_id IS NOT NULL OR floy_id IS NOT NULL OR etasje_id IS NOT NULL OR rom_id IS NOT NULL)
+        CHECK (
+            bygg_id IS NOT NULL OR floy_id IS NOT NULL OR etasje_id IS NOT NULL OR rom_id IS NOT NULL OR uteomraade_id IS NOT NULL
+        )
 );
 
 CREATE INDEX IF NOT EXISTS ix_ifc_loc_bygg
@@ -379,6 +382,9 @@ CREATE INDEX IF NOT EXISTS ix_ifc_loc_etasje
     ON ifc_product_location (etasje_id);
 CREATE INDEX IF NOT EXISTS ix_ifc_loc_rom
     ON ifc_product_location (rom_id);
+
+CREATE INDEX IF NOT EXISTS ix_ifc_loc_uteomraade
+    ON ifc_product_location (uteomraade_id);
 
 -- Systems (e.g., HVAC loop, electrical circuit) and membership
 CREATE TABLE IF NOT EXISTS ifc_system
