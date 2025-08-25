@@ -268,3 +268,44 @@ Merk:
 - `ifc_product_location` støtter `uteomraade_id` i tillegg til bygg/fløy/etasje/rom. Minst én av disse må være satt.
 - Koordinater (`lon`/`lat`) er valgfrie, men nyttige for kart og nærmeste-adkomst.
 
+
+## 11. Proveniens og kontekstsensitiv ruting til fagsystemer
+
+Denne løsningen samler autorative data (Matrikkel) og supplerer med lokale data pr. kommune (f.eks. «Aktiv kommune» for booking) samt FDV/andre fagsystemer. Målet er at brukeren ikke trenger å velge kommune; systemet leder automatisk til riktig instans basert på kontekst og valgt ressurs.
+
+- Proveniens (kilde, ekstern_id, autoritativ)
+  - Alle kjerne-tabeller har feltene: kilde, kilde_ref, sist_oppdatert, autoritativ.
+  - Eksterne nøkler per objekt (ekstern_id) brukes sammen med kilde for oppslag og idempotente oppdateringer.
+  - Prioritetsregler: Matrikkel er autoritativ for eiendomsidentitet (gnr/bnr/fnr/snr, adresser, bygningsnr). Andre kilder kan være autoritative for tekniske/operative felt.
+
+- Kommune-kontekst
+  - Bygning forankres via bydel → kommune.
+  - Uteområde forankres via bydel → kommune (evt. matrikkelenhet).
+  - Adresser og matrikkelenheter bærer kommunenr. Dermed kan en valgt ressurs entydig kobles til kommune.
+
+- Fagsystemkobling (konsepter)
+  - Fagsystem: navn og type (booking, FDV, sensordata, …).
+  - Fagsystem-instans: én instans per kommune (base-URL, API-nøkler, teknisk metadata).
+  - Ressurslenke: kobler master-ressurs (bygg/rom/uteområde/produkt) til korrekt fagsystem-instans med ekstern nøkkel for gitt kontekst (booking/FDV).
+  - Klassifisering: brukes for enkel filtrering/ruting (f.eks. hvilke produkter tilhører FDV vs. booking).
+
+- Ruteprosess (booking-eksempel)
+  1. Bruker velger en ressurs (f.eks. gymsal) i master-UI.
+  2. Systemet finner ressursens kommune via bygg/bydel/kommune (eller via adresse/matrikkelenhet).
+  3. Slå opp Ressurslenke for kontekst=booking → hent fagsystem-instans (Aktiv kommune for aktuell kommune) og ekstern_id.
+  4. Redirect eller kall API med base-URL fra instansen og ekstern_id fra lenken.
+  5. Status/kvittering speiles tilbake i master (leser via samme lenke).
+
+- FDV/andre kilder (komponenter/utstyr)
+  - ifc_product kan representere både IFC og ikke-IFC utstyr (ifc_guid valgfritt) med ekstern_id+kilde.
+  - ifc_product_location forankrer objekter i bygg/etasje/rom eller uteområde.
+  - Egenskaper lagres i properties_json og normaliseres ved behov i ifc_property_set/ifc_property for spørringer.
+  - For ruting til FDV: Ressurslenke peker produktet til riktig FDV-instans per kommune med ekstern_id fra FDV.
+
+- Personvern og tilgang
+  - Ingen persondata i ekstern_id.
+  - Ruting skjer på system- og ressursnivå; tilgangskontroll og logging håndteres i både master og underliggende fagsystem.
+
+Praktisk anbefaling
+- Etabler små referansetabeller (utenfor scope i denne filen) for: fagsystem, fagsystem_instans (per kommune), ressurslenke (resource_type, resource_id, context, system_instans_id, ekstern_id).
+- Hold oppslag idempotent: oppdater lenker på (resource, context) og kilde/ekstern_id uten duplikater.

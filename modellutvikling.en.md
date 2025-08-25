@@ -328,3 +328,44 @@ Notes:
 
 - `ifc_product_location` supports `uteomraade_id` in addition to building/wing/floor/room. At least one of these must be set.
 - Coordinates (`lon`/`lat`) are optional but useful for maps and nearest-access.
+
+## 11. Provenance and context-aware routing to line-of-business systems
+
+This master DB combines authoritative registries (Matrikkel) with local per-municipality systems (e.g., “Aktiv kommune” for booking) and FDV/CMMS. The user should not select a municipality; the system auto-routes based on the chosen resource and context.
+
+- Provenance (source, external ID, authoritative)
+  - Core tables carry: source (kilde), source ref, last updated, authoritative flag.
+  - External IDs (ekstern_id) + source identify records for idempotent upserts.
+  - Precedence: Matrikkel is authoritative for property identity; other systems for domain-specific fields.
+
+- Municipality context
+  - Buildings anchor via district → municipality.
+  - Outdoor areas anchor via district → municipality (optionally via parcel).
+  - Addresses and parcels carry municipality codes, enabling deterministic mapping.
+
+- LOB system linking (concepts)
+  - System: logical system with a type (booking, FDV, sensors, …).
+  - System instance: one per municipality (base URL, credentials, metadata).
+  - Resource link: maps a master resource (building/room/outdoor area/product) to the correct system instance with an external ID for a given context (booking/FDV).
+  - Classification: optional for filtering/routing.
+
+- Routing flow (booking example)
+  1. User picks a resource (e.g., sports hall) in the master UI.
+  2. Determine municipality via building/district or address/parcel.
+  3. Look up the Resource link for context=booking → fetch system instance (Aktiv kommune for that municipality) and external_id.
+  4. Redirect or call the API using the instance base URL and the external_id.
+  5. Mirror status/ack back into the master UI via the same mapping.
+
+- FDV/other sources (components/equipment)
+  - ifc_product supports IFC and non-IFC assets (ifc_guid optional) with external_id+source.
+  - ifc_product_location anchors assets to building/floor/room or outdoor area.
+  - Properties live in properties_json and, when needed, normalized in ifc_property_set/ifc_property.
+  - For FDV routing: the Resource link points the product to the correct FDV instance per municipality using the FDV external_id.
+
+- Privacy and access
+  - Do not store personal data in external_id.
+  - Routing happens at system/resource level; access and audit are enforced in both master and downstream systems.
+
+Practical recommendation
+- Introduce small reference tables (out of scope in this file) for: system, system_instance (per municipality), and resource_link (resource_type, resource_id, context, system_instance_id, external_id).
+- Keep upserts idempotent: maintain unique (resource, context) mapping per

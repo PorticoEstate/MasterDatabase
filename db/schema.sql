@@ -457,3 +457,96 @@ CREATE TABLE IF NOT EXISTS ifc_property
     value_json     JSONB,
     UNIQUE (pset_id, product_id, name)
 );
+
+-- Fagsystemer og ruting: systemkatalog, instanser per kommune og ressurslenker
+
+-- Fagsystem (type: booking, FDV, sensor, annet)
+CREATE TABLE IF NOT EXISTS fagsystem
+(
+    fagsystem_id BIGSERIAL PRIMARY KEY,
+    navn         TEXT UNIQUE NOT NULL,
+    type         TEXT NOT NULL CHECK (type IN ('booking','fdv','sensor','annet')),
+    beskrivelse  TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Fagsystem-instans per kommune (én per system/kommune)
+CREATE TABLE IF NOT EXISTS fagsystem_instans
+(
+    instans_id   BIGSERIAL PRIMARY KEY,
+    fagsystem_id BIGINT NOT NULL REFERENCES fagsystem(fagsystem_id) ON DELETE CASCADE,
+    kommune_id   BIGINT NOT NULL REFERENCES kommune(kommune_id) ON DELETE CASCADE,
+    base_url     TEXT NOT NULL,
+    konfig_json  JSONB,
+    aktiv        BOOLEAN DEFAULT TRUE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uniq_fagsystem_per_kommune UNIQUE (fagsystem_id, kommune_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_fagsystem
+    ON fagsystem_instans (fagsystem_id);
+
+CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_kommune
+    ON fagsystem_instans (kommune_id);
+
+-- Ressurslenke: kobler master-ressurser til riktig fagsystem-instans for en gitt kontekst
+CREATE TABLE IF NOT EXISTS ressurslenke
+(
+    ressurslenke_id BIGSERIAL PRIMARY KEY,
+    kontekst        TEXT NOT NULL CHECK (kontekst IN ('booking','fdv','sensor','annet')),
+    fagsystem_instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(instans_id) ON DELETE CASCADE,
+    -- Pekere til én og kun én ressurs
+    bygg_id        BIGINT REFERENCES bygning(bygg_id) ON DELETE CASCADE,
+    bruksenhet_id  BIGINT REFERENCES bruksenhet(bruksenhet_id) ON DELETE CASCADE,
+    rom_id         BIGINT REFERENCES rom(rom_id) ON DELETE CASCADE,
+    uteomraade_id  BIGINT REFERENCES uteomraade(uteomraade_id) ON DELETE CASCADE,
+    product_id     BIGINT REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    -- Ekstern adressat i fagsystemet
+    ekstern_id     TEXT NOT NULL,
+    ekstern_path   TEXT,
+    metadata_json  JSONB,
+    aktiv          BOOLEAN DEFAULT TRUE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_ressurslenke_exactly_one
+        CHECK (
+            (CASE WHEN bygg_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN bruksenhet_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN rom_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN uteomraade_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN product_id IS NOT NULL THEN 1 ELSE 0 END)
+          = 1
+        )
+);
+
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_instans
+    ON ressurslenke (fagsystem_instans_id);
+
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_instans_kontekst
+    ON ressurslenke (fagsystem_instans_id, kontekst);
+
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_instans_ekstern
+    ON ressurslenke (fagsystem_instans_id, ekstern_id);
+
+-- Unike lenker per instans/kontekst for hver ressurs-type
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_bygg
+    ON ressurslenke (kontekst, fagsystem_instans_id, bygg_id)
+    WHERE bygg_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_bruksenhet
+    ON ressurslenke (kontekst, fagsystem_instans_id, bruksenhet_id)
+    WHERE bruksenhet_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_rom
+    ON ressurslenke (kontekst, fagsystem_instans_id, rom_id)
+    WHERE rom_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_uteomraade
+    ON ressurslenke (kontekst, fagsystem_instans_id, uteomraade_id)
+    WHERE uteomraade_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_product
+    ON ressurslenke (kontekst, fagsystem_instans_id, product_id)
+    WHERE product_id IS NOT NULL;
