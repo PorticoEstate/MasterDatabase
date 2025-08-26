@@ -1,5 +1,53 @@
 # Input document for AI model development: Integrating a master database with cadastral (Matrikkel) and asset data
 
+## 12. Resources and resource pools (non location-bound)
+
+This section describes how we handle resources that are not permanently tied to a physical place (equipment in storage, mobile devices, people, services), organize them into pools, and route them to the correct line-of-business system with the same context-aware mechanism used for location-bound objects.
+
+- Purpose
+  - Model resources (equipment, personnel, services) independent of buildings/rooms.
+  - Group resources into named pools (e.g., “Custodian Team Central”, “Loan equipment – School A”).
+  - Routing: reuse the context-aware mechanism at the resource level.
+
+- Tables (sketch, see `db/schema.sql`)
+  - ressurs: type (equipment|person|service|other), either linked to ifc_product or identified by (kilde, ekstern_id); metadata_json; provenance fields; partial UNIQUE on (kilde, ekstern_id).
+  - ressurspool: named collection per municipality; UNIQUE (kommune_id, navn); type (booking|staffing|equipment|other).
+  - ressurspool_medlem: M:N pool–resource with validity window (gyldig_fra/gyldig_til).
+  - ressurslenke: adds ressurs_id; exactly-one-reference CHECK; uniqueness per (instans_id, context, ekstern_id) and per (context, instans_id, ressurs_id).
+
+- Interaction with routing
+  - Reuse fagsystem and fagsystem_instans.
+  - For a resource request, look up ressurslenke by (instans_id, context, ressurs_id) to get the external ID in the correct instance.
+  - Overlapping IDs across instances are safe due to scoped uniqueness.
+
+- Examples
+  - Create a resource (person from HR):
+
+        INSERT INTO ressurs (type, navn, kilde, ekstern_id, sist_oppdatert, autoritativ)
+        VALUES ('person', 'Ola Normann', 'hr', 'EMP-12345', NOW(), true);
+
+  - Create a pool and add a member:
+
+        INSERT INTO ressurspool (kommune_id, navn, type)
+        VALUES (42, 'Vaktmesterteam Sentrum', 'staffing')
+        RETURNING id;
+
+        INSERT INTO ressurspool_medlem (pool_id, ressurs_id, gyldig_fra)
+        VALUES (<pool_id>, <ressurs_id>, CURRENT_DATE);
+
+  - Resolve routing for booking:
+    1) Instance: SELECT i.id, i.base_url FROM fagsystem_instans i JOIN fagsystem f ON f.id=i.fagsystem_id WHERE f.type='booking' AND i.kommune_id=<kommune_id>;
+    2) External ID: SELECT ekstern_id FROM ressurslenke WHERE context='booking' AND instans_id=<instans_id> AND ressurs_id=<ressurs_id>;
+
+  - Useful query: active pool members today:
+
+        SELECT r.*
+        FROM ressurspool_medlem m
+        JOIN ressurs r ON r.id = m.ressurs_id
+        WHERE m.pool_id = <pool_id>
+          AND (m.gyldig_fra IS NULL OR m.gyldig_fra <= CURRENT_DATE)
+          AND (m.gyldig_til IS NULL OR m.gyldig_til >= CURRENT_DATE);
+
 ---
 
 ## 1. Objectives
@@ -155,9 +203,7 @@ Plan for this project (data pull):
 
   Example (address search with ETRS89/EPSG:4258 coordinates and 5 results):
 
-  ```bash
-  curl "https://ws.geonorge.no/adresser/v1/sok?adresse=Storgata%2010%2C%20Oslo&utkoordsys=4258&treffPerSide=5"
-  ```
+  curl "<https://ws.geonorge.no/adresser/v1/sok?adresse=Storgata%2010%2C%20Oslo&utkoordsys=4258&treffPerSide=5>"
 
   Typical fields: matrikkelId (if present), address components, coordinates, and quality codes.
 
@@ -249,58 +295,96 @@ This model supports importing and managing building components (architecture/str
 
 This example creates an FM asset without an IFC GUID, adds properties in a property set, and upserts them idempotently.
 
-```sql
--- 1) Create a property set (one-time)
-INSERT INTO ifc_property_set (name, description)
-VALUES ('FDV_Common', 'Properties from FM system');
+  -- 1) Create a property set (one-time)
+  INSERT INTO ifc_property_set (name, description)
+  VALUES ('FDV_Common', 'Properties from FM system');
 
--- 2) Create the asset (non-IFC) with an external key from the source
-INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
-VALUES (
-  'CustomEquipment',
-  'Air Handling Unit AHU-1',
-  'AHU-1',
-  '{"power_kw":5.5, "manufacturer":"X"}',
-  'FDV',
-  'fdv:ahu:1'
-);
+  -- 2) Create the asset (non-IFC) with an external key from the source
+  INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
+  VALUES (
+    'CustomEquipment',
+    'Air Handling Unit AHU-1',
+    'AHU-1',
+    '{"power_kw":5.5, "manufacturer":"X"}',
+    'FDV',
+    'fdv:ahu:1'
+  );
 
--- 3) Normalize selected properties for querying/reporting
-INSERT INTO ifc_property (pset_id, product_id, name, value_text, value_num)
-SELECT p.pset_id, pr.product_id, v.name, v.value_text, v.value_num
-FROM (SELECT pset_id FROM ifc_property_set WHERE name='FDV_Common') p,
-   (SELECT product_id FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1') pr,
-   (VALUES
-    ('Manufacturer', 'X', NULL::NUMERIC),
-    ('Power_kW', NULL::TEXT, 5.5::NUMERIC)
-   ) AS v(name, value_text, value_num)
-ON CONFLICT (pset_id, product_id, name)
-DO UPDATE SET value_text = EXCLUDED.value_text,
-        value_num  = EXCLUDED.value_num;
+  -- 3) Normalize selected properties for querying/reporting
+  INSERT INTO ifc_property (pset_id, product_id, name, value_text, value_num)
+  SELECT p.pset_id, pr.product_id, v.name, v.value_text, v.value_num
+  FROM (SELECT pset_id FROM ifc_property_set WHERE name='FDV_Common') p,
+     (SELECT product_id FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1') pr,
+     (VALUES
+      ('Manufacturer', 'X', NULL::NUMERIC),
+      ('Power_kW', NULL::TEXT, 5.5::NUMERIC)
+     ) AS v(name, value_text, value_num)
+  ON CONFLICT (pset_id, product_id, name)
+  DO UPDATE SET value_text = EXCLUDED.value_text,
+    value_num  = EXCLUDED.value_num;
 
--- 4) (Optional) Place the asset in the model
-INSERT INTO ifc_product_location (product_id, bygg_id, etasje_id, rom_id)
-SELECT product_id, 1, NULL, 10
-FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1';
-```
+  -- 4) (Optional) Place the asset in the model
+  INSERT INTO ifc_product_location (product_id, bygg_id, etasje_id, rom_id)
+  SELECT product_id, 1, NULL, 10
+  FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1';
+        -- 1) Create a property set (one-time)
+        INSERT INTO ifc_property_set (name, description)
+        VALUES ('FDV_Common', 'Properties from FM system');
 
-Tips:
+        -- 2) Create the asset (non-IFC) with an external key from the source
+        INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
+        VALUES (
+          'CustomEquipment',
+          'Air Handling Unit AHU-1',
+          'AHU-1',
+          '{"power_kw":5.5, "manufacturer":"X"}',
+          'FDV',
+          'fdv:ahu:1'
+        );
+        
+        -- 1) Create an asset placed outdoors (generic or IFC-classified)
+        INSERT INTO ifc_product (entity, predefined_type, name, properties_json, kilde, ekstern_id, lon, lat)
+        VALUES (
+            'CustomEquipment',           -- or e.g. 'IfcFurnishingElement'
+            'PLAY_EQUIPMENT',
+            'Playground – swing',
+            '{"material":"wood","age_6_12":true}',
+            'FDV',
+            'fdv:play:swing:001',
+            10.7461, 59.9127             -- optional position (ETRS89/EPSG:4258)
+        );
 
-- Use `properties_json` for the full Pset content, and mirror only query-critical keys into `ifc_property`.
-- Keep names/units consistent (e.g., `Power_kW`).
+        -- 2) Place it on an outdoor area (provide correct uteomraade_id)
+        INSERT INTO ifc_product_location (product_id, uteomraade_id)
+        SELECT product_id, 42  -- replace 42 with actual uteomraade_id
+        FROM ifc_product
+        WHERE kilde='FDV' AND ekstern_id='fdv:play:swing:001';
 
-### 10.3 Example: playground equipment placed on an outdoor area
+        -- 3) (Optional) Classify in a custom scheme or known code system
+        INSERT INTO classification (scheme, code, title)
+        VALUES ('CUSTOM','PLAY_EQUIPMENT','Play equipment')
+        ON CONFLICT DO NOTHING;
 
-This shows a playground device placed directly on an outdoor area (outside buildings), with optional coordinates.
+        INSERT INTO product_classification (product_id, class_id)
+        SELECT p.product_id, c.class_id
+        FROM ifc_product p, classification c
+        WHERE p.kilde='FDV' AND p.ekstern_id='fdv:play:swing:001'
+          AND c.scheme='CUSTOM' AND c.code='PLAY_EQUIPMENT';
 
-```sql
--- 1) Create product (generic or IFC-classified)
-INSERT INTO ifc_product (entity, predefined_type, name, properties_json, kilde, ekstern_id, lon, lat)
-VALUES (
-    'CustomEquipment',           -- or e.g., 'IfcFurnishingElement'
-    'PLAY_EQUIPMENT',
-    'Play equipment – swing',
-    '{"material":"wood","age_6_12":true}',
+        -- 1) Create a property set (one-time)
+        INSERT INTO ifc_property_set (name, description)
+        VALUES ('FDV_Common', 'Properties from FM system');
+
+        -- 2) Create the asset (non-IFC) with an external key from the source
+        INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
+        VALUES (
+          'CustomEquipment',
+          'Air Handling Unit AHU-1',
+          'AHU-1',
+          '{"power_kw":5.5, "manufacturer":"X"}',
+          'FDV',
+          'fdv:ahu:1'
+        );
     'FDV',
     'fdv:play:swing:001',
     10.7461, 59.9127             -- optional position (ETRS89/EPSG:4258)
@@ -322,7 +406,6 @@ SELECT p.product_id, c.class_id
 FROM ifc_product p, classification c
 WHERE p.kilde='FDV' AND p.ekstern_id='fdv:play:swing:001'
   AND c.scheme='CUSTOM' AND c.code='PLAY_EQUIPMENT';
-```
 
 Notes:
 
@@ -367,5 +450,6 @@ This master DB combines authoritative registries (Matrikkel) with local per-muni
   - Routing happens at system/resource level; access and audit are enforced in both master and downstream systems.
 
 Practical recommendation
+
 - Introduce small reference tables (out of scope in this file) for: system, system_instance (per municipality), and resource_link (resource_type, resource_id, context, system_instance_id, external_id).
-- Keep upserts idempotent: maintain unique (resource, context) mapping per
+- Keep upserts idempotent: maintain unique (resource, context) mapping per system instance and avoid duplicates.

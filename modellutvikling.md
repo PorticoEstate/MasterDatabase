@@ -1,8 +1,71 @@
 # Inputdokument for AI-modellutvikling: Integrasjon av masterdatabase med matrikkelinformasjon og anleggsdata
 
----
 
-## 1. Målsetting
+## 12. Ressurser og ressurspooler (ikke-stedsbundne)
+
+Denne seksjonen beskriver hvordan vi håndterer ressurser som ikke er permanent knyttet til et fysisk sted (utstyr på lager, mobile enheter, personer, tjenester), samt hvordan de kan organiseres i ressurspooler og rutes til riktig fagsystem på samme måte som stedbundne objekter.
+
+- Formål
+  - Modellere “ressurser” (utstyr, personell, tjenester) som kan brukes/planlegges uavhengig av bygg/rom.
+  - Samle ressurser i navngitte pooler (for eksempel «Vaktmesterteam sentrum», «Låneutstyr skole A»).
+  - Ruting: samme kontekstsensitive mekanisme som for bygg/rom/IFC, men på ressursnivå.
+- Tabeller (skisse, se `db/schema.sql` for detaljer)
+  - `ressurs`
+    - type: equipment | person | service | other.
+    - enten koblet til `ifc_product` ELLER identifisert via `(kilde, ekstern_id)`; CHECK sikrer “minst én identitet”.
+    - proveniensfelt: kilde, kilde_ref, sist_oppdatert, autoritativ.
+    - unikhet: delvis UNIQUE på `(kilde, ekstern_id)` når ekstern_id finnes.
+  - `ressurspool`
+    - navngitt samling per kommune; UNIQUE (kommune_id, navn).
+    - type: booking | staffing | equipment | other.
+  - `ressurspool_medlem`
+    - M:N mellom pool og ressurs.
+    - gyldighetsintervall (gyldig_fra, gyldig_til) med CHECK (fra < til) eller åpen slutt.
+  - `ressurslenke` (utvidet)
+    - nå også `ressurs_id` i tillegg til bygg/bruksenhet/rom/uteområde/ifc_product.
+    - CHECK «eksakt én referanse er satt» er oppdatert til å inkludere `ressurs_id`.
+    - unikhet: (instans_id, context, ekstern_id) og, for ressurs-lenker, UNIQUE (context, instans_id, ressurs_id).
+
+- Samspill med ruting (seksjon 11)
+  - Ruting til fagsystemer gjenbruker `fagsystem` og `fagsystem_instans`.
+  - Når en forespørsel gjelder en ressurs (context f.eks. booking), slås `ressurslenke` opp på `(instans_id, context, ressurs_id)` for å finne ekstern identitet i riktig instans.
+  - Overlappende ekstern-ID’er på tvers av instanser håndteres ved at unikhet skopes per instans og kontekst.
+- Eksempler
+  - Opprette en ressurs (person fra HR-systemet):
+
+        INSERT INTO ressurs (type, navn, kilde, ekstern_id, sist_oppdatert, autoritativ)
+
+  - Opprette en pool og legge til medlem med gyldighet:
+
+        INSERT INTO ressurspool (kommune_id, navn, type)
+        VALUES (42, 'Vaktmesterteam Sentrum', 'staffing')
+        RETURNING id;
+
+        INSERT INTO ressurspool_medlem (pool_id, ressurs_id, gyldig_fra)
+        VALUES (<pool_id>, <ressurs_id>, CURRENT_DATE);
+
+  - Rute en bookingforespørsel for en ressurs:
+    1) Finn instansen for booking i kommunen: `SELECT i.id, i.base_url FROM fagsystem_instans i JOIN fagsystem f ON f.id=i.fagsystem_id WHERE f.type='booking' AND i.kommune_id = <kommune_id>;`
+    2) Finn ekstern-ID for ressursen i denne instansen: `SELECT ekstern_id FROM ressurslenke WHERE context='booking' AND instans_id = <instans_id> AND ressurs_id = <ressurs_id>;`
+    3) Kall fagsystemets API med `base_url` og `ekstern_id`.
+
+  - Nyttige spørringer
+  - Aktive medlemmer i en pool på en dato:
+
+        SELECT r.*
+        FROM ressurspool_medlem m
+        JOIN ressurs r ON r.id = m.ressurs_id
+        WHERE m.pool_id = <pool_id>
+          AND (m.gyldig_fra IS NULL OR m.gyldig_fra <= CURRENT_DATE)
+          AND (m.gyldig_til IS NULL OR m.gyldig_til >= CURRENT_DATE);
+
+  - Alle lenker for en ressurs i en gitt kontekst (for eksempel booking):
+
+        SELECT i.base_url, l.ekstern_id
+        FROM ressurslenke l
+        JOIN fagsystem_instans i ON i.id = l.instans_id
+        WHERE l.context = 'booking' AND l.ressurs_id = <ressurs_id>;
+
 
 Etablere en masterdatabase som integrerer data fra flere lignende databaseinstanser (lokale databaser med bygnings- og anleggsdata) og supplerer med informasjon fra autoritative registre som matrikkelen og det nasjonale anleggsregisteret.
 
@@ -15,12 +78,10 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 - **Nasjonalt anleggsregister**: Strukturert katalog over tekniske installasjoner
 - **Fagsystemer for**:
   - Leie av lokaler
-  - Skade- og vedlikeholdsmeldinger
   - Drift og ressursforvaltning
 
 ---
 
-## 3. Masterdatabasefunksjoner
 
 - Unik identitet for hvert bygg/anlegg via koplingstabeller
 - Datavask og validering (inkl. versjonssporing og kvalitetskontroll)
@@ -38,12 +99,10 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 
 ### Ekstern API
 
-- Integrasjon med nasjonalt anleggsregister
 - Eksterne forespørselssvar og oppdateringsprotokoller
 
 ---
 
-## 5. Kontekstuell forespørselshåndtering
 
 - En forespørsel (som leie eller skade) skal rutes til riktig fagsystem basert på type og kontekst.
 - Alle henvendelser opererer på samme bygg-ID.
@@ -188,40 +247,38 @@ Denne modellen støtter innlesing og forvaltning av bygningskomponenter (arkitek
 
 Dette eksemplet oppretter et FDV-objekt uten IFC GUID, legger egenskaper i et egenskapssett og oppdaterer dem idempotent.
 
-```sql
--- 1) Opprett et egenskapssett (engangsoperasjon)
-INSERT INTO ifc_property_set (name, description)
-VALUES ('FDV_Common', 'Egenskaper fra FDV-system');
+  -- 1) Opprett et egenskapssett (engangsoperasjon)
+  INSERT INTO ifc_property_set (name, description)
+  VALUES ('FDV_Common', 'Egenskaper fra FDV-system');
 
--- 2) Opprett produktet (ikke-IFC) med ekstern nøkkel fra kilden
-INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
-VALUES (
-  'CustomEquipment',
-  'Ventilasjonsaggregat AHU-1',
-  'AHU-1',
-  '{"effekt_kw":5.5, "produsent":"X"}',
-  'FDV',
-  'fdv:ahu:1'
-);
+  -- 2) Opprett produktet (ikke-IFC) med ekstern nøkkel fra kilden
+  INSERT INTO ifc_product (entity, name, tag, properties_json, kilde, ekstern_id)
+  VALUES (
+    'CustomEquipment',
+    'Ventilasjonsaggregat AHU-1',
+    'AHU-1',
+    '{"effekt_kw":5.5, "produsent":"X"}',
+    'FDV',
+    'fdv:ahu:1'
+  );
 
--- 3) Normaliser utvalgte egenskaper for spørringer/rapportering
-INSERT INTO ifc_property (pset_id, product_id, name, value_text, value_num)
-SELECT p.pset_id, pr.product_id, v.name, v.value_text, v.value_num
-FROM (SELECT pset_id FROM ifc_property_set WHERE name='FDV_Common') p,
-   (SELECT product_id FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1') pr,
-   (VALUES
-    ('Produsent', 'X', NULL::NUMERIC),
-    ('Effekt_kW', NULL::TEXT, 5.5::NUMERIC)
-   ) AS v(name, value_text, value_num)
-ON CONFLICT (pset_id, product_id, name)
-DO UPDATE SET value_text = EXCLUDED.value_text,
-        value_num  = EXCLUDED.value_num;
+  -- 3) Normaliser utvalgte egenskaper for spørringer/rapportering
+  INSERT INTO ifc_property (pset_id, product_id, name, value_text, value_num)
+  SELECT p.pset_id, pr.product_id, v.name, v.value_text, v.value_num
+  FROM (SELECT pset_id FROM ifc_property_set WHERE name='FDV_Common') p,
+     (SELECT product_id FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1') pr,
+     (VALUES
+      ('Produsent', 'X', NULL::NUMERIC),
+      ('Effekt_kW', NULL::TEXT, 5.5::NUMERIC)
+     ) AS v(name, value_text, value_num)
+  ON CONFLICT (pset_id, product_id, name)
+  DO UPDATE SET value_text = EXCLUDED.value_text,
+    value_num  = EXCLUDED.value_num;
 
--- 4) (Valgfritt) Plasser objektet i modellen
-INSERT INTO ifc_product_location (product_id, bygg_id, etasje_id, rom_id)
-SELECT product_id, 1, NULL, 10
-FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1';
-```
+  -- 4) (Valgfritt) Plasser objektet i modellen
+  INSERT INTO ifc_product_location (product_id, bygg_id, etasje_id, rom_id)
+  SELECT product_id, 1, NULL, 10
+  FROM ifc_product WHERE kilde='FDV' AND ekstern_id='fdv:ahu:1';
 
 Tips:
 
@@ -232,36 +289,34 @@ Tips:
 
 Dette viser et lekeapparat som plasseres direkte på et uteområde (utenfor bygg), med valgfri posisjon.
 
-```sql
--- 1) Opprett produkt (kan være generisk eller IFC-klassifisert)
-INSERT INTO ifc_product (entity, predefined_type, name, properties_json, kilde, ekstern_id, lon, lat)
-VALUES (
-    'CustomEquipment',           -- eller f.eks. 'IfcFurnishingElement'
-    'PLAY_EQUIPMENT',
-    'Lekeapparat – huske',
-    '{"materiale":"tre","alder_6_12":true}',
-    'FDV',
-    'fdv:play:huske:001',
-    10.7461, 59.9127             -- valgfritt: posisjon (ETRS89/EPSG:4258)
-);
+        -- 1) Opprett produkt (kan være generisk eller IFC-klassifisert)
+        INSERT INTO ifc_product (entity, predefined_type, name, properties_json, kilde, ekstern_id, lon, lat)
+        VALUES (
+            'CustomEquipment',           -- eller f.eks. 'IfcFurnishingElement'
+            'PLAY_EQUIPMENT',
+            'Lekeapparat – huske',
+            '{"materiale":"tre","alder_6_12":true}',
+            'FDV',
+            'fdv:play:huske:001',
+            10.7461, 59.9127             -- valgfritt: posisjon (ETRS89/EPSG:4258)
+        );
 
--- 2) Plasser det på et uteområde (angi riktig uteomraade_id)
-INSERT INTO ifc_product_location (product_id, uteomraade_id)
-SELECT product_id, 42  -- erstatt 42 med faktisk uteomraade_id
-FROM ifc_product
-WHERE kilde='FDV' AND ekstern_id='fdv:play:huske:001';
+        -- 2) Plasser det på et uteområde (angi riktig uteomraade_id)
+        INSERT INTO ifc_product_location (product_id, uteomraade_id)
+        SELECT product_id, 42  -- erstatt 42 med faktisk uteomraade_id
+        FROM ifc_product
+        WHERE kilde='FDV' AND ekstern_id='fdv:play:huske:001';
 
--- 3) (Valgfritt) Klassifiser i eget skjema eller kjent kodeverk
-INSERT INTO classification (scheme, code, title)
-VALUES ('CUSTOM','PLAY_EQUIPMENT','Lekeapparat')
-ON CONFLICT DO NOTHING;
+        -- 3) (Valgfritt) Klassifiser i eget skjema eller kjent kodeverk
+        INSERT INTO classification (scheme, code, title)
+        VALUES ('CUSTOM','PLAY_EQUIPMENT','Lekeapparat')
+        ON CONFLICT DO NOTHING;
 
-INSERT INTO product_classification (product_id, class_id)
-SELECT p.product_id, c.class_id
-FROM ifc_product p, classification c
-WHERE p.kilde='FDV' AND p.ekstern_id='fdv:play:huske:001'
-  AND c.scheme='CUSTOM' AND c.code='PLAY_EQUIPMENT';
-```
+        INSERT INTO product_classification (product_id, class_id)
+        SELECT p.product_id, c.class_id
+        FROM ifc_product p, classification c
+        WHERE p.kilde='FDV' AND p.ekstern_id='fdv:play:huske:001'
+          AND c.scheme='CUSTOM' AND c.code='PLAY_EQUIPMENT';
 
 Merk:
 
@@ -307,5 +362,6 @@ Denne løsningen samler autorative data (Matrikkel) og supplerer med lokale data
   - Ruting skjer på system- og ressursnivå; tilgangskontroll og logging håndteres i både master og underliggende fagsystem.
 
 Praktisk anbefaling
+
 - Etabler små referansetabeller (utenfor scope i denne filen) for: fagsystem, fagsystem_instans (per kommune), ressurslenke (resource_type, resource_id, context, system_instans_id, ekstern_id).
 - Hold oppslag idempotent: oppdater lenker på (resource, context) og kilde/ekstern_id uten duplikater.

@@ -458,6 +458,105 @@ CREATE TABLE IF NOT EXISTS ifc_property
     UNIQUE (pset_id, product_id, name)
 );
 
+-- Generiske ressurser (utstyr/person/tjeneste), ressurspooler og medlemskap
+CREATE TABLE IF NOT EXISTS ressurs
+(
+    ressurs_id     BIGSERIAL PRIMARY KEY,
+    type           TEXT NOT NULL CHECK (type IN ('equipment','person','service','other')),
+    ifc_product_id BIGINT REFERENCES ifc_product(product_id) ON DELETE SET NULL,
+    navn           TEXT,
+    metadata_json  JSONB,
+    kilde          TEXT,
+    kilde_ref      TEXT,
+    ekstern_id     TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ    BOOLEAN DEFAULT FALSE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_ressurs_ident
+        CHECK (
+            ifc_product_id IS NOT NULL OR (kilde IS NOT NULL AND ekstern_id IS NOT NULL)
+        )
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurs_source_external
+    ON ressurs (kilde, ekstern_id)
+    WHERE kilde IS NOT NULL AND ekstern_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS ix_ressurs_ifc_product
+    ON ressurs (ifc_product_id);
+
+CREATE TABLE IF NOT EXISTS ressurspool
+(
+    pool_id       BIGSERIAL PRIMARY KEY,
+    navn          TEXT NOT NULL,
+    type          TEXT NOT NULL CHECK (type IN ('booking','staffing','equipment','other')),
+    kommune_id    BIGINT REFERENCES kommune(kommune_id) ON DELETE SET NULL,
+    beskrivelse   TEXT,
+    metadata_json JSONB,
+    aktiv         BOOLEAN DEFAULT TRUE,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uniq_pool_per_scope UNIQUE (kommune_id, navn)
+);
+
+CREATE INDEX IF NOT EXISTS ix_pool_kommune
+    ON ressurspool (kommune_id);
+
+CREATE TABLE IF NOT EXISTS ressurspool_medlem
+(
+    pool_id      BIGINT NOT NULL REFERENCES ressurspool(pool_id) ON DELETE CASCADE,
+    ressurs_id   BIGINT NOT NULL REFERENCES ressurs(ressurs_id) ON DELETE CASCADE,
+    rolle        TEXT,
+    prioritet    INTEGER,
+    gyldig_fra   TIMESTAMPTZ,
+    gyldig_til   TIMESTAMPTZ,
+    merknad      TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (pool_id, ressurs_id),
+    CONSTRAINT chk_medlem_interval
+        CHECK (gyldig_til IS NULL OR gyldig_fra IS NULL OR gyldig_til > gyldig_fra)
+);
+
+CREATE INDEX IF NOT EXISTS ix_pool_medlem_ressurs
+    ON ressurspool_medlem (ressurs_id);
+
+CREATE INDEX IF NOT EXISTS ix_pool_medlem_gyldighet
+    ON ressurspool_medlem (gyldig_fra, gyldig_til);
+
+-- Utvid ruting: støtte direkte lenking for ressurs
+ALTER TABLE ressurslenke
+    ADD COLUMN IF NOT EXISTS ressurs_id BIGINT REFERENCES ressurs(ressurs_id) ON DELETE CASCADE;
+
+-- Oppdatér sjekk for at nøyaktig én referanse er satt (inkluderer ressurs_id)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'chk_ressurslenke_exactly_one'
+          AND table_name = 'ressurslenke'
+    ) THEN
+        ALTER TABLE ressurslenke DROP CONSTRAINT chk_ressurslenke_exactly_one;
+    END IF;
+END $$;
+
+ALTER TABLE ressurslenke
+    ADD CONSTRAINT chk_ressurslenke_exactly_one
+        CHECK (
+            (CASE WHEN bygg_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN bruksenhet_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN rom_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN uteomraade_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN product_id IS NOT NULL THEN 1 ELSE 0 END)
+          + (CASE WHEN ressurs_id IS NOT NULL THEN 1 ELSE 0 END)
+          = 1
+        );
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_ressurs
+    ON ressurslenke (kontekst, fagsystem_instans_id, ressurs_id)
+    WHERE ressurs_id IS NOT NULL;
+
 -- Fagsystemer og ruting: systemkatalog, instanser per kommune og ressurslenker
 
 -- Fagsystem (type: booking, FDV, sensor, annet)
