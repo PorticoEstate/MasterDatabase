@@ -1,5 +1,9 @@
 # Inputdokument for AI-modellutvikling: Integrasjon av masterdatabase med matrikkelinformasjon og anleggsdata
 
+## 1. Målsetting
+
+Etablere en masterdatabase som integrerer data fra flere lignende databaseinstanser (lokale databaser med bygnings- og anleggsdata) og supplerer med informasjon fra autoritative registre som matrikkelen og det nasjonale anleggsregisteret.
+
 
 ## 2. Datakilder
 
@@ -361,8 +365,5 @@ Denne seksjonen beskriver hvordan vi håndterer ressurser som ikke er permanent 
         FROM ressurslenke l
         JOIN fagsystem_instans i ON i.id = l.instans_id
         WHERE l.context = 'booking' AND l.ressurs_id = <ressurs_id>;
-
-
-Etablere en masterdatabase som integrerer data fra flere lignende databaseinstanser (lokale databaser med bygnings- og anleggsdata) og supplerer med informasjon fra autoritative registre som matrikkelen og det nasjonale anleggsregisteret.
 
 ---
