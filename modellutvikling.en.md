@@ -1,55 +1,5 @@
 # Input document for AI model development: Integrating a master database with cadastral (Matrikkel) and asset data
 
-## 12. Resources and resource pools (non location-bound)
-
-This section describes how we handle resources that are not permanently tied to a physical place (equipment in storage, mobile devices, people, services), organize them into pools, and route them to the correct line-of-business system with the same context-aware mechanism used for location-bound objects.
-
-- Purpose
-  - Model resources (equipment, personnel, services) independent of buildings/rooms.
-  - Group resources into named pools (e.g., “Custodian Team Central”, “Loan equipment – School A”).
-  - Routing: reuse the context-aware mechanism at the resource level.
-
-- Tables (sketch, see `db/schema.sql`)
-  - ressurs: type (equipment|person|service|other), either linked to ifc_product or identified by (kilde, ekstern_id); metadata_json; provenance fields; partial UNIQUE on (kilde, ekstern_id).
-  - ressurspool: named collection per municipality; UNIQUE (kommune_id, navn); type (booking|staffing|equipment|other).
-  - ressurspool_medlem: M:N pool–resource with validity window (gyldig_fra/gyldig_til).
-  - ressurslenke: adds ressurs_id; exactly-one-reference CHECK; uniqueness per (instans_id, context, ekstern_id) and per (context, instans_id, ressurs_id).
-
-- Interaction with routing
-  - Reuse fagsystem and fagsystem_instans.
-  - For a resource request, look up ressurslenke by (instans_id, context, ressurs_id) to get the external ID in the correct instance.
-  - Overlapping IDs across instances are safe due to scoped uniqueness.
-
-- Examples
-  - Create a resource (person from HR):
-
-        INSERT INTO ressurs (type, navn, kilde, ekstern_id, sist_oppdatert, autoritativ)
-        VALUES ('person', 'Ola Normann', 'hr', 'EMP-12345', NOW(), true);
-
-  - Create a pool and add a member:
-
-        INSERT INTO ressurspool (kommune_id, navn, type)
-        VALUES (42, 'Vaktmesterteam Sentrum', 'staffing')
-        RETURNING id;
-
-        INSERT INTO ressurspool_medlem (pool_id, ressurs_id, gyldig_fra)
-        VALUES (<pool_id>, <ressurs_id>, CURRENT_DATE);
-
-  - Resolve routing for booking:
-    1) Instance: SELECT i.id, i.base_url FROM fagsystem_instans i JOIN fagsystem f ON f.id=i.fagsystem_id WHERE f.type='booking' AND i.kommune_id=<kommune_id>;
-    2) External ID: SELECT ekstern_id FROM ressurslenke WHERE context='booking' AND instans_id=<instans_id> AND ressurs_id=<ressurs_id>;
-
-  - Useful query: active pool members today:
-
-        SELECT r.*
-        FROM ressurspool_medlem m
-        JOIN ressurs r ON r.id = m.ressurs_id
-        WHERE m.pool_id = <pool_id>
-          AND (m.gyldig_fra IS NULL OR m.gyldig_fra <= CURRENT_DATE)
-          AND (m.gyldig_til IS NULL OR m.gyldig_til >= CURRENT_DATE);
-
----
-
 ## 1. Objectives
 
 Establish a master database that integrates data from multiple similar database instances (local databases with building and installation data) and enriches it with information from authoritative registries such as the Norwegian cadastre (Matrikkelen) and the national installations register.
@@ -453,3 +403,53 @@ Practical recommendation
 
 - Introduce small reference tables (out of scope in this file) for: system, system_instance (per municipality), and resource_link (resource_type, resource_id, context, system_instance_id, external_id).
 - Keep upserts idempotent: maintain unique (resource, context) mapping per system instance and avoid duplicates.
+
+## 12. Resources and resource pools (non location-bound)
+
+This section describes how we handle resources that are not permanently tied to a physical place (equipment in storage, mobile devices, people, services), organize them into pools, and route them to the correct line-of-business system with the same context-aware mechanism used for location-bound objects.
+
+- Purpose
+  - Model resources (equipment, personnel, services) independent of buildings/rooms.
+  - Group resources into named pools (e.g., “Custodian Team Central”, “Loan equipment – School A”).
+  - Routing: reuse the context-aware mechanism at the resource level.
+
+- Tables (sketch, see `db/schema.sql`)
+  - ressurs: type (equipment|person|service|other), either linked to ifc_product or identified by (kilde, ekstern_id); metadata_json; provenance fields; partial UNIQUE on (kilde, ekstern_id).
+  - ressurspool: named collection per municipality; UNIQUE (kommune_id, navn); type (booking|staffing|equipment|other).
+  - ressurspool_medlem: M:N pool–resource with validity window (gyldig_fra/gyldig_til).
+  - ressurslenke: adds ressurs_id; exactly-one-reference CHECK; uniqueness per (instans_id, context, ekstern_id) and per (context, instans_id, ressurs_id).
+
+- Interaction with routing
+  - Reuse fagsystem and fagsystem_instans.
+  - For a resource request, look up ressurslenke by (instans_id, context, ressurs_id) to get the external ID in the correct instance.
+  - Overlapping IDs across instances are safe due to scoped uniqueness.
+
+- Examples
+  - Create a resource (person from HR):
+
+        INSERT INTO ressurs (type, navn, kilde, ekstern_id, sist_oppdatert, autoritativ)
+        VALUES ('person', 'Ola Normann', 'hr', 'EMP-12345', NOW(), true);
+
+  - Create a pool and add a member:
+
+        INSERT INTO ressurspool (kommune_id, navn, type)
+        VALUES (42, 'Vaktmesterteam Sentrum', 'staffing')
+        RETURNING id;
+
+        INSERT INTO ressurspool_medlem (pool_id, ressurs_id, gyldig_fra)
+        VALUES (<pool_id>, <ressurs_id>, CURRENT_DATE);
+
+  - Resolve routing for booking:
+    1) Instance: SELECT i.id, i.base_url FROM fagsystem_instans i JOIN fagsystem f ON f.id=i.fagsystem_id WHERE f.type='booking' AND i.kommune_id=<kommune_id>;
+    2) External ID: SELECT ekstern_id FROM ressurslenke WHERE context='booking' AND instans_id=<instans_id> AND ressurs_id=<ressurs_id>;
+
+  - Useful query: active pool members today:
+
+        SELECT r.*
+        FROM ressurspool_medlem m
+        JOIN ressurs r ON r.id = m.ressurs_id
+        WHERE m.pool_id = <pool_id>
+          AND (m.gyldig_fra IS NULL OR m.gyldig_fra <= CURRENT_DATE)
+          AND (m.gyldig_til IS NULL OR m.gyldig_til >= CURRENT_DATE);
+
+---
