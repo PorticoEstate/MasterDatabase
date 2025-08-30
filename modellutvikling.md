@@ -5,6 +5,15 @@
 Etablere en masterdatabase som integrerer data fra flere lignende databaseinstanser (lokale databaser med bygnings- og anleggsdata) og supplerer med informasjon fra autoritative registre som matrikkelen og det nasjonale anleggsregisteret.
 
 
+### Forutsetninger (premisser)
+
+- Masterdatabasen er et definisjons- og rutingslag. Fagsystemene eier sanntids sensordata, tidsserier, detaljerte historikk- og prosessdata.
+- Master lagrer ikke rå tidsserier eller detaljert sensordata; kun lenker (ressurslenke/identitetslenke), metadata (kilde, sist oppdatert, autorativ status) og eventuelt aggregerte indikatorer for oversikt.
+- Forespørsler og hendelser rutes til riktig fagsysteminstans basert på type og kontekst; status speiles tilbake i master. Se seksjon 11 for ruting og proveniens.
+- Den semantiske grafen (valgfri parallell) eksponerer definisjoner, relasjoner og lenker; den er ikke en transportkanal for sensordata.
+- Felt-for-felt autoritet og proveniens håndheves for å unngå dublering og sikre kildeansvar.
+
+
 ## 2. Datakilder
 
 - **Matrikkel**: Autorativ for bygningsnummer, gatenummer, husnummer, eiendomsdata
@@ -97,19 +106,19 @@ Plan for data-pull i dette prosjektet:
 - Avklare behandlingsgrunnlag og inngå avtale med Kartverket.
 - Etablere Maskinporten-klient og evt. mTLS/IP-tilgang etter krav.
 
-2. Tjenestevalg
+1. Tjenestevalg
 
 - Adresse/lett oppslag: Adresse-API (offentlig) for adresser og koordinater.
 - Autorative matrikkeldata: Matrikkel Web Services (SOAP) og/eller WFS/WMS (lisensiert).
 - Masseoppdatering: Periodiske uttrekk via Geonorge/FTP der det er hensiktsmessig.
 
-3. ETL og modelltilpasning
+1. ETL og modelltilpasning
 
 - Hente data til «staging», validere, normalisere og mappe til master-IDer.
 - Feltvis prioritet: Sett Matrikkel som autorativ for identitet (gnr/bnr/fnr/snr, bygningsnummer, adresser).
 - Proveniens: lagre kilde, sist oppdatert og autorativ-status per felt.
 
-4. Drift
+1. Drift
 
 - Håndtere rate limits og feil via retry/backoff og idempotente oppdateringer.
 - Loggføre og revidere tilgang i henhold til avtale og utleveringsforskrift.

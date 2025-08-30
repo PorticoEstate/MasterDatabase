@@ -4,6 +4,14 @@
 
 Establish a master database that integrates data from multiple similar database instances (local databases with building and installation data) and enriches it with information from authoritative registries such as the Norwegian cadastre (Matrikkelen) and the national installations register.
 
+### Assumptions
+
+- The master database is a definitions and routing layer. Line-of-business systems own real-time sensor data, time series, detailed history, and process data.
+- The master does not store raw time series or detailed sensor payloads; it only keeps links (resource/identity links), metadata (source, last_updated, authoritative status), and optionally aggregated indicators for overview.
+- Requests and events are routed to the correct system instance based on type and context; status is reflected back into the master. See Section 11 for routing and provenance.
+- The semantic graph (optional, parallel) exposes definitions, relations, and links; it is not a transport channel for sensor data.
+- Field-level authority and provenance are enforced to avoid duplication and ensure source responsibility.
+
 ---
 
 ## 2. Data sources
