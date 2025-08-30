@@ -527,11 +527,11 @@ This adds SPARQL and semantics over the master data without changing the data la
 
 - City of Helsinki – semantic city model (CityGML/CityJSON) integrated with municipal data: <https://www.hel.fi/3d/>
 - Amsterdam DataPunt – knowledge graph/open data: <https://data.amsterdam.nl/>
-- Ordnance Survey Linked Data (UK) – buildings/addresses with SPARQL: <https://osdatahub.os.uk/linked-data/>
-- Netherlands Kadaster BAG Linked Data – property/address (BAG/BGT): <https://bag.basisregistraties.overheid.nl/> and <https://data.pdok.nl/>
-- UK National Digital Twin (CDBB/IMF) – framework for shared information models: <https://www.cdbb.cam.ac.uk/national-digital-twin/>
+- Ordnance Survey Linked Data (UK) – buildings/addresses with SPARQL: <https://www.ordnancesurvey.co.uk/products/os-open-linked-identifiers>
+- Netherlands Kadaster BAG Linked Data – property/address (BAG/BGT): <https://bag.basisregistraties.overheid.nl/>
+- UK National Digital Twin (CDBB/IMF) – framework for shared information models: <https://www.cdbb.cam.ac.uk/what-we-did/national-digital-twin-programme>
 - buildingSMART bSDD – semantic dictionary/code sets for AEC assets: <https://bsdd.buildingsmart.org/>
-- IFC-OWL / IfcWoD – IFC as RDF for integration with sensors/FM: <https://w3id.org/ifc/OWL>
+- IFC-OWL / IfcWoD – IFC as RDF for integration with sensors/FM: <https://technical.buildingsmart.org/standards/ifc/ifc-formats/ifcowl/>
 - FIWARE Smart Data Models – open semantic models (buildings/IoT/assets): <https://smartdatamodels.org/>
 - OGC standards – GeoSPARQL, CityGML/CityJSON: <https://www.ogc.org/standards/>
 - Norway – GeoNorge/Kartverket (Cadastre/Addresses): <https://www.geonorge.no/> and <https://kartverket.no/>

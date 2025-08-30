@@ -441,11 +441,11 @@ Dette gir SPARQL og semantikk over masterdata uten å endre datalaget og kan tas
 
 - City of Helsinki – semantisk bymodell (CityGML/CityJSON) koblet til kommunale data: <https://www.hel.fi/3d/>
 - Amsterdam DataPunt – kunnskapsgraf/åpne data: <https://data.amsterdam.nl/>
-- Ordnance Survey Linked Data (UK) – bygninger/adresser med SPARQL: <https://osdatahub.os.uk/linked-data/>
-- Netherlands Kadaster BAG Linked Data – eiendom/adresse (BAG/BGT): <https://bag.basisregistraties.overheid.nl/> og <https://data.pdok.nl/>
-- UK National Digital Twin (CDBB/IMF) – rammeverk for delte informasjonsmodeller: <https://www.cdbb.cam.ac.uk/national-digital-twin/>
+- Ordnance Survey Linked Data (UK) – bygninger/adresser med SPARQL: <https://www.ordnancesurvey.co.uk/products/os-open-linked-identifiers>
+- Netherlands Kadaster BAG Linked Data – eiendom/adresse (BAG/BGT): <https://bag.basisregistraties.overheid.nl/>
+- UK National Digital Twin (CDBB/IMF) – rammeverk for delte informasjonsmodeller: <https://www.cdbb.cam.ac.uk/what-we-did/national-digital-twin-programme>
 - buildingSMART bSDD – semantisk ordbok/kodeverk for bygg/utstyr: <https://bsdd.buildingsmart.org/>
-- IFC-OWL / IfcWoD – IFC som RDF for kobling mot sensorer/forvaltning: <https://w3id.org/ifc/OWL>
+- IFC-OWL / IfcWoD – IFC som RDF for kobling mot sensorer/forvaltning: <https://technical.buildingsmart.org/standards/ifc/ifc-formats/ifcowl/>
 - FIWARE Smart Data Models – åpne semantiske modeller (bygg/IoT/eiendeler): <https://smartdatamodels.org/>
 - OGC standarder – GeoSPARQL, CityGML/CityJSON: <https://www.ogc.org/standards/>
 - Norge – GeoNorge/Kartverket (Matrikkel/Adresse): <https://www.geonorge.no/> og <https://kartverket.no/>
