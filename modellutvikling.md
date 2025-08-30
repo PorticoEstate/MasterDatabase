@@ -97,19 +97,19 @@ Plan for data-pull i dette prosjektet:
 - Avklare behandlingsgrunnlag og inngå avtale med Kartverket.
 - Etablere Maskinporten-klient og evt. mTLS/IP-tilgang etter krav.
 
-1. Tjenestevalg
+2. Tjenestevalg
 
 - Adresse/lett oppslag: Adresse-API (offentlig) for adresser og koordinater.
 - Autorative matrikkeldata: Matrikkel Web Services (SOAP) og/eller WFS/WMS (lisensiert).
 - Masseoppdatering: Periodiske uttrekk via Geonorge/FTP der det er hensiktsmessig.
 
-1. ETL og modelltilpasning
+3. ETL og modelltilpasning
 
 - Hente data til «staging», validere, normalisere og mappe til master-IDer.
 - Feltvis prioritet: Sett Matrikkel som autorativ for identitet (gnr/bnr/fnr/snr, bygningsnummer, adresser).
 - Proveniens: lagre kilde, sist oppdatert og autorativ-status per felt.
 
-1. Drift
+4. Drift
 
 - Håndtere rate limits og feil via retry/backoff og idempotente oppdateringer.
 - Loggføre og revidere tilgang i henhold til avtale og utleveringsforskrift.
@@ -367,3 +367,72 @@ Denne seksjonen beskriver hvordan vi håndterer ressurser som ikke er permanent 
         WHERE l.context = 'booking' AND l.ressurs_id = <ressurs_id>;
 
 ---
+
+## 13. Semantisk graf som parallell utvidelse (valgfritt)
+
+Denne utvidelsen skisserer hvordan en semantisk kunnskapsgraf kan kjøres parallelt med den relasjonelle masterdatabasen, uten å erstatte Postgres-skjemaet. Målet er å tilby SPARQL, standardiserte begreper (ontologi) og regel-/valideringslag (OWL/SHACL) på tvers av kilder.
+
+### 13.1 Motivasjon (hvorfor)
+
+- Felles semantikk for heterogene kilder (BOT, SOSA/SSN, GeoSPARQL, IFC-OWL + et lett lokalt namespace).
+- Multihopp-spørringer (bygg → etasje → rom → utstyr → system → sensor) uten kompliserte JOIN-kjeder.
+- Datakvalitet og samsvar: SHACL-kontrakter og lettvekts-inferens (OWL RL/EL) for avledede relasjoner.
+- Identitetsforening: modellere og «binde» flere eksterne identiteter til én masteridentitet.
+- Løs kobling: utvikle begreper og regler uten å endre databaseskjemaet.
+- Federering: slå opp eksterne vokabularer/kataloger via SPARQL SERVICE.
+
+### 13.2 Arkitekturoppsett
+
+To komplementære mønstre:
+
+1. Virtuell graf (OBDA/R2RML) over Postgres
+   - Verktøy: Ontop eller Apache Jena. Mappinger beskriver hvordan tabeller/visninger fremstår som RDF ved spørring.
+   - Fordeler: ingen ETL/duplisering; rask å ta i bruk; SPARQL direkte fra masterdata.
+   - Avveiing: svært tunge grafer kan være trege; krever god indeksering og bevisst spørring.
+
+2. Materialisert graf (triplestore) med løpende oppdatering
+   - Verktøy: GraphDB, Fuseki, Blazegraph/Neptune m.fl.
+   - Synk: CDC (Debezium) eller batch-eksporter fra Postgres.
+   - Fordeler: ytelse for komplekse grafer/inferens; dedikert cachelag.
+   - Avveiing: drift/ETL-kompleksitet og duplisering som må styres (proveniens/versjon).
+
+Anbefaling: start virtuelt (OBDA); materialiser selektivt ved behov.
+
+### 13.3 Integrasjonspunkter mot modellen
+
+- IRI-strategi: stabile IRIs pr. entitet (kommune/bygn./rom/ifc_product) basert på primærnøkler.
+- Ontologi: gjenbruk standardvokabularer og supplér med et «pe:»-namespace for prosjektspesifikke begreper.
+- Identitet: eksponer eksterne IDer (f.eks. owl:sameAs/skos:exactMatch) i tråd med identitetslenker i DB.
+- Proveniens: dct:source, prov:wasDerivedFrom, dct:modified for kilde/autorativitet/tidsstempel.
+- Geometri: WKT/GeoSPARQL-literals i første omgang; PostGIS-binding senere.
+- Ruting: modeller fagsystem/instans/ressurslenke i grafen for å forklare «hvorfor» forespørsler rutes.
+
+### 13.4 Minimum første leveranse
+
+- En liten mappingpakke (R2RML/RML) for: kommune, matrikkelenhet, bygning, etasje, rom, ifc_product.
+- En SQL-view som genererer IRIs deterministisk (f.eks. per tabell).
+- 3–5 SPARQL-eksempler (rom i bygg X, utstyr i rom Y, produkter i system Z).
+- Kort README for å kjøre Ontop lokalt mot Postgres med mappingene.
+
+Foreslått struktur (senere): db/semantic/ med ontology.ttl, mapping/*.ttl, README.md.
+
+### 13.5 Sikkerhet og tilgang
+
+- Speil tilgangsregler fra master-DB. Bruk named graphs for å skille kommune/tenant/domene.
+- Ikke map felter med begrenset tilgang (personopplysninger) til grafen.
+- Loggfør spørringer; vurder rate limiting for åpne endepunkt.
+
+### 13.6 Ytelse og drift
+
+- Cache hyppige spørringer; vurder delvis materialisering for tunge analyser.
+- Begrens inferens til det som trengs (RL/EL) eller kjør batch-inferens.
+- Etabler SHACL-shapes for viktige integritetskrav (bygg–etasje–rom, klassifikasjon, etc.).
+
+### 13.7 Kom i gang (kort)
+
+1. Lag en enkel IRI-view i databasen.
+2. Skriv en R2RML-mapping for «bygning» og «rom».
+3. Start et OBDA-endepunkt (Ontop) mot Postgres og test med SPARQL.
+4. Utvid trinnvis med flere entiteter, identiteter og proveniens.
+
+Dette gir SPARQL og semantikk over masterdata uten å endre datalaget og kan tas i bruk selektivt der det gir mest verdi.

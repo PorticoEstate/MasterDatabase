@@ -1,0 +1,35 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix bot:  <https://w3id.org/bot#> .
+@prefix pe:   <https://porticoestate.github.io/ontology/> .
+
+# A room must have a room number and belong to a storey
+pe:RoomShape a sh:NodeShape ;
+  sh:targetClass pe:Room ;
+  sh:property [
+    sh:path pe:roomNumber ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path bot:hasSpaceWithin ;
+    sh:class bot:Storey ;
+    sh:minCount 1 ;
+  ] .
+
+# A floor should be linked to a building
+pe:FloorShape a sh:NodeShape ;
+  sh:targetClass pe:Floor ;
+  sh:property [
+    sh:path pe:hasFloor ;  # inverse modeling hint; adjust if using explicit inverse property
+    sh:minCount 0 ;
+  ] .
+
+# A product placed in a room should reference a room
+pe:ProductShape a sh:NodeShape ;
+  sh:targetClass pe:Product ;
+  sh:property [
+    sh:path pe:placedInRoom ;
+    sh:class pe:Room ;
+    sh:minCount 0 ;
+  ] .

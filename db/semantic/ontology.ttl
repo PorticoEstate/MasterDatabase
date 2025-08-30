@@ -1,0 +1,46 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix bot:  <https://w3id.org/bot#> .
+@prefix geo:  <http://www.opengis.net/ont/geosparql#> .
+@prefix pe:   <https://porticoestate.github.io/ontology/> .
+
+# Lightweight project namespace
+pe:Building a rdfs:Class ; rdfs:subClassOf bot:Building .
+pe:Floor    a rdfs:Class ; rdfs:subClassOf bot:Storey .
+pe:Room     a rdfs:Class ; rdfs:subClassOf bot:Space .
+pe:Product  a rdfs:Class .
+pe:Municipality a rdfs:Class .
+pe:District     a rdfs:Class .
+pe:Parcel       a rdfs:Class .
+pe:OutdoorArea  a rdfs:Class .
+pe:Address      a rdfs:Class .
+
+pe:hasFloor       a rdf:Property ; rdfs:domain pe:Building ; rdfs:range pe:Floor .
+pe:isFloorOf      a rdf:Property ; rdfs:domain pe:Floor ;    rdfs:range pe:Building .
+pe:hasRoom        a rdf:Property ; rdfs:domain pe:Floor ;    rdfs:range pe:Room .
+pe:placedInRoom   a rdf:Property ; rdfs:domain pe:Product ;  rdfs:range pe:Room .
+pe:roomNumber     a rdf:Property ; rdfs:domain pe:Room ;     rdfs:range xsd:string .
+pe:externalId     a rdf:Property ; rdfs:range xsd:string .
+pe:source         a rdf:Property ; rdfs:range xsd:string .
+pe:authoritative  a rdf:Property ; rdfs:range xsd:boolean .
+
+# Administrative and identity properties
+pe:inMunicipality a rdf:Property ; rdfs:range pe:Municipality .
+pe:inDistrict     a rdf:Property ; rdfs:range pe:District .
+pe:hasAddress     a rdf:Property ; rdfs:range pe:Address .
+pe:hasParcel      a rdf:Property ; rdfs:range pe:Parcel .
+pe:hasOutdoorArea a rdf:Property ; rdfs:range pe:OutdoorArea .
+
+pe:municipalityNumber a rdf:Property ; rdfs:range xsd:string .
+pe:districtName       a rdf:Property ; rdfs:range xsd:string .
+pe:parcelType         a rdf:Property ; rdfs:range xsd:string .
+pe:gnr                a rdf:Property ; rdfs:range xsd:integer .
+pe:bnr                a rdf:Property ; rdfs:range xsd:integer .
+pe:fnr                a rdf:Property ; rdfs:range xsd:integer .
+pe:snr                a rdf:Property ; rdfs:range xsd:integer .
+
+# Geometry: allow direct asWKT on features for simplicity
+geo:asWKT rdfs:domain rdfs:Resource ; rdfs:range geo:wktLiteral .

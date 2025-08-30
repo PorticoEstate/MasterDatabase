@@ -1,0 +1,87 @@
+# Example 1: Rooms in a given building
+PREFIX bot: <https://w3id.org/bot#>
+PREFIX pe:  <https://porticoestate.github.io/ontology/>
+
+SELECT ?room ?roomNumber
+WHERE {
+  BIND(<https://data.example.org/bygning/1> AS ?building)
+  ?floor a bot:Storey ;
+         ^pe:isFloorOf ?building .
+  ?room a bot:Space ;
+        bot:hasSpaceWithin ?floor ;
+        pe:roomNumber ?roomNumber .
+}
+ORDER BY ?roomNumber
+
+# Example 2: Equipment (products) placed in a specific room
+PREFIX pe:  <https://porticoestate.github.io/ontology/>
+
+SELECT ?product ?tag
+WHERE {
+  BIND(<https://data.example.org/rom/10> AS ?room)
+  ?product a pe:Product ;
+           pe:placedInRoom ?room ;
+           pe:externalId ?tag .
+}
+
+# Example 3: Count rooms per building
+PREFIX bot: <https://w3id.org/bot#>
+PREFIX pe:  <https://porticoestate.github.io/ontology/>
+
+SELECT ?building (COUNT(?room) AS ?rooms)
+WHERE {
+  ?room a bot:Space ;
+        bot:hasSpaceWithin ?floor .
+  ?floor a bot:Storey ;
+         pe:isFloorOf ?building .
+}
+GROUP BY ?building
+ORDER BY DESC(?rooms)
+
+# Example 4: Parcels filtered by municipality number and GNR/BNR
+PREFIX pe:  <https://porticoestate.github.io/ontology/>
+
+SELECT ?parcel ?kommunenr ?gnr ?bnr ?snr ?fnr ?type
+WHERE {
+  ?parcel a pe:Parcel ;
+          pe:municipalityNumber ?kommunenr ;
+          pe:gnr ?gnr ;
+          pe:bnr ?bnr ;
+          pe:parcelType ?type .
+  OPTIONAL { ?parcel pe:snr ?snr }
+  OPTIONAL { ?parcel pe:fnr ?fnr }
+  FILTER (?kommunenr = "0301" && ?gnr = 1 && ?bnr = 2)
+}
+LIMIT 50
+
+# Example 5: Addresses within a named district (with parcel and postal info if present)
+PREFIX pe:  <https://porticoestate.github.io/ontology/>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+SELECT ?addr ?parcel ?postnummer ?poststed
+WHERE {
+  ?district a pe:District ; dct:title ?navn .
+  FILTER (LCASE(?navn) = "sentrum")
+  ?addr a pe:Address ;
+        pe:inDistrict ?district .
+  OPTIONAL { ?addr pe:hasParcel ?parcel }
+  OPTIONAL { ?addr dct:spatial ?postnummer }
+  OPTIONAL { ?addr dct:coverage ?poststed }
+}
+LIMIT 100
+
+# Example 6: Outdoor areas in a municipality (with geometry when available)
+PREFIX pe:  <https://porticoestate.github.io/ontology/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+
+SELECT ?area ?name ?wkt
+WHERE {
+  ?mun a pe:Municipality ; pe:municipalityNumber "0301" .
+  ?district a pe:District ; pe:inMunicipality ?mun .
+  ?area a pe:OutdoorArea ;
+        pe:inDistrict ?district ;
+        dct:title ?name .
+  OPTIONAL { ?area geo:asWKT ?wkt }
+}
+ORDER BY ?name

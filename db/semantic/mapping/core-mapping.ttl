@@ -1,0 +1,120 @@
+@prefix rr:    <http://www.w3.org/ns/r2rml#> .
+@prefix rml:   <http://semweb.mmlab.be/ns/rml#> .
+@prefix ql:    <http://semweb.mmlab.be/ns/ql#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix bot:   <https://w3id.org/bot#> .
+@prefix pe:    <https://porticoestate.github.io/ontology/> .
+@prefix geo:   <http://www.opengis.net/ont/geosparql#> .
+
+# Municipality
+<#MunicipalityTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT k.kommune_id, k.kommunenr, k.navn, k.geom_wkt
+        FROM kommune k
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/kommune/{kommune_id}" ; rr:class pe:Municipality ];
+    rr:predicateObjectMap [ rr:predicate pe:municipalityNumber ; rr:objectMap [ rr:column "kommunenr" ] ] ;
+    rr:predicateObjectMap [ rr:predicate dct:title ; rr:objectMap [ rr:column "navn" ] ] ;
+    rr:predicateObjectMap [ rr:predicate geo:asWKT ; rr:objectMap [ rr:column "geom_wkt" ; rr:datatype geo:wktLiteral ] ]
+.
+
+# District
+<#DistrictTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT b.bydel_id, b.kommune_id, b.navn, b.geom_wkt
+        FROM bydel b
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/bydel/{bydel_id}" ; rr:class pe:District ];
+    rr:predicateObjectMap [ rr:predicate dct:title ; rr:objectMap [ rr:column "navn" ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:inMunicipality ; rr:objectMap [ rr:template "https://data.example.org/kommune/{kommune_id}" ] ] ;
+    rr:predicateObjectMap [ rr:predicate geo:asWKT ; rr:objectMap [ rr:column "geom_wkt" ; rr:datatype geo:wktLiteral ] ]
+.
+
+# Parcel (matrikkelenhet)
+<#ParcelTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT m.enhet_id, m.kommunenr, m.gardsnr, m.bruksnr, m.festenr, m.seksjonsnr, m.enhetstype, m.geom_wkt
+        FROM matrikkelenhet m
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/matrikkelenhet/{enhet_id}" ; rr:class pe:Parcel ];
+    rr:predicateObjectMap [ rr:predicate pe:municipalityNumber ; rr:objectMap [ rr:column "kommunenr" ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:gnr ; rr:objectMap [ rr:column "gardsnr" ; rr:datatype xsd:integer ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:bnr ; rr:objectMap [ rr:column "bruksnr" ; rr:datatype xsd:integer ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:fnr ; rr:objectMap [ rr:column "festenr" ; rr:datatype xsd:integer ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:snr ; rr:objectMap [ rr:column "seksjonsnr" ; rr:datatype xsd:integer ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:parcelType ; rr:objectMap [ rr:column "enhetstype" ] ] ;
+    rr:predicateObjectMap [ rr:predicate geo:asWKT ; rr:objectMap [ rr:column "geom_wkt" ; rr:datatype geo:wktLiteral ] ]
+.
+
+# Outdoor area
+<#OutdoorTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT u.uteomraade_id, u.bydel_id, u.navn, u.geom_wkt
+        FROM uteomraade u
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/uteomraade/{uteomraade_id}" ; rr:class pe:OutdoorArea ];
+    rr:predicateObjectMap [ rr:predicate dct:title ; rr:objectMap [ rr:column "navn" ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:inDistrict ; rr:objectMap [ rr:template "https://data.example.org/bydel/{bydel_id}" ] ] ;
+    rr:predicateObjectMap [ rr:predicate geo:asWKT ; rr:objectMap [ rr:column "geom_wkt" ; rr:datatype geo:wktLiteral ] ]
+.
+
+# Address
+<#AddressTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT a.adresse_id, a.bygg_id, a.bruksenhet_id, a.uteomraade_id, a.husnr, a.bokstav, a.postnummer, a.poststed
+        FROM adresse a
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/adresse/{adresse_id}" ; rr:class pe:Address ];
+    rr:predicateObjectMap [ rr:predicate pe:hasParcel ; rr:objectMap [ rr:template "https://data.example.org/matrikkelenhet/{matrikkelenhet_id}" ] ] ;
+    rr:predicateObjectMap [ rr:predicate dct:identifier ; rr:objectMap [ rr:column "husnr" ] ] ;
+    rr:predicateObjectMap [ rr:predicate dct:issued ; rr:objectMap [ rr:column "bokstav" ] ] ;
+    rr:predicateObjectMap [ rr:predicate dct:spatial ; rr:objectMap [ rr:column "postnummer" ] ] ;
+    rr:predicateObjectMap [ rr:predicate dct:coverage ; rr:objectMap [ rr:column "poststed" ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:hasOutdoorArea ; rr:objectMap [ rr:template "https://data.example.org/uteomraade/{uteomraade_id}" ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:inDistrict ; rr:objectMap [ rr:template "https://data.example.org/bydel/{bydel_id}" ] ]
+.
+
+# Building
+<#BuildingTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT b.bygg_id, b.bydel_id
+        FROM bygning b
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/bygning/{bygg_id}" ; rr:class bot:Building, pe:Building ];
+    rr:predicateObjectMap [ rr:predicate pe:inDistrict ; rr:objectMap [ rr:template "https://data.example.org/bydel/{bydel_id}" ] ]
+.
+
+# Floor (Storey)
+<#FloorTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT e.etasje_id, e.bygg_id
+        FROM etasje e
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/etasje/{etasje_id}" ; rr:class bot:Storey, pe:Floor ];
+    rr:predicateObjectMap [ rr:predicate pe:isFloorOf ; rr:objectMap [ rr:template "https://data.example.org/bygning/{bygg_id}" ] ]
+.
+
+# Room (Space)
+<#RoomTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT r.rom_id, r.etasje_id, r.nummer
+        FROM rom r
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/rom/{rom_id}" ; rr:class bot:Space, pe:Room ];
+    rr:predicateObjectMap [ rr:predicate pe:roomNumber ; rr:objectMap [ rr:column "nummer" ; rr:datatype xsd:string ] ] ;
+    rr:predicateObjectMap [ rr:predicate bot:hasSpaceWithin ; rr:objectMap [ rr:template "https://data.example.org/etasje/{etasje_id}" ] ]
+.
+
+# Product
+<#ProductTriples>
+    rr:logicalTable [ rr:sqlQuery """
+        SELECT p.product_id, l.rom_id, p.name, p.tag
+        FROM ifc_product p
+        LEFT JOIN ifc_product_location l ON l.product_id = p.product_id
+    """ ];
+    rr:subjectMap [ rr:template "https://data.example.org/ifc/product/{product_id}" ; rr:class pe:Product ];
+    rr:predicateObjectMap [ rr:predicate pe:placedInRoom ; rr:objectMap [ rr:template "https://data.example.org/rom/{rom_id}" ] ] ;
+    rr:predicateObjectMap [ rr:predicate dct:title ; rr:objectMap [ rr:column "name" ] ] ;
+    rr:predicateObjectMap [ rr:predicate pe:externalId ; rr:objectMap [ rr:column "tag" ] ]
+.

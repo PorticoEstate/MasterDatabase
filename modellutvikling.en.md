@@ -453,3 +453,72 @@ This section describes how we handle resources that are not permanently tied to 
           AND (m.gyldig_til IS NULL OR m.gyldig_til >= CURRENT_DATE);
 
 ---
+
+## 13. Semantic graph as a parallel extension (optional)
+
+This section outlines how to run a semantic knowledge graph in parallel with the relational master database without replacing the Postgres schema. The goal is to provide SPARQL, standardized concepts (ontology), and rules/validation (OWL/SHACL) across sources.
+
+### 13.1 Motivation (why)
+
+- Common semantics across heterogeneous sources (BOT, SOSA/SSN, GeoSPARQL, IFC-OWL + a lightweight local namespace).
+- Multi-hop queries (building → floor → room → equipment → system → sensor) without complex JOIN chains.
+- Data quality and conformance: SHACL shapes and lightweight inference (OWL RL/EL) for derived relations.
+- Identity reconciliation: model and bind multiple external identities to one master identity.
+- Loose coupling: evolve concepts and rules without changing the database schema.
+- Federation: look up external vocabularies/catalogs via SPARQL SERVICE.
+
+### 13.2 Architecture patterns
+
+Two complementary options:
+
+1. Virtual graph (OBDA/R2RML) over Postgres
+   - Tools: Ontop or Apache Jena. Mappings express how tables/views appear as RDF at query-time.
+   - Pros: no ETL/duplication; fast to adopt; SPARQL directly from master data.
+   - Trade-offs: very heavy graph queries may be slow; needs indexing and mindful query design.
+
+2. Materialized graph (triplestore) with ongoing updates
+   - Tools: GraphDB, Fuseki, Blazegraph/Neptune, etc.
+   - Sync: CDC (Debezium) or batch exports from Postgres.
+   - Pros: performance for complex graphs/inference; dedicated caching layer.
+   - Trade-offs: operational/ETL complexity and duplication to manage (provenance/versioning).
+
+Recommendation: start virtual (OBDA); materialize selectively when needed.
+
+### 13.3 Integration points with the model
+
+- IRI strategy: stable IRIs per entity (municipality/building/room/ifc_product) based on primary keys.
+- Ontology: reuse standard vocabularies and add a "pe:" namespace for project-specific concepts.
+- Identity: expose external IDs (e.g., owl:sameAs/skos:exactMatch) aligned with identity links in the DB.
+- Provenance: dct:source, prov:wasDerivedFrom, dct:modified for source/authoritativeness/timestamps.
+- Geometry: WKT/GeoSPARQL literals initially; PostGIS binding later.
+- Routing: model line-of-business system/instance/resource-link in the graph to explain routing decisions.
+
+### 13.4 Minimal first delivery
+
+- A small mapping package (R2RML/RML) for: municipality, cadastral unit, building, floor, room, ifc_product.
+- A SQL view that deterministically generates IRIs (e.g., per table).
+- 3–5 SPARQL examples (rooms in building X, equipment in room Y, products in system Z).
+- A short README to run Ontop locally against Postgres with the mappings.
+
+Suggested structure (later): db/semantic/ with ontology.ttl, mapping/*.ttl, README.md.
+
+### 13.5 Security and access
+
+- Mirror access rules from the master DB. Use named graphs to separate municipality/tenant/domain.
+- Do not map fields with restricted access (personal data) to the graph.
+- Log queries; consider rate limiting for public endpoints.
+
+### 13.6 Performance and operations
+
+- Cache frequent queries; consider partial materialization for heavy analytics.
+- Limit inference to what you need (RL/EL) or run batch inference.
+- Establish SHACL shapes for key integrity constraints (building–floor–room chains, classification, etc.).
+
+### 13.7 Getting started (quick)
+
+1. Create a simple IRI view in the database.
+2. Write an R2RML mapping for "building" and "room".
+3. Start an OBDA endpoint (Ontop) against Postgres and test with SPARQL.
+4. Expand gradually with more entities, identities, and provenance.
+
+This adds SPARQL and semantics over the master data without changing the data layer and can be adopted selectively where it brings the most value.
