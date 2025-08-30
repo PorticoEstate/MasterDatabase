@@ -30,3 +30,11 @@ Next steps
 - Add migration tooling (e.g., Flyway or dbmate) and seed scripts.
 - Create staging tables for raw Matrikkel pulls and a small rules engine to set `autorativ` per field.
 - Add ETL to import municipal WFS/OSM layers for parks/playgrounds/ball courts into `uteomrade` and link parcels.
+
+# UML - modeling
+
+```
+docker run -d -p 8081:8080 plantuml/plantuml-server:jetty
+```
+Access via `http://localhost:8081` 
+

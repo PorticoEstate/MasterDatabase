@@ -1,0 +1,463 @@
+@startuml
+hide methods
+hide stereotypes
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam ArrowColor Black
+
+' =========================
+' Entities (tables)
+' =========================
+
+entity "kommune" as kommune {
+    + kommune_id : BIGSERIAL [PK]
+    kommunenr : CHAR(4) [UNIQUE]
+    navn : TEXT
+    geom_wkt : TEXT
+    ekstern_id : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "bydel" as bydel {
+    + bydel_id : BIGSERIAL [PK]
+    kommune_id : BIGINT [FK -> kommune.kommune_id]
+    navn : TEXT
+    bydelnr : INTEGER
+    geom_wkt : TEXT
+    ekstern_id : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "matrikkelenhet" as matrikkelenhet {
+    + enhet_id : BIGSERIAL [PK]
+    kommunenr : CHAR(4)
+    gardsnr : INTEGER
+    bruksnr : INTEGER
+    festenr : INTEGER
+    seksjonsnr : INTEGER
+    anleggsnr : INTEGER
+    enhetstype : TEXT
+    areal_m2 : NUMERIC(12,2)
+    geom_wkt : TEXT
+    ekstern_id : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "bygning" as bygning {
+    + bygg_id : BIGSERIAL [PK]
+    bygningsnr : BIGINT [UNIQUE]
+    bydel_id : BIGINT [FK -> bydel.bydel_id]
+    bygningstype : TEXT
+    status : TEXT
+    geom_wkt : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    byggeaar : INTEGER
+    antall_etasjer : INTEGER
+    bra_m2 : NUMERIC(12,2)
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "floy" as floy {
+    + floy_id : BIGSERIAL [PK]
+    bygg_id : BIGINT [FK -> bygning.bygg_id]
+    navn : TEXT
+    beskrivelse : TEXT
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "etasje" as etasje {
+    + etasje_id : BIGSERIAL [PK]
+    bygg_id : BIGINT [FK -> bygning.bygg_id]
+    nummer : TEXT
+    betegnelse : TEXT
+    areal_m2 : NUMERIC(10,2)
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "bruksenhet" as bruksenhet {
+    + bruksenhet_id : BIGSERIAL [PK]
+    matrikkelenhet_id : BIGINT [FK -> matrikkelenhet.enhet_id]
+    bygg_id : BIGINT [FK -> bygning.bygg_id]
+    etasje_id : BIGINT [FK -> etasje.etasje_id]
+    snr : INTEGER
+    bruksenhetsnr : TEXT
+    areal_m2 : NUMERIC(10,2)
+    brukstype : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "rom" as rom {
+    + rom_id : BIGSERIAL [PK]
+    bruksenhet_id : BIGINT [FK -> bruksenhet.bruksenhet_id]
+    etasje_id : BIGINT [FK -> etasje.etasje_id]
+    floy_id : BIGINT [FK -> floy.floy_id]
+    nummer : TEXT
+    navn : TEXT
+    areal_m2 : NUMERIC(10,2)
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "gate" as gate {
+    + gate_id : BIGSERIAL [PK]
+    kommunenr : CHAR(4) [FK -> kommune.kommunenr]
+    gatenavn : TEXT
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "adresse" as adresse {
+    + adresse_id : BIGSERIAL [PK]
+    bygg_id : BIGINT [FK -> bygning.bygg_id]
+    bruksenhet_id : BIGINT [FK -> bruksenhet.bruksenhet_id]
+    uteomraade_id : BIGINT [FK -> uteomraade.uteomraade_id]
+    adressetype : TEXT
+    gate_id : BIGINT [FK -> gate.gate_id]
+    matrikkelenhet_id : BIGINT [FK -> matrikkelenhet.enhet_id]
+    husnr : TEXT
+    bokstav : CHAR(1)
+    postnummer : CHAR(4)
+    poststed : TEXT
+    lat : DOUBLE PRECISION
+    lon : DOUBLE PRECISION
+    srid : INTEGER
+    ekstern_id : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "uteomraade_type" as uteomraade_type {
+    + type_id : BIGSERIAL [PK]
+    kode : TEXT [UNIQUE]
+    beskrivelse : TEXT
+}
+
+entity "uteomraade" as uteomraade {
+    + uteomraade_id : BIGSERIAL [PK]
+    matrikkelenhet_id : BIGINT [FK -> matrikkelenhet.enhet_id]
+    bydel_id : BIGINT [FK -> bydel.bydel_id]
+    type_id : BIGINT [FK -> uteomraade_type.type_id]
+    navn : TEXT
+    areal_m2 : NUMERIC(12,2)
+    geom_wkt : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "adkomstpunkt" as adkomstpunkt {
+    + adkomstpunkt_id : BIGSERIAL [PK]
+    uteomraade_id : BIGINT [FK -> uteomraade.uteomraade_id]
+    gate_id : BIGINT [FK -> gate.gate_id]
+    type : TEXT
+    beskrivelse : TEXT
+    lon : DOUBLE PRECISION
+    lat : DOUBLE PRECISION
+    srid : INTEGER
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "bygning_matrikkelenhet" as bygning_matrikkelenhet {
+    + bygg_id : BIGINT [PK, FK -> bygning.bygg_id]
+    + enhet_id : BIGINT [PK, FK -> matrikkelenhet.enhet_id]
+    rolle : TEXT
+    dekningsgrad : NUMERIC(5,2)
+}
+
+entity "ifc_type" as ifc_type {
+    + type_id : BIGSERIAL [PK]
+    ifc_guid : CHAR(22) [UNIQUE]
+    entity : TEXT
+    predefined_type : TEXT
+    name : TEXT
+    description : TEXT
+    properties_json : JSONB
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "ifc_product" as ifc_product {
+    + product_id : BIGSERIAL [PK]
+    ifc_guid : CHAR(22) [UNIQUE]
+    entity : TEXT
+    predefined_type : TEXT
+    name : TEXT
+    tag : TEXT
+    serial_no : TEXT
+    type_id : BIGINT [FK -> ifc_type.type_id]
+    status : TEXT
+    geom_wkt : TEXT
+    lon : DOUBLE PRECISION
+    lat : DOUBLE PRECISION
+    srid : INTEGER
+    properties_json : JSONB
+    ekstern_id : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "ifc_product_location" as ifc_product_location {
+    + product_id : BIGINT [PK, FK -> ifc_product.product_id]
+    bygg_id : BIGINT [FK -> bygning.bygg_id]
+    floy_id : BIGINT [FK -> floy.floy_id]
+    etasje_id : BIGINT [FK -> etasje.etasje_id]
+    rom_id : BIGINT [FK -> rom.rom_id]
+    uteomraade_id : BIGINT [FK -> uteomraade.uteomraade_id]
+    placement_json : JSONB
+    ref_elevation : NUMERIC(10,2)
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "ifc_system" as ifc_system {
+    + system_id : BIGSERIAL [PK]
+    name : TEXT
+    system_type : TEXT
+    description : TEXT
+    kilde : TEXT
+    kilde_ref : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "ifc_product_system" as ifc_product_system {
+    + product_id : BIGINT [PK, FK -> ifc_product.product_id]
+    + system_id : BIGINT [PK, FK -> ifc_system.system_id]
+    rolle : TEXT
+}
+
+entity "ifc_rel_aggregates" as ifc_rel_aggregates {
+    + parent_product_id : BIGINT [PK, FK -> ifc_product.product_id]
+    + child_product_id : BIGINT [PK, FK -> ifc_product.product_id]
+    role : TEXT
+}
+
+entity "classification" as classification {
+    + class_id : BIGSERIAL [PK]
+    scheme : TEXT
+    code : TEXT
+    title : TEXT
+}
+
+entity "product_classification" as product_classification {
+    + product_id : BIGINT [PK, FK -> ifc_product.product_id]
+    + class_id : BIGINT [PK, FK -> classification.class_id]
+}
+
+entity "ifc_property_set" as ifc_property_set {
+    + pset_id : BIGSERIAL [PK]
+    name : TEXT
+    description : TEXT
+}
+
+entity "ifc_property" as ifc_property {
+    + property_id : BIGSERIAL [PK]
+    pset_id : BIGINT [FK -> ifc_property_set.pset_id]
+    product_id : BIGINT [FK -> ifc_product.product_id]
+    name : TEXT
+    value_text : TEXT
+    value_num : NUMERIC
+    value_json : JSONB
+}
+
+entity "ressurs" as ressurs {
+    + ressurs_id : BIGSERIAL [PK]
+    type : TEXT
+    ifc_product_id : BIGINT [FK -> ifc_product.product_id]
+    navn : TEXT
+    metadata_json : JSONB
+    kilde : TEXT
+    kilde_ref : TEXT
+    ekstern_id : TEXT
+    sist_oppdatert : TIMESTAMPTZ
+    autoritativ : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "ressurspool" as ressurspool {
+    + pool_id : BIGSERIAL [PK]
+    navn : TEXT
+    type : TEXT
+    kommune_id : BIGINT [FK -> kommune.kommune_id]
+    beskrivelse : TEXT
+    metadata_json : JSONB
+    aktiv : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "ressurspool_medlem" as ressurspool_medlem {
+    + pool_id : BIGINT [PK, FK -> ressurspool.pool_id]
+    + ressurs_id : BIGINT [PK, FK -> ressurs.ressurs_id]
+    rolle : TEXT
+    prioritet : INTEGER
+    gyldig_fra : TIMESTAMPTZ
+    gyldig_til : TIMESTAMPTZ
+    merknad : TEXT
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "fagsystem" as fagsystem {
+    + fagsystem_id : BIGSERIAL [PK]
+    navn : TEXT
+    type : TEXT
+    beskrivelse : TEXT
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "fagsystem_instans" as fagsystem_instans {
+    + instans_id : BIGSERIAL [PK]
+    fagsystem_id : BIGINT [FK -> fagsystem.fagsystem_id]
+    kommune_id : BIGINT [FK -> kommune.kommune_id]
+    base_url : TEXT
+    konfig_json : JSONB
+    aktiv : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+entity "ressurslenke" as ressurslenke {
+    + ressurslenke_id : BIGSERIAL [PK]
+    kontekst : TEXT
+    fagsystem_instans_id : BIGINT [FK -> fagsystem_instans.instans_id]
+    bygg_id : BIGINT [FK -> bygning.bygg_id]
+    bruksenhet_id : BIGINT [FK -> bruksenhet.bruksenhet_id]
+    rom_id : BIGINT [FK -> rom.rom_id]
+    uteomraade_id : BIGINT [FK -> uteomraade.uteomraade_id]
+    product_id : BIGINT [FK -> ifc_product.product_id]
+    ressurs_id : BIGINT [FK -> ressurs.ressurs_id]
+    ekstern_id : TEXT
+    ekstern_path : TEXT
+    metadata_json : JSONB
+    aktiv : BOOLEAN
+    created_at : TIMESTAMPTZ
+    updated_at : TIMESTAMPTZ
+}
+
+' =========================
+' Relationships (FKs)
+' =========================
+
+kommune ||--o{ bydel : "kommune_id"
+kommune ||--o{ fagsystem_instans : "kommune_id"
+kommune ||--o{ ressurspool : "kommune_id"
+kommune ||--o{ gate : "kommunenr"
+
+bydel ||--o{ bygning : "bydel_id"
+bydel ||--o{ uteomraade : "bydel_id"
+
+matrikkelenhet ||--o{ bruksenhet : "matrikkelenhet_id"
+matrikkelenhet ||--o{ uteomraade : "matrikkelenhet_id"
+matrikkelenhet ||--o{ bygning_matrikkelenhet : "enhet_id"
+' adresse also references matrikkelenhet
+matrikkelenhet ||--o{ adresse : "matrikkelenhet_id"
+
+bygning ||--o{ floy : "bygg_id"
+bygning ||--o{ etasje : "bygg_id"
+bygning ||--o{ bruksenhet : "bygg_id"
+bygning ||--o{ adresse : "bygg_id"
+bygning ||--o{ bygning_matrikkelenhet : "bygg_id"
+
+floy ||--o{ rom : "floy_id"
+
+etasje ||--o{ rom : "etasje_id"
+etasje ||--o{ bruksenhet : "etasje_id"
+
+bruksenhet ||--o{ rom : "bruksenhet_id"
+bruksenhet ||--o{ adresse : "bruksenhet_id"
+
+gate ||--o{ adresse : "gate_id"
+gate ||--o{ adkomstpunkt : "gate_id"
+
+uteomraade_type ||--o{ uteomraade : "type_id"
+
+uteomraade ||--o{ adresse : "uteomraade_id"
+uteomraade ||--o{ adkomstpunkt : "uteomraade_id"
+uteomraade ||--o{ ifc_product_location : "uteomraade_id"
+
+ifc_type ||--o{ ifc_product : "type_id"
+
+ifc_product ||--|| ifc_product_location : "product_id (PK/FK)"
+ifc_product ||--o{ ifc_product_system : "product_id"
+ifc_product ||--o{ ifc_rel_aggregates : "parent/child"
+ifc_product ||--o{ product_classification : "product_id"
+ifc_product ||--o{ ifc_property : "product_id"
+ifc_product ||--o{ ressurs : "ifc_product_id"
+ifc_product ||--o{ ressurslenke : "product_id"
+
+ifc_system ||--o{ ifc_product_system : "system_id"
+
+classification ||--o{ product_classification : "class_id"
+
+ifc_property_set ||--o{ ifc_property : "pset_id"
+
+ressurs ||--o{ ressurspool_medlem : "ressurs_id"
+ressurs ||--o{ ressurslenke : "ressurs_id"
+
+ressurspool ||--o{ ressurspool_medlem : "pool_id"
+
+fagsystem ||--o{ fagsystem_instans : "fagsystem_id"
+
+fagsystem_instans ||--o{ ressurslenke : "fagsystem_instans_id"
+
+' Location links to core structures
+bygning ||--o{ ifc_product_location : "bygg_id"
+floy ||--o{ ifc_product_location : "floy_id"
+etasje ||--o{ ifc_product_location : "etasje_id"
+rom ||--o{ ifc_product_location : "rom_id"
+
+@enduml
