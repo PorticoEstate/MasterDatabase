@@ -403,7 +403,7 @@ Anbefaling: start virtuelt (OBDA); materialiser selektivt ved behov.
 - IRI-strategi: stabile IRIs pr. entitet (kommune/bygn./rom/ifc_product) basert på primærnøkler.
 - Ontologi: gjenbruk standardvokabularer og supplér med et «pe:»-namespace for prosjektspesifikke begreper.
 - Identitet: eksponer eksterne IDer (f.eks. owl:sameAs/skos:exactMatch) i tråd med identitetslenker i DB.
-- Proveniens: dct:source, prov:wasDerivedFrom, dct:modified for kilde/autorativitet/tidsstempel.
+- Proveniens: dct:source, prov:wasDerivedFrom, dct:modified for kilde/autoritativitet/tidsstempel.
 - Geometri: WKT/GeoSPARQL-literals i første omgang; PostGIS-binding senere.
 - Ruting: modeller fagsystem/instans/ressurslenke i grafen for å forklare «hvorfor» forespørsler rutes.
 
@@ -414,7 +414,7 @@ Anbefaling: start virtuelt (OBDA); materialiser selektivt ved behov.
 - 3–5 SPARQL-eksempler (rom i bygg X, utstyr i rom Y, produkter i system Z).
 - Kort README for å kjøre Ontop lokalt mot Postgres med mappingene.
 
-Foreslått struktur (senere): db/semantic/ med ontology.ttl, mapping/*.ttl, README.md.
+Foreslått struktur (senere): db/semantic/ with ontology.ttl, mapping/*.ttl, README.md.
 
 ### 13.5 Sikkerhet og tilgang
 
@@ -436,3 +436,16 @@ Foreslått struktur (senere): db/semantic/ med ontology.ttl, mapping/*.ttl, READ
 4. Utvid trinnvis med flere entiteter, identiteter og proveniens.
 
 Dette gir SPARQL og semantikk over masterdata uten å endre datalaget og kan tas i bruk selektivt der det gir mest verdi.
+
+## 14. Referanser og lignende prosjekter
+
+- City of Helsinki – semantisk bymodell (CityGML/CityJSON) koblet til kommunale data: <https://www.hel.fi/3d/>
+- Amsterdam DataPunt – kunnskapsgraf/åpne data: <https://data.amsterdam.nl/>
+- Ordnance Survey Linked Data (UK) – bygninger/adresser med SPARQL: <https://osdatahub.os.uk/linked-data/>
+- Netherlands Kadaster BAG Linked Data – eiendom/adresse (BAG/BGT): <https://bag.basisregistraties.overheid.nl/> og <https://data.pdok.nl/>
+- UK National Digital Twin (CDBB/IMF) – rammeverk for delte informasjonsmodeller: <https://www.cdbb.cam.ac.uk/national-digital-twin/>
+- buildingSMART bSDD – semantisk ordbok/kodeverk for bygg/utstyr: <https://bsdd.buildingsmart.org/>
+- IFC-OWL / IfcWoD – IFC som RDF for kobling mot sensorer/forvaltning: <https://w3id.org/ifc/OWL>
+- FIWARE Smart Data Models – åpne semantiske modeller (bygg/IoT/eiendeler): <https://smartdatamodels.org/>
+- OGC standarder – GeoSPARQL, CityGML/CityJSON: <https://www.ogc.org/standards/>
+- Norge – GeoNorge/Kartverket (Matrikkel/Adresse): <https://www.geonorge.no/> og <https://kartverket.no/>

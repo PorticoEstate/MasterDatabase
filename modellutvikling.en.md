@@ -522,3 +522,16 @@ Suggested structure (later): db/semantic/ with ontology.ttl, mapping/*.ttl, READ
 4. Expand gradually with more entities, identities, and provenance.
 
 This adds SPARQL and semantics over the master data without changing the data layer and can be adopted selectively where it brings the most value.
+
+## 13. References and similar projects
+
+- City of Helsinki – semantic city model (CityGML/CityJSON) integrated with municipal data: <https://www.hel.fi/3d/>
+- Amsterdam DataPunt – knowledge graph/open data: <https://data.amsterdam.nl/>
+- Ordnance Survey Linked Data (UK) – buildings/addresses with SPARQL: <https://osdatahub.os.uk/linked-data/>
+- Netherlands Kadaster BAG Linked Data – property/address (BAG/BGT): <https://bag.basisregistraties.overheid.nl/> and <https://data.pdok.nl/>
+- UK National Digital Twin (CDBB/IMF) – framework for shared information models: <https://www.cdbb.cam.ac.uk/national-digital-twin/>
+- buildingSMART bSDD – semantic dictionary/code sets for AEC assets: <https://bsdd.buildingsmart.org/>
+- IFC-OWL / IfcWoD – IFC as RDF for integration with sensors/FM: <https://w3id.org/ifc/OWL>
+- FIWARE Smart Data Models – open semantic models (buildings/IoT/assets): <https://smartdatamodels.org/>
+- OGC standards – GeoSPARQL, CityGML/CityJSON: <https://www.ogc.org/standards/>
+- Norway – GeoNorge/Kartverket (Cadastre/Addresses): <https://www.geonorge.no/> and <https://kartverket.no/>
