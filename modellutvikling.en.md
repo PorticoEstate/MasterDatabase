@@ -47,6 +47,38 @@ Establish a master database that integrates data from multiple similar database 
 - Integrate with the national installations register and other registries.
 - Handle external requests and update protocols.
 
+### API development strategy (OpenAPI-first)
+
+- Contract-first (OpenAPI 3.1 in `api/openapi.yaml`): endpoints, schemas, errors, and security are the single source of truth.
+- Review and versioning: PR review, semver, and a breaking-change gate in CI before publishing.
+- Code generation
+  - Server stubs: generate php-slim4 stubs (OpenAPI Generator) and wire them to Slim 4 + PHP-DI.
+  - Client SDKs as needed (TypeScript, Python, C#) from the same spec.
+- Runtime validation: middleware validating requests/responses against OpenAPI; errors as RFC 7807 Problem+JSON.
+- Architecture/stack
+  - Slim 4 + PSR-7/15 + PHP-DI; PostgreSQL (PDO/DBAL) and PostGIS for spatial queries.
+  - Middleware: auth (JWT/OAuth2 or via gateway), rate limiting, request-id/correlation-id, logging, CORS.
+  - Observability: structured logs, metrics, and audit trail.
+- Design rules
+  - Resourceful routes (plural nouns), clear contexts for routing.
+  - Pagination (limit/offset or cursor), sorting and filtering via query params.
+  - Idempotent writes (Idempotency-Key), 202/Accepted for async ops with a status URL.
+  - ETag/If-None-Match on GET; 429/503 with Retry-After under load.
+  - Consistent error shapes and Problem+JSON everywhere.
+- Security and governance
+  - Minimize personal data; no raw sensor data in the master API; links/metadata and optional aggregates only (see assumptions).
+  - Field-level authority and provenance in responses; DB RLS and auditing.
+- Routing to line-of-business systems (see Section 11)
+  - Resolve the correct system instance via resource/identity links; proxy/forward and mirror status back.
+  - Timeouts, retries with backoff, and circuit breakers to protect the master API.
+- Testing strategy
+  - Contract tests (Schemathesis/Dredd), unit/integration tests, and a mock server for early development.
+  - Test fixtures and e2e scenarios for routing and authority rules.
+- Documentation and publishing
+  - Swagger UI/Redoc built from `openapi.yaml`; changelog and deprecation policy follow semver.
+- Suggested folder layout
+  - `api/openapi.yaml`, `api/server/` (generated Slim 4 stub), `api/src/handlers/`, `api/middleware/`, `api/tests/`.
+
 ---
 
 ## 5. Contextual request handling

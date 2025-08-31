@@ -44,6 +44,38 @@ Etablere en masterdatabase som integrerer data fra flere lignende databaseinstan
 
 - Eksterne forespørselssvar og oppdateringsprotokoller
 
+### Utviklingsstrategi for API (OpenAPI-first)
+
+- Kontrakt først (OpenAPI 3.1 i `api/openapi.yaml`): endepunkter, skjema, feil og sikkerhet er «single source of truth».
+- Review og versjonering: PR-gjennomgang, semver, og «breaking change»-sjekk i CI før publisering.
+- Kodegenerering
+  - Server-stubs: generer php-slim4-stubs (OpenAPI Generator) og koble til Slim 4 + PHP-DI.
+  - Klient-SDKer ved behov (TypeScript, Python, C#) fra samme spesifikasjon.
+- Runtime-validering: middleware som validerer request/response mot OpenAPI; feil som RFC 7807 Problem+JSON.
+- Arkitektur/stack
+  - Slim 4 + PSR-7/15 + PHP-DI; PostgreSQL (PDO/DBAL) og PostGIS for romlige spørringer.
+  - Middleware: auth (JWT/OAuth2 eller via gateway), rate limiting, request-id/correlation-id, logging, CORS.
+  - Observability: strukturert logging, metrikker og audit trail.
+- Designregler
+  - Ressursorienterte ruter (flertall), tydelige kontekster for ruting.
+  - Paginering (limit/offset eller cursor), sortering og filtrering via query-parametre.
+  - Idempotens for skriv (Idempotency-Key), 202/Accepted for asynkrone operasjoner med status-URL.
+  - ETag/If-None-Match på GET; 429/503 med Retry-After ved trykk.
+  - Konsistente feilkoder og Problem+JSON for alle feil.
+- Sikkerhet og dataforvaltning
+  - Minimer persondata; ingen rå sensordata i master-API; kun lenker/metadata og ev. aggregater (jfr. forutsetninger).
+  - Felt-vis autoritet og proveniens i svar; RLS i database og revisjonsspor.
+- Ruting til fagsystem (jfr. seksjon 11)
+  - Oppslag i ressurs-/identitetslenker for å velge riktig fagsystem-instans; proxy/videresend, og speil status tilbake.
+  - Tidsavbrudd, retries med backoff, og «circuit breaker» for å beskytte master-API.
+- Teststrategi
+  - Kontraktstester (Schemathesis/Dredd), enhet/integrasjonstester, og mock-server for tidlig utvikling.
+  - Testdata/fixtures og e2e-scenarier for ruting og autoritetsregler.
+- Dokumentasjon og publisering
+  - Swagger UI/Redoc bygges fra `openapi.yaml`; changelog og deprecation-policy følger semver.
+- Mappestruktur (anbefalt)
+  - `api/openapi.yaml`, `api/server/` (generert Slim 4-stub), `api/src/handlers/`, `api/middleware/`, `api/tests/`.
+
 ---
 
 
