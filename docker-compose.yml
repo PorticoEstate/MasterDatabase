@@ -1,0 +1,28 @@
+services:
+  portico_masterdata:
+    container_name: portico_masterdata
+    hostname: portico_masterdata
+    build:
+        context: .
+        dockerfile: Dockerfile
+        args:
+           http_proxy: ${http_proxy}
+           https_proxy: ${https_proxy}
+    ports:
+      - "8083:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APACHE_RUN_USER=www-data
+      - APACHE_RUN_GROUP=www-data
+    env_file:
+      - .env.compose
+    depends_on: []
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - portico_internal
+
+networks:
+  portico_internal:
+    external: true  # Reference the existing external network

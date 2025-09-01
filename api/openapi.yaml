@@ -1,0 +1,75 @@
+openapi: 3.1.0
+info:
+  title: MasterDatabase API
+  version: 0.1.0
+  description: >-
+    Contract-first spec for the MasterDatabase. This is the single source of truth
+    for endpoints, schemas, errors and security. Generated server stubs SHOULD
+    be wired into Slim 4 + PHP-DI (or your chosen stack).
+servers:
+  - url: http://localhost:8083
+    description: Local Docker (Apache)
+paths:
+  /health:
+    get:
+      summary: Liveness/health probe
+      operationId: getHealth
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /buildings:
+    get:
+      summary: List buildings
+      operationId: listBuildings
+      parameters:
+        - name: bydelId
+          in: query
+          schema: { type: integer }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, minimum: 1, maximum: 500 }
+        - name: cursor
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of buildings
+          headers:
+            X-Next-Cursor:
+              description: Cursor for next page
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Building'
+components:
+  schemas:
+    Building:
+      type: object
+      properties:
+        bygg_id:
+          type: integer
+        bygningsnr:
+          type: integer
+        navn:
+          type: string
+        bydel_id:
+          type: integer
+        geom_wkt:
+          type: string
+      required: [bygg_id]
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
