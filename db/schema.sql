@@ -276,6 +276,68 @@ CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_gate
 CREATE INDEX IF NOT EXISTS ix_adkomstpunkt_lon_lat
     ON adkomstpunkt (lon, lat);
 
+-- Flater/baner/løyper (inne/ute) med felles identitet og provenance
+CREATE TABLE IF NOT EXISTS flate
+(
+    flate_id	   BIGSERIAL PRIMARY KEY,
+    navn	       TEXT,
+    type	       TEXT NOT NULL CHECK (type IN ('bane','flate','trase','loype','annet')),
+    -- plassering: velg nøyaktig én
+    rom_id	       BIGINT REFERENCES rom(rom_id) ON DELETE CASCADE,
+    uteomraade_id BIGINT REFERENCES uteomraade(uteomraade_id) ON DELETE CASCADE,
+    -- geometri og kartstøtte uten PostGIS
+    geom_wkt	   TEXT,
+    lon	       DOUBLE PRECISION CHECK (lon IS NULL OR (lon BETWEEN -180 AND 180)),
+    lat	       DOUBLE PRECISION CHECK (lat IS NULL OR (lat BETWEEN -90 AND 90)),
+    srid	       INTEGER DEFAULT 4258,
+    -- identitet og provenance
+    kilde	       TEXT,
+    ekstern_id   TEXT,
+    kilde_ref	   TEXT,
+    sist_oppdatert TIMESTAMPTZ,
+    autoritativ  BOOLEAN DEFAULT FALSE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    -- nøyaktig én lokasjonsreferanse må være satt
+    CONSTRAINT chk_flate_one_location
+        CHECK (
+            (CASE WHEN rom_id IS NOT NULL THEN 1 ELSE 0 END) +
+            (CASE WHEN uteomraade_id IS NOT NULL THEN 1 ELSE 0 END)
+            = 1
+        ),
+    CONSTRAINT chk_flate_lon_lat_both
+        CHECK ((lon IS NULL AND lat IS NULL) OR (lon IS NOT NULL AND lat IS NOT NULL))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_flate_source_external
+    ON flate (kilde, ekstern_id)
+    WHERE kilde IS NOT NULL AND ekstern_id IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS ix_flate_rom
+    ON flate (rom_id);
+CREATE INDEX IF NOT EXISTS ix_flate_uteomraade
+    ON flate (uteomraade_id);
+CREATE INDEX IF NOT EXISTS ix_flate_lon_lat
+    ON flate (lon, lat);
+
+-- Komposisjon: kombiner/del flater (f.eks. 2 små baner -> 1 stor)
+CREATE TABLE IF NOT EXISTS flate_rel_aggregates
+(
+    parent_flate_id BIGINT NOT NULL REFERENCES flate(flate_id) ON DELETE CASCADE,
+    child_flate_id  BIGINT NOT NULL REFERENCES flate(flate_id) ON DELETE CASCADE,
+    role		    TEXT,                 -- f.eks. 'kombinasjon','del'
+    dekning_pct	  NUMERIC(5,2),         -- valgfritt: hvor mye av parent arealet barnet dekker
+    PRIMARY KEY (parent_flate_id, child_flate_id)
+);
+
+-- Klassifisering av flater via eksisterende classification
+CREATE TABLE IF NOT EXISTS flate_classification
+(
+    flate_id  BIGINT NOT NULL REFERENCES flate(flate_id) ON DELETE CASCADE,
+    class_id  BIGINT NOT NULL REFERENCES classification(class_id) ON DELETE CASCADE,
+    PRIMARY KEY (flate_id, class_id)
+);
+
 -- M:N kobling mellom bygning og matrikkelenhet
 CREATE TABLE IF NOT EXISTS bygning_matrikkelenhet
 (
@@ -464,6 +526,7 @@ CREATE TABLE IF NOT EXISTS ressurs
     ressurs_id     BIGSERIAL PRIMARY KEY,
     type           TEXT NOT NULL CHECK (type IN ('equipment','person','service','other')),
     ifc_product_id BIGINT REFERENCES ifc_product(product_id) ON DELETE SET NULL,
+    flate_id       BIGINT REFERENCES flate(flate_id) ON DELETE SET NULL,
     navn           TEXT,
     metadata_json  JSONB,
     kilde          TEXT,
@@ -485,6 +548,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurs_source_external
 
 CREATE INDEX IF NOT EXISTS ix_ressurs_ifc_product
     ON ressurs (ifc_product_id);
+
+-- Én-til-én kobling (valgfritt) mellom flate og ressurs når flate brukes som bookbar ressurs
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurs_flate
+    ON ressurs (flate_id)
+    WHERE flate_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS ressurspool
 (
@@ -524,39 +592,6 @@ CREATE INDEX IF NOT EXISTS ix_pool_medlem_ressurs
 
 CREATE INDEX IF NOT EXISTS ix_pool_medlem_gyldighet
     ON ressurspool_medlem (gyldig_fra, gyldig_til);
-
--- Utvid ruting: støtte direkte lenking for ressurs
-ALTER TABLE ressurslenke
-    ADD COLUMN IF NOT EXISTS ressurs_id BIGINT REFERENCES ressurs(ressurs_id) ON DELETE CASCADE;
-
--- Oppdatér sjekk for at nøyaktig én referanse er satt (inkluderer ressurs_id)
-DO $$
-BEGIN
-    IF EXISTS (
-        SELECT 1 FROM information_schema.table_constraints
-        WHERE constraint_name = 'chk_ressurslenke_exactly_one'
-          AND table_name = 'ressurslenke'
-    ) THEN
-        ALTER TABLE ressurslenke DROP CONSTRAINT chk_ressurslenke_exactly_one;
-    END IF;
-END $$;
-
-ALTER TABLE ressurslenke
-    ADD CONSTRAINT chk_ressurslenke_exactly_one
-        CHECK (
-            (CASE WHEN bygg_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN bruksenhet_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN rom_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN uteomraade_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN product_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN ressurs_id IS NOT NULL THEN 1 ELSE 0 END)
-          = 1
-        );
-
-CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_ressurs
-    ON ressurslenke (kontekst, fagsystem_instans_id, ressurs_id)
-    WHERE ressurs_id IS NOT NULL;
-
 -- Fagsystemer og ruting: systemkatalog, instanser per kommune og ressurslenker
 
 -- Fagsystem (type: booking, FDV, sensor, annet)
@@ -602,6 +637,7 @@ CREATE TABLE IF NOT EXISTS ressurslenke
     rom_id         BIGINT REFERENCES rom(rom_id) ON DELETE CASCADE,
     uteomraade_id  BIGINT REFERENCES uteomraade(uteomraade_id) ON DELETE CASCADE,
     product_id     BIGINT REFERENCES ifc_product(product_id) ON DELETE CASCADE,
+    ressurs_id     BIGINT REFERENCES ressurs(ressurs_id) ON DELETE CASCADE,
     -- Ekstern adressat i fagsystemet
     ekstern_id     TEXT NOT NULL,
     ekstern_path   TEXT,
@@ -615,7 +651,8 @@ CREATE TABLE IF NOT EXISTS ressurslenke
           + (CASE WHEN bruksenhet_id IS NOT NULL THEN 1 ELSE 0 END)
           + (CASE WHEN rom_id IS NOT NULL THEN 1 ELSE 0 END)
           + (CASE WHEN uteomraade_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN product_id IS NOT NULL THEN 1 ELSE 0 END)
+                    + (CASE WHEN product_id IS NOT NULL THEN 1 ELSE 0 END)
+                    + (CASE WHEN ressurs_id IS NOT NULL THEN 1 ELSE 0 END)
           = 1
         )
 );
@@ -649,3 +686,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_uteomraade
 CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_product
     ON ressurslenke (kontekst, fagsystem_instans_id, product_id)
     WHERE product_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_ressurs
+    ON ressurslenke (kontekst, fagsystem_instans_id, ressurs_id)
+    WHERE ressurs_id IS NOT NULL;

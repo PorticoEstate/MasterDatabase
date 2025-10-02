@@ -409,11 +409,99 @@ Denne seksjonen beskriver hvordan vi håndterer ressurser som ikke er permanent 
 
 ---
 
-## 13. Semantisk graf som parallell utvidelse (valgfritt)
+## 13. Flater og baner (inne/ute)
+
+Denne seksjonen beskriver hvordan «flater» (baner, arealer, løyper/traseer) modelleres felles for innendørs og utendørs bruk, med støtte for klassifisering, sammenslåing/deling og ruting/booking via ressurs.
+
+- Kjernebegreper
+  - `flate`: representerer en bane/flate/trase/«løype». Nøyaktig én lokasjonsreferanse settes: enten `rom_id` (inne) eller `uteomraade_id` (ute). Geometri kan lagres som `geom_wkt` og/eller `lon`/`lat` (SRID 4258 som standard).
+  - Komposisjon: `flate_rel_aggregates` modellerer at flere del-flater kan inngå i en «parent»-flate (for eksempel to små baner kan slås sammen til én stor). Valgfri `dekning_pct` kan angi andel.
+  - Klassifisering: `classification` + `flate_classification` for å knytte flater til kodeverk (f.eks. «fotball 7er», «tennis single/double», «løype blå»).
+  - Booking/FDV: `ressurs` kan peke til `flate` (valgfri 1:1 via unik indeks). `ressurslenke` i konteksten `booking`/`fdv` ruter videre til korrekt fagsystem-instans per kommune.
+
+- Integrasjon/forankring
+  - Inne: `flate.rom_id` forankrer til `rom` → `etasje` → `bygning` → `bydel` → `kommune`.
+  - Ute: `flate.uteomraade_id` forankrer til `uteomraade` → `bydel` → `kommune` (evt. matrikkelenhet).
+  - Ruting følger samme oppslag som beskrevet i seksjon 11 (ressurslenke og fagsystem_instans).
+
+- Eksempler
+
+  Opprette en utendørs 7er-fotballbane på et uteområde, klassifisere og gjøre den bookbar
+
+        -- 1) Opprett flaten (ute)
+        INSERT INTO flate (navn, type, uteomraade_id, geom_wkt)
+        VALUES ('Fotballbane 7er A', 'bane', 42, 'POLYGON((...))')
+        RETURNING flate_id;
+
+        -- 2) Klassifiser (kodeverket kan være lokalt eller kjent standard)
+        INSERT INTO classification (scheme, code, title)
+        VALUES ('SPORT', 'FOOTBALL_7', 'Fotball 7er')
+        ON CONFLICT DO NOTHING;
+
+        INSERT INTO flate_classification (flate_id, class_id)
+        SELECT f.flate_id, c.class_id
+        FROM flate f, classification c
+        WHERE f.navn='Fotballbane 7er A'
+          AND c.scheme='SPORT' AND c.code='FOOTBALL_7'
+        ON CONFLICT DO NOTHING;
+
+        -- 3) Knytt til ressurs for booking
+        INSERT INTO ressurs (type, navn, flate_id)
+        SELECT 'equipment', 'Fotballbane 7er A', flate_id
+        FROM flate WHERE navn='Fotballbane 7er A'
+        RETURNING ressurs_id;
+
+  -- 4) Rute til fagsystem (booking) via ressurs_id
+  INSERT INTO ressurslenke (kontekst, fagsystem_instans_id, ressurs_id, ekstern_id, aktiv)
+  VALUES ('booking', <instans_id_for_kommune>, <ressurs_id>, 'aktiv:field:7A', TRUE);
+
+  Opprette en innendørs bane i et rom
+
+        INSERT INTO flate (navn, type, rom_id)
+        VALUES ('Gymsal – bane B', 'bane', 12345);
+
+  Slå sammen to del-flater til én stor flate
+
+        -- Parent (stor bane)
+        INSERT INTO flate (navn, type, uteomraade_id)
+        VALUES ('Stor bane AB', 'bane', 42)
+        RETURNING flate_id;
+
+        -- Relasjon til del-flater A og B
+        INSERT INTO flate_rel_aggregates (parent_flate_id, child_flate_id, role, dekning_pct)
+        VALUES
+          (<parent_id>, <flate_A_id>, 'kombinasjon', 50.0),
+          (<parent_id>, <flate_B_id>, 'kombinasjon', 50.0);
+
+- Spørringer (utvalg)
+  - Finn flater i en kommune via uteområder
+
+        SELECT f.*
+        FROM flate f
+        JOIN uteomraade u ON u.uteomraade_id = f.uteomraade_id
+        JOIN bydel b ON b.bydel_id = u.bydel_id
+        WHERE b.kommune_id = <kommune_id>;
+
+  - Finn flater i et bygg via rom
+
+        SELECT f.*
+        FROM flate f
+        JOIN rom r ON r.rom_id = f.rom_id
+        JOIN etasje e ON e.etasje_id = r.etasje_id
+        WHERE e.bygg_id = <bygg_id>;
+
+Notater
+
+- `chk_flate_one_location` sikrer at én av `rom_id` eller `uteomraade_id` er satt.
+- `ux_flate_source_external` tillater idempotente oppdateringer per kilde.
+- `ux_ressurs_flate` håndhever (valgfri) 1:1 mellom flate og ressurs når flaten er selvstendig bookbar.
+- Booking via ressurs: bruk `ressurslenke.ressurs_id` som subjekt i kontekster som `booking`/`fdv`. `chk_ressurslenke_exactly_one` garanterer at nøyaktig én subjekt-FK er satt, og `ux_ressurslenke_ressurs (kontekst, fagsystem_instans_id, ressurs_id)` gir entydighet per instans/kontekst. Se ER v8 (`db/erdiagram_v8.puml`).
+
+## 14. Semantisk graf som parallell utvidelse (valgfritt)
 
 Denne utvidelsen skisserer hvordan en semantisk kunnskapsgraf kan kjøres parallelt med den relasjonelle masterdatabasen, uten å erstatte Postgres-skjemaet. Målet er å tilby SPARQL, standardiserte begreper (ontologi) og regel-/valideringslag (OWL/SHACL) på tvers av kilder.
 
-### 13.1 Motivasjon (hvorfor)
+### 14.1 Motivasjon (hvorfor)
 
 - Felles semantikk for heterogene kilder (BOT, SOSA/SSN, GeoSPARQL, IFC-OWL + et lett lokalt namespace).
 - Multihopp-spørringer (bygg → etasje → rom → utstyr → system → sensor) uten kompliserte JOIN-kjeder.
@@ -422,7 +510,7 @@ Denne utvidelsen skisserer hvordan en semantisk kunnskapsgraf kan kjøres parall
 - Løs kobling: utvikle begreper og regler uten å endre databaseskjemaet.
 - Federering: slå opp eksterne vokabularer/kataloger via SPARQL SERVICE.
 
-### 13.2 Arkitekturoppsett
+### 14.2 Arkitekturoppsett
 
 To komplementære mønstre:
 
@@ -439,7 +527,7 @@ To komplementære mønstre:
 
 Anbefaling: start virtuelt (OBDA); materialiser selektivt ved behov.
 
-### 13.3 Integrasjonspunkter mot modellen
+### 14.3 Integrasjonspunkter mot modellen
 
 - IRI-strategi: stabile IRIs pr. entitet (kommune/bygn./rom/ifc_product) basert på primærnøkler.
 - Ontologi: gjenbruk standardvokabularer og supplér med et «pe:»-namespace for prosjektspesifikke begreper.
@@ -448,7 +536,7 @@ Anbefaling: start virtuelt (OBDA); materialiser selektivt ved behov.
 - Geometri: WKT/GeoSPARQL-literals i første omgang; PostGIS-binding senere.
 - Ruting: modeller fagsystem/instans/ressurslenke i grafen for å forklare «hvorfor» forespørsler rutes.
 
-### 13.4 Minimum første leveranse
+### 14.4 Minimum første leveranse
 
 - En liten mappingpakke (R2RML/RML) for: kommune, matrikkelenhet, bygning, etasje, rom, ifc_product.
 - En SQL-view som genererer IRIs deterministisk (f.eks. per tabell).
@@ -457,19 +545,19 @@ Anbefaling: start virtuelt (OBDA); materialiser selektivt ved behov.
 
 Foreslått struktur (senere): db/semantic/ with ontology.ttl, mapping/*.ttl, README.md.
 
-### 13.5 Sikkerhet og tilgang
+### 14.5 Sikkerhet og tilgang
 
 - Speil tilgangsregler fra master-DB. Bruk named graphs for å skille kommune/tenant/domene.
 - Ikke map felter med begrenset tilgang (personopplysninger) til grafen.
 - Loggfør spørringer; vurder rate limiting for åpne endepunkt.
 
-### 13.6 Ytelse og drift
+### 14.6 Ytelse og drift
 
 - Cache hyppige spørringer; vurder delvis materialisering for tunge analyser.
 - Begrens inferens til det som trengs (RL/EL) eller kjør batch-inferens.
 - Etabler SHACL-shapes for viktige integritetskrav (bygg–etasje–rom, klassifikasjon, etc.).
 
-### 13.7 Kom i gang (kort)
+### 14.7 Kom i gang (kort)
 
 1. Lag en enkel IRI-view i databasen.
 2. Skriv en R2RML-mapping for «bygning» og «rom».
@@ -478,7 +566,7 @@ Foreslått struktur (senere): db/semantic/ with ontology.ttl, mapping/*.ttl, REA
 
 Dette gir SPARQL og semantikk over masterdata uten å endre datalaget og kan tas i bruk selektivt der det gir mest verdi.
 
-## 14. Referanser og lignende prosjekter
+## 15. Referanser og lignende prosjekter
 
 - City of Helsinki – semantisk bymodell (CityGML/CityJSON) koblet til kommunale data: <https://www.hel.fi/3d/>
 - Amsterdam DataPunt – kunnskapsgraf/åpne data: <https://data.amsterdam.nl/>
