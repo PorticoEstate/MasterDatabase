@@ -1,5 +1,7 @@
 # Input document for AI model development: Integrating a master database with cadastral (Matrikkel) and asset data
 
+---
+
 ## 1. Overview
 
 This document summarizes the master data model for buildings/assets and how it integrates with authoritative registries (Matrikkel) and local operational systems. It mirrors the Norwegian document `modellutvikling.md` and only highlights the key concepts and changes introduced in recent iterations.

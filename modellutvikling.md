@@ -341,6 +341,129 @@ Praktisk anbefaling
 - Etabler små referansetabeller (utenfor scope i denne filen) for: fagsystem, fagsystem_instans (per kommune), ressurslenke (resource_type, resource_id, context, system_instans_id, ekstern_id).
 - Hold oppslag idempotent: oppdater lenker på (resource, context) og kilde/ekstern_id uten duplikater.
 
+### 11.x Ressurstyper, tilgang og kontekstbasert ruting
+
+Denne underseksjonen oppsummerer hvordan de viktigste ressurstypene er modellert, hvordan de finnes i master, og hvordan de rutes til riktig fagsystem ut fra valgt kontekst (f.eks. 'booking' vs. 'fdv').
+
+- Flate (bane/trase/løype)
+  - Modell: `flate` med nøyaktig én lokasjonsreferanse (`rom_id` ELLER `uteomraade_id`). Bookbar via 1:1 `ressurs` (`ressurs.flate_id`; unik indeks).
+  - Tilgang: slå opp `flate` direkte; for ruting bruk `ressurs` → `ressurslenke` med `ressurs_id`.
+  - Ruting: `ressurslenke(kontekst, fagsystem_instans_id, ressurs_id, ekstern_id)`.
+
+- Rom (garderobe, sal, møterom)
+  - Modell: `rom` under `etasje/bygg`.
+  - Tilgang: via `rom_id` eller søk i bygg/etasje.
+  - Ruting: `ressurslenke.rom_id` (alternativt via egen `ressurs` for ensartet mønster).
+
+- Utstyr/komponent
+  - Modell: `ifc_product` (+ `ifc_product_location`) eller `ressurs(type='equipment')`.
+  - Tilgang: via `product_id` eller `ressurs_id`.
+  - Ruting: `ressurslenke.product_id` eller `ressurslenke.ressurs_id`.
+
+- Uteområde / Bygning / Bruksenhet
+  - Modell: `uteomraade`, `bygning`, `bruksenhet`.
+  - Tilgang: via identitet og kommunal forankring.
+  - Ruting: `ressurslenke.uteomraade_id` / `ressurslenke.bygg_id` / `ressurslenke.bruksenhet_id`.
+
+- Generisk ressurs (person/tjeneste/kjøretøy/pool-medlem)
+  - Modell: `ressurs` med ev. kobling til `flate` eller `ifc_product`; metadata i `metadata_json`.
+  - Tilgang: via `ressurs_id` eller pool-medlemskap (`ressurspool_medlem`).
+  - Ruting: `ressurslenke.ressurs_id`.
+
+Flyt for spørring mot fagsystem etter valgt kontekst
+
+1. Finn objektet i master (flate/rom/produkt/ressurs ...).
+2. Slå opp riktig fagsystem for valgt `kontekst` via `ressurslenke`:
+   - Flate: `flate → ressurs → ressurslenke (kontekst)`.
+   - Rom/produkt/uteområde/bygg/bruksenhet/ressurs: direkte via tilsvarende FK i `ressurslenke`.
+3. Hent `base_url` fra `fagsystem_instans` og `ekstern_id` fra `ressurslenke`.
+4. Kall fagsystemets API (ledighet/booking, arbeidsordre, sensordata) og normaliser svaret.
+
+SQL-eksempler (utvalg)
+
+Flate via ressurs → lenke for valgt kontekst
+
+        SELECT rl.kontekst, rl.ekstern_id, fi.base_url, fs.type AS fagsystem_type
+        FROM flate f
+        JOIN ressurs r             ON r.flate_id = f.flate_id
+        JOIN ressurslenke rl       ON rl.ressurs_id = r.ressurs_id AND rl.kontekst = :kontekst
+        JOIN fagsystem_instans fi  ON fi.instans_id = rl.fagsystem_instans_id
+        JOIN fagsystem fs          ON fs.fagsystem_id = fi.fagsystem_id
+        WHERE f.flate_id = :flate_id
+          AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id);
+
+Generisk “resolver” for ulike objekttyper (ett kall, valg på type)
+
+        (
+          SELECT 'flate' AS type, rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN ressurs r            ON r.ressurs_id = rl.ressurs_id
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'flate'
+            AND r.flate_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'rom', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'rom'
+            AND rl.rom_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'product', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'product'
+            AND rl.product_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'ressurs', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'ressurs'
+            AND rl.ressurs_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'uteomraade', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'uteomraade'
+            AND rl.uteomraade_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'bygg', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'bygg'
+            AND rl.bygg_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'bruksenhet', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'bruksenhet'
+            AND rl.bruksenhet_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        );
 
 ## 12. Ressurser og ressurspooler (ikke-stedsbundne)
 
