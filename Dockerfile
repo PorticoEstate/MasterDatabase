@@ -11,8 +11,8 @@ ENV https_proxy=${https_proxy}
 
 # Download and install the install-php-extensions script
 # https://github.com/mlocati/docker-php-extension-installer
-RUN curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o /usr/local/bin/install-php-extensions \
-    && chmod +x /usr/local/bin/install-php-extensions
+
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
 # Configure PEAR
 RUN if [ -n "${http_proxy}" ]; then pear config-set http_proxy ${http_proxy}; fi && \

@@ -5,6 +5,7 @@ services:
     build:
         context: .
         dockerfile: Dockerfile
+        network: host  # corporate proxy allow-lists by source IP; bridge NAT gets dropped
         args:
            http_proxy: ${http_proxy}
            https_proxy: ${https_proxy}
