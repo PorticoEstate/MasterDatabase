@@ -330,6 +330,16 @@ CREATE TABLE IF NOT EXISTS flate_rel_aggregates
     PRIMARY KEY (parent_flate_id, child_flate_id)
 );
 
+-- External classifications (NS 3451, TFM, Omniclass)
+CREATE TABLE IF NOT EXISTS classification
+(
+    class_id       BIGSERIAL PRIMARY KEY,
+    scheme         TEXT NOT NULL,
+    code           TEXT NOT NULL,
+    title          TEXT,
+    UNIQUE (scheme, code)
+);
+
 -- Klassifisering av flater via eksisterende classification
 CREATE TABLE IF NOT EXISTS flate_classification
 (
@@ -481,16 +491,6 @@ CREATE TABLE IF NOT EXISTS ifc_rel_aggregates
     child_product_id  BIGINT NOT NULL REFERENCES ifc_product(product_id) ON DELETE CASCADE,
     role              TEXT,
     PRIMARY KEY (parent_product_id, child_product_id)
-);
-
--- External classifications (NS 3451, TFM, Omniclass) mapped to products
-CREATE TABLE IF NOT EXISTS classification
-(
-    class_id       BIGSERIAL PRIMARY KEY,
-    scheme         TEXT NOT NULL,
-    code           TEXT NOT NULL,
-    title          TEXT,
-    UNIQUE (scheme, code)
 );
 
 CREATE TABLE IF NOT EXISTS product_classification
