@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
     environment:
        POSTGRES_USER: postgres
-       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
        PGDATA: /data/postgres
     ports:
       - "5432:5432"

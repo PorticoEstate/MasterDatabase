@@ -14,6 +14,8 @@ Kjør i Docker:
 2. Start: `docker compose up -d`
 3. Åpne Swagger eller Redoc på lenkene over.
 
+Se [DEVELOPMENT_WSL2.md](DEVELOPMENT_WSL2.md) for oppsett av utviklermiljø på WSL2 bak bedriftens brannmur/proxy.
+
 ## Kode-stil
 
 - Bracestil: Allman (åpne klamme på ny linje)
