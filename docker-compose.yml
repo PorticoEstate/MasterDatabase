@@ -18,12 +18,33 @@ services:
       - APACHE_RUN_GROUP=www-data
     env_file:
       - .env.compose
-    depends_on: []
+    depends_on:
+      - db
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      - portico_internal
+      - portico_masterbase
+
+  db:
+    image: postgres:18
+    container_name: portico_masterdb
+    hostname: db
+    restart: unless-stopped
+    environment:
+       POSTGRES_USER: postgres
+       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+       PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/data/postgres
+ #     - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    networks:
+      - portico_masterbase
+
+volumes:
+  postgres_data:
 
 networks:
-  portico_internal:
-    external: true  # Reference the existing external network
+  portico_masterbase:
+    driver: bridge
