@@ -1,0 +1,13 @@
+Backup
+$ docker exec portico_masterdb pg_dump -U postgres -d portico_bergen_20260526 | gzip > portico_bergen_20260526.gz
+
+Restore:
+(først: opprett databasen "portico_bergen_20260526" i pgAdmin)
+
+Aktiv kommune, Bergen
+$ gunzip -c portico_bergen_20260526.gz | docker exec -i portico_masterdb psql -U postgres -d portico_bergen_20260526
+
+opprett databasen "matrikkel_20260915" i pgAdmin
+
+Matrikkeldata, Sogndal
+$ gunzip -c matrikkel_20260915.gz | docker exec -i portico_masterdb psql -U postgres -d matrikkel_20260915
