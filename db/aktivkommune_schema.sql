@@ -109,7 +109,6 @@ CREATE TABLE IF NOT EXISTS aktivkommune.resources
 (
     id                            BIGINT PRIMARY KEY,
     name                          TEXT NOT NULL,
-    activity_id                   BIGINT REFERENCES aktivkommune.activities(id),
     active                        SMALLINT,
     sort                          INTEGER,
     organizations_ids             TEXT, -- format unconfirmed, empty in every sample so far
