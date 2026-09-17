@@ -1,0 +1,559 @@
+# Inputdokument for AI-modellutvikling: Integrasjon av masterdatabase med matrikkelinformasjon og anleggsdata
+
+## 1. Målsetting
+
+Etablere en masterdatabase som integrerer data fra flere lignende databaseinstanser (lokale databaser med bygnings- og anleggsdata) og supplerer med informasjon fra autoritative registre som matrikkelen og det nasjonale anleggsregisteret.
+
+
+### Forutsetninger (premisser)
+
+- Masterdatabasen er et definisjons- og rutingslag. Fagsystemene eier sanntids sensordata, tidsserier, detaljerte historikk- og prosessdata.
+- Master lagrer ikke rå tidsserier eller detaljert sensordata; kun lenker (ressurslenke/identitetslenke), metadata (kilde, sist oppdatert, autorativ status) og eventuelt aggregerte indikatorer for oversikt.
+- Forespørsler og hendelser rutes til riktig fagsysteminstans basert på type og kontekst; status speiles tilbake i master. Se seksjon 11 for ruting og proveniens.
+- Den semantiske grafen (valgfri parallell) eksponerer definisjoner, relasjoner og lenker; den er ikke en transportkanal for sensordata.
+- Felt-for-felt autoritet og proveniens håndheves for å unngå dublering og sikre kildeansvar.
+
+
+## 2. Datakilder
+
+- **Matrikkel**: Autorativ for bygningsnummer, gatenummer, husnummer, eiendomsdata
+- **Lokale driftsdatabaser**: Anleggsdetaljer, bookingstatus, driftsmeldinger, tekniske data
+- **Nasjonalt anleggsregister**: Strukturert katalog over tekniske installasjoner
+- **Fagsystemer for**:
+  - Leie av lokaler
+  - Drift og ressursforvaltning
+
+---
+
+
+- Unik identitet for hvert bygg/anlegg via koplingstabeller
+- Datavask og validering (inkl. versjonssporing og kvalitetskontroll)
+- Sporing av datakilde og oppdateringsansvar
+- Regelmotor som avgjør hvilke data som er autorative
+
+---
+
+## 4. API-krav
+
+### Intern API
+
+- Synkronisering med underliggende databaser
+- Push/pull av oppdaterte metadata
+
+### Ekstern API
+
+- Eksterne forespørselssvar og oppdateringsprotokoller
+
+### Utviklingsstrategi for API (OpenAPI-first)
+
+- Kontrakt først (OpenAPI 3.1 i `api/openapi.yaml`): endepunkter, skjema, feil og sikkerhet er «single source of truth».
+- Review og versjonering: PR-gjennomgang, semver, og «breaking change»-sjekk i CI før publisering.
+- Kodegenerering
+  - Server-stubs: generer php-slim4-stubs (OpenAPI Generator) og koble til Slim 4 + PHP-DI.
+  - Klient-SDKer ved behov (TypeScript, Python, C#) fra samme spesifikasjon.
+- Runtime-validering: middleware som validerer request/response mot OpenAPI; feil som RFC 7807 Problem+JSON.
+- Arkitektur/stack
+  - Slim 4 + PSR-7/15 + PHP-DI; PostgreSQL (PDO/DBAL) og PostGIS for romlige spørringer.
+  - Middleware: auth (JWT/OAuth2 eller via gateway), rate limiting, request-id/correlation-id, logging, CORS.
+  - Observability: strukturert logging, metrikker og audit trail.
+- Designregler
+  - Ressursorienterte ruter (flertall), tydelige kontekster for ruting.
+  - Paginering (limit/offset eller cursor), sortering og filtrering via query-parametre.
+  - Idempotens for skriv (Idempotency-Key), 202/Accepted for asynkrone operasjoner med status-URL.
+  - ETag/If-None-Match på GET; 429/503 med Retry-After ved trykk.
+  - Konsistente feilkoder og Problem+JSON for alle feil.
+- Sikkerhet og dataforvaltning
+  - Minimer persondata; ingen rå sensordata i master-API; kun lenker/metadata og ev. aggregater (jfr. forutsetninger).
+  - Felt-vis autoritet og proveniens i svar; RLS i database og revisjonsspor.
+- Ruting til fagsystem (jfr. seksjon 11)
+  - Oppslag i ressurs-/identitetslenker for å velge riktig fagsystem-instans; proxy/videresend, og speil status tilbake.
+  - Tidsavbrudd, retries med backoff, og «circuit breaker» for å beskytte master-API.
+- Teststrategi
+  - Kontraktstester (Schemathesis/Dredd), enhet/integrasjonstester, og mock-server for tidlig utvikling.
+  - Testdata/fixtures og e2e-scenarier for ruting og autoritetsregler.
+- Dokumentasjon og publisering
+  - Swagger UI/Redoc bygges fra `openapi.yaml`; changelog og deprecation-policy følger semver.
+- Mappestruktur (anbefalt)
+  - `api/openapi.yaml`, `api/server/` (generert Slim 4-stub), `api/src/handlers/`, `api/middleware/`, `api/tests/`.
+
+---
+
+
+- En forespørsel (som leie eller skade) skal rutes til riktig fagsystem basert på type og kontekst.
+- Alle henvendelser opererer på samme bygg-ID.
+- Systemet må kunne trigge hendelser mot riktig applikasjon og vise status tilbake i masterdatabasegrensesnittet.
+
+---
+
+## 6. Kart- og temabasert søk
+
+- Bruk av spatial database (f.eks. PostGIS)
+- Filtrering på tematiske kriterier:
+  - Befolkningstetthet
+  - Rasfare
+  - Radon
+- Resultat koblet til bygg-ID i masterdatabasen
+
+---
+
+## 7. Autorative regler og datasynkronisering
+
+- Matrikkeldata har høyest prioritet for eiendomsidentifikasjon
+- Anleggsregister og lokale databaser kan ha ulik aktualitet for forskjellige datatyper
+- Hver datakomponent merkes med:
+  - Sist oppdatert
+  - Kilde
+  - Autorativ status
+
+---
+
+## 8. Sikkerhet og tilgang
+
+- Tilgangsstyring på fagsystemnivå
+- Lesesporing og endringslogg
+- Mulighet for godkjenningsflyt ved datamodifikasjoner
+
+---
+
+Dette dokumentet skal brukes som input til AI-generert modellutvikling og systemdesign.
+
+
+---
+
+## 9. Matrikkel: Datauttak via Kartverket (Eiendomsdata)
+
+Oppsummert fra Kartverket: «Elektronisk tilgang til eiendomsdata» (<https://kartverket.no/api-og-data/eiendomsdata>):
+
+- Tilgang: Data er gratis, men regulert. Det kreves lovlig behandlingsgrunnlag og avtale med Kartverket før utlevering av data fra grunnbok og matrikkel.
+- Tilgangsnivå: Ulike virksomhetskategorier får ulikt omfang av opplysninger. Databehandlere kan få tilgang når de videreformidler til behandlingsansvarlige med grunnlag.
+- Forpliktelser: Krav til tekniske og organisatoriske tiltak, videreføringsplikt til kunder, og etterlevelse av personvernregelverk. Brudd kan medføre stenging av tilgang.
+- Bruksbegrensninger: Ikke lov å bruke til reklame/markedsføring uten samtykke.
+- Søknad: Tilgang søkes via nettskjema (<https://kartverket.no/api-og-data/eiendomsdata/soknad-api-tilgang>). Kartverket vurderer vilkår for utlevering.
+- Katalog: Tjenester/datasett finnes i Geonorge kartkatalog og API-oversikt.
+
+Plan for data-pull i dette prosjektet:
+
+1. Juridisk og tilgang
+
+- Avklare behandlingsgrunnlag og inngå avtale med Kartverket.
+- Etablere Maskinporten-klient og evt. mTLS/IP-tilgang etter krav.
+
+1. Tjenestevalg
+
+- Adresse/lett oppslag: Adresse-API (offentlig) for adresser og koordinater.
+- Autorative matrikkeldata: Matrikkel Web Services (SOAP) og/eller WFS/WMS (lisensiert).
+- Masseoppdatering: Periodiske uttrekk via Geonorge/FTP der det er hensiktsmessig.
+
+1. ETL og modelltilpasning
+
+- Hente data til «staging», validere, normalisere og mappe til master-IDer.
+- Feltvis prioritet: Sett Matrikkel som autorativ for identitet (gnr/bnr/fnr/snr, bygningsnummer, adresser).
+- Proveniens: lagre kilde, sist oppdatert og autorativ-status per felt.
+
+1. Drift
+
+- Håndtere rate limits og feil via retry/backoff og idempotente oppdateringer.
+- Loggføre og revidere tilgang i henhold til avtale og utleveringsforskrift.
+
+
+## 11. Proveniens og kontekstsensitiv ruting til fagsystemer
+
+Denne løsningen samler autorative data (Matrikkel) og supplerer med lokale data pr. kommune (f.eks. «Aktiv kommune» for booking) samt FDV/andre fagsystemer. Målet er at brukeren ikke trenger å velge kommune; systemet leder automatisk til riktig instans basert på kontekst og valgt ressurs.
+
+- Proveniens (kilde, ekstern_id, autoritativ)
+  - Alle kjerne-tabeller har feltene: kilde, kilde_ref, sist_oppdatert, autoritativ.
+  - Eksterne nøkler per objekt (ekstern_id) brukes sammen med kilde for oppslag og idempotente oppdateringer.
+  - Prioritetsregler: Matrikkel er autoritativ for eiendomsidentitet (gnr/bnr/fnr/snr, adresser, bygningsnr). Andre kilder kan være autoritative for tekniske/operative felt.
+
+- Kommune-kontekst
+  - Bygning forankres via bydel → kommune.
+  - Uteområde forankres via bydel → kommune (evt. matrikkelenhet).
+  - Adresser og matrikkelenheter bærer kommunenr. Dermed kan en valgt ressurs entydig kobles til kommune.
+
+- Fagsystemkobling (konsepter)
+  - Fagsystem: navn og type (booking, FDV, sensordata, …).
+  - Fagsystem-instans: én instans per kommune (base-URL, API-nøkler, teknisk metadata).
+  - Ressurslenke: kobler master-ressurs (bygg/rom/uteområde/produkt) til korrekt fagsystem-instans med ekstern nøkkel for gitt kontekst (booking/FDV).
+  - Klassifisering: brukes for enkel filtrering/ruting (f.eks. hvilke produkter tilhører FDV vs. booking).
+
+- Ruteprosess (booking-eksempel)
+  1. Bruker velger en ressurs (f.eks. gymsal) i master-UI.
+  2. Systemet finner ressursens kommune via bygg/bydel/kommune (eller via adresse/matrikkelenhet).
+  3. Slå opp Ressurslenke for kontekst=booking → hent fagsystem-instans (Aktiv kommune for aktuell kommune) og ekstern_id.
+  4. Redirect eller kall API med base-URL fra instansen og ekstern_id fra lenken.
+  5. Status/kvittering speiles tilbake i master (leser via samme lenke).
+
+- FDV/andre kilder (komponenter/utstyr)
+  - `ressurs` (type='equipment') representerer utstyr/komponenter, identifisert via `(kilde, ekstern_id)`.
+  - Detaljert plassering og egenskaper for utstyret eies av FDV-systemet selv; master lagrer kun identitet, klassifisering og lenke.
+  - For ruting til FDV: Ressurslenke peker ressursen til riktig FDV-instans per kommune med ekstern_id fra FDV.
+
+- Personvern og tilgang
+  - Ingen persondata i ekstern_id.
+  - Ruting skjer på system- og ressursnivå; tilgangskontroll og logging håndteres i både master og underliggende fagsystem.
+
+Praktisk anbefaling
+
+- Etabler små referansetabeller (utenfor scope i denne filen) for: fagsystem, fagsystem_instans (per kommune), ressurslenke (resource_type, resource_id, context, system_instans_id, ekstern_id).
+- Hold oppslag idempotent: oppdater lenker på (resource, context) og kilde/ekstern_id uten duplikater.
+
+### 11.x Ressurstyper, tilgang og kontekstbasert ruting
+
+Denne underseksjonen oppsummerer hvordan de viktigste ressurstypene er modellert, hvordan de finnes i master, og hvordan de rutes til riktig fagsystem ut fra valgt kontekst (f.eks. 'booking' vs. 'fdv').
+
+- Flate (bane/trase/løype)
+  - Modell: `flate` med nøyaktig én lokasjonsreferanse (`rom_id` ELLER `uteomraade_id`). Bookbar via 1:1 `ressurs` (`ressurs.flate_id`; unik indeks).
+  - Tilgang: slå opp `flate` direkte; for ruting bruk `ressurs` → `ressurslenke` med `ressurs_id`.
+  - Ruting: `ressurslenke(kontekst, fagsystem_instans_id, ressurs_id, ekstern_id)`.
+
+- Rom (garderobe, sal, møterom)
+  - Modell: `rom` under `etasje/bygg`.
+  - Tilgang: via `rom_id` eller søk i bygg/etasje.
+  - Ruting: `ressurslenke.rom_id` (alternativt via egen `ressurs` for ensartet mønster).
+
+- Utstyr/komponent
+  - Modell: `ressurs(type='equipment')`.
+  - Tilgang: via `ressurs_id`.
+  - Ruting: `ressurslenke.ressurs_id`.
+
+- Uteområde / Bygning / Bruksenhet
+  - Modell: `uteomraade`, `bygning`, `bruksenhet`.
+  - Tilgang: via identitet og kommunal forankring.
+  - Ruting: `ressurslenke.uteomraade_id` / `ressurslenke.bygg_id` / `ressurslenke.bruksenhet_id`.
+
+- Generisk ressurs (person/tjeneste/kjøretøy/pool-medlem)
+  - Modell: `ressurs` med ev. kobling til `flate`; metadata i `metadata_json`.
+  - Tilgang: via `ressurs_id` eller pool-medlemskap (`ressurspool_medlem`).
+  - Ruting: `ressurslenke.ressurs_id`.
+
+Flyt for spørring mot fagsystem etter valgt kontekst
+
+1. Finn objektet i master (flate/rom/produkt/ressurs ...).
+2. Slå opp riktig fagsystem for valgt `kontekst` via `ressurslenke`:
+   - Flate: `flate → ressurs → ressurslenke (kontekst)`.
+   - Rom/produkt/uteområde/bygg/bruksenhet/ressurs: direkte via tilsvarende FK i `ressurslenke`.
+3. Hent `base_url` fra `fagsystem_instans` og `ekstern_id` fra `ressurslenke`.
+4. Kall fagsystemets API (ledighet/booking, arbeidsordre, sensordata) og normaliser svaret.
+
+SQL-eksempler (utvalg)
+
+Flate via ressurs → lenke for valgt kontekst
+
+        SELECT rl.kontekst, rl.ekstern_id, fi.base_url, fs.type AS fagsystem_type
+        FROM flate f
+        JOIN ressurs r             ON r.flate_id = f.flate_id
+        JOIN ressurslenke rl       ON rl.ressurs_id = r.ressurs_id AND rl.kontekst = :kontekst
+        JOIN fagsystem_instans fi  ON fi.instans_id = rl.fagsystem_instans_id
+        JOIN fagsystem fs          ON fs.fagsystem_id = fi.fagsystem_id
+        WHERE f.flate_id = :flate_id
+          AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id);
+
+Generisk “resolver” for ulike objekttyper (ett kall, valg på type)
+
+        (
+          SELECT 'flate' AS type, rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN ressurs r            ON r.ressurs_id = rl.ressurs_id
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'flate'
+            AND r.flate_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'rom', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'rom'
+            AND rl.rom_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'product', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'product'
+            AND rl.product_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'ressurs', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'ressurs'
+            AND rl.ressurs_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'uteomraade', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'uteomraade'
+            AND rl.uteomraade_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'bygg', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'bygg'
+            AND rl.bygg_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        )
+        UNION ALL
+        (
+          SELECT 'bruksenhet', rl.ekstern_id, fi.base_url
+          FROM ressurslenke rl
+          JOIN fagsystem_instans fi ON fi.instans_id = rl.fagsystem_instans_id
+          WHERE rl.kontekst = :kontekst
+            AND :type = 'bruksenhet'
+            AND rl.bruksenhet_id = :id
+            AND (:kommune_id IS NULL OR fi.kommune_id = :kommune_id)
+        );
+
+## 12. Ressurser og ressurspooler (ikke-stedsbundne)
+
+Denne seksjonen beskriver hvordan vi håndterer ressurser som ikke er permanent knyttet til et fysisk sted (utstyr på lager, mobile enheter, personer, tjenester), samt hvordan de kan organiseres i ressurspooler og rutes til riktig fagsystem på samme måte som stedbundne objekter.
+
+- Formål
+  - Modellere “ressurser” (utstyr, personell, tjenester) som kan brukes/planlegges uavhengig av bygg/rom.
+  - Samle ressurser i navngitte pooler (for eksempel «Vaktmesterteam sentrum», «Låneutstyr skole A»).
+  - Ruting: samme kontekstsensitive mekanisme som for bygg/rom, men på ressursnivå.
+- Tabeller (skisse, se `db/schema_magnus.sql` for detaljer)
+  - `ressurs`
+    - type: equipment | person | service | other.
+    - identifisert via `(kilde, ekstern_id)`; CHECK sikrer at identitet er satt.
+    - proveniensfelt: kilde, kilde_ref, sist_oppdatert, autoritativ.
+    - unikhet: delvis UNIQUE på `(kilde, ekstern_id)` når ekstern_id finnes.
+  - `ressurspool`
+    - navngitt samling per kommune; UNIQUE (kommune_id, navn).
+    - type: booking | staffing | equipment | other.
+  - `ressurspool_medlem`
+    - M:N mellom pool og ressurs.
+    - gyldighetsintervall (gyldig_fra, gyldig_til) med CHECK (fra < til) eller åpen slutt.
+  - `ressurslenke` (utvidet)
+    - nå også `ressurs_id` i tillegg til bygg/bruksenhet/rom/uteområde.
+    - CHECK «eksakt én referanse er satt» er oppdatert til å inkludere `ressurs_id`.
+    - unikhet: (instans_id, context, ekstern_id) og, for ressurs-lenker, UNIQUE (context, instans_id, ressurs_id).
+
+- Samspill med ruting (seksjon 11)
+  - Ruting til fagsystemer gjenbruker `fagsystem` og `fagsystem_instans`.
+  - Når en forespørsel gjelder en ressurs (context f.eks. booking), slås `ressurslenke` opp på `(instans_id, context, ressurs_id)` for å finne ekstern identitet i riktig instans.
+  - Overlappende ekstern-ID’er på tvers av instanser håndteres ved at unikhet skopes per instans og kontekst.
+- Eksempler
+  - Opprette en ressurs (person fra HR-systemet):
+
+        INSERT INTO ressurs (type, navn, kilde, ekstern_id, sist_oppdatert, autoritativ)
+
+  - Opprette en pool og legge til medlem med gyldighet:
+
+        INSERT INTO ressurspool (kommune_id, navn, type)
+        VALUES (42, 'Vaktmesterteam Sentrum', 'staffing')
+        RETURNING id;
+
+        INSERT INTO ressurspool_medlem (pool_id, ressurs_id, gyldig_fra)
+        VALUES (<pool_id>, <ressurs_id>, CURRENT_DATE);
+
+  - Rute en bookingforespørsel for en ressurs:
+    1) Finn instansen for booking i kommunen: `SELECT i.id, i.base_url FROM fagsystem_instans i JOIN fagsystem f ON f.id=i.fagsystem_id WHERE f.type='booking' AND i.kommune_id = <kommune_id>;`
+    2) Finn ekstern-ID for ressursen i denne instansen: `SELECT ekstern_id FROM ressurslenke WHERE context='booking' AND instans_id = <instans_id> AND ressurs_id = <ressurs_id>;`
+    3) Kall fagsystemets API med `base_url` og `ekstern_id`.
+
+  - Nyttige spørringer
+  - Aktive medlemmer i en pool på en dato:
+
+        SELECT r.*
+        FROM ressurspool_medlem m
+        JOIN ressurs r ON r.id = m.ressurs_id
+        WHERE m.pool_id = <pool_id>
+          AND (m.gyldig_fra IS NULL OR m.gyldig_fra <= CURRENT_DATE)
+          AND (m.gyldig_til IS NULL OR m.gyldig_til >= CURRENT_DATE);
+
+  - Alle lenker for en ressurs i en gitt kontekst (for eksempel booking):
+
+        SELECT i.base_url, l.ekstern_id
+        FROM ressurslenke l
+        JOIN fagsystem_instans i ON i.id = l.instans_id
+        WHERE l.context = 'booking' AND l.ressurs_id = <ressurs_id>;
+
+---
+
+## 13. Flater og baner (inne/ute)
+
+Denne seksjonen beskriver hvordan «flater» (baner, arealer, løyper/traseer) modelleres felles for innendørs og utendørs bruk, med støtte for klassifisering, sammenslåing/deling og ruting/booking via ressurs.
+
+- Kjernebegreper
+  - `flate`: representerer en bane/flate/trase/«løype». Nøyaktig én lokasjonsreferanse settes: enten `rom_id` (inne) eller `uteomraade_id` (ute). Geometri kan lagres som `geom_wkt` og/eller `lon`/`lat` (SRID 4258 som standard).
+  - Komposisjon: `flate_rel_aggregates` modellerer at flere del-flater kan inngå i en «parent»-flate (for eksempel to små baner kan slås sammen til én stor). Valgfri `dekning_pct` kan angi andel.
+  - Klassifisering: `classification` + `flate_classification` for å knytte flater til kodeverk (f.eks. «fotball 7er», «tennis single/double», «løype blå»).
+  - Booking/FDV: `ressurs` kan peke til `flate` (valgfri 1:1 via unik indeks). `ressurslenke` i konteksten `booking`/`fdv` ruter videre til korrekt fagsystem-instans per kommune.
+
+- Integrasjon/forankring
+  - Inne: `flate.rom_id` forankrer til `rom` → `etasje` → `bygning` → `bydel` → `kommune`.
+  - Ute: `flate.uteomraade_id` forankrer til `uteomraade` → `bydel` → `kommune` (evt. matrikkelenhet).
+  - Ruting følger samme oppslag som beskrevet i seksjon 11 (ressurslenke og fagsystem_instans).
+
+- Eksempler
+
+  Opprette en utendørs 7er-fotballbane på et uteområde, klassifisere og gjøre den bookbar
+
+        -- 1) Opprett flaten (ute)
+        INSERT INTO flate (navn, type, uteomraade_id, geom_wkt)
+        VALUES ('Fotballbane 7er A', 'bane', 42, 'POLYGON((...))')
+        RETURNING flate_id;
+
+        -- 2) Klassifiser (kodeverket kan være lokalt eller kjent standard)
+        INSERT INTO classification (scheme, code, title)
+        VALUES ('SPORT', 'FOOTBALL_7', 'Fotball 7er')
+        ON CONFLICT DO NOTHING;
+
+        INSERT INTO flate_classification (flate_id, class_id)
+        SELECT f.flate_id, c.class_id
+        FROM flate f, classification c
+        WHERE f.navn='Fotballbane 7er A'
+          AND c.scheme='SPORT' AND c.code='FOOTBALL_7'
+        ON CONFLICT DO NOTHING;
+
+        -- 3) Knytt til ressurs for booking
+        INSERT INTO ressurs (type, navn, flate_id)
+        SELECT 'equipment', 'Fotballbane 7er A', flate_id
+        FROM flate WHERE navn='Fotballbane 7er A'
+        RETURNING ressurs_id;
+
+  -- 4) Rute til fagsystem (booking) via ressurs_id
+  INSERT INTO ressurslenke (kontekst, fagsystem_instans_id, ressurs_id, ekstern_id, aktiv)
+  VALUES ('booking', <instans_id_for_kommune>, <ressurs_id>, 'aktiv:field:7A', TRUE);
+
+  Opprette en innendørs bane i et rom
+
+        INSERT INTO flate (navn, type, rom_id)
+        VALUES ('Gymsal – bane B', 'bane', 12345);
+
+  Slå sammen to del-flater til én stor flate
+
+        -- Parent (stor bane)
+        INSERT INTO flate (navn, type, uteomraade_id)
+        VALUES ('Stor bane AB', 'bane', 42)
+        RETURNING flate_id;
+
+        -- Relasjon til del-flater A og B
+        INSERT INTO flate_rel_aggregates (parent_flate_id, child_flate_id, role, dekning_pct)
+        VALUES
+          (<parent_id>, <flate_A_id>, 'kombinasjon', 50.0),
+          (<parent_id>, <flate_B_id>, 'kombinasjon', 50.0);
+
+- Spørringer (utvalg)
+  - Finn flater i en kommune via uteområder
+
+        SELECT f.*
+        FROM flate f
+        JOIN uteomraade u ON u.uteomraade_id = f.uteomraade_id
+        JOIN bydel b ON b.bydel_id = u.bydel_id
+        WHERE b.kommune_id = <kommune_id>;
+
+  - Finn flater i et bygg via rom
+
+        SELECT f.*
+        FROM flate f
+        JOIN rom r ON r.rom_id = f.rom_id
+        JOIN etasje e ON e.etasje_id = r.etasje_id
+        WHERE e.bygg_id = <bygg_id>;
+
+Notater
+
+- `chk_flate_one_location` sikrer at én av `rom_id` eller `uteomraade_id` er satt.
+- `ux_flate_source_external` tillater idempotente oppdateringer per kilde.
+- `ux_ressurs_flate` håndhever (valgfri) 1:1 mellom flate og ressurs når flaten er selvstendig bookbar.
+- Booking via ressurs: bruk `ressurslenke.ressurs_id` som subjekt i kontekster som `booking`/`fdv`. `chk_ressurslenke_exactly_one` garanterer at nøyaktig én subjekt-FK er satt, og `ux_ressurslenke_ressurs (kontekst, fagsystem_instans_id, ressurs_id)` gir entydighet per instans/kontekst. Se ER v8 (`db/erdiagram_v8.puml`).
+
+## 14. Semantisk graf som parallell utvidelse (valgfritt)
+
+Denne utvidelsen skisserer hvordan en semantisk kunnskapsgraf kan kjøres parallelt med den relasjonelle masterdatabasen, uten å erstatte Postgres-skjemaet. Målet er å tilby SPARQL, standardiserte begreper (ontologi) og regel-/valideringslag (OWL/SHACL) på tvers av kilder.
+
+### 14.1 Motivasjon (hvorfor)
+
+- Felles semantikk for heterogene kilder (BOT, SOSA/SSN, GeoSPARQL + et lett lokalt namespace).
+- Multihopp-spørringer (bygg → etasje → rom → utstyr → system → sensor) uten kompliserte JOIN-kjeder.
+- Datakvalitet og samsvar: SHACL-kontrakter og lettvekts-inferens (OWL RL/EL) for avledede relasjoner.
+- Identitetsforening: modellere og «binde» flere eksterne identiteter til én masteridentitet.
+- Løs kobling: utvikle begreper og regler uten å endre databaseskjemaet.
+- Federering: slå opp eksterne vokabularer/kataloger via SPARQL SERVICE.
+
+### 14.2 Arkitekturoppsett
+
+To komplementære mønstre:
+
+1. Virtuell graf (OBDA/R2RML) over Postgres
+   - Verktøy: Ontop eller Apache Jena. Mappinger beskriver hvordan tabeller/visninger fremstår som RDF ved spørring.
+   - Fordeler: ingen ETL/duplisering; rask å ta i bruk; SPARQL direkte fra masterdata.
+   - Avveiing: svært tunge grafer kan være trege; krever god indeksering og bevisst spørring.
+
+2. Materialisert graf (triplestore) med løpende oppdatering
+   - Verktøy: GraphDB, Fuseki, Blazegraph/Neptune m.fl.
+   - Synk: CDC (Debezium) eller batch-eksporter fra Postgres.
+   - Fordeler: ytelse for komplekse grafer/inferens; dedikert cachelag.
+   - Avveiing: drift/ETL-kompleksitet og duplisering som må styres (proveniens/versjon).
+
+Anbefaling: start virtuelt (OBDA); materialiser selektivt ved behov.
+
+### 14.3 Integrasjonspunkter mot modellen
+
+- IRI-strategi: stabile IRIs pr. entitet (kommune/bygn./rom/ressurs) basert på primærnøkler.
+- Ontologi: gjenbruk standardvokabularer og supplér med et «pe:»-namespace for prosjektspesifikke begreper.
+- Identitet: eksponer eksterne IDer (f.eks. owl:sameAs/skos:exactMatch) i tråd med identitetslenker i DB.
+- Proveniens: dct:source, prov:wasDerivedFrom, dct:modified for kilde/autoritativitet/tidsstempel.
+- Geometri: WKT/GeoSPARQL-literals i første omgang; PostGIS-binding senere.
+- Ruting: modeller fagsystem/instans/ressurslenke i grafen for å forklare «hvorfor» forespørsler rutes.
+
+### 14.4 Minimum første leveranse
+
+- En liten mappingpakke (R2RML/RML) for: kommune, matrikkelenhet, bygning, etasje, rom, ressurs.
+- En SQL-view som genererer IRIs deterministisk (f.eks. per tabell).
+- 3–5 SPARQL-eksempler (rom i bygg X, utstyr i rom Y, produkter i system Z).
+- Kort README for å kjøre Ontop lokalt mot Postgres med mappingene.
+
+Foreslått struktur (senere): db/semantic/ with ontology.ttl, mapping/*.ttl, README.md.
+
+### 14.5 Sikkerhet og tilgang
+
+- Speil tilgangsregler fra master-DB. Bruk named graphs for å skille kommune/tenant/domene.
+- Ikke map felter med begrenset tilgang (personopplysninger) til grafen.
+- Loggfør spørringer; vurder rate limiting for åpne endepunkt.
+
+### 14.6 Ytelse og drift
+
+- Cache hyppige spørringer; vurder delvis materialisering for tunge analyser.
+- Begrens inferens til det som trengs (RL/EL) eller kjør batch-inferens.
+- Etabler SHACL-shapes for viktige integritetskrav (bygg–etasje–rom, klassifikasjon, etc.).
+
+### 14.7 Kom i gang (kort)
+
+1. Lag en enkel IRI-view i databasen.
+2. Skriv en R2RML-mapping for «bygning» og «rom».
+3. Start et OBDA-endepunkt (Ontop) mot Postgres og test med SPARQL.
+4. Utvid trinnvis med flere entiteter, identiteter og proveniens.
+
+Dette gir SPARQL og semantikk over masterdata uten å endre datalaget og kan tas i bruk selektivt der det gir mest verdi.
+
+## 15. Referanser og lignende prosjekter
+
+- City of Helsinki – semantisk bymodell (CityGML/CityJSON) koblet til kommunale data: <https://www.hel.fi/3d/>
+- Amsterdam DataPunt – kunnskapsgraf/åpne data: <https://data.amsterdam.nl/>
+- Ordnance Survey Linked Data (UK) – bygninger/adresser med SPARQL: <https://www.ordnancesurvey.co.uk/products/os-open-linked-identifiers>
+- Netherlands Kadaster BAG Linked Data – eiendom/adresse (BAG/BGT): <https://bag.basisregistraties.overheid.nl/>
+- UK National Digital Twin (CDBB/IMF) – rammeverk for delte informasjonsmodeller: <https://www.cdbb.cam.ac.uk/what-we-did/national-digital-twin-programme>
+- buildingSMART bSDD – semantisk ordbok/kodeverk for bygg/utstyr: <https://bsdd.buildingsmart.org/>
+- IFC-OWL / IfcWoD – IFC som RDF for kobling mot sensorer/forvaltning: <https://technical.buildingsmart.org/standards/ifc/ifc-formats/ifcowl/>
+- FIWARE Smart Data Models – åpne semantiske modeller (bygg/IoT/eiendeler): <https://smartdatamodels.org/>
+- OGC standarder – GeoSPARQL, CityGML/CityJSON: <https://www.ogc.org/standards/>
+- Norge – GeoNorge/Kartverket (Matrikkel/Adresse): <https://www.geonorge.no/> og <https://kartverket.no/>
