@@ -1,11 +1,12 @@
 -- AktivKommuneSchema
 --
 -- Staging schema that mirrors the shape of a single aktiv-kommune
--- "bookingfrontend" instance (GET /bookingfrontend/searchdataall), one
--- kommune per fagsystem_instans. This intentionally does NOT try to fit the
--- data into the master model (see db/schema_v9.sql) yet -- it is the raw
--- landing zone described for the ingest pipeline: land close to source shape
--- first, transform into master tables afterwards.
+-- "bookingfrontend" instance (GET /bookingfrontend/searchdataall). One
+-- instance can serve several kommuner (interkommunalt samarbeid), so a feed
+-- is not assumed to cover exactly one kommune. This intentionally does NOT
+-- try to fit the data into the master model (see db/schema_v9.sql) yet --
+-- it is the raw landing zone described for the ingest pipeline: land close
+-- to source shape first, transform into master tables afterwards.
 --
 -- Deliberate deviations from a 1:1 mirror (privacy):
 --   - buildings.tilsyn_name/_phone/_email and tilsyn_name2/_phone2/_email2
@@ -143,9 +144,6 @@ CREATE TABLE IF NOT EXISTS aktivkommune.resources
     source_synced_at                 TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS ix_ak_resources_activity
-    ON aktivkommune.resources (activity_id);
-
 CREATE INDEX IF NOT EXISTS ix_ak_resources_rescategory
     ON aktivkommune.resources (rescategory_id);
 
@@ -193,12 +191,28 @@ CREATE TABLE IF NOT EXISTS aktivkommune.resource_category_activity
 CREATE INDEX IF NOT EXISTS ix_ak_resource_category_activity_activity
     ON aktivkommune.resource_category_activity (activity_id);
 
--- Kommune: not a source collection -- this endpoint is scoped to exactly
--- one kommune (one deployment per kommune, matching the master schema's
--- fagsystem_instans model), so this table holds that single row of context
--- rather than being populated from a "kommune" list in the payload.
--- kommunenr isn't exposed by the endpoint either; populate it at ingest
--- time from the fagsystem_instans configuration, not from the API response.
+-- Fagsystem-instans: the aktiv-kommune deployment this staging data was
+-- pulled from. Not a source collection -- populated at ingest time, and id
+-- is expected to mirror fagsystem_instans.instans_id in the master schema
+-- so staging rows can be traced back to a configured instance. One
+-- deployment can serve several kommuner (interkommunalt samarbeid), so the
+-- kommune link is M:N via fagsystem_instans_kommune, not a column here.
+CREATE TABLE IF NOT EXISTS aktivkommune.fagsystem_instans
+(
+    id       BIGINT PRIMARY KEY,
+    name     TEXT NOT NULL,
+    base_url TEXT NOT NULL,
+    source_synced_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uniq_ak_fagsystem_instans_base_url UNIQUE (base_url)
+);
+
+-- Kommune: not a source collection -- the payload has no "kommune" list.
+-- Rows here are populated at ingest time from the fagsystem_instans
+-- configuration (i.e. which kommuner that instance serves), not from the
+-- API response. A single instance can serve several kommuner
+-- (interkommunalt samarbeid), so this is a genuine multi-row table rather
+-- than one row of context. kommunenr isn't exposed by the endpoint either
+-- and comes from the same configuration.
 CREATE TABLE IF NOT EXISTS aktivkommune.kommune
 (
     id        BIGINT PRIMARY KEY,
@@ -206,6 +220,19 @@ CREATE TABLE IF NOT EXISTS aktivkommune.kommune
     name      TEXT NOT NULL,
     source_synced_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- M:N between deployment and kommune: which kommuner a single
+-- aktiv-kommune deployment serves. Mirrors fagsystem_instans_kommune in
+-- the master schema.
+CREATE TABLE IF NOT EXISTS aktivkommune.fagsystem_instans_kommune
+(
+    instans_id BIGINT NOT NULL REFERENCES aktivkommune.fagsystem_instans(id) ON DELETE CASCADE,
+    kommune_id BIGINT NOT NULL REFERENCES aktivkommune.kommune(id) ON DELETE CASCADE,
+    PRIMARY KEY (instans_id, kommune_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_ak_fagsystem_instans_kommune_kommune
+    ON aktivkommune.fagsystem_instans_kommune (kommune_id);
 
 -- Bydel: the source's own small fixed lookup of districts (9 distinct
 -- id<->name pairs observed). Renamed from the source's "towns" label to

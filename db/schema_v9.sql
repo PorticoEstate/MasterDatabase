@@ -453,25 +453,38 @@ CREATE TABLE IF NOT EXISTS fagsystem
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Fagsystem-instans per kommune (én per system/kommune)
+-- Fagsystem-instans: én deployment av et fagsystem. En instans kan betjene
+-- flere kommuner (interkommunalt samarbeid), så kommunetilknytningen ligger
+-- i fagsystem_instans_kommune, ikke som kolonne her. Naturlig nøkkel for
+-- idempotent oppdatering er (fagsystem_id, base_url).
 CREATE TABLE IF NOT EXISTS fagsystem_instans
 (
     instans_id   BIGSERIAL PRIMARY KEY,
     fagsystem_id BIGINT NOT NULL REFERENCES fagsystem(fagsystem_id) ON DELETE CASCADE,
-    kommune_id   BIGINT NOT NULL REFERENCES kommune(kommune_id) ON DELETE CASCADE,
     base_url     TEXT NOT NULL,
     konfig_json  JSONB,
     aktiv        BOOLEAN DEFAULT TRUE,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uniq_fagsystem_per_kommune UNIQUE (fagsystem_id, kommune_id)
+    CONSTRAINT uniq_fagsystem_instans_base_url UNIQUE (fagsystem_id, base_url)
 );
 
 CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_fagsystem
     ON fagsystem_instans (fagsystem_id);
 
-CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_kommune
-    ON fagsystem_instans (kommune_id);
+-- M:N mellom fagsystem-instans og kommune. Én instans kan dekke flere
+-- kommuner, og en kommune kan ha flere instanser av samme fagsystem (f.eks.
+-- en samarbeidsinstans i tillegg til egen instans). Ruting for en gitt
+-- ressurs bestemmes av ressurslenke, ikke av dette oppslaget alene.
+CREATE TABLE IF NOT EXISTS fagsystem_instans_kommune
+(
+    instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(instans_id) ON DELETE CASCADE,
+    kommune_id BIGINT NOT NULL REFERENCES kommune(kommune_id) ON DELETE CASCADE,
+    PRIMARY KEY (instans_id, kommune_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_kommune_kommune
+    ON fagsystem_instans_kommune (kommune_id);
 
 -- Ressurslenke: kobler master-ressurser til riktig fagsystem-instans for en gitt kontekst
 CREATE TABLE IF NOT EXISTS ressurslenke

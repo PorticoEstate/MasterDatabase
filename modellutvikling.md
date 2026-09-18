@@ -315,7 +315,7 @@ Denne løsningen samler autorative data (Matrikkel) og supplerer med lokale data
 
 - Fagsystemkobling (konsepter)
   - Fagsystem: navn og type (booking, FDV, sensordata, …).
-  - Fagsystem-instans: én instans per kommune (base-URL, API-nøkler, teknisk metadata).
+  - Fagsystem-instans: én deployment av et fagsystem (base-URL, API-nøkler, teknisk metadata). En instans kan betjene flere kommuner (interkommunalt samarbeid); kommunetilknytning ligger i koblingstabell, ikke som felt på instansen. 
   - Ressurslenke: kobler master-ressurs (bygg/rom/uteområde/produkt) til korrekt fagsystem-instans med ekstern nøkkel for gitt kontekst (booking/FDV).
   - Klassifisering: brukes for enkel filtrering/ruting (f.eks. hvilke produkter tilhører FDV vs. booking).
 
@@ -338,7 +338,7 @@ Denne løsningen samler autorative data (Matrikkel) og supplerer med lokale data
 
 Praktisk anbefaling
 
-- Etabler små referansetabeller (utenfor scope i denne filen) for: fagsystem, fagsystem_instans (per kommune), ressurslenke (resource_type, resource_id, context, system_instans_id, ekstern_id).
+- Etabler små referansetabeller (utenfor scope i denne filen) for: fagsystem, fagsystem_instans (med koblingstabell mot kommune for samarbeidsinstanser), ressurslenke (resource_type, resource_id, context, system_instans_id, ekstern_id).
 - Hold oppslag idempotent: oppdater lenker på (resource, context) og kilde/ekstern_id uten duplikater.
 
 ### 11.x Ressurstyper, tilgang og kontekstbasert ruting
