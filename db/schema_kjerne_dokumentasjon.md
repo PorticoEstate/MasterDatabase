@@ -1,6 +1,8 @@
 # Kjernemodell for masterdatabasen
 
-Dokumentasjon for `db/schema_kjerne.sql`. 16 tabeller, 2 visninger. Alle tabellene får data.
+Dokumentasjon for `db/schema_kjerne.sql`. 16 egne tabeller, 2 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data.
+
+**Krever PostGIS.** Docker-imaget er `postgis/postgis:18-3.6` (ikke rent `postgres:18`), og skjemaet starter med `CREATE EXTENSION IF NOT EXISTS postgis;`.
 
 **Navnekonvensjon:** hver tabells primærnøkkel heter `id`. En fremmednøkkel heter `<tabellnavn den peker til>_id`, f.eks. `kommune_id` på en kolonne som peker til `kommune`. Unntak: selvrefererende hierarkikolonner (`lokaletype.parent_id`, `aktivitet.parent_id`) heter `parent_id`, ikke `lokaletype_id`, for lesbarhet.
 
@@ -55,7 +57,9 @@ Den unike indeksen bruker `COALESCE(festenr, 0)` fordi festenr og seksjonsnr er 
 
 ### Bygning
 
-**`bygning`** — 425 rader. Stedet.
+**`bygning`** — 423 rader. Stedet.
+
+`antall_etasjer` er lagt til etter å ha sett faktiske data i Matrikkelen — feltet finnes der som et tall per bygg (ikke en egen rad per etasje), og hadde ingen plass i den opprinnelige versjonen av denne tabellen.
 
 Tabellen holder både bygg og utendørs anlegg, fordi Aktiv kommune bare har ett stedsbegrep: «Paradis kunstgressbane» er registrert som et bygg der. `er_uteanlegg` skiller dem uten at det trengs en egen tabell.
 
@@ -79,6 +83,8 @@ Derfor trengs ingen egen tabell for identitetskobling. Begge har sin egen partie
 **`adresse`** — 421 rader. Egen tabell, ikke kolonner på bygning, fordi matrikkelen gir flere adresser per bygg (flere innganger) og fordi representasjonspunktet hører til adressen.
 
 `geokoding` sier hvordan koordinatene ble til: `matrikkel` (autoritativt punkt), `geokodet` (oppslag på gateadresse), `manuell`, `feilet`, `ukjent`. Skillet er nødvendig fordi **kildedata ikke har koordinater i det hele tatt** — ingen av de 12 instansene har lat, lon, UTM eller geometri. Punktene må slås opp, og en senere matrikkelimport må kunne se at et geokodet punkt trygt kan overskrives.
+
+Punktet selv ligger i `posisjon geography(Point, 4326)` — samme kolonnetype på `bygning` og `adresse`. `geography` (ikke `geometry`) er valgt fordi `ST_Distance` og `ST_DWithin` da regner ekte avstand i meter direkte, uten at man selv må velge riktig UTM-sone for Norge. Én kolonne erstatter det som før var tre (`lat`, `lon`, `srid`), og den kan ikke stå «halvveis utfylt» slik to separate nullbare tall kunne.
 
 Gatenavn ligger som tekst av samme grunn som bydel.
 
@@ -186,7 +192,7 @@ Med bare to kilder er dette en regel, ikke en mekanisme. Regelen ligger her og h
 |---|---|
 | `bygningsnr`, `bygningstype`, `byggeaar`, `bra_m2`, `geom_wkt` | Matrikkelen |
 | `navn`, `hjemmeside`, `epost`, `telefon`, `apningstid_tekst` | Aktiv kommune |
-| `lat`, `lon` (via `adresse`) | Matrikkelen, hvis `geokoding='matrikkel'` |
+| `posisjon` (via `adresse`) | Matrikkelen, hvis `geokoding='matrikkel'` |
 | `kapasitet` på `ressurs` | Manuell verdi over kildeverdi |
 
 Matrikkelen vinner på byggets fakta. Aktiv kommune vinner på det publikumsvennlige navnet, for matrikkelen vet ikke at bygget heter «Flaktveit stadion».
@@ -199,7 +205,7 @@ Matrikkelen vinner på byggets fakta. Aktiv kommune vinner på det publikumsvenn
 2. **Rens tekst.** Kilden er HTML-escapet én gang for mye: `Rom 19 &amp;#40;219&amp;#41;` skal bli `Rom 19 (219)` etter to runder avkoding. `description_json` inneholder `&lt;p&gt;`-escapet HTML.
 3. **Last kildekoder.** Alle `resource_categories`, `activities` og `facilities` til `kildekode`. Nye koder får forslag i `kildekode_mapping` med status `foreslatt`.
 4. **Kurer.** Godkjenn eller avvis forslagene. Førstegangsarbeid er noen dager; deretter viser `v_ukartlagte_kildekoder` bare det nye.
-5. **Slå opp adressene mot Kartverket.** Dette steget må komme **før** byggene lagres, fordi Adresse-API-et er det som avgjør hvilken kommune bygget ligger i. Ett oppslag på gateadresse og postnummer gir `kommunenummer`, `adressenavn`, `nummer`, `bokstav`, `representasjonspunkt` (lat/lon med EPSG-kode) samt `gardsnummer` og `bruksnummer`. API-et er åpent og krever ingen avtale.
+5. **Slå opp adressene mot Kartverket.** Dette steget må komme **før** byggene lagres, fordi Adresse-API-et er det som avgjør hvilken kommune bygget ligger i. Ett oppslag på gateadresse og postnummer gir `kommunenummer`, `adressenavn`, `nummer`, `bokstav`, `representasjonspunkt` (lat/lon med EPSG-kode) samt `gardsnummer` og `bruksnummer`. API-et er åpent og krever ingen avtale. Representasjonspunktet skrives til `posisjon` med `ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography`.
 6. **Last bygg, adresser og ressurser.** `kommune_id` settes fra oppslaget i steg 5, ikke fra subdomenet. Alle upserts på `ON CONFLICT (fagsystem_instans_id, ekstern_id) DO UPDATE`, slik at gjentatt kjøring oppdaterer i stedet for å duplisere. Bygg der adresseoppslaget mislykkes, får `geokoding='feilet'` og loggføres i `synk_avvik`; de må få kommune satt manuelt.
 7. **Matrikkelen senere.** Bygningsnummer, bygningstype, byggeår, BRA og bygningsomriss krever avtale med Kartverket og dokumentert behandlingsgrunnlag. Match bygg på adresse, sett `matrikkel_match` etter sikkerhet, og oppdater byggfeltene der matrikkelen vinner. Eiendomskoblingen (`matrikkelenhet`, `bygning_matrikkelenhet`) kan derimot fylles allerede i steg 5, siden det åpne API-et gir gårds- og bruksnummer.
 
@@ -238,6 +244,18 @@ SELECT navn, kommune_navn FROM v_ressurs_sok
 WHERE sokevektor @@ to_tsquery('norwegian', 'garderobe & parkett');
 ```
 
+Nærhetssøk — lokaler innenfor 10 km av et gitt punkt, sortert etter avstand (krever at `posisjon` er fylt via geokoding):
+
+```sql
+SELECT navn, kommune_navn,
+       round(ST_Distance(posisjon, ST_SetSRID(ST_MakePoint(5.3221, 60.3948), 4326)::geography)) AS meter
+FROM v_ressurs_sok
+WHERE ST_DWithin(posisjon, ST_SetSRID(ST_MakePoint(5.3221, 60.3948), 4326)::geography, 10000)
+ORDER BY posisjon <-> ST_SetSRID(ST_MakePoint(5.3221, 60.3948), 4326)::geography;
+```
+
+`ST_DWithin` er filteret (alt innenfor radiusen), `<->` er sorteringen (nærmest først). Begge bruker GiST-indeksen på `posisjon` — bekreftet med `EXPLAIN`, som viser `Index Scan using ix_bygning_posisjon`, ikke en full tabellskanning.
+
 Hvordan en lokal kode ble tolket:
 
 ```sql
@@ -255,25 +273,27 @@ ORDER BY fi.kildenokkel, kk.kode;
 
 ## Validering
 
-Skjemaet er kjørt mot PostgreSQL 18, er idempotent ved gjentatt kjøring, og oppretter 16 tabeller og 2 visninger.
+Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt kjøring, og oppretter 16 egne tabeller og 2 visninger (pluss PostGIS' egen `spatial_ref_sys`).
 
 Mange-til-én-relasjonen (én instans, flere kommuner) er verifisert direkte på `kommune.fagsystem_instans_id`, uten koblingstabell: to kommuner på samme instans godtas, et bygg med en annen instans enn sin kommunes instans avvises via `fk_bygning_fagsystem_instans_kommune`, en ressurs med feil instans for sin kommune avvises via `fk_ressurs_fagsystem_instans_kommune`, og en ressurs i et bygg fra en annen kommune avvises via `fk_ressurs_bygning`.
+
+**PostGIS-nærhetssøk er verifisert med reelle avstander.** To bygg i Bergen (i Flaktveit- og Nordnes-området) fikk midlertidige testkoordinater, og `ST_Distance` regnet ut 7 662 meter mellom dem — riktig størrelsesorden for den faktiske avstanden. `ST_DWithin` fant korrekt alle bygg innenfor 10 km, sortert med `<->`, og `EXPLAIN` bekreftet `Index Scan using ix_bygning_posisjon` — altså at GiST-indeksen faktisk brukes, ikke en full tabellskanning. Testkoordinatene ble deretter nullet ut igjen; `posisjon` står NULL på alle rader til geokoding faktisk kjøres.
 
 Alle 12 instanser er lastet inn med reelle data:
 
 | Tabell | Rader |
 |---|---:|
 | `kommune` / `fagsystem_instans` | 12 / 12 |
-| `bygning` | 425 |
-| `adresse` | 421 |
+| `bygning` | 423 |
+| `adresse` | 419 |
 | `ressurs` | 1 805 |
 | — med kanonisk lokaletype | 1 755 (97 %) |
-| — med byggtilknytning | 1 617 |
+| — med byggtilknytning | 1 613 |
 | `kildekode` | 1 566 |
 | `ressurs_aktivitet` / `ressurs_fasilitet` | 672 / 1 221 |
-| `synk_avvik` | 2 635 |
+| `synk_avvik` | 2 639 |
 
-Tverrkommunalt søk er verifisert. Ett søk på `GYMSAL` finner 108 gymsaler i 3 kommuner, `IDRETTSHALL` finner 154 i 4 kommuner, `FOTBALLBANE` 129 i 4 — alt gjennom én kanonisk kode, til tross for at de lokale ID-ene er uforenlige. Søk på idrettshall med garderobe gir 41 treff i Bergen, 32 i Stavanger, 15 i Øygarden og 13 i Bærum.
+Radtallene svinger litt fra kjøring til kjøring (kommunene endrer sine egne data daglig); det er `GYMSAL`/`IDRETTSHALL`-mønsteret som er det stabile beviset. Tverrkommunalt søk er verifisert: ett søk på `GYMSAL` finner gymsaler i 3 kommuner, `IDRETTSHALL` i 4 kommuner — alt gjennom én kanonisk kode, til tross for at de lokale ID-ene er uforenlige.
 
 ---
 

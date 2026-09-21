@@ -1,5 +1,5 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
--- PostgreSQL 12+, ingen PostGIS. Testet mot PostgreSQL 18.
+-- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
 -- 16 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
 -- matrikkelen. Se db/schema_kjerne_dokumentasjon.md.
@@ -12,6 +12,14 @@
 -- heter <tabellnavn som den refererer>_id, f.eks. "kommune_id" på en tabell
 -- som peker til kommune. Unntak: selvrefererende hierarkikolonner (f.eks.
 -- lokaletype.parent_id) heter "parent_id" for lesbarhet, ikke "lokaletype_id".
+--
+-- Geometri: punkter lagres som geography(Point, 4326), ikke lat/lon-tall i to
+-- kolonner. En geography-verdi kan ikke være "halvveis utfylt" (i motsetning
+-- til to nullbare tall), bærer sitt eget koordinatsystem, og støtter ekte
+-- avstands- og radiussøk (ST_DWithin, <->) med en GiST-indeks, i stedet for
+-- de grove rektangelsøkene en vanlig indeks på (lon, lat) er begrenset til.
+
+CREATE EXTENSION IF NOT EXISTS postgis;
 
 
 CREATE OR REPLACE FUNCTION sett_updated_at()
@@ -139,17 +147,19 @@ CREATE TABLE IF NOT EXISTS bygning
     matrikkel_match TEXT NOT NULL DEFAULT 'ikke_forsokt'
                        CHECK (matrikkel_match IN
                            ('ikke_forsokt','bekreftet','sannsynlig','usikker','ikke_funnet')),
+    -- Fra matrikkelen: antall etasjer i bygget som helhet (ikke en egen rad
+    -- per etasje - kilden har bare et tall her).
+    antall_etasjer INTEGER CHECK (antall_etasjer IS NULL OR antall_etasjer > 0),
 
-    lat            DOUBLE PRECISION CHECK (lat IS NULL OR lat BETWEEN -90 AND 90),
-    lon            DOUBLE PRECISION CHECK (lon IS NULL OR lon BETWEEN -180 AND 180),
-    srid           INTEGER NOT NULL DEFAULT 4258,
+    -- Representasjonspunktet for bygget. geography (ikke geometry) fordi
+    -- ST_DWithin og <-> da gir avstand i meter direkte, uten at man selv må
+    -- velge riktig projeksjon/UTM-sone for å få korrekt avstand.
+    posisjon       geography(Point, 4326),
 
     aktiv          BOOLEAN NOT NULL DEFAULT TRUE,
     sist_oppdatert TIMESTAMPTZ,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_bygning_lon_lat_both
-        CHECK ((lon IS NULL AND lat IS NULL) OR (lon IS NOT NULL AND lat IS NOT NULL)),
     -- Mål for ressurs.fk_ressurs_bygning.
     CONSTRAINT uq_bygning_kommune UNIQUE (id, kommune_id),
     -- Bygget kan bare tilhøre en instans som faktisk betjener kommunen bygget
@@ -171,7 +181,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_bygning_bygningsnr
     WHERE bygningsnr IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS ix_bygning_kommune ON bygning (kommune_id);
-CREATE INDEX IF NOT EXISTS ix_bygning_lon_lat ON bygning (lon, lat);
+-- GiST, ikke btree: nødvendig for ST_DWithin/<-> (nærhetssøk) skal kunne
+-- bruke indeksen. En vanlig btree-indeks kan ikke svare på "innenfor 5 km".
+CREATE INDEX IF NOT EXISTS ix_bygning_posisjon ON bygning USING GIST (posisjon);
 
 -- Et bygg kan stå på flere eiendommer, og en eiendom kan ha flere bygg.
 CREATE TABLE IF NOT EXISTS bygning_matrikkelenhet
@@ -205,9 +217,7 @@ CREATE TABLE IF NOT EXISTS adresse
     bokstav        CHAR(1),
     postnummer     CHAR(4) CHECK (postnummer IS NULL OR postnummer ~ '^[0-9]{4}$'),
     poststed       TEXT,
-    lat            DOUBLE PRECISION CHECK (lat IS NULL OR lat BETWEEN -90 AND 90),
-    lon            DOUBLE PRECISION CHECK (lon IS NULL OR lon BETWEEN -180 AND 180),
-    srid           INTEGER NOT NULL DEFAULT 4258,
+    posisjon       geography(Point, 4326),
     -- Kildedata har ingen koordinater i det hele tatt, så punktet må slås opp.
     -- Statusen gjør at en senere matrikkelimport trygt kan overskrive et
     -- geokodet punkt, men ikke et autoritativt representasjonspunkt.
@@ -217,9 +227,7 @@ CREATE TABLE IF NOT EXISTS adresse
     ekstern_id     TEXT,
     sist_oppdatert TIMESTAMPTZ,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_adresse_lon_lat_both
-        CHECK ((lon IS NULL AND lat IS NULL) OR (lon IS NOT NULL AND lat IS NOT NULL))
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_adresse_hovedadresse
@@ -227,6 +235,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_adresse_hovedadresse
 
 CREATE INDEX IF NOT EXISTS ix_adresse_bygning ON adresse (bygning_id);
 CREATE INDEX IF NOT EXISTS ix_adresse_postnummer ON adresse (postnummer);
+CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 
 
 -- =============================================================================
@@ -471,8 +480,11 @@ SELECT
     b.navn                         AS bygg_navn,
     b.er_uteanlegg,
     b.bydel_navn,
-    COALESCE(a.lat, b.lat)         AS lat,
-    COALESCE(a.lon, b.lon)         AS lon,
+    -- Geografi til bruk i nærhetssøk (ST_DWithin, <-> mot et gitt punkt), samt
+    -- lat/lon som vanlige tall for enkel visning uten PostGIS-funksjoner.
+    COALESCE(a.posisjon, b.posisjon)                AS posisjon,
+    ST_Y(COALESCE(a.posisjon, b.posisjon)::geometry) AS lat,
+    ST_X(COALESCE(a.posisjon, b.posisjon)::geometry) AS lon,
     a.adressetekst,
     a.postnummer,
     a.poststed,
