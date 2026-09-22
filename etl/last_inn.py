@@ -201,17 +201,16 @@ def generer_sql(slug: str, ut) -> None:
     w(f"-- {knavn}\n")
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
       f"VALUES ({q(knr)},{q(knavn)},{q(fylke)}) ON CONFLICT (kommunenr) DO NOTHING;\n")
-    w(f"INSERT INTO fagsystem_instans (kildenokkel,navn,base_url) "
-      f"VALUES ({q(kn)},{q('Aktiv kommune ' + knavn)},{q('https://' + slug + '.aktiv-kommune.no')}) "
+    w(f"INSERT INTO fagsystem_instans (kildenokkel,type,navn,base_url) "
+      f"VALUES ({q(kn)},'booking',{q('Aktiv kommune ' + knavn)},{q('https://' + slug + '.aktiv-kommune.no')}) "
       f"ON CONFLICT (kildenokkel) DO NOTHING;\n")
-    # instans_kommune finnes ikke som egen tabell; fagsystem_instans_id ligger
-    # direkte på kommune (én instans kan ha mange kommuner, ikke omvendt).
-    # Oppdateres bare når feltet ennå ikke er satt, slik at en kommune som
-    # senere kobles til en annen instans ikke overskrives ved hvert kjøring.
-    w(f"UPDATE kommune SET fagsystem_instans_id = fi.id "
-      f"FROM fagsystem_instans fi "
-      f"WHERE kommune.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
-      f"AND kommune.fagsystem_instans_id IS NULL;\n\n")
+    # Ekte mange-til-mange: en kommune kan ha flere instanser (booking, fdv,
+    # sensor, ...), én instans kan betjene flere kommuner. uniq_kommune_
+    # fagsystem_type hindrer to instanser av samme type for samme kommune.
+    w(f"INSERT INTO kommune_fagsystem_instans (kommune_id,fagsystem_instans_id,type) "
+      f"SELECT k.id, fi.id, fi.type FROM kommune k, fagsystem_instans fi "
+      f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
+      f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
     # --- kildekoder + automatisk forslag til kartlegging ---
     for kodetype, samling, tabell in [

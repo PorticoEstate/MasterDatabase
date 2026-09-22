@@ -1,7 +1,7 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
 -- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
--- 16 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
+-- 17 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
 -- matrikkelen. Se db/schema_kjerne_dokumentasjon.md.
 --
 -- To kilder, to roller:
@@ -34,19 +34,23 @@ $$;
 -- =============================================================================
 -- 1. Kildesystem og kommune
 --
--- fagsystem_instans er "toppen": én installasjon kan betjene flere kommuner
--- (interkommunalt samarbeid). Fremmednøkkelen ligger derfor på kommune, ikke i
--- en egen koblingstabell - det er en ren en-til-mange, ikke mange-til-mange.
--- En kommune kan bare ha én instans om gangen, fordi kolonnen er skalar.
+-- Ekte mange-til-mange: en kommune kan ha flere fagsystem-instanser (booking,
+-- fdv, sensor, ...), og én instans kan betjene flere kommuner. "Hvilken av
+-- kommunens instanser er booking-instansen" avgjøres ved å filtrere på
+-- fagsystem_instans.type - ikke med et eget "kontekst"-begrep. En kommune kan
+-- likevel bare ha én instans PER TYPE: uniq_kommune_fagsystem_type håndhever
+-- det ved at typen er kopiert inn i koblingstabellen.
 -- =============================================================================
 
--- Én rad per Aktiv kommune-installasjon. kildenokkel ('aktiv-kommune:bergen')
--- brukes som kildemerking ellers i basen. Instansen er nødvendig i nøklene
--- fordi de lokale ID-ene overlapper: ressurs 438 finnes i flere instanser.
+-- Én rad per fagsysteminstallasjon (booking, fdv, sensor, ...). kildenokkel
+-- ('aktiv-kommune:bergen') brukes som kildemerking ellers i basen. Instansen
+-- er nødvendig i nøklene fordi de lokale ID-ene overlapper: ressurs 438
+-- finnes i flere instanser.
 CREATE TABLE IF NOT EXISTS fagsystem_instans
 (
     id           BIGSERIAL PRIMARY KEY,
     kildenokkel  TEXT UNIQUE NOT NULL,
+    type         TEXT NOT NULL CHECK (type IN ('booking','fdv','sensor','annet')),
     navn         TEXT,
     base_url     TEXT NOT NULL,
     aktiv        BOOLEAN NOT NULL DEFAULT TRUE,
@@ -56,21 +60,33 @@ CREATE TABLE IF NOT EXISTS fagsystem_instans
 
 CREATE TABLE IF NOT EXISTS kommune
 (
-    id                   BIGSERIAL PRIMARY KEY,
-    kommunenr            CHAR(4) UNIQUE NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
-    navn                 TEXT NOT NULL,
-    fylkesnavn           TEXT,
-    -- Nullbar: en kommune kan være kjent fra matrikkelen før den har fått en
-    -- Aktiv kommune-instans knyttet til seg.
-    fagsystem_instans_id BIGINT REFERENCES fagsystem_instans(id) ON DELETE SET NULL,
-    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    -- Mål for de sammensatte fremmednøklene fra bygning og ressurs, som
-    -- garanterer at en ressurs sin instans stemmer med kommunens instans.
-    CONSTRAINT uq_kommune_fagsystem_instans UNIQUE (id, fagsystem_instans_id)
+    id           BIGSERIAL PRIMARY KEY,
+    kommunenr    CHAR(4) UNIQUE NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
+    navn         TEXT NOT NULL,
+    fylkesnavn   TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS ix_kommune_fagsystem_instans ON kommune (fagsystem_instans_id);
+-- Koblingstabell: hvilke instanser betjener hvilke kommuner. "type" er en
+-- kopi av fagsystem_instans.type, satt ved innsetting - ikke en uavhengig
+-- verdi. Kopien finnes bare for at UNIQUE (kommune_id, type) skal kunne
+-- håndheve "maks én instans per type per kommune"; Postgres kan ikke
+-- håndheve en unik-regel som refererer en kolonne i en annen tabell direkte.
+CREATE TABLE IF NOT EXISTS kommune_fagsystem_instans
+(
+    kommune_id           BIGINT NOT NULL REFERENCES kommune(id) ON DELETE CASCADE,
+    fagsystem_instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(id) ON DELETE CASCADE,
+    type                 TEXT NOT NULL,
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    -- Primærnøkkelen er samtidig målet for de sammensatte fremmednøklene fra
+    -- bygning og ressurs - ingen egen indeks trengs for det.
+    PRIMARY KEY (kommune_id, fagsystem_instans_id),
+    CONSTRAINT uniq_kommune_fagsystem_type UNIQUE (kommune_id, type)
+);
+
+CREATE INDEX IF NOT EXISTS ix_kommune_fagsystem_instans_instans
+    ON kommune_fagsystem_instans (fagsystem_instans_id);
 
 
 -- =============================================================================
@@ -107,8 +123,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelenhet
 -- 3. Bygning
 --
 -- Holder både bygg og utendørs anlegg. Aktiv kommune har bare ett stedsbegrep:
--- "Paradis kunstgressbane" er registrert som et bygg der. er_uteanlegg skiller
--- dem uten at det trengs en egen tabell.
+-- "Paradis kunstgressbane" er registrert som et bygg der, på linje med ekte
+-- bygninger. Vi skiller dem ikke på bygningsnivå - kildedata har ingen felt
+-- som sier "dette er utendørs", og et bygg kan i praksis romme både en hall
+-- og en utendørs kunstgressbane under samme adresse. Innendørs/utendørs
+-- avgjøres derfor per ressurs, via ressurs.lokaletype_id (se UTEAREAL-gruppen
+-- og de utendørs-spesifikke kodene i lokaletype).
 --
 -- Raden bærer to identiteter samtidig:
 --   (fagsystem_instans_id, ekstern_id)  identiteten i kommunens bookingsystem
@@ -121,7 +141,6 @@ CREATE TABLE IF NOT EXISTS bygning
     id             BIGSERIAL PRIMARY KEY,
     kommune_id     BIGINT NOT NULL REFERENCES kommune(id) ON DELETE CASCADE,
     navn           TEXT NOT NULL,
-    er_uteanlegg   BOOLEAN NOT NULL DEFAULT FALSE,
     bydel_navn     TEXT,
 
     -- Fra Aktiv kommune. NULL for bygg som bare er kjent fra matrikkelen.
@@ -166,7 +185,7 @@ CREATE TABLE IF NOT EXISTS bygning
     -- ligger i. Ikke håndhevet når fagsystem_instans_id er NULL (bygg fra
     -- matrikkelen, uten booking-tilknytning).
     CONSTRAINT fk_bygning_fagsystem_instans_kommune FOREIGN KEY (kommune_id, fagsystem_instans_id)
-        REFERENCES kommune (id, fagsystem_instans_id)
+        REFERENCES kommune_fagsystem_instans (kommune_id, fagsystem_instans_id)
 );
 
 -- Identitet fra bookingsystemet, unik per instans.
@@ -388,7 +407,7 @@ CREATE TABLE IF NOT EXISTS ressurs
         REFERENCES bygning (id, kommune_id) ON DELETE SET NULL,
     -- Ressursen kan bare høre til en kommune instansen faktisk betjener.
     CONSTRAINT fk_ressurs_fagsystem_instans_kommune FOREIGN KEY (kommune_id, fagsystem_instans_id)
-        REFERENCES kommune (id, fagsystem_instans_id),
+        REFERENCES kommune_fagsystem_instans (kommune_id, fagsystem_instans_id),
     CONSTRAINT uniq_ressurs_ekstern UNIQUE (fagsystem_instans_id, ekstern_id)
 );
 
@@ -478,7 +497,6 @@ SELECT
     p.kode                         AS lokaletype_hovedgruppe,
     b.id                           AS bygg_id,
     b.navn                         AS bygg_navn,
-    b.er_uteanlegg,
     b.bydel_navn,
     -- Geografi til bruk i nærhetssøk (ST_DWithin, <-> mot et gitt punkt), samt
     -- lat/lon som vanlige tall for enkel visning uten PostGIS-funksjoner.
@@ -511,12 +529,13 @@ WHERE r.aktiv AND r.bookbar;
 -- Arbeidslisten for kuratering. Hver rad er en lokal kode som ennå ikke kan
 -- søkes på tvers av kommuner. Kildekoden hører til instansen, ikke til én
 -- kommune, siden en instans kan betjene flere - kommunene listes derfor
--- sammenslått via oppslag på kommune.fagsystem_instans_id.
+-- sammenslått via oppslag i kommune_fagsystem_instans.
 CREATE OR REPLACE VIEW v_ukartlagte_kildekoder AS
 SELECT kk.id AS kildekode_id, fi.kildenokkel,
        (SELECT string_agg(k.navn, ', ' ORDER BY k.navn)
-          FROM kommune k
-         WHERE k.fagsystem_instans_id = fi.id) AS kommuner,
+          FROM kommune_fagsystem_instans kfi
+          JOIN kommune k ON k.id = kfi.kommune_id
+         WHERE kfi.fagsystem_instans_id = fi.id) AS kommuner,
        kk.kodetype, kk.kode, kk.navn, kk.sist_sett
 FROM kildekode kk
 JOIN fagsystem_instans fi ON fi.id = kk.fagsystem_instans_id

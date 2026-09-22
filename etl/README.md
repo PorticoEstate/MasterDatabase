@@ -66,6 +66,30 @@ kan ikke lastes og logges i stedet i `synk_avvik`, med `avvikstype` og en
 kort forklaring - se den tabellen for å forstå datakvaliteten i det som ble
 lastet inn.
 
+## Geokoding
+
+`geokod.py` fyller `adresse.posisjon` og `bygning.posisjon` fra Kartverkets åpne Adresse-API. Leser en enkel liste fra standard-inn, skriver SQL til standard-ut - samme mønster som `last_inn.py`, ingen ekstra Python-pakker.
+
+```bash
+docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
+    SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr
+    FROM adresse a
+    JOIN bygning b ON b.id = a.bygning_id
+    JOIN kommune k ON k.id = b.kommune_id
+    WHERE a.posisjon IS NULL AND a.adressetekst IS NOT NULL;
+" > etl/ut/adresser_a_geokode.txt
+
+python3 etl/geokod.py < etl/ut/adresser_a_geokode.txt > etl/ut/geokoding.sql
+
+docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/geokoding.sql
+```
+
+Kjøres trygt på nytt: `WHERE a.posisjon IS NULL` i dumpen sørger for at bare det som fortsatt mangler blir sendt til API-et igjen.
+
+**Prinsipp: ett eksakt treff brukes, ellers logges det som avvik.** Ingen fuzzy-gjetning - et geokodet punkt som er feil er verre enn intet punkt. Er `postnummer` kjent, kreves nøyaktig ett treff *med det postnummeret*; finnes ingen slike, regnes søket som mislykket selv om et ufiltrert søk ga andre treff et annet sted i landet. Dette ble funnet nødvendig i praksis: et fritekstsøk på «Festplassen» (Bergen) matchet først den eneste «Festplassen» i hele adresseregisteret med husnummer - som ligger i Lørenskog.
+
+Reelt resultat ved full kjøring (423 bygg, 419 adresser å geokode): 234 geokodet, 185 feilet og loggført i `synk_avvik` (stavefeil/formatforskjeller mellom Aktiv kommune og det offisielle registeret, f.eks. «Wolfsgate 12x» mot det offisielle «Wolffs gate»), og 4 tilfeller der geokodingen fant et annet kommunenummer enn det innlastingen antok - loggført, ikke overskrevet, siden `kommune_id` er identitetsdata som ikke skal endres stille av et geokodingsoppslag.
+
 ## Kjent forenkling
 
 `kommune_id` settes i dag fra hvilken Aktiv kommune-instans dataene kommer

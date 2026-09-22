@@ -1,6 +1,6 @@
 # Kjernemodell for masterdatabasen
 
-Dokumentasjon for `db/schema_kjerne.sql`. 16 egne tabeller, 2 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data.
+Dokumentasjon for `db/schema_kjerne.sql`. 17 egne tabeller, 2 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data.
 
 **Krever PostGIS.** Docker-imaget er `postgis/postgis:18-3.6` (ikke rent `postgres:18`), og skjemaet starter med `CREATE EXTENSION IF NOT EXISTS postgis;`.
 
@@ -29,21 +29,35 @@ Master eier **ikke** bookinger, kalendere eller søkerdata. Den finner lokalet o
 
 **`kommune`** — 12 rader. Kommunenummer, navn, fylke.
 
-**`fagsystem_instans`** — 12 rader. Én per Aktiv kommune-installasjon, med `base_url` og `kildenokkel` (`aktiv-kommune:bergen`).
+**`fagsystem_instans`** — 12 rader i dag, alle `type='booking'`. Én per fagsysteminstallasjon, med `base_url`, `kildenokkel` (`aktiv-kommune:bergen`) og en `type` (`booking`, `fdv`, `sensor`, `annet`).
 
 Instansen må være med i nøklene fordi de lokale ID-ene overlapper mellom instanser. Ressurs 438 finnes i flere installasjoner og betyr ulike ting. `(fagsystem_instans_id, ekstern_id)` er entydig; `438` alene er ubrukelig.
 
-**Én instans kan betjene flere kommuner** (interkommunalt samarbeid), men en kommune betjenes bare av én instans. Dette er en vanlig en-til-mange-relasjon, ikke mange-til-mange, og løses uten egen koblingstabell: `kommune.fagsystem_instans_id` peker opp til instansen. Fordi kolonnen er skalar, kan en kommune aldri ha to instanser samtidig; fordi flere kommunerader kan dele samme `fagsystem_instans_id`, kan én instans ha mange kommuner.
+**`kommune_fagsystem_instans`** — koblingstabell, **ekte mange-til-mange**. Én instans kan betjene flere kommuner (interkommunalt samarbeid), og én kommune kan ha flere instanser samtidig — men bare én per `type`. Bergen kan altså ha én booking-instans (Aktiv kommune) og én FDV-instans samtidig, men ikke to booking-instanser.
 
-`kommune` har i tillegg `CONSTRAINT uq_kommune_fagsystem_instans UNIQUE (id, fagsystem_instans_id)`. Den finnes ikke for å håndheve noe på `kommune` selv — `id` er allerede unik — men som *mål* for de sammensatte fremmednøklene fra `bygning` og `ressurs`, som begge har `(kommune_id, fagsystem_instans_id)` pekende hit. Det hindrer at et bygg eller en ressurs havner i en kommune som instansen ikke betjener:
+`type`-kolonnen på koblingstabellen er en kopi av `fagsystem_instans.type`, satt når raden opprettes. Den finnes bare for at `UNIQUE (kommune_id, type)` skal kunne håndheve «maks én instans per type per kommune» — Postgres kan ikke lage en unik-regel som refererer en kolonne i en annen tabell direkte, så kopien er den vanlige måten å løse det på.
+
+Ruting til riktig instans er ett filter på typen, ikke et eget «kontekst»-begrep:
+
+```sql
+SELECT fi.base_url FROM kommune k
+JOIN kommune_fagsystem_instans kfi ON kfi.kommune_id = k.id
+JOIN fagsystem_instans fi ON fi.id = kfi.fagsystem_instans_id
+WHERE k.kommunenr = '4601' AND fi.type = 'booking';
+```
+
+`bygning` og `ressurs` har sammensatte fremmednøkler `(kommune_id, fagsystem_instans_id)` mot `kommune_fagsystem_instans` (ikke mot `kommune` direkte). Det hindrer at et bygg eller en ressurs havner i en kommune/instans-kombinasjon som ikke faktisk finnes:
 
 ```
-ERROR:  insert or update on table "ressurs" violates foreign key constraint
-        "fk_ressurs_fagsystem_instans_kommune"
-DETAIL:  Key (kommune_id, fagsystem_instans_id)=(2, 2) is not present in table "kommune".
+ERROR:  insert or update on table "bygning" violates foreign key constraint
+        "fk_bygning_fagsystem_instans_kommune"
+DETAIL:  Key (kommune_id, fagsystem_instans_id)=(1, 3) is not present in table
+         "kommune_fagsystem_instans".
 ```
 
 For `bygning` er `fagsystem_instans_id` nullbar, og da er regelen ikke i kraft — det gjelder bygg som bare er kjent fra matrikkelen.
+
+**Hvorfor ikke `ressurslenke`/`kontekst` (som i `schema_perfect.sql`)?** Det løser et annet, vanskeligere problem: at *samme ressurs* har forskjellig identitet i flere fagsystemer samtidig (en gymsal med én ekstern-ID i bookingsystemet og en annen i FDV-systemet). Det problemet finnes ikke i dag — hver ressurs kommer fra nøyaktig én kilde. Løsningen her løser bare «hvilken instans skal en kommune rutes til for en gitt type», som er alt vi har bruk for nå.
 
 > **Viktig konsekvens for innlastingen.** Kommunen kan ikke lenger utledes fra subdomenet. Tidligere betydde `bergen.aktiv-kommune.no` at alt derfra var Bergen; det holder ikke når en instans dekker flere kommuner. `kommune_id` må settes fra **adressen**, og Kartverkets åpne Adresse-API returnerer `kommunenummer` direkte i samme oppslag som gir koordinatene. Geokodingssteget er dermed ikke lenger bare for kart — det er det som avgjør kommunetilhørighet.
 
@@ -61,7 +75,9 @@ Den unike indeksen bruker `COALESCE(festenr, 0)` fordi festenr og seksjonsnr er 
 
 `antall_etasjer` er lagt til etter å ha sett faktiske data i Matrikkelen — feltet finnes der som et tall per bygg (ikke en egen rad per etasje), og hadde ingen plass i den opprinnelige versjonen av denne tabellen.
 
-Tabellen holder både bygg og utendørs anlegg, fordi Aktiv kommune bare har ett stedsbegrep: «Paradis kunstgressbane» er registrert som et bygg der. `er_uteanlegg` skiller dem uten at det trengs en egen tabell.
+Tabellen holder både bygg og utendørs anlegg, fordi Aktiv kommune bare har ett stedsbegrep: «Paradis kunstgressbane» er registrert som et bygg der, på linje med ekte bygninger.
+
+**Innendørs/utendørs avgjøres ikke på bygningsnivå.** Vi prøvde først en `er_uteanlegg`-kolonne på `bygning`, men den ble aldri fylt riktig: Aktiv kommune har ingen strukturert markering for dette i kildedataen (kun navnet, f.eks. «Møhlenpris kunstgress», gir et hint — og det er fritekst, ikke et felt å stole på). Verre: et bygg kan i praksis romme *begge* — en idrettspark kan ha en innendørshall og en utendørs kunstgressbane under samme adresse — så «er dette bygget utendørs» har ikke ett riktig svar per bygg. Kolonnen er derfor fjernet. Innendørs/utendørs filtreres i stedet på **ressursnivå**, via `ressurs.lokaletype_id` — `lokaletype` har allerede en `UTEAREAL`-hovedgruppe (`FRILUFTSOMRAADE`, `UTEOMRAADE`, `TURVEI` m.fl.) og enkelte utendørs-spesifikke koder under `IDRETT` (`FOTBALLBANE`, `SKATEANLEGG`). Det er den riktige granulariteten: to ressurser i samme bygg kan ha ulik status, selv om bygget ikke kan.
 
 Raden bærer **to identiteter samtidig**:
 
@@ -273,11 +289,13 @@ ORDER BY fi.kildenokkel, kk.kode;
 
 ## Validering
 
-Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt kjøring, og oppretter 16 egne tabeller og 2 visninger (pluss PostGIS' egen `spatial_ref_sys`).
+Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt kjøring, og oppretter 17 egne tabeller og 2 visninger (pluss PostGIS' egen `spatial_ref_sys`).
 
-Mange-til-én-relasjonen (én instans, flere kommuner) er verifisert direkte på `kommune.fagsystem_instans_id`, uten koblingstabell: to kommuner på samme instans godtas, et bygg med en annen instans enn sin kommunes instans avvises via `fk_bygning_fagsystem_instans_kommune`, en ressurs med feil instans for sin kommune avvises via `fk_ressurs_fagsystem_instans_kommune`, og en ressurs i et bygg fra en annen kommune avvises via `fk_ressurs_bygning`.
+Mange-til-mange-relasjonen mellom `kommune` og `fagsystem_instans` er verifisert: én kommune kan knyttes til flere instanser av forskjellig type (booking + fdv samtidig, testet på Bergen), men `UNIQUE (kommune_id, type)` avviser en andre instans av *samme* type for samme kommune. Ruting fungerer ved å filtrere på `fagsystem_instans.type` — bekreftet at et oppslag på Bergens booking-instans og Bergens fdv-instans gir to forskjellige, korrekte `base_url`. Et bygg med en kommune/instans-kombinasjon som ikke finnes i `kommune_fagsystem_instans` avvises fortsatt via `fk_bygning_fagsystem_instans_kommune`, og det samme gjelder `ressurs` via `fk_ressurs_fagsystem_instans_kommune` og `fk_ressurs_bygning`.
 
-**PostGIS-nærhetssøk er verifisert med reelle avstander.** To bygg i Bergen (i Flaktveit- og Nordnes-området) fikk midlertidige testkoordinater, og `ST_Distance` regnet ut 7 662 meter mellom dem — riktig størrelsesorden for den faktiske avstanden. `ST_DWithin` fant korrekt alle bygg innenfor 10 km, sortert med `<->`, og `EXPLAIN` bekreftet `Index Scan using ix_bygning_posisjon` — altså at GiST-indeksen faktisk brukes, ikke en full tabellskanning. Testkoordinatene ble deretter nullet ut igjen; `posisjon` står NULL på alle rader til geokoding faktisk kjøres.
+**PostGIS-nærhetssøk er verifisert med reelle avstander**, først med midlertidige testkoordinater (7 662 meter mellom to Bergen-bygg, riktig størrelsesorden, `EXPLAIN` bekreftet `Index Scan using ix_bygning_posisjon`), deretter med ekte geokodede koordinater etter at `etl/geokod.py` ble kjørt (se `etl/README.md`). 234 av 419 adresser ble geokodet mot Kartverkets Adresse-API; de resterende 185 er loggført i `synk_avvik` fordi Aktiv kommunes adressetekst ikke alltid stemmer med det offisielle registeret (stavefeil, mellomrom, feil postnummer). Et nærhetssøk på gymsaler innenfor 5 km av Bergen sentrum gir nå 13 reelle treff, sortert etter faktisk avstand.
+
+Geokodingen fanget også et eget bugfunn: et fritekstsøk uten streng postnummer-håndtering matchet «Festplassen» (Bergen) mot den eneste «Festplassen» i hele adresseregisteret med husnummer — i Lørenskog. Rettet til at postnummer-filteret må gi et faktisk treff for at et resultat skal godtas; ellers regnes søket som mislykket. 4 adresser fikk et annet kommunenummer fra geokodingen enn det innlastingen antok (trolig postnummer som strekker seg over en kommunegrense) — loggført i `synk_avvik`, ikke overskrevet, siden `kommune_id` er identitetsdata.
 
 Alle 12 instanser er lastet inn med reelle data:
 
@@ -301,7 +319,7 @@ Radtallene svinger litt fra kjøring til kjøring (kommunene endrer sine egne da
 
 Verdt å kjenne før noe loves som søkefunksjon.
 
-**Ingen koordinater i kilden.** Ingen av de 12 instansene har geodata. Geokoding er et obligatorisk steg, ikke en forbedring.
+**Ingen koordinater i kilden.** Ingen av de 12 instansene har geodata. Geokoding var derfor et obligatorisk steg, ikke en forbedring — se `etl/geokod.py`. Resultat: 56 % av adressene (234 av 419) lot seg geokode automatisk; resten krever manuell retting av adressetekst eller postnummer, siden Aktiv kommunes fritekst ikke alltid stemmer med det offisielle registeret.
 
 **Kapasitet er nesten ikke utfylt.** 2 av 590 ressurser i Bergen, 3 av 371 i Stavanger. Kapasitetsfilter vil skjule nesten alle treff til verdier fylles manuelt.
 
@@ -325,7 +343,7 @@ Disse fantes i `schema_perfect.sql` og er tatt ut, fordi ingen data fyller dem e
 |---|---|
 | `etasje`, `rom`, `floy` | Kilden har ingen felt for etasje, rom eller fløy. Verifisert: 63 feltnavn i kildedata, ingen treff. |
 | `flate`, `flate_rel_aggregates` | Baner er vanlige ressurser i kilden, ikke et eget begrep. |
-| `uteomraade`, `uteomraade_type` | Aktiv kommune har ett stedsbegrep. `bygning.er_uteanlegg` dekker det. |
+| `uteomraade`, `uteomraade_type` | Aktiv kommune har ett stedsbegrep. `bygning` dekker det; innendørs/utendørs filtreres via `ressurs.lokaletype_id` i stedet for en egen stedstabell. |
 | `bruksenhet` | Kommer fra matrikkelen, men trengs ikke for å finne et lokale. |
 | `gate`, `bydel` | Tekstkolonner til noen skal vedlikeholde dem som register. |
 | `identitetslenke` | Bygget bærer begge identitetene selv. |
