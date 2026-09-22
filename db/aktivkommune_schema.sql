@@ -29,9 +29,13 @@
 --   - resource_categories.parent_id has been observed as 0 (not NULL) for
 --     top-level rows, so no FK is enforced on the self-referencing parent_id
 --     columns -- clean that up in the transform step, not here.
---   - opening_hours, organizations_ids and simple_booking_start_date/
---     end_date were empty in every sample seen so far; kept as TEXT since
---     their populated format hasn't been confirmed yet.
+--   - opening_hours (buildings and resources) is HTML prose written by
+--     hand, not structured opening hours -- treat as display text only.
+--   - simple_booking_start_date/_end_date are unix epoch seconds (BIGINT),
+--     converted to timestamptz in the transform step.
+--   - organizations_ids is empty in every row seen so far; if it is ever
+--     populated the resource<->organization link belongs in a junction
+--     table, not in that column.
 --   - the source's "towns" collection (b_id/b_name/id/name) was actually a
 --     building-to-bydel relation, not a flat list: normalized below into
 --     aktivkommune.bydel (the 9 distinct id/name pairs, under a kommune
@@ -98,7 +102,7 @@ CREATE TABLE IF NOT EXISTS aktivkommune.buildings
     district               TEXT,
     city                   TEXT,
     calendar_text          TEXT,
-    opening_hours          TEXT, -- format unconfirmed, empty in every sample so far
+    opening_hours          TEXT, -- HTML prose, not structured hours; not machine-parseable
     source_synced_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -115,7 +119,7 @@ CREATE TABLE IF NOT EXISTS aktivkommune.resources
     organizations_ids             TEXT, -- format unconfirmed, empty in every sample so far
     json_representation           JSONB,
     rescategory_id                BIGINT REFERENCES aktivkommune.resource_categories(id),
-    opening_hours                 TEXT, -- format unconfirmed, empty in every sample so far
+    opening_hours                 TEXT, -- HTML prose, not structured hours; not machine-parseable
     direct_booking                SMALLINT,
     booking_day_default_lenght    INTEGER,
     booking_dow_default_start     INTEGER,
@@ -123,9 +127,9 @@ CREATE TABLE IF NOT EXISTS aktivkommune.resources
     booking_time_default_end      INTEGER, -- sentinel -1 = unset, not a TIME value
     simple_booking                SMALLINT,
     direct_booking_season_id      BIGINT,
-    simple_booking_start_date     TEXT, -- format unconfirmed, null in every sample so far
+    simple_booking_start_date     BIGINT, -- unix epoch seconds
     booking_month_horizon         INTEGER,
-    simple_booking_end_date       TEXT, -- format unconfirmed, null in every sample so far
+    simple_booking_end_date       BIGINT, -- unix epoch seconds
     booking_day_horizon           INTEGER,
     capacity                      INTEGER,
     deactivate_calendar           SMALLINT,
@@ -138,7 +142,7 @@ CREATE TABLE IF NOT EXISTS aktivkommune.resources
     booking_buffer_deadline        INTEGER,
     description_json                JSONB,
     deny_application_if_booked      SMALLINT,
-    short_description                TEXT,
+    short_description                JSONB, -- i18n dict like description_json; empty in every populated row so far
     cancellation_deadline_value      INTEGER,
     cancellation_deadline_unit       TEXT,
     source_synced_at                 TIMESTAMPTZ NOT NULL DEFAULT now()
