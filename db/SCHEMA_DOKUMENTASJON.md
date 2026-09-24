@@ -159,7 +159,10 @@ Medlemskap av en `ressurs` i en `ressurspool`, med rolle, prioritet og gyldighet
 Katalog over fagsystemtyper (booking, fdv, sensor, annet).
 
 ### `fagsystem_instans`
-Én instans av et fagsystem per kommune (`UNIQUE (fagsystem_id, kommune_id)`), med `base_url` og fri `konfig_json`.
+En instans av et fagsystem, med `base_url` og fri `konfig_json`. Kan betjene én eller flere kommuner — koblingen ligger i `fagsystem_instans_kommune`, ikke som egen kolonne her.
+
+### `fagsystem_instans_kommune`
+Mange-til-mange-kobling mellom `fagsystem_instans` og `kommune`. Gjør det mulig for én instans (f.eks. en delt/regional instans) å betjene flere kommuner, og for én kommune å bruke flere instanser (av samme eller forskjellige fagsystem). `PRIMARY KEY (instans_id, kommune_id)`.
 
 ### `ressurslenke`
 Kobler en master-ressurs (bygg, bruksenhet, rom, uteområde **eller** ressurs — akkurat én) til riktig fagsystem-instans for en gitt kontekst (booking/fdv/sensor/annet), med ekstern identifikator i fagsystemet.
@@ -203,6 +206,7 @@ Repoet inneholder eksempeldata i `ak-aktivitetsanalyse-master/searchdataall-<kom
 - Adressefelt fra kilden (`street`, `zip_code`, `city`) er fritekst og må parses/normaliseres før de kan settes inn i strukturerte `gate`/`adresse`-rader.
 - Ingen validering/RLS er satt opp for `organisasjon` ennå — bør vurderes før produksjonsbruk (se personvernmerknad).
 - Skjemaet er ikke kjørt/validert mot en live database etter siste endringer (brukeren valgte å teste selv).
+- ⚠️ **VIKTIG: Ingen constraint hindrer at én kommune kobles til to forskjellige instanser av *samme* fagsystem** via `fagsystem_instans_kommune` (PK er kun `(instans_id, kommune_id)`, som ikke kjenner til `fagsystem_id`). Eksempel: kommune 42 kobles til både `instans_id=1` og `instans_id=2`, der begge har `fagsystem_id=5` — da er det tvetydig hvilken `base_url` som er "riktig" Active-instans for kommune 42. Dette hindres **ikke** av databasen i dag; **må** håndteres i applikasjonslogikk eller en trigger før dette tas i bruk med flere kommuner/instanser i praksis.
 
 ---
 
@@ -225,3 +229,9 @@ Repoet inneholder eksempeldata i `ak-aktivitetsanalyse-master/searchdataall-<kom
 - Nye koblingstabeller: `ressurs_aktivitet`, `ressurs_fasilitet`, `ressurskategori_aktivitet`, `bygning_ressurs`.
 - Ny kolonne `ressurs.kategori_id` (FK til `ressurskategori`).
 - Nye kolonner på `bygning`: `aktivitet_id`, `telefon`, `epost`, `hjemmeside`, `apningstider`, `tilsyn_navn/telefon/epost` (+ `_2`), `metadata_json`.
+
+**Lagt til (fagsystem_instans <-> kommune som mange-til-mange):**
+- `fagsystem_instans.kommune_id` og `CONSTRAINT uniq_fagsystem_per_kommune` er fjernet — en instans er ikke lenger bundet til akkurat én kommune.
+- Ny relasjonstabell `fagsystem_instans_kommune (instans_id, kommune_id)` med `PRIMARY KEY (instans_id, kommune_id)`, slik at én instans kan betjene flere kommuner (f.eks. en delt/regional instans), og én kommune kan bruke flere instanser.
+- Indeksen `ix_fagsystem_instans_kommune` (på `fagsystem_instans.kommune_id`) er fjernet og ersattet med `ix_fagsystem_instans_kommune_kommune` (på `fagsystem_instans_kommune.kommune_id`).
+- Kjent hull etter denne endringen: se punktet om tvetydig fagsystem-kobling under [Kjente hull og videre arbeid](#10-kjente-hull-og-videre-arbeid).

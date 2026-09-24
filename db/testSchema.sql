@@ -549,25 +549,32 @@ CREATE TABLE IF NOT EXISTS fagsystem
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Fagsystem-instans per kommune (én per system/kommune)
+-- Fagsystem-instans (kan betjene én eller flere kommuner, se fagsystem_instans_kommune)
 CREATE TABLE IF NOT EXISTS fagsystem_instans
 (
     instans_id   BIGSERIAL PRIMARY KEY,
     fagsystem_id BIGINT NOT NULL REFERENCES fagsystem(fagsystem_id) ON DELETE CASCADE,
-    kommune_id   BIGINT NOT NULL REFERENCES kommune(kommune_id) ON DELETE CASCADE,
     base_url     TEXT NOT NULL,
     konfig_json  JSONB,
     aktiv        BOOLEAN DEFAULT TRUE,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uniq_fagsystem_per_kommune UNIQUE (fagsystem_id, kommune_id)
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_fagsystem
     ON fagsystem_instans (fagsystem_id);
 
-CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_kommune
-    ON fagsystem_instans (kommune_id);
+-- Kobling fagsystem_instans <-> kommune: mange-til-mange (én instans kan betjene
+-- flere kommuner, f.eks. en delt/regional instans; én kommune kan bruke flere instanser)
+CREATE TABLE IF NOT EXISTS fagsystem_instans_kommune
+(
+    instans_id  BIGINT NOT NULL REFERENCES fagsystem_instans(instans_id) ON DELETE CASCADE,
+    kommune_id  BIGINT NOT NULL REFERENCES kommune(kommune_id) ON DELETE CASCADE,
+    PRIMARY KEY (instans_id, kommune_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_fagsystem_instans_kommune_kommune
+    ON fagsystem_instans_kommune (kommune_id);
 
 -- Ressurslenke: kobler master-ressurser til riktig fagsystem-instans for en gitt kontekst
 CREATE TABLE IF NOT EXISTS ressurslenke
