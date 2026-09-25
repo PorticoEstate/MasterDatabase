@@ -26,7 +26,7 @@ services:
       - portico_masterbase
 
   db:
-    image: postgres:18
+    image: postgis/postgis:18-3.6
     container_name: portico_masterdb
     hostname: db
     restart: unless-stopped
