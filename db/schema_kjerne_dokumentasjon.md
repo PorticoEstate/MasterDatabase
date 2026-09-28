@@ -215,19 +215,61 @@ Matrikkelen vinner på byggets fakta. Aktiv kommune vinner på det publikumsvenn
 
 ---
 
-## Innlasting, steg for steg
+## Innlasting: filene og rekkefølgen
 
-1. **Hent** `https://<kommune>.aktiv-kommune.no/bookingfrontend/searchdataall` for hver av de 12 instansene. Lagre rått i `kildeuttrekk`. Cirka 6 MB i alt.
-2. **Rens tekst.** Kilden er HTML-escapet én gang for mye: `Rom 19 &amp;#40;219&amp;#41;` skal bli `Rom 19 (219)` etter to runder avkoding. `description_json` inneholder `&lt;p&gt;`-escapet HTML.
-3. **Last kildekoder.** Alle `resource_categories`, `activities` og `facilities` til `kildekode`. Nye koder får forslag i `kildekode_mapping` med status `foreslatt`.
-4. **Kurer.** Godkjenn eller avvis forslagene. Førstegangsarbeid er noen dager; deretter viser `v_ukartlagte_kildekoder` bare det nye.
-5. **Slå opp adressene mot Kartverket.** Dette steget må komme **før** byggene lagres, fordi Adresse-API-et er det som avgjør hvilken kommune bygget ligger i. Ett oppslag på gateadresse og postnummer gir `kommunenummer`, `adressenavn`, `nummer`, `bokstav`, `representasjonspunkt` (lat/lon med EPSG-kode) samt `gardsnummer` og `bruksnummer`. API-et er åpent og krever ingen avtale. Representasjonspunktet skrives til `posisjon` med `ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography`.
-6. **Last bygg, adresser og ressurser.** `kommune_id` settes fra oppslaget i steg 5, ikke fra subdomenet. Alle upserts på `ON CONFLICT (fagsystem_instans_id, ekstern_id) DO UPDATE`, slik at gjentatt kjøring oppdaterer i stedet for å duplisere. Bygg der adresseoppslaget mislykkes, får `geokoding='feilet'` og loggføres i `synk_avvik`; de må få kommune satt manuelt.
-7. **Matrikkelen senere.** Bygningsnummer, bygningstype, byggeår, BRA og bygningsomriss krever avtale med Kartverket og dokumentert behandlingsgrunnlag. Match bygg på adresse, sett `matrikkel_match` etter sikkerhet, og oppdater byggfeltene der matrikkelen vinner. Eiendomskoblingen (`matrikkelenhet`, `bygning_matrikkelenhet`) kan derimot fylles allerede i steg 5, siden det åpne API-et gir gårds- og bruksnummer.
+Dette er den faktiske pipelinen, ikke en plan — alle filnavn og kommandoer under er det som brukes i praksis (se `etl/README.md` for kjøreinstruksjoner i detalj).
 
-Rekkefølgen er viktig: Aktiv kommune definerer hvilke bygg som er relevante, adresseoppslaget avgjør kommune og koordinat, og de lisensierte matrikkeldataene beriker til slutt.
+```
+                    KILDER                          FILER/SKRIPT                    DATABASE
+                    ───────                          ────────────                    ────────
 
-`httpx` og `psycopg` er tilstrekkelig verktøy. 6 MB fra 12 kilder rettferdiggjør ikke dbt eller Airflow.
+  12 × Aktiv kommune   ──HTTPS──▶  etl/last_inn.py  ──skriver──▶  etl/ut/alle.sql  ──psql──▶  masterdb
+  (searchdataall)                 (hardkodet logikk)              (forkastbar output)
+
+  Kartverkets          ──HTTPS──▶  etl/geokod.py    ──skriver──▶  etl/ut/geokoding.sql ──psql──▶  masterdb
+  Adresse-API                     (hardkodet logikk)              (forkastbar output)
+
+  db/schema_kjerne.sql ────────────────────────────────────────────────psql────────────▶  masterdb
+  (strukturen, kjøres først, én gang eller ved endring)
+```
+
+Ingen av disse fem stegene trigger det neste automatisk — alt er manuelle kommandoer i rekkefølge, bevisst, gitt hvor lite data det er tale om (under 6 MB, 419 adresser).
+
+| Fil | Kjøres når | Hva den gjør | Hardkodet? |
+|---|---|---|---|
+| `db/schema_kjerne.sql` | Én gang mot en ny database, eller på nytt etter en modellendring | Lager alle tabellene, indeksene, visningene, og seeder kodeverkene | Ja — dette er selve modellen |
+| `etl/last_inn.py` | Hver gang vi vil oppdatere kommunedata | Henter `searchdataall` fra én eller alle 12 kommuner, renser tekst (HTML er escapet to ganger i kilden), oversetter lokale koder via ordbøkene (`LOKALETYPE`/`AKTIVITET`/`FASILITET`/`IKKE_RELEVANT_*`), skriver SQL til standard-ut | Ja — ordbøkene og avvisningslogikken er hardkodet Python |
+| `etl/ut/alle.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av hva kommunene sa akkurat da skriptet kjørte | Nei — forkastbar output, ligger i `.gitignore`, ulik hver dag |
+| `etl/geokod.py` | Etter `last_inn.py`, når nye adresser mangler koordinater | Slår opp adresser mot Kartverkets Adresse-API, skriver `UPDATE`-setninger for `posisjon` med `ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography`. Krever ett eksakt treff (bekreftet mot postnummer når det finnes); null eller flere treff logges i `synk_avvik` i stedet for å gjettes | Ja — matchingsregelen er hardkodet |
+| `etl/ut/geokoding.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av geokodingsresultatet | Nei — samme som over |
+
+Kommandorekkefølgen i praksis:
+
+```bash
+# 1. Struktur (kun ved ny database eller modellendring)
+docker exec -i portico_masterdb psql -U postgres -d masterdb < db/schema_kjerne.sql
+
+# 2. Kommunedata
+python3 etl/last_inn.py alle > etl/ut/alle.sql
+docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
+
+# 3. Geokoding
+docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
+    SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr
+    FROM adresse a JOIN bygning b ON b.id=a.bygning_id JOIN kommune k ON k.id=b.kommune_id
+    WHERE a.posisjon IS NULL AND a.adressetekst IS NOT NULL;
+" > etl/ut/adresser_a_geokode.txt
+python3 etl/geokod.py < etl/ut/adresser_a_geokode.txt > etl/ut/geokoding.sql
+docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/geokoding.sql
+```
+
+Alle upserts i steg 2 og 3 går på `ON CONFLICT ... DO UPDATE`, slik at gjentatt kjøring oppdaterer i stedet for å duplisere.
+
+**Kjent forenkling, verdt å lese to ganger:** `kommune_id` settes i steg 2 fra hvilken Aktiv kommune-instans dataene kommer fra (instansens slug slås opp direkte mot en kommune), **ikke** fra geokodingen i steg 3. Det stemmer for alle 12 instansene i dag, siden hver av dem betjener nøyaktig én kommune (se `kommune_fagsystem_instans`). Skulle en instans senere betjene flere kommuner, holder ikke denne forenklingen — da må steg 2 vente på steg 3, og `kommune_id` avgjøres av adressens geokodede `kommunenummer` i stedet.
+
+**Matrikkelen** (bygningsnummer, bygningstype, byggeår, BRA, bygningsomriss) krever avtale med Kartverket og er ikke del av denne pipelinen ennå. Eiendomskoblingen (`matrikkelenhet`, `bygning_matrikkelenhet`) kan derimot fylles fra det åpne Adresse-API-et allerede i steg 3, siden det gir gårds- og bruksnummer gratis — ikke implementert i `geokod.py` i dag, men datagrunnlaget er der.
+
+**Ikke del av pipelinen ennå:** ingen automatisk gjentakelse (ingen cron/planlagt jobb — alt kjøres manuelt), ingen bruk av `kildeuttrekk`-tabellen (ingen av skriptene lagrer rå JSON før tolkning, selv om tabellen finnes i skjemaet), og ingen automatisert kuratering av `v_ukartlagte_kildekoder` — det er fortsatt en manuell jobb å lese visningen og redigere ordbøkene i `last_inn.py`.
 
 ---
 

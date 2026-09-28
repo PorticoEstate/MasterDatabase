@@ -124,10 +124,29 @@ LOKALETYPE = {
     "redningsvestar": "REDNINGSVEST", "lydanlegg": "LYDANLEGG", "utstyr": "ANNET_UTSTYR",
 }
 
-IKKE_RELEVANT = {
-    "stengt", "fiktivt rom", "kantinebidrag", "inkludering", "sosial aktivitet",
-    "kvitsoygata 3", "judaberg innbyggertorg", "mostun natursenter", "wc toalett",
+# Junk uansett kodetype: adresser, stedsnavn og driftsstatus som aldri kan
+# være en ekte lokaletype, aktivitet eller fasilitet.
+IKKE_RELEVANT_UNIVERSELT = {
+    "stengt", "fiktivt rom", "kantinebidrag",
+    "kvitsoygata 3", "judaberg innbyggertorg", "mostun natursenter",
 }
+
+# Junk KUN i én kodetype-kontekst - kan være en ekte verdi i en annen. F.eks.
+# er "Inkludering" ikke en stedstype, men er en fullt plausibel aktivitet
+# (inkluderingstiltak er en vanlig kommunal kategori). Tidligere lå alt i én
+# delt mengde, som feilaktig avviste "Stengt" og "Inkludering" som AKTIVITET
+# med forklaringen "Ikke en lokaletype" - bekreftet mot ekte data fra
+# Bergen/Stavanger/Bærum, der begge faktisk finnes i activities-listen.
+IKKE_RELEVANT_PER_TYPE = {
+    "lokaletype": {"inkludering", "sosial aktivitet", "wc toalett"},
+    "aktivitet": set(),
+    "fasilitet": set(),
+}
+
+
+def er_ikke_relevant(kodetype: str, navn_normalisert: str) -> bool:
+    return (navn_normalisert in IKKE_RELEVANT_UNIVERSELT
+            or navn_normalisert in IKKE_RELEVANT_PER_TYPE.get(kodetype, set()))
 
 FASILITET = {
     "garderobe": "GARDEROBE", "dusj": "DUSJ", "toalett": "TOALETT", "wc": "TOALETT",
@@ -227,9 +246,9 @@ def generer_sql(slug: str, ut) -> None:
               f"FROM fagsystem_instans WHERE kildenokkel={q(kn)} "
               f"ON CONFLICT (fagsystem_instans_id,kodetype,kode) DO UPDATE SET navn=EXCLUDED.navn, sist_sett=now();\n")
             n = norm(navn)
-            if n in IKKE_RELEVANT:
+            if er_ikke_relevant(kodetype, n):
                 w(f"INSERT INTO kildekode_mapping (kildekode_id,status,merknad,kartlagt_av) "
-                  f"SELECT kk.id,'ikke_relevant','Ikke en lokaletype','etl' "
+                  f"SELECT kk.id,'ikke_relevant',{q(f'Ikke en gyldig {kodetype}')},'etl' "
                   f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
                   f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(rad['id'])} "
                   f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
