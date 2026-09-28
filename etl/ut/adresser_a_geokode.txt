@@ -1,0 +1,420 @@
+1|Breimyra 68 A|5134|Flaktveit|4601
+2|Wolfsgate 12x|5008|Bergen|4601
+3|Hj. Brantingsvei 9|5142|Fyllingsdalen|4601
+4|Landåsveien 22|5097|Bergen|4601
+5|Leikvangvegen 33|5111|Breistein|4601
+6|Nygårdsparken|5020|Bergen|4601
+7|Klosteret 2|5005|Bergen|4601
+8|Salhusvegen 151|5107|Salhus|4601
+9|Håsteinsgaten 9|5163|Laksevåg|4601
+10|Alvøveien 46|5179|Godvik|4601
+11|Fjøsangerveien 38b|5054|Bergen|4601
+12|Neumannsagte 1|5020|Bergen|4601
+13|Holbergskaien 1|||4601
+14|Edvard Griegs vei 29|5053|Bergen|4601
+15|Wolfsgate 12|5006|Bergen|4601
+16|Grimseidvegen 60|5239|Rådal|4601
+17|Øyjordsveien 2|5038|Bergen|4601
+18|Nordnesparken 30|5005|Bergen|4601
+19|Breimyra 68A|5134|Flaktveit|4601
+20|Elvetun 21|5071|Loddefjord|4601
+21|Tertnesveien 31|5113|Tertnes|4601
+22|Granlien 1|5105|Eidsvåg|4601
+23|Elsesro 9|5042|Bergen|4601
+24|St. Olavsvei 50|5052|Bergen|4601
+25|Torgny Segerstedts vei 14|||4601
+26|Ladegårdsgaten 65b|5033|Bergen|4601
+27|Elvetun 27|5172|Loddefjord|4601
+28|Agnes Mowinckels gate 6|5008|Bergen|4601
+29|Damsgårdsveien 195|5160|Laksevåg|4601
+30|Eikhaugen 20|5262|Arnatveit|4601
+31|Nordre Skansemyren 40|5019|Bergen|4601
+32|Fanavegen 314|5244|Fana|4601
+33|Rotthaugsgaten 10|5033|Bergen|4601
+34|Strømgaten 19|||4601
+35|Peter Jebsens veg 4|5265|Ytre Arna|4601
+36|Øvre Seimsmark 70|5264|Garnes|4601
+37|Garnesvegen 88|5260|Indre Arna|4601
+38|Lyderhornsvei 42|5163|Laksevåg|4601
+39|Herman Gransvei 6|5163|Laksevåg|4601
+40|Storetveitveien 125|5231|Paradis|4601
+41|Lien 85|5057|Bergen|4601
+42|Festplassen|5014|Bergen|4601
+43|Osveien 335|5229|KALANDSEIDET|4601
+44|Lønningsflaten 35|5228|Blomsterdalen|4601
+45|Bendixens vei|5067|Bergen|4601
+46|Slåtthaugveien 49|5222|Nesttun|4601
+47|Neumannsgate 1|5020|Bergen|4601
+48|Ytrebygdvegen 51|5251|SØREIDGREND|4601
+49|Øvre Seimsmark 52|5264|Garnes|4601
+50|Rogagaten 9|5055|Bergen|4601
+51|Kringlebotn 221|5225|Nesttun|4601
+52|Steinsvikvegen 393|5239|Søreidgrend|4601
+53|Nesttun torg|5221|Bergen|4601
+54|Johannes Bruns gate 12|5008|Bergen|4601
+55|Landåsveien 31|5097|Bergen|4601
+56|Håsteinsgate 3|5163|Laksevåg|4601
+57|Byparken|||4601
+58|Totlandsvegen 53||5224 Nesttun|4601
+59|Neumansgt.1|5020|Bergen|4601
+60|Neumannsgate 1|5020|Bergen|4601
+61|Biblioteksplassen|5015|Bergen|4601
+62|Olsvikåsen 49|5183|Olsvik|4601
+63|Slåtthaugveien 142|5222|Nesttun|4601
+64|Granlia 1|5104|Eidsvåg i Åsane|4601
+65|Ny - Paradis 43|5231|Bergen|4601
+66|Søråshøgda 105|5235|Rådal|4601
+67|Kloppedalsveien 18|5232|Paradis|4601
+68|Bønesberget 1|5153|Bønes|4601
+69|Nygårdsmyren 1|5164|Laksevåg|4601
+70|Vilhelm Bjerknes' vei 30|5081|Bergen|4601
+71|Lyngfaret 55|5172|Loddefjord|4601
+72|Åsane senter 58|5116|Åsane|4601
+73|Landåsvn. 22|5097|Bergen|4601
+74|Neumannsgate 1|5020|Bergen|4601
+75|Neumannsgate 1|5020|Bergen|4601
+76|Tors veg 9|5221|Bergen|4601
+77|Øyordsveien 2|5038|Bergen|4601
+78|Dag Hammarskjolds vei 7|5144|Fyllingsdalen|4601
+79|Øyjordsveien 2|5038|Bergen|4601
+80|Liakroken 29|5132|Flaktveit|4601
+81|St. Olavs vei 20|5052|Bergen|4601
+82|Myrdalskogen 53|5118|BERGEN|4601
+83|Nebbeveien 1|5144|Fyllingsdalen|4601
+84|Elvetun 18|5172|Loddefjord|4601
+85|Åslia|5115|Bergen|4601
+86|Haukelandsbakken 15|5021|Bergen|4601
+87|Shetlands-Larsens vei 14|5143|Fyllingsdalen|4601
+88|Steinsvikvegen 280|5237|Rådal|4601
+89|Åsamyrane 304|5131|Nyborg|4601
+90|Skageveien 38|5258|Blomsterdalen|4601
+91|Loddefjordveien 2|5171|Loddefjord|4601
+92|Sandslivegen 98|5258|SANDSLI|4601
+93|Myrdalskogen 39b (inngang fra Hesthaugvegen)|5118|Ulset|4601
+94|Herman Grans vei 2|5162|Laksevåg|4601
+95|Professor Dahls gate 35|5031|Bergen|4601
+96|Lilandsvegen 50|5258|Blomsterdalen|4601
+97|Rådalslien 95|5239|Rådal|4601
+98|Nedre Smøråsvegen 8|5238|Rådal|4601
+99|Torgny Segerstedts vei 4|5143|Fyllingsdalen|4601
+100|Breimyra 68B|5134|Flaktveit|4601
+101|Bønesberget 1|5152|Bønes|4601
+102|Møllendalsveien|5009|Bergen|4601
+103|Fjellsdalen 7|5155|Bønes|4601
+104|Kjøkkelvikveien 27|5187|Loddefjord|4601
+105|Parkveien 31|5006|Bergen|4601
+106|Sandsliveien 100|5254|Sandsli|4601
+107|Skeievegen 100|5239|Bergen|4601
+108|Botnane 4|5119|Ulset|4601
+109|Leikvangvegen 33|5111|Breistein|4601
+110|Lonaleitet 30|5267|Bergen|4601
+111|Kongsbrekkene 2|5174|Mathopen|4601
+112|Lyngfaret 55|5172|Loddefjord|4601
+113|Krohnegården friluftsområde|||4601
+114|Vilhelm Bjerknesvei 42|5081|Bergen|4601
+115|Alvøveien 50|5179|Godvik|4601
+116|Grønskjeret 5|5113|Tertnes|4601
+117|Østre Nesttunvegen 18|5221|Nesttun|4601
+118|Fredrik Stangsvei 14|5052|Bergen|4601
+119|Helleveien 118|5043|Bergen|4601
+120|Kongsbrekkene 2|5174|Mathopen|4601
+121|Lillehatten 3|5148|Fyllingsdalen|4601
+122|Merkurvegen 30|5099|Bergen|4601
+123|Nordeidåsen 5|5251|Søreidgrend|4601
+124|Lonaleitet 131|5267|Haukeland|4601
+125|Nye Sædalsveien 190|5099|Bergen|4601
+126|Vilhelm Bjerknesvei 24|5081|Bergen|4601
+127|Folke Bernadottes vei 52|5847|Bergen|4601
+128|Nordnesparken 3|5005|Bergen|4601
+129|Åsane senter 52|5116|Ulset|4601
+130|Osvegen 10|5228|Nesttun|4601
+131|Søråshøgda 301|5235|Rådal|4601
+132|Haakon Sæthres veg 42|5232|Paradis|4601
+133|Ulsetskogen 14|5119|Ulset|4601
+134|Vardeveien 71|5141|Fyllingsdalen|4601
+135|Lakslia 10|||4601
+136|Østre Nesttunvegen 18||Østre Nesttunvegen 18, 5221 Nesttun|4601
+137|Grønnestølsveien 22|5073|Bergen|4601
+138|Øvre Holen 6|5163|Laksevåg|4601
+139|Lyngfaret 21|5172|Bergen|4601
+140|Neumanns gate 1|||4601
+141|Rådstuplassen 5|||4601
+142|Apeltunvegen 94|5238|Bergen|4601
+143|Aurdalslia 30|5253|Bergen|4601
+144|Øvre Fyllingsveien 35|5161|Laksevåg|4601
+145|Nygårdslien 3|5164|Laksevåg|4601
+146|Statsminister Michelsens veg 55|5230|Paradis|4601
+147|Marikollen 28|5136|Mjølkeråen|4601
+148|Janaflaten 31|5179|Godvik|4601
+149|Johannes Bruns gate 12|5008|Bergen|4601
+150|Åslia13|5115|Ulset|4601
+151|Øvre Råtræet 37|5239|Rådal|4601
+152|Vikavegen 30|5107|Salhus|4601
+153|Vilhelm Bjerknes' vei 15|5081|Bergen|4601
+154|Marikollen 30B|5136|Mjølkeråen|4601
+155|Nøkkelhenting: Johannes Bruns gate 12|||4601
+156|Skjoldlia 1|5236|Nesttun|4601
+157|Åsane Senter 50B|5116|Ulset|4601
+158|Strømgaten 6|5015|Bergen|4601
+159|Flaktveitsvingane 17|5135|Flaktveit|4601
+160|Indre Arnavegen 189|5260|INDRE ARNA|4601
+161|Bøkeveien 19|5093|Bergen|4601
+162|Midtre Prestavegen 18|5108|Hordvik|4601
+163|Leikvangvegen 21|5111|Breistein|4601
+164|Grendatunvegen 23|5259|Hjellestad|4601
+165|Kloppedalsvegen 18|5232|Nesttun|4601
+166|Kalvatræet 37|5106|Ervik|4601
+167|Bjørndalsskogen 37|5170|Bjørndalstræ|4601
+168|Stemmeveien 1|5009|Bergen|4601
+169|Hesthaugvegen 91|5119|Ulset|4601
+170|Kong Oscarsgate 54|||4601
+171|Landåssvingen 15|5096|Bergen|4601
+172|Allestadveien 12-14|5142|Fyllingsdalen|4601
+173|Bankvegen 11|5265|Ytre Arna|4601
+347|Fredtunveien 10|4026|Stavanger|1103
+348|Ulsbergbakken 61|4034|Stavanger|1103
+349|Midjordgata 30|4015|Stavanger|1103
+350|Sophus Bugges gate 13|||1103
+351|Treskeveien 3|4043|Hafrsfjord|1103
+352|Ytre Eiganesveien|||1103
+353|Austbøsvingene 56|4085|Hundvåg|1103
+354|Vågholmveien|4154|Austre Åmøy|1103
+355|Merkurveien|4021|Stavanger|1103
+356|Krossbergveien 111|4047|Hafrsfjord|1103
+357|Morgedalsveien 60|4021|Stavanger|1103
+358|Ordfører Tveteraasgt|4020|Stavanger|1103
+359|Sørmarkveien 18|4019|Stavanger|1103
+360|Madlasandnes|4045|Hafrsfjord|1103
+361|Skolevollen 15|4017|Stavanger|1103
+362|Nesflåtveien|4018|Stavanger|1103
+363|Regimentveien 101|4045|Hafrsfjord|1103
+364|Ishockeyveien 1|||1103
+365|Moseidsletta 41|4052|Røyneberg|1103
+366|Heiloveien 1|4049|Stavanger|1103
+367|Austbøsvingene 54|4086|Hundvåg|1103
+368|Heiloveien 9|4049|Stavanger|1103
+369|Rektor Oldens gate 31|4022|Stavanger|1103
+370|Mosvangen 18|4021|Stavanger|1103
+371|Ishockeyveien 11|||1103
+372|Fredtunveien|4026|Stavanger|1103
+373|Kongsgata 43, 4005 Stavanger|4005|Stavanger|1103
+374|Gunnar Warebergs gate 9|||1103
+375|Gjerdeveien|4028|Stavanger|1103
+376|false|4156|Stavanger|1103
+377|4156 Mosterøy|4156|Rennesøy|1103
+378|Holbergs gate 70|4023|Stavanger|1103
+379|Jåttåvågveien 11|4020|Stavanger|1103
+380|Henrik Ibsensgate 59|4021|Stavanger|1103
+381|Rasmus Risasgate 33|4015|Stavanger|1103
+382|Stavanger sentrum|||1103
+383|Austbøgeilen 35|4085|Hundvåg|1103
+384|Fredtunveien 10|4026|Stavanger|1103
+385|Håvasteinveien 105|4150|Rennesøy|1103
+386|Hagabakken 1|4160|Finnøy|1103
+387|Ryfylkegata|||1103
+388|Eskelandsveien 35|4027|Stavanger|1103
+389|Gjerdeveien 30|4027|Stavanger|1103
+390|Ishockeyveien 7|||1103
+391|Rappveien 17|4041|Hafrsfjord|1103
+392|Rennesøygata 15|4014|Stavanger|1103
+393|Treskeveien 3|4043|Hafrsfjord|1103
+394|Kvernevik ring|4049|Stavanger|1103
+395|Søre Ramsvigvei 55|||1103
+396|Bergsagelveien|4016|Stavanger|1103
+397|Nordstrandveien|4076|Stavanger|1103
+398|Idrettsbakken|4085|Hundvåg|1103
+399|Revheimsveien 128|4043|Hafrsfjord|1103
+400|Hannasdalsgata 10|4009|Stavanger|1103
+401|Ishockeyveien 7|4021|Stavanger|1103
+402|Henrik Ibsens gt 59|4021|Stavanger|1103
+403|Jarlabanen|4016|Stavanger|1103
+404|Dusavikveien 24|4007|Stavanger|1103
+405|Hundvåg ring|4085|Hundvåg|1103
+406|Heiloveien 11|4049|Hafrsfjord|1103
+407|Gauselbakken 103|4032|Stavanger|1103
+408|Heddeveien 145|4034|Stavanger|1103
+409|Skolevollen 15|4017|Stavanger|1103
+410|Skolevollen 15|4017|Stavanger|1103
+411|Traneveien 14|4048|Hafrsfjord|1103
+412|Soltunveien 30|4026|Stavanger|1103
+413|Rektor Oldens gate 2|4022|Stavanger|1103
+414|Folkvangveien 50|4034|Stavanger|1103
+415|Håvarsteinveien 105|4150|Rennesøy|1103
+416|Lars Hertervigs gate 4|4005|Stavanger|1103
+417|Gnr 26 Bnr 76|4160|Stavanger|1103
+418|Sørbøveien 900|4150|Rennesøy|1103
+419|Gunnar Warebergs gate 3|4009|Stavanger|1103
+420|Hagabakken 1|4160|Finnøy|1103
+421|Sølvberggata 2|||1103
+422|Judabergvegen 6|4160|Finnøy|1103
+423|Søre Ramsvigvei 30|4015|Stavanger|1103
+424|Asalveien 6|4150|Rennesøy|1103
+425|Breiavatnet|||1103
+426|Kisteneset 34|4083|Hundvåg|1103
+427|Hjalmar Johansensgate 4|4019|Stavanger|1103
+428|Stavanger torg|||1103
+429|Heddeveien 141|4034|Stavanger|1103
+430|Carl Sundt Hansens gate 20|4024|Stavanger|1103
+431|Jåttåvågveien 3|4020|Stavanger|1103
+432|Traneveien 10|4048|Hafrsfjord|1103
+433|Nordre Ramsvigvei 1|4015|Stavanger|1103
+434|Eldfiskbakken 7|4028|Stavanger|1103
+435|Jelsagata 2 Stavanger|||1103
+436|Skolevollen 17|4017|STAVANGER|1103
+437|Gartnerveien|4016|Hillevåg|1103
+438|Vikevågveien 138|4150|Rennesøy|1103
+439|Stavanger sentrum|||1103
+440|Vålandshaugen 18|4010|Stavanger|1103
+441|Ulsnesveien 11|4077|Hundvåg|1103
+442|Åsta Kongsmorsgate 20|4044|Hafrsfjord|1103
+443|Evjebakken 20|1346|Gjettum|3201
+444|Nedre Åsvei 1|1341|Slependen|3201
+445|Hauger skolevei 36|1351|Rud|3201
+446|Levre skolevei 6|1346|Gjettum|3201
+447|Gjønnesjordet 36|1357|Bekkestua|3201
+448|Hauger skolevei 36|1351|Rud|3201
+449|false|||3201
+450|Skollerudveien 5|1353|Bærums Verk|3201
+451|Tokes vei 50|1336|Sandvika|3201
+452|Bjarne Skaus vei 40|1362|Hosle|3201
+453|Hauger skolevei 36|1351|Rud|3201
+454|Grorudenga 11|1350|Lommedalen|3201
+455|Bispeveien 10|1362|Hosle|3201
+456|Snarøyveien 81|1364|Snarøya|3201
+457|Haukeveien 11|||3201
+458|Peiks vei 1|1356|Bekkestua|3201
+459|Leirdueveien 70|1349|Rykkinn|3201
+460|Hauger skolevei 36|1351|Rud|3201
+461|Malmskriverveien 18|||3201
+462|Gamle Ringeriksvei 44|1357|Bekkestua|3201
+463|Leirdueveien 73|1349|Rykkinn|3201
+464|Forneburingen 300|1364|Fornebu|3201
+465|Gamle Drammensvei 119|1363|Høvik|3201
+466|Skolegata 30|1350|Lommedalen|3201
+467|Leirdueveien 74|1349|Rykkinn|3201
+468|Stasjonstorget 5|1337|Sandvika|3201
+469|Snarøyveien 81|1364|Fornebu|3201
+470|Haukeveien 12|1356|Bekkestua|3201
+471|Haukeveien 12|1356|Bekkestua|3201
+472|Hauger skolevei 36|1351|Rud|3201
+473|Hauger skolevei 36|1351|Rud|3201
+474|Hauger skolevei 36|1351|Rud|3201
+475|Arnold Haukelands Pl. 10.|1338|Sandvika|3201
+476|Forneburingen 5|1360|Fornebu|3201
+477|Levre skolevei 6|1346|Gjettum|3201
+478|Forneburingen 74-76 og 78|1360|Fornebu|3201
+479|Skogsskiftet|||4626
+480|Grasbakken 100|5381|Glesvær|4626
+481|Nygardsvegen 2|5337|Rong|4626
+482|Finkelhølsvegen 44|5382|Skogsvåg|4626
+483|Grasbakken 100|5382|Skogsvåg|4626
+484|Ternholmvegen 2|5337|Rong|4626
+485|Blombakkane 3|5354|Straume|4626
+486|Tveitane 12|5379|Steinsland|4626
+487|Vestsidevegen 265|5357|Fjell|4626
+488|Hamramyra 20|5363|Ågotnes|4626
+489|Alebakkane 18|5360|Kolltveit|4626
+490|Møvikvegen 39|5353|Fjell|4626
+491|Torsvikvegen 1|5337|Rong|4626
+492|Tveitane 12|5379|Steinsland|4626
+493|Tveitane 5|5379|Steinsland|4626
+494|Blombakkane 7|5353|Straume|4626
+495|Festningsvegen|5357|Fjell|4626
+496|Nygårdsvegen 1|5350|Brattholmen|4626
+497|Tjødnarvegen 50|5337|Rong|4626
+498|Landrovegen 250|5363|Ågotnes|4626
+499|Fjæreidevegen 30|5360|Kolltveit|4626
+500|Rongøyvegen 270|5337|Rong|4626
+501|Neset 25|5336|Tjeldstø|4626
+502|Grønebakksvegen 9|5382|Skogsvåg|4626
+503|Idrettsvegen 50|5353|Straume|4626
+504|Hamramyra 10|5363|Ågotnes|4626
+505|Tveitane 10|5379|Steinsland|4626
+506|Søre Knappen 4|5355|Knarrevik|4626
+507|Skiftedalsvegen 1|5353|Straume|4626
+508|Branndalsmyra 62|5353|Straume|4626
+509|Sartorvegen 12|5353|Straume|4626
+510|Foldnesvegen 1|5354|Straume|4626
+511|Lonavegen|5353|Straume|4626
+512|Hamramyra 10|5363|Ågotnes|4626
+513|Finkelhølsvegen 56|5382|Skogsvåg|4626
+514|Ternholmveien 61|5337|Rong|4626
+515|Rongøyvegen 270|5337|Rong|4626
+516|Grasbakken 100|5382|Skogsvåg|4626
+517|Ternholmvegen|5337|Rong|4626
+518|Svartevikvegen 125|5337|Rong|4626
+519|Neset 25|5336|Tjeldstø|4626
+520|Arefjordvegen 290|5355|Knarrevik|4626
+521|Fjellavegen 222|5357|Fjell|4626
+522|Bjørkestølen 41|5353|Straume|4626
+523|Hamramyra 20|5353|Ågotnes|4626
+524|Bjorøyvegen 202|5177|Bjorøyhamn|4626
+525|Hamramyra 2|5363|Ågotnes|4626
+526|Alleen 6|8516|Narvik|1806
+527|Tårnveien 3|8516|Narvik|1806
+528|Tårnveien 1|8516|Narvik|1806
+529|Frydenlundsgata 73|8517|Narvik|1806
+530|F.L.Smiths vei 1|8590|Narvik|1806
+531|Teknologiveien 2A|8517|Narvik|1806
+532|Kvanta 25|8522|Beisfjord|1806
+533|Sykehjemsstien 9|8540|Ballangen|1806
+534|Villaveien 60|8516|Narvik|1806
+535|Nattmålsveien 11|8530|Bjerkvik|1806
+536|Bøstrand-FV819|8540|Ballangen|1806
+537|Maridalsveien 8|8530|Narvik|1806
+538|Skjomenveien 210|8523|Elvegard|1806
+539|Brugata 8|8517|Narvik|1806
+540|Kvanta 25|8522|Beisfjord|1806
+541|Ånesveien 3|8520|Ankenes|1806
+542|Maridalsveien 6|8530|Bjerkvik|1806
+543|Sykehjemsstien 9|8540|Ballangen|1806
+544|Tårnveien 3|8516|Narvik|1806
+545|Åsveien 54|8520|Ankenes|1806
+546|Kokaas vei 10|8590|Kjøpsvik|1806
+547|Bjørnsons vei 1|8517|Narvik|1806
+548|Åsveien 50|8520|Ankenes|1806
+549|Åsveien 49-51|8520|Ankenes|1806
+550|Skistuaveien 22|8515|Narvik|1806
+551|Storhaugveien 20|8540|Ballangen|1806
+552|Øvre Årnes|||5058
+553|Nordalsveien|||5058
+554|Nordalsveien|||5058
+555|Øvre Årnes|7169|ÅFJORD|5058
+556|Rangøyveien 11|6532|Averøy|1554
+557|Djupmyrveien 36|6531|AVERØY|1554
+558|Averøyveien 424|||1554
+559|Djupmyrveien|6531|AVERØY|1554
+560|Djupmyrveien 36|6531|AVERØY|1554
+561|Bruvollveien 4|||1554
+562|Djupmyrveien 38|6531|AVERØY|1554
+563|Djupmyrveien 38|6531|AVERØY|1554
+564|Djupmyrveien 21|6531|AVERØY|1554
+565|Skytterhusveien|||5628
+566|Gamvikveien|||5628
+567|Værveien|||5628
+568|Gamvikveien|||5628
+569|Værveien|||5628
+570|Værveien|||5628
+571|Værveien|||5628
+572|Vevikveien|||5628
+573|Vevikveien|||5628
+574|Vevikveien|||5628
+575|Køppenvegen 10|7690|Mosvik|5053
+576|Skogvegen 4|7670|Inderøy|5053
+577|Vennavegen|||5053
+578|Vennalivegen 15|7670|Inderøy|5053
+579|Øvergata|7670|Inderøy|5053
+580|Sentrum 17|9151|Storslett|5540
+581|Flomstadvegen 14|9151|Storslett|5540
+582|Lyngsmark 10|9151|Storslett|5540
+583|Fjellveien 1|||1868
+584|Støveien 20|||1868
+585|Alsvågveien 688|||1868
+586|Matelvveien 17|||1868
+587|Korea 6|||4640
+588|Fjørevegen 17|||4640
+589|Holmen 11|||4640
+590|Riverdalen 5|||4640
+591|Parkvegen 6|||4640
+592|Kreklingevegen 2|||4640
+593|Riverdalen 5|6863|Leikanger|4640
