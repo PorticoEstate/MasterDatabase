@@ -11,7 +11,7 @@ interface Activity {
   percentage: number;
   municipalities: string[];
   descriptions: string[];
-  has_parent_relationships: boolean;
+  has_parent_relationships: boolean;spoti
   parent_relationships: Array<{
     municipality: string;
     parent_id: number;
@@ -94,7 +94,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [minPercentage, setMinPercentage] = useState(0);
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
-  const [sortBy, setSortBy] = useState<'percentage' | 'name' | 'municipalities'>('percentage');
+  const [sortBy, setSortBy] = useState< 'name' | 'municipalities' | 'resources' >('municipalities');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -139,9 +139,10 @@ export default function Home() {
             return a.name.localeCompare(b.name);
           case 'municipalities':
             return b.occurrence_count - a.occurrence_count || a.name.localeCompare(b.name);
-          case 'percentage':
+          case 'resources':
+            return b.resource_count - a.resource_count || a.name.localeCompare(b.name);
           default:
-            return b.percentage - a.percentage || a.name.localeCompare(b.name);
+            return b.occurrence_count - a.occurrence_count || a.name.localeCompare(b.name);
         }
       });
     };
@@ -286,10 +287,10 @@ export default function Home() {
         </div>
         <div className={styles.controlGroup}>
           <label>Sort by:</label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'percentage' | 'name' | 'municipalities')}>
-            <option value="percentage">Occurrence %</option>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'municipalities' | 'resources')}>
             <option value="name">Name (A-Z)</option>
             <option value="municipalities">Municipality count</option>
+            <option value="resources">Resource count</option>
           </select>
         </div>
       </div>
