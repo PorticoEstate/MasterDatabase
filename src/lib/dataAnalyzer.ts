@@ -29,6 +29,7 @@ export interface Activity {
     parent_id: number | null;
     active: number;
   }>;
+  resource_count: number;
 }
 
 export interface Facility {
@@ -44,6 +45,7 @@ export interface Facility {
   }>;
   is_unique: boolean;
   is_common: boolean;
+  resource_count: number;
 }
 
 export interface AnalysisResult {
@@ -95,6 +97,7 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
     child_relationships: Array<{ municipality: string; child_id: number; child_name: string; id: number; name: string }>;
     activity_ids: Set<number>;
     activity_details: Array<{ municipality: string; id: number; parent_id: number | null; active: number }>;
+    resource_ids: Set<string>;
   }>();
 
   // Analyze facilities
@@ -102,6 +105,7 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
     municipalities: string[];
     facility_ids: Set<number>;
     facility_details: Array<{ municipality: string; id: number; active: number }>;
+    resource_ids: Set<string>;
   }>();
 
   // First pass: build activity ID to name lookup and parent-child map
@@ -143,6 +147,33 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
     const { name: municipality, data } = municipalityData;
     if (!data) continue;
 
+    // Build local (per-municipality) lookups from bookable resources to the
+    // activities/facilities they're tagged with. IDs are only unique within
+    // a single municipality's dataset, so these maps must not be shared
+    // across municipalities.
+    const activityResourceIds = new Map<number, Set<number>>();
+    for (const resource of data.resources || []) {
+      if (resource.activity_id == null) continue;
+      if (!activityResourceIds.has(resource.activity_id)) {
+        activityResourceIds.set(resource.activity_id, new Set());
+      }
+      activityResourceIds.get(resource.activity_id)!.add(resource.id);
+    }
+    for (const link of data.resource_activities || []) {
+      if (!activityResourceIds.has(link.activity_id)) {
+        activityResourceIds.set(link.activity_id, new Set());
+      }
+      activityResourceIds.get(link.activity_id)!.add(link.resource_id);
+    }
+
+    const facilityResourceIds = new Map<number, Set<number>>();
+    for (const link of data.resource_facilities || []) {
+      if (!facilityResourceIds.has(link.facility_id)) {
+        facilityResourceIds.set(link.facility_id, new Set());
+      }
+      facilityResourceIds.get(link.facility_id)!.add(link.resource_id);
+    }
+
     // Process activities
     for (const activity of data.activities || []) {
       const name = activity.name?.trim();
@@ -156,6 +187,7 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
           child_relationships: [],
           activity_ids: new Set(),
           activity_details: [],
+          resource_ids: new Set(),
         });
       }
 
@@ -168,7 +200,11 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
         parent_id: activity.parent_id,
         active: activity.active,
       });
-      
+
+      for (const resourceId of activityResourceIds.get(activity.id) || []) {
+        activityInfo.resource_ids.add(`${municipality}:${resourceId}`);
+      }
+
       if (activity.description?.trim()) {
         activityInfo.descriptions.add(activity.description.trim());
       }
@@ -210,6 +246,7 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
           municipalities: [],
           facility_ids: new Set(),
           facility_details: [],
+          resource_ids: new Set(),
         });
       }
 
@@ -221,6 +258,10 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
         id: facility.id,
         active: facility.active,
       });
+
+      for (const resourceId of facilityResourceIds.get(facility.id) || []) {
+        facilityInfo.resource_ids.add(`${municipality}:${resourceId}`);
+      }
     }
   }
 
@@ -242,6 +283,7 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
       child_relationships: info.child_relationships,
       activity_ids: Array.from(info.activity_ids).sort(),
       activity_details: info.activity_details,
+      resource_count: info.resource_ids.size,
     };
   }).sort((a, b) => b.percentage - a.percentage || a.name.localeCompare(b.name));
 
@@ -259,6 +301,7 @@ export function analyzeData(fetchedData: FetchedMunicipalityData[]): AnalysisRes
       facility_details: info.facility_details,
       is_unique: occurrenceCount === 1,
       is_common: occurrenceCount >= (totalMunicipalities * 0.5),
+      resource_count: info.resource_ids.size,
     };
   }).sort((a, b) => b.percentage - a.percentage || a.name.localeCompare(b.name));
 

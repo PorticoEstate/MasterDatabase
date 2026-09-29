@@ -40,4 +40,19 @@ export interface RawMunicipalityData {
     activity_id: number;
     [key: string]: unknown;
   }>;
+  resources: Array<{
+    id: number;
+    name: string;
+    activity_id: number | null;
+    active: number;
+    [key: string]: unknown;
+  }>;
+  resource_activities: Array<{
+    resource_id: number;
+    activity_id: number;
+  }>;
+  resource_facilities: Array<{
+    resource_id: number;
+    facility_id: number;
+  }>;
 }

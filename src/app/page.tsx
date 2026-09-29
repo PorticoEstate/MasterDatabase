@@ -34,6 +34,7 @@ interface Activity {
     parent_id: number | null;
     active: number;
   }>;
+  resource_count: number;
 }
 
 interface Facility {
@@ -49,6 +50,7 @@ interface Facility {
   }>;
   is_unique: boolean;
   is_common: boolean;
+  resource_count: number;
 }
 
 interface DataStructure {
@@ -379,6 +381,9 @@ export default function Home() {
                       </div>
                       <div className={styles.occurrenceCount}>
                         {item.occurrence_count}/{data.metadata.total_municipalities}
+                      </div>
+                      <div className={styles.resourceCount}>
+                        {item.resource_count} resource{item.resource_count !== 1 ? 's' : ''}
                       </div>
                     </div>
                     

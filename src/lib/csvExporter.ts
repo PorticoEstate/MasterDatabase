@@ -27,7 +27,8 @@ export function formatActivitiesToCsv(activities: Activity[]): string {
     'Description Count',
     'Descriptions',
     'Parent-Child Details',
-    'Child-Parent Details'
+    'Child-Parent Details',
+    'Resource Count'
   ];
 
   let csv = headers.join(',') + '\n';
@@ -64,7 +65,8 @@ export function formatActivitiesToCsv(activities: Activity[]): string {
       activity.descriptions.length.toString(),
       escapeCsv(activity.descriptions.join('; ')),
       escapeCsv(parentChildDetails),
-      escapeCsv(childParentDetails)
+      escapeCsv(childParentDetails),
+      activity.resource_count.toString()
     ];
     csv += row.join(',') + '\n';
   }
@@ -85,7 +87,8 @@ export function formatFacilitiesToCsv(facilities: Facility[]): string {
     'Facility ID Count',
     'Active Instances',
     'Inactive Instances',
-    'Total Instances'
+    'Total Instances',
+    'Resource Count'
   ];
 
   let csv = headers.join(',') + '\n';
@@ -106,7 +109,8 @@ export function formatFacilitiesToCsv(facilities: Facility[]): string {
       facility.facility_ids.length.toString(),
       activeInstances.toString(),
       inactiveInstances.toString(),
-      facility.facility_details.length.toString()
+      facility.facility_details.length.toString(),
+      facility.resource_count.toString()
     ];
     csv += row.join(',') + '\n';
   }
