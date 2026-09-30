@@ -1,0 +1,2131 @@
+[
+    {
+        "id": {
+            "value": 257224720,
+            "snapshotVersion": null
+        },
+        "metadata": {
+            "item": [
+                "representasjonspunkt",
+                "bygningstypeKodeId",
+                "naringsgruppeKodeId",
+                "oppdateringsdato",
+                "kommuneId",
+                "bruksenhetIds",
+                "kontaktpersoner",
+                "ufullstendigAreal",
+                "vannforsyningsKodeId",
+                "energikildeKodeIds",
+                "opprinnelsesKodeId",
+                "etasjer",
+                "tidligereByggId",
+                "versjon",
+                "bygningstatusHistorikker",
+                "harHeis",
+                "avsluttetAv",
+                "bygningsnummer",
+                "sluttdato",
+                "uuid",
+                "lopenummer",
+                "bebygdAreal",
+                "avlopsKodeId",
+                "bygningstatusKodeId",
+                "harSefrakminne",
+                "skjermingsverdig",
+                "utenBebygdAreal",
+                "id",
+                "oppdatertAv",
+                "etasjedata",
+                "kommunalTilleggsdel",
+                "oppvarmingsKodeIds",
+                "harKulturminne",
+                "versjonId"
+            ]
+        },
+        "oppdateringsdato": {
+            "timestamp": "2026-04-28T10:02:53.089008000+02:00"
+        },
+        "versjonId": 7,
+        "oppdatertAv": "1201inh",
+        "versjon": 1777363373089,
+        "bygningsnummer": 13913528,
+        "lopenummer": 0,
+        "kommuneId": {
+            "value": 4601,
+            "snapshotVersion": null
+        },
+        "representasjonspunkt": {
+            "metadata": {
+                "item": [
+                    "position",
+                    "koordinatkvalitetKodeId",
+                    "koordinatsystemKodeId",
+                    "stedfestingVerifisert",
+                    "kvalitet",
+                    "originalKoordinatsystemKodeId"
+                ]
+            },
+            "koordinatsystemKodeId": {
+                "value": 10
+            },
+            "position": {
+                "metadata": {
+                    "item": [
+                        "x",
+                        "z",
+                        "y"
+                    ]
+                },
+                "x": 299751,
+                "y": 6697383,
+                "z": 0
+            },
+            "koordinatkvalitetKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "stedfestingVerifisert": false
+        },
+        "harSefrakminne": false,
+        "harKulturminne": false,
+        "harHeis": true,
+        "skjermingsverdig": false,
+        "bebygdAreal": 0,
+        "utenBebygdAreal": false,
+        "etasjer": {
+            "item": [
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 391809946,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 3,
+                    "antallBoenheter": 12,
+                    "bruksarealTilBolig": 989,
+                    "bruksarealTilAnnet": 0,
+                    "bruksarealTotalt": 989,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2015-01-26T10:18:32.263000000+01:00"
+                    },
+                    "versjonId": 2,
+                    "oppdatertAv": "1201moj",
+                    "id": 391809944,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 1,
+                    "antallBoenheter": 11,
+                    "bruksarealTilBolig": 1058,
+                    "bruksarealTilAnnet": 1701,
+                    "bruksarealTotalt": 2759,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 391809945,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 2,
+                    "antallBoenheter": 12,
+                    "bruksarealTilBolig": 1002,
+                    "bruksarealTilAnnet": 2035,
+                    "bruksarealTotalt": 3037,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 391809942,
+                    "etasjeplanKodeId": {
+                        "value": 3,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 1,
+                    "antallBoenheter": 0,
+                    "bruksarealTilBolig": 6,
+                    "bruksarealTilAnnet": 0,
+                    "bruksarealTotalt": 6,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 391809943,
+                    "etasjeplanKodeId": {
+                        "value": 4,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 1,
+                    "antallBoenheter": 0,
+                    "bruksarealTilBolig": 0,
+                    "bruksarealTilAnnet": 1339,
+                    "bruksarealTotalt": 1339,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                }
+            ]
+        },
+        "bruksenhetIds": {
+            "item": [
+                {
+                    "value": 257224976,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224977,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224964,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 301644266,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224965,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 301644267,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224966,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224967,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 301644265,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224960,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224961,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224962,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224963,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224972,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224973,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224974,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224975,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224968,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224969,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224970,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224971,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224948,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224949,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224950,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224951,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224945,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224946,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224947,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224956,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224957,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224958,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224959,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224952,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224953,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224954,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257224955,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257225129,
+                    "snapshotVersion": null
+                }
+            ]
+        },
+        "bygningsstatusHistorikker": {
+            "item": [
+                {
+                    "metadata": {
+                        "item": [
+                            "registrertDato",
+                            "bygningstatusKodeId",
+                            "oppdateringsdato",
+                            "id",
+                            "versjonId",
+                            "oppdatertAv",
+                            "dato",
+                            "slettetDato",
+                            "referanse",
+                            "arsakTilForingKodeId",
+                            "avsluttetAv",
+                            "signatur",
+                            "uuid",
+                            "sluttdato"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257224721,
+                    "bygningsstatusKodeId": {
+                        "value": 4,
+                        "snapshotVersion": null
+                    },
+                    "arsakTilForingKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "registrertDato": {
+                        "timestamp": "2005-05-05T00:00:00.000000000+02:00"
+                    }
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "registrertDato",
+                            "bygningstatusKodeId",
+                            "oppdateringsdato",
+                            "id",
+                            "versjonId",
+                            "oppdatertAv",
+                            "dato",
+                            "slettetDato",
+                            "referanse",
+                            "arsakTilForingKodeId",
+                            "avsluttetAv",
+                            "signatur",
+                            "uuid",
+                            "sluttdato"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2022-04-04T08:54:20.017000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "susalsor",
+                    "id": 6418941244,
+                    "bygningsstatusKodeId": {
+                        "value": 14,
+                        "snapshotVersion": null
+                    },
+                    "arsakTilForingKodeId": {
+                        "value": 2,
+                        "snapshotVersion": null
+                    },
+                    "signatur": "susalsor",
+                    "referanse": "202128679",
+                    "dato": {
+                        "date": "2022-04-04"
+                    },
+                    "registrertDato": {
+                        "timestamp": "2022-04-04T08:54:20.017000000+02:00"
+                    }
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "registrertDato",
+                            "bygningstatusKodeId",
+                            "oppdateringsdato",
+                            "id",
+                            "versjonId",
+                            "oppdatertAv",
+                            "dato",
+                            "slettetDato",
+                            "referanse",
+                            "arsakTilForingKodeId",
+                            "avsluttetAv",
+                            "signatur",
+                            "uuid",
+                            "sluttdato"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2026-04-28T09:57:08.273218000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "1201inh",
+                    "id": 6509622251,
+                    "bygningsstatusKodeId": {
+                        "value": 14,
+                        "snapshotVersion": null
+                    },
+                    "arsakTilForingKodeId": {
+                        "value": 2,
+                        "snapshotVersion": null
+                    },
+                    "signatur": "1201inh",
+                    "dato": {
+                        "date": "2026-04-28"
+                    },
+                    "registrertDato": {
+                        "timestamp": "2026-04-28T09:57:08.273218000+02:00"
+                    }
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "registrertDato",
+                            "bygningstatusKodeId",
+                            "oppdateringsdato",
+                            "id",
+                            "versjonId",
+                            "oppdatertAv",
+                            "dato",
+                            "slettetDato",
+                            "referanse",
+                            "arsakTilForingKodeId",
+                            "avsluttetAv",
+                            "signatur",
+                            "uuid",
+                            "sluttdato"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2026-04-28T10:02:53.089008000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "1201inh",
+                    "id": 6509622520,
+                    "bygningsstatusKodeId": {
+                        "value": 14,
+                        "snapshotVersion": null
+                    },
+                    "arsakTilForingKodeId": {
+                        "value": 2,
+                        "snapshotVersion": null
+                    },
+                    "signatur": "1201inh",
+                    "dato": {
+                        "date": "2026-04-28"
+                    },
+                    "registrertDato": {
+                        "timestamp": "2026-04-28T10:02:53.089008000+02:00"
+                    }
+                }
+            ]
+        },
+        "kontaktpersoner": {
+            "item": {
+                "metadata": {
+                    "item": [
+                        "datoFra",
+                        "versjonId",
+                        "oppdatertAv",
+                        "oppdateringsdato",
+                        "uuid",
+                        "kontaktpersonKodeId",
+                        "sluttdato",
+                        "id",
+                        "personId",
+                        "avsluttetAv"
+                    ]
+                },
+                "oppdateringsdato": {
+                    "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                },
+                "versjonId": 1,
+                "oppdatertAv": "smatmynd",
+                "id": 391809947,
+                "personId": {
+                    "value": 255679256,
+                    "snapshotVersion": null
+                },
+                "kontaktpersonKodeId": {
+                    "value": 1,
+                    "snapshotVersion": null
+                }
+            }
+        },
+        "oppvarmingsKodeIds": {},
+        "energikildeKodeIds": {},
+        "bygningsstatusKodeId": {
+            "value": 4,
+            "snapshotVersion": null
+        },
+        "avlopsKodeId": {
+            "value": 1,
+            "snapshotVersion": null
+        },
+        "vannforsyningsKodeId": {
+            "value": 1,
+            "snapshotVersion": null
+        },
+        "naringsgruppeKodeId": {
+            "value": 13,
+            "snapshotVersion": null
+        },
+        "opprinnelsesKodeId": {
+            "value": 5,
+            "snapshotVersion": null
+        },
+        "etasjedata": {
+            "metadata": {
+                "item": [
+                    "alternativtAreal2",
+                    "antallBoenheter",
+                    "bruttoarealTilAnnet",
+                    "bruksarealTilBolig",
+                    "bruksarealTotalt",
+                    "bruttoarealTilBolig",
+                    "alternativtAreal",
+                    "bruttoarealTotalt",
+                    "bruksarealTilAnnet"
+                ]
+            },
+            "antallBoenheter": 35,
+            "bruksarealTilBolig": 3055,
+            "bruksarealTilAnnet": 5075,
+            "bruksarealTotalt": 8130,
+            "alternativtAreal": 0,
+            "alternativtAreal2": 0,
+            "bruttoarealTilBolig": 0,
+            "bruttoarealTilAnnet": 0,
+            "bruttoarealTotalt": 0
+        },
+        "kommunalTilleggsdel": {
+            "metadata": {
+                "item": [
+                    "antallRoklop",
+                    "kommentarer",
+                    "privatKloakkRensingsKodeId",
+                    "brenseltankNedgravd",
+                    "bygningsReferanser",
+                    "materialeIYtterveggKoder",
+                    "fundamenteringsKodeId",
+                    "alternativtArealBygning",
+                    "kartblad",
+                    "septiktank",
+                    "vertikalBarekonstrKoder",
+                    "antallEtasjer",
+                    "renovasjonsKodeId",
+                    "horisontalBarekonstrKoder",
+                    "kildePrivatVannforsyningKodeId"
+                ]
+            },
+            "alternativtArealBygning": 0,
+            "antallEtasjer": 0,
+            "antallRoklop": 0,
+            "brenseltankNedgravd": 0,
+            "septiktank": false,
+            "kildePrivatVannforsyningKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "privatKloakkRensingsKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "renovasjonsKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "fundamenteringsKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "materialeIYtterveggKoder": {},
+            "horisontalBarekonstrKoder": {},
+            "vertikalBarekonstrKoder": {},
+            "kommentarer": {},
+            "bygningsReferanser": {}
+        },
+        "uuid": {
+            "navnerom": "https:\/\/data.geonorge.no\/matrikkel",
+            "uuid": "5ebeb1bd-04b5-5259-b393-39928cc81db7"
+        },
+        "bygningstypeKodeId": {
+            "value": 49,
+            "snapshotVersion": null
+        },
+        "ufullstendigAreal": false,
+        "adresser": [
+            {
+                "id": {
+                    "value": 256958256,
+                    "snapshotVersion": null
+                },
+                "metadata": {
+                    "item": [
+                        "kretsIds",
+                        "kommunalTilleggsdel",
+                        "atkomster",
+                        "tilleggsnavnKildeKodeId",
+                        "sluttdato",
+                        "matrikkelenhetId",
+                        "vegId",
+                        "avsluttetAv",
+                        "oppdatertAv",
+                        "uuid",
+                        "representasjonspunkt",
+                        "id",
+                        "kortnavn",
+                        "oppdateringsdato",
+                        "bokstav",
+                        "adressetilleggsnavn",
+                        "versjonId",
+                        "versjon",
+                        "nummer"
+                    ]
+                },
+                "oppdateringsdato": {
+                    "timestamp": "2020-06-15T17:51:05.925000000+02:00"
+                },
+                "versjonId": 3,
+                "oppdatertAv": "smatmynd",
+                "versjon": 1592236265925,
+                "representasjonspunkt": {
+                    "metadata": {
+                        "item": [
+                            "position",
+                            "koordinatkvalitetKodeId",
+                            "koordinatsystemKodeId",
+                            "stedfestingVerifisert",
+                            "kvalitet",
+                            "originalKoordinatsystemKodeId"
+                        ]
+                    },
+                    "koordinatsystemKodeId": {
+                        "value": 10
+                    },
+                    "position": {
+                        "metadata": {
+                            "item": [
+                                "x",
+                                "z",
+                                "y"
+                            ]
+                        },
+                        "x": 299781,
+                        "y": 6697379,
+                        "z": 0
+                    },
+                    "koordinatkvalitetKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "stedfestingVerifisert": false
+                },
+                "matrikkelenhetId": {
+                    "value": 255816748,
+                    "snapshotVersion": null
+                },
+                "atkomster": {},
+                "kretsIds": {
+                    "item": [
+                        {
+                            "value": 10484845,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668527,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668632,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668619,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668261,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 1006113,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668563,
+                            "snapshotVersion": null
+                        }
+                    ]
+                },
+                "kommunalTilleggsdel": {
+                    "metadata": {
+                        "item": [
+                            "adresseReferanser",
+                            "kartblad",
+                            "kommentarer"
+                        ]
+                    },
+                    "kommentarer": {},
+                    "adresseReferanser": {}
+                },
+                "tilleggsnavnKildeKodeId": {
+                    "value": 0,
+                    "snapshotVersion": null
+                },
+                "uuid": {
+                    "navnerom": "https:\/\/data.geonorge.no\/matrikkel",
+                    "uuid": "d456ab2a-4c47-5931-b546-455b52c484a2"
+                },
+                "vegId": {
+                    "value": 256380083,
+                    "snapshotVersion": null
+                },
+                "nummer": 31,
+                "bokstav": "B"
+            },
+            {
+                "id": {
+                    "value": 256958255,
+                    "snapshotVersion": null
+                },
+                "metadata": {
+                    "item": [
+                        "kretsIds",
+                        "kommunalTilleggsdel",
+                        "atkomster",
+                        "tilleggsnavnKildeKodeId",
+                        "sluttdato",
+                        "matrikkelenhetId",
+                        "vegId",
+                        "avsluttetAv",
+                        "oppdatertAv",
+                        "uuid",
+                        "representasjonspunkt",
+                        "id",
+                        "kortnavn",
+                        "oppdateringsdato",
+                        "bokstav",
+                        "adressetilleggsnavn",
+                        "versjonId",
+                        "versjon",
+                        "nummer"
+                    ]
+                },
+                "oppdateringsdato": {
+                    "timestamp": "2020-06-15T17:51:05.925000000+02:00"
+                },
+                "versjonId": 3,
+                "oppdatertAv": "smatmynd",
+                "versjon": 1592236265925,
+                "representasjonspunkt": {
+                    "metadata": {
+                        "item": [
+                            "position",
+                            "koordinatkvalitetKodeId",
+                            "koordinatsystemKodeId",
+                            "stedfestingVerifisert",
+                            "kvalitet",
+                            "originalKoordinatsystemKodeId"
+                        ]
+                    },
+                    "koordinatsystemKodeId": {
+                        "value": 10
+                    },
+                    "position": {
+                        "metadata": {
+                            "item": [
+                                "x",
+                                "z",
+                                "y"
+                            ]
+                        },
+                        "x": 299731,
+                        "y": 6697386,
+                        "z": 0
+                    },
+                    "koordinatkvalitetKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "stedfestingVerifisert": false
+                },
+                "matrikkelenhetId": {
+                    "value": 255816748,
+                    "snapshotVersion": null
+                },
+                "atkomster": {},
+                "kretsIds": {
+                    "item": [
+                        {
+                            "value": 10484845,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668527,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668632,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668619,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668261,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 1006113,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668563,
+                            "snapshotVersion": null
+                        }
+                    ]
+                },
+                "kommunalTilleggsdel": {
+                    "metadata": {
+                        "item": [
+                            "adresseReferanser",
+                            "kartblad",
+                            "kommentarer"
+                        ]
+                    },
+                    "kommentarer": {},
+                    "adresseReferanser": {}
+                },
+                "tilleggsnavnKildeKodeId": {
+                    "value": 0,
+                    "snapshotVersion": null
+                },
+                "uuid": {
+                    "navnerom": "https:\/\/data.geonorge.no\/matrikkel",
+                    "uuid": "187a7739-a8a5-50b4-a71f-a00946381778"
+                },
+                "vegId": {
+                    "value": 256380083,
+                    "snapshotVersion": null
+                },
+                "nummer": 31,
+                "bokstav": "A"
+            }
+        ]
+    },
+    {
+        "id": {
+            "value": 257365972,
+            "snapshotVersion": null
+        },
+        "metadata": {
+            "item": [
+                "representasjonspunkt",
+                "bygningstypeKodeId",
+                "naringsgruppeKodeId",
+                "oppdateringsdato",
+                "kommuneId",
+                "bruksenhetIds",
+                "kontaktpersoner",
+                "ufullstendigAreal",
+                "vannforsyningsKodeId",
+                "energikildeKodeIds",
+                "opprinnelsesKodeId",
+                "etasjer",
+                "tidligereByggId",
+                "versjon",
+                "bygningstatusHistorikker",
+                "harHeis",
+                "avsluttetAv",
+                "bygningsnummer",
+                "sluttdato",
+                "uuid",
+                "lopenummer",
+                "bebygdAreal",
+                "avlopsKodeId",
+                "bygningstatusKodeId",
+                "harSefrakminne",
+                "skjermingsverdig",
+                "utenBebygdAreal",
+                "id",
+                "oppdatertAv",
+                "etasjedata",
+                "kommunalTilleggsdel",
+                "oppvarmingsKodeIds",
+                "harKulturminne",
+                "versjonId"
+            ]
+        },
+        "oppdateringsdato": {
+            "timestamp": "2020-06-15T20:12:39.571000000+02:00"
+        },
+        "versjonId": 8,
+        "oppdatertAv": "smatmynd",
+        "versjon": 1592244759571,
+        "bygningsnummer": 20773502,
+        "lopenummer": 0,
+        "kommuneId": {
+            "value": 4601,
+            "snapshotVersion": null
+        },
+        "representasjonspunkt": {
+            "metadata": {
+                "item": [
+                    "position",
+                    "koordinatkvalitetKodeId",
+                    "koordinatsystemKodeId",
+                    "stedfestingVerifisert",
+                    "kvalitet",
+                    "originalKoordinatsystemKodeId"
+                ]
+            },
+            "koordinatsystemKodeId": {
+                "value": 10
+            },
+            "position": {
+                "metadata": {
+                    "item": [
+                        "x",
+                        "z",
+                        "y"
+                    ]
+                },
+                "x": 297395,
+                "y": 6699705,
+                "z": 0
+            },
+            "koordinatkvalitetKodeId": {
+                "value": 89,
+                "snapshotVersion": null
+            },
+            "stedfestingVerifisert": false
+        },
+        "harSefrakminne": false,
+        "harKulturminne": false,
+        "harHeis": true,
+        "skjermingsverdig": false,
+        "bebygdAreal": 0,
+        "utenBebygdAreal": false,
+        "etasjer": {
+            "item": [
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2014-10-22T09:39:30.933000000+02:00"
+                    },
+                    "versjonId": 2,
+                    "oppdatertAv": "1201moj",
+                    "id": 257366786,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 1,
+                    "antallBoenheter": 0,
+                    "bruksarealTilBolig": 0,
+                    "bruksarealTilAnnet": 2283,
+                    "bruksarealTotalt": 2283,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257366785,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 6,
+                    "antallBoenheter": 6,
+                    "bruksarealTilBolig": 537,
+                    "bruksarealTilAnnet": 0,
+                    "bruksarealTotalt": 537,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2014-10-22T09:39:30.933000000+02:00"
+                    },
+                    "versjonId": 2,
+                    "oppdatertAv": "1201moj",
+                    "id": 257366784,
+                    "etasjeplanKodeId": {
+                        "value": 2,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 1,
+                    "antallBoenheter": 0,
+                    "bruksarealTilBolig": 0,
+                    "bruksarealTilAnnet": 1726,
+                    "bruksarealTotalt": 1726,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2014-10-22T09:43:34.892000000+02:00"
+                    },
+                    "versjonId": 2,
+                    "oppdatertAv": "1201grr",
+                    "id": 257366783,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 2,
+                    "antallBoenheter": 0,
+                    "bruksarealTilBolig": 0,
+                    "bruksarealTilAnnet": 535,
+                    "bruksarealTotalt": 535,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257366782,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 3,
+                    "antallBoenheter": 6,
+                    "bruksarealTilBolig": 537,
+                    "bruksarealTilAnnet": 0,
+                    "bruksarealTotalt": 537,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257366781,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 7,
+                    "antallBoenheter": 4,
+                    "bruksarealTilBolig": 447,
+                    "bruksarealTilAnnet": 0,
+                    "bruksarealTotalt": 447,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257366780,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 4,
+                    "antallBoenheter": 6,
+                    "bruksarealTilBolig": 537,
+                    "bruksarealTilAnnet": 0,
+                    "bruksarealTotalt": 537,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "avsluttetAv",
+                            "sluttdato",
+                            "uuid",
+                            "oppdateringsdato",
+                            "antallBoenheter",
+                            "etasjeplanKodeId",
+                            "etasjenummer",
+                            "bruksarealTilAnnet",
+                            "bruksarealTilBolig",
+                            "versjonId",
+                            "id",
+                            "alternativtAreal2",
+                            "bruttoarealTilBolig",
+                            "alternativtAreal",
+                            "bruttoarealTotalt",
+                            "oppdatertAv",
+                            "bruksarealTotalt",
+                            "bruttoarealTilAnnet"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257366779,
+                    "etasjeplanKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "etasjenummer": 5,
+                    "antallBoenheter": 6,
+                    "bruksarealTilBolig": 537,
+                    "bruksarealTilAnnet": 0,
+                    "bruksarealTotalt": 537,
+                    "alternativtAreal": 0,
+                    "alternativtAreal2": 0,
+                    "bruttoarealTilBolig": 0,
+                    "bruttoarealTilAnnet": 0,
+                    "bruttoarealTotalt": 0
+                }
+            ]
+        },
+        "bruksenhetIds": {
+            "item": [
+                {
+                    "value": 257366167,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366292,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366175,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366174,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366173,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366172,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366171,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366170,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366169,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366168,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366360,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366194,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366193,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366192,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366183,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366182,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366181,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366180,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366179,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366178,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366177,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366176,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366191,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366190,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366189,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366188,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366187,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366186,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366185,
+                    "snapshotVersion": null
+                },
+                {
+                    "value": 257366184,
+                    "snapshotVersion": null
+                }
+            ]
+        },
+        "bygningsstatusHistorikker": {
+            "item": [
+                {
+                    "metadata": {
+                        "item": [
+                            "registrertDato",
+                            "bygningstatusKodeId",
+                            "oppdateringsdato",
+                            "id",
+                            "versjonId",
+                            "oppdatertAv",
+                            "dato",
+                            "slettetDato",
+                            "referanse",
+                            "arsakTilForingKodeId",
+                            "avsluttetAv",
+                            "signatur",
+                            "uuid",
+                            "sluttdato"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257365973,
+                    "bygningsstatusKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "arsakTilForingKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "dato": {
+                        "date": "2001-12-19"
+                    },
+                    "registrertDato": {
+                        "timestamp": "2002-01-16T00:00:00.000000000+01:00"
+                    }
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "registrertDato",
+                            "bygningstatusKodeId",
+                            "oppdateringsdato",
+                            "id",
+                            "versjonId",
+                            "oppdatertAv",
+                            "dato",
+                            "slettetDato",
+                            "referanse",
+                            "arsakTilForingKodeId",
+                            "avsluttetAv",
+                            "signatur",
+                            "uuid",
+                            "sluttdato"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257365974,
+                    "bygningsstatusKodeId": {
+                        "value": 1,
+                        "snapshotVersion": null
+                    },
+                    "arsakTilForingKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "dato": {
+                        "date": "2001-12-20"
+                    },
+                    "registrertDato": {
+                        "timestamp": "2003-01-15T00:00:00.000000000+01:00"
+                    }
+                },
+                {
+                    "metadata": {
+                        "item": [
+                            "registrertDato",
+                            "bygningstatusKodeId",
+                            "oppdateringsdato",
+                            "id",
+                            "versjonId",
+                            "oppdatertAv",
+                            "dato",
+                            "slettetDato",
+                            "referanse",
+                            "arsakTilForingKodeId",
+                            "avsluttetAv",
+                            "signatur",
+                            "uuid",
+                            "sluttdato"
+                        ]
+                    },
+                    "oppdateringsdato": {
+                        "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                    },
+                    "versjonId": 1,
+                    "oppdatertAv": "smatmynd",
+                    "id": 257365975,
+                    "bygningsstatusKodeId": {
+                        "value": 4,
+                        "snapshotVersion": null
+                    },
+                    "arsakTilForingKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "dato": {
+                        "date": "2003-07-04"
+                    },
+                    "registrertDato": {
+                        "timestamp": "2003-07-08T00:00:00.000000000+02:00"
+                    }
+                }
+            ]
+        },
+        "kontaktpersoner": {
+            "item": {
+                "metadata": {
+                    "item": [
+                        "datoFra",
+                        "versjonId",
+                        "oppdatertAv",
+                        "oppdateringsdato",
+                        "uuid",
+                        "kontaktpersonKodeId",
+                        "sluttdato",
+                        "id",
+                        "personId",
+                        "avsluttetAv"
+                    ]
+                },
+                "oppdateringsdato": {
+                    "timestamp": "2013-10-27T01:00:00.000000000+02:00"
+                },
+                "versjonId": 1,
+                "oppdatertAv": "smatmynd",
+                "id": 257366787,
+                "personId": {
+                    "value": 255725692,
+                    "snapshotVersion": null
+                },
+                "kontaktpersonKodeId": {
+                    "value": 1,
+                    "snapshotVersion": null
+                }
+            }
+        },
+        "oppvarmingsKodeIds": {
+            "item": {
+                "value": 0,
+                "snapshotVersion": null
+            }
+        },
+        "energikildeKodeIds": {
+            "item": {
+                "value": 0,
+                "snapshotVersion": null
+            }
+        },
+        "bygningsstatusKodeId": {
+            "value": 4,
+            "snapshotVersion": null
+        },
+        "avlopsKodeId": {
+            "value": 1,
+            "snapshotVersion": null
+        },
+        "vannforsyningsKodeId": {
+            "value": 1,
+            "snapshotVersion": null
+        },
+        "naringsgruppeKodeId": {
+            "value": 24,
+            "snapshotVersion": null
+        },
+        "opprinnelsesKodeId": {
+            "value": 5,
+            "snapshotVersion": null
+        },
+        "etasjedata": {
+            "metadata": {
+                "item": [
+                    "alternativtAreal2",
+                    "antallBoenheter",
+                    "bruttoarealTilAnnet",
+                    "bruksarealTilBolig",
+                    "bruksarealTotalt",
+                    "bruttoarealTilBolig",
+                    "alternativtAreal",
+                    "bruttoarealTotalt",
+                    "bruksarealTilAnnet"
+                ]
+            },
+            "antallBoenheter": 28,
+            "bruksarealTilBolig": 2595,
+            "bruksarealTilAnnet": 4544,
+            "bruksarealTotalt": 7139,
+            "alternativtAreal": 0,
+            "alternativtAreal2": 0,
+            "bruttoarealTilBolig": 0,
+            "bruttoarealTilAnnet": 0,
+            "bruttoarealTotalt": 0
+        },
+        "kommunalTilleggsdel": {
+            "metadata": {
+                "item": [
+                    "antallRoklop",
+                    "kommentarer",
+                    "privatKloakkRensingsKodeId",
+                    "brenseltankNedgravd",
+                    "bygningsReferanser",
+                    "materialeIYtterveggKoder",
+                    "fundamenteringsKodeId",
+                    "alternativtArealBygning",
+                    "kartblad",
+                    "septiktank",
+                    "vertikalBarekonstrKoder",
+                    "antallEtasjer",
+                    "renovasjonsKodeId",
+                    "horisontalBarekonstrKoder",
+                    "kildePrivatVannforsyningKodeId"
+                ]
+            },
+            "alternativtArealBygning": 0,
+            "antallEtasjer": 0,
+            "antallRoklop": 0,
+            "brenseltankNedgravd": 0,
+            "septiktank": false,
+            "kildePrivatVannforsyningKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "privatKloakkRensingsKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "renovasjonsKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "fundamenteringsKodeId": {
+                "value": 0,
+                "snapshotVersion": null
+            },
+            "materialeIYtterveggKoder": {},
+            "horisontalBarekonstrKoder": {},
+            "vertikalBarekonstrKoder": {},
+            "kommentarer": {},
+            "bygningsReferanser": {}
+        },
+        "uuid": {
+            "navnerom": "https:\/\/data.geonorge.no\/matrikkel",
+            "uuid": "856e754c-5e90-5c19-abde-f964ea2a31ab"
+        },
+        "bygningstypeKodeId": {
+            "value": 14,
+            "snapshotVersion": null
+        },
+        "ufullstendigAreal": false,
+        "adresser": [
+            {
+                "id": {
+                    "value": 256968544,
+                    "snapshotVersion": null
+                },
+                "metadata": {
+                    "item": [
+                        "kretsIds",
+                        "kommunalTilleggsdel",
+                        "atkomster",
+                        "tilleggsnavnKildeKodeId",
+                        "sluttdato",
+                        "matrikkelenhetId",
+                        "vegId",
+                        "avsluttetAv",
+                        "oppdatertAv",
+                        "uuid",
+                        "representasjonspunkt",
+                        "id",
+                        "kortnavn",
+                        "oppdateringsdato",
+                        "bokstav",
+                        "adressetilleggsnavn",
+                        "versjonId",
+                        "versjon",
+                        "nummer"
+                    ]
+                },
+                "oppdateringsdato": {
+                    "timestamp": "2026-07-13T16:25:04.255572000+02:00"
+                },
+                "versjonId": 4,
+                "oppdatertAv": "eksternregister3",
+                "versjon": 1783952704256,
+                "representasjonspunkt": {
+                    "metadata": {
+                        "item": [
+                            "position",
+                            "koordinatkvalitetKodeId",
+                            "koordinatsystemKodeId",
+                            "stedfestingVerifisert",
+                            "kvalitet",
+                            "originalKoordinatsystemKodeId"
+                        ]
+                    },
+                    "koordinatsystemKodeId": {
+                        "value": 10
+                    },
+                    "position": {
+                        "metadata": {
+                            "item": [
+                                "x",
+                                "z",
+                                "y"
+                            ]
+                        },
+                        "x": 297367,
+                        "y": 6699706,
+                        "z": 0
+                    },
+                    "koordinatkvalitetKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "stedfestingVerifisert": false
+                },
+                "matrikkelenhetId": {
+                    "value": 255849581,
+                    "snapshotVersion": null
+                },
+                "atkomster": {},
+                "kretsIds": {
+                    "item": [
+                        {
+                            "value": 255668540,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 10484845,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668555,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668614,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668630,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668193,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 1006065,
+                            "snapshotVersion": null
+                        }
+                    ]
+                },
+                "kommunalTilleggsdel": {
+                    "metadata": {
+                        "item": [
+                            "adresseReferanser",
+                            "kartblad",
+                            "kommentarer"
+                        ]
+                    },
+                    "kommentarer": {},
+                    "adresseReferanser": {}
+                },
+                "tilleggsnavnKildeKodeId": {
+                    "value": 0,
+                    "snapshotVersion": null
+                },
+                "uuid": {
+                    "navnerom": "https:\/\/data.geonorge.no\/matrikkel",
+                    "uuid": "ed91852c-93a5-55bb-ae9b-6f8b0d1ea8d5"
+                },
+                "vegId": {
+                    "value": 256380824,
+                    "snapshotVersion": null
+                },
+                "nummer": 12
+            },
+            {
+                "id": {
+                    "value": 256967224,
+                    "snapshotVersion": null
+                },
+                "metadata": {
+                    "item": [
+                        "kretsIds",
+                        "kommunalTilleggsdel",
+                        "atkomster",
+                        "tilleggsnavnKildeKodeId",
+                        "sluttdato",
+                        "matrikkelenhetId",
+                        "vegId",
+                        "avsluttetAv",
+                        "oppdatertAv",
+                        "uuid",
+                        "representasjonspunkt",
+                        "id",
+                        "kortnavn",
+                        "oppdateringsdato",
+                        "bokstav",
+                        "adressetilleggsnavn",
+                        "versjonId",
+                        "versjon",
+                        "nummer"
+                    ]
+                },
+                "oppdateringsdato": {
+                    "timestamp": "2026-07-13T16:25:04.255572000+02:00"
+                },
+                "versjonId": 4,
+                "oppdatertAv": "eksternregister3",
+                "versjon": 1783952704256,
+                "representasjonspunkt": {
+                    "metadata": {
+                        "item": [
+                            "position",
+                            "koordinatkvalitetKodeId",
+                            "koordinatsystemKodeId",
+                            "stedfestingVerifisert",
+                            "kvalitet",
+                            "originalKoordinatsystemKodeId"
+                        ]
+                    },
+                    "koordinatsystemKodeId": {
+                        "value": 10
+                    },
+                    "position": {
+                        "metadata": {
+                            "item": [
+                                "x",
+                                "z",
+                                "y"
+                            ]
+                        },
+                        "x": 297393,
+                        "y": 6699723,
+                        "z": 0
+                    },
+                    "koordinatkvalitetKodeId": {
+                        "value": 0,
+                        "snapshotVersion": null
+                    },
+                    "stedfestingVerifisert": false
+                },
+                "matrikkelenhetId": {
+                    "value": 255849581,
+                    "snapshotVersion": null
+                },
+                "atkomster": {},
+                "kretsIds": {
+                    "item": [
+                        {
+                            "value": 255668540,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 10484845,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668555,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668614,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668630,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 255668193,
+                            "snapshotVersion": null
+                        },
+                        {
+                            "value": 1006065,
+                            "snapshotVersion": null
+                        }
+                    ]
+                },
+                "kommunalTilleggsdel": {
+                    "metadata": {
+                        "item": [
+                            "adresseReferanser",
+                            "kartblad",
+                            "kommentarer"
+                        ]
+                    },
+                    "kommentarer": {},
+                    "adresseReferanser": {}
+                },
+                "tilleggsnavnKildeKodeId": {
+                    "value": 0,
+                    "snapshotVersion": null
+                },
+                "uuid": {
+                    "navnerom": "https:\/\/data.geonorge.no\/matrikkel",
+                    "uuid": "46e47901-f50c-5ea2-a9cf-085fb031e44d"
+                },
+                "vegId": {
+                    "value": 256380765,
+                    "snapshotVersion": null
+                },
+                "nummer": 27
+            }
+        ]
+    }
+]
