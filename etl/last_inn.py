@@ -9,10 +9,10 @@ nøyaktig hva som skal skje før noe faktisk endres.
 
 Bruk:
     python3 etl/last_inn.py bergen > etl/ut/bergen.sql
-    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/bergen.sql
+    docker exec -i portico_masterdb psql -U postgres -d OppdatertDatabase < etl/ut/bergen.sql
 
     python3 etl/last_inn.py alle > etl/ut/alle.sql
-    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
+    docker exec -i portico_masterdb psql -U postgres -d OppdatertDatabase < etl/ut/alle.sql
 
 Se etl/README.md for full forklaring.
 
