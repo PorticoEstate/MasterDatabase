@@ -109,11 +109,24 @@ def main():
         a = treff[0]
         punkt = a["representasjonspunkt"]
         lon, lat = punkt["lon"], punkt["lat"]
+
+        adressetekst = a["adressetekst"]
+        adressenavn = a["adressenavn"]
+        husnr = a["nummer"]
+        bokstav = a["bokstav"]
+        poststed = a["poststed"]
+        postnummer = a["postnummer"]
         funnet_kommunenr = a.get("kommunenummer")
 
         out.write(
             f"UPDATE adresse SET "
-            f"posisjon = ST_SetSRID(ST_MakePoint({lon},{lat}),4326)::geography, "
+            f"posisjon = ST_SetSRID(ST_MakePoint({lon},{lat}),4326)::geography,"
+            f"adressetekst = {q(adressetekst)}, "
+            f"gatenavn = {q(adressenavn)}, "
+            f"husnr = {q(husnr)}, "
+            f"bokstav = {q(bokstav)}, "
+            f"poststed = {q(poststed)}, "
+            f"postnummer = {q(postnummer)}, "
             f"geokoding = 'geokodet' "
             f"WHERE id = {adresse_id};\n"
         )

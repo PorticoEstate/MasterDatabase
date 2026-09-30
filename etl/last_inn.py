@@ -153,7 +153,7 @@ FASILITET = {
     "hc toalett": "HC_TOALETT", "teleslynge": "TELESLYNGE", "heis": "HEIS",
     "projektor": "PROSJEKTOR", "prosjektor": "PROSJEKTOR", "lydanlegg": "LYDANLEGG",
     "musikkanlegg m blatann": "LYDANLEGG", "mikrofon": "MIKROFON",
-    "flygel": "FLYGEL", "piano": "FLYGEL", "parkettgulv": "PARKETTGULV",
+    "flygel": "PIANO", "piano": "PIANO", "parkettgulv": "PARKETTGULV",
     "tribune": "TRIBUNE", "kiosk": "KIOSK", "kjokken": "KJOKKEN",
     "parkering": "PARKERING", "balpanne": "BAALPLASS", "whiteboard": "WHITEBOARD",
     "flomlys": "FLOMLYS", "wifi": "WIFI",
