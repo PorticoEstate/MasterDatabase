@@ -656,6 +656,8 @@ INSERT INTO aktivitet (kode, navn, sortering) VALUES
     ('PRIVAT','Privat arrangement',50),
     ('FRIVILLIGHET','Frivillighet og lag',60),
     ('FRILUFT','Friluftsliv',70),
+    ('ARRANGEMENT','Arrangement og marked',75),
+    ('NAERING','Næring og kommersiell utleie',78),
     ('INTERNT','Internt kommunalt',80)
 ON CONFLICT (kode) DO NOTHING;
 

@@ -126,11 +126,21 @@ LOKALETYPE = {
 
 IKKE_RELEVANT = {
     "stengt", "fiktivt rom", "kantinebidrag", "inkludering", "sosial aktivitet",
-    "kvitsoygata 3", "judaberg innbyggertorg", "mostun natursenter", "wc toalett",
+    "kvitsoygata 3", "judaberg innbyggertorg", "mostun natursenter",
+    # Uspesifiserte samlekategorier og administrative tilstander fra
+    # aktivitetslistene. NB: ordboken deles av alle kodetyper, så bare navn
+    # som ikke er gyldige i noen kodetype hører hjemme her.
+    "annet", "x annet", "andre", "generelt", "forslag", "gi bort",
+    "slettet utgatt", "vedlikehold", "stengt pga ferie eller arrangement",
+    "stengt pga vedlikehold reperasjon av utstyr", "sommerstengt sommertrening",
+    "utlansordningen er ikke apen",
+    "tiden er ledig sykkelen reserveres fra forrige ledige torsdag",
+    "walk and talk test",
 }
 
 FASILITET = {
     "garderobe": "GARDEROBE", "dusj": "DUSJ", "toalett": "TOALETT", "wc": "TOALETT",
+    "wc toalett": "TOALETT",
     "hc toalett": "HC_TOALETT", "teleslynge": "TELESLYNGE", "heis": "HEIS",
     "projektor": "PROSJEKTOR", "prosjektor": "PROSJEKTOR", "lydanlegg": "LYDANLEGG",
     "musikkanlegg m blatann": "LYDANLEGG", "mikrofon": "MIKROFON",
@@ -140,14 +150,170 @@ FASILITET = {
     "flomlys": "FLOMLYS", "wifi": "WIFI",
 }
 
+# Kartleggingsregel: mest spesifikke kode vi har, ellers rotkategorien
+# (IDRETT, KULTUR, ...). Nettsiden filtrerer på kategoriene, aldri på
+# rånavnene, så en grov plassering er mye bedre enn ingen. Navn som
+# fortsatt mangler her forblir ukartlagt og dukker opp i
+# v_ukartlagte_kildekoder for manuell vurdering.
 AKTIVITET = {
-    "fotball": "FOTBALL", "handball": "HANDBALL", "basketball": "BASKETBALL",
-    "volleyball": "VOLLEYBALL", "turn": "TURN", "kampsport": "KAMPSPORT",
-    "svomming": "SVOMMING", "friidrett": "FRIIDRETT", "klatring": "KLATRING",
-    "tennis": "TENNIS", "skyting": "SKYTING", "dans": "DANS", "speider": "SPEIDER",
-    "sykling": "SYKLING", "idrett": "IDRETT", "kultur": "KULTUR",
-    "privat arrangement": "PRIVAT", "kor og sang": "KOR", "teater og revy": "TEATER",
+    # --- Idrett: spesifikke grener ---
+    "fotball": "FOTBALL", "fotballbane": "FOTBALL", "futsal": "FOTBALL",
+    "innefotball": "FOTBALL",
+    "handball": "HANDBALL", "minihandball": "HANDBALL", "sandhandball": "HANDBALL",
+    "basketball": "BASKETBALL",
+    "volleyball": "VOLLEYBALL", "sandvolleyball": "VOLLEYBALL",
+    "turn": "TURN", "gymnastikk": "TURN", "gymnastikk og turn": "TURN",
+    "kampsport": "KAMPSPORT", "boksing": "KAMPSPORT", "bryting": "KAMPSPORT",
+    "judo": "KAMPSPORT", "ju jitsu": "KAMPSPORT", "karate": "KAMPSPORT",
+    "kickboksing": "KAMPSPORT", "taekwondo": "KAMPSPORT", "fekting": "KAMPSPORT",
+    "svomming": "SVOMMING", "svommehall": "SVOMMING", "symjehall": "SVOMMING",
+    "stuping": "SVOMMING", "vannpolo": "SVOMMING", "undervannsrugby": "SVOMMING",
+    "dykking": "SVOMMING",
+    "friidrett": "FRIIDRETT",
+    "ishockey": "ISHOCKEY", "bandy": "ISHOCKEY", "skoyter": "ISHOCKEY",
+    "kunstlop": "ISHOCKEY", "hurtiglop": "ISHOCKEY", "curling": "ISHOCKEY",
+    "klatring": "KLATRING", "klartring": "KLATRING",
+    "styrketrening": "STYRKETRENING", "vektlofting": "STYRKETRENING",
+    "styrkelofting": "STYRKETRENING", "styrkeloft": "STYRKETRENING",
+    "tennis": "TENNIS",
+    "skyting": "SKYTING", "bueskyting": "SKYTING", "leirdueskyting": "SKYTING",
+    "sykling": "SYKLING", "leie av lastesykkel": "SYKLING",
+
+    # --- Idrett: rotnivå (ingen egen kode ennå) ---
+    "idrett": "IDRETT", "annen idrett": "IDRETT", "andre idretter": "IDRETT",
+    "idrettsaktiviteter": "IDRETT", "sport og idrett": "IDRETT",
+    "ballsport": "IDRETT", "egenorganisert": "IDRETT",
+    "badminton": "IDRETT", "bordtennis": "IDRETT", "innebandy": "IDRETT",
+    "bandy inne": "IDRETT", "squash": "IDRETT", "orientering": "IDRETT",
+    "cheerleading": "IDRETT", "drill": "IDRETT", "sportsdrill": "IDRETT",
+    "skisport": "IDRETT", "ski": "IDRETT", "amerikansk fotball": "IDRETT",
+    "rugby": "IDRETT", "lacrosse": "IDRETT", "cricket": "IDRETT",
+    "baseball": "IDRETT", "baseball softball": "IDRETT", "golf": "IDRETT",
+    "boccia": "IDRETT", "bowls": "IDRETT", "e sport": "IDRETT",
+    "hestesport": "IDRETT", "riding": "IDRETT", "motorsport": "IDRETT",
+    "luftsport": "IDRETT", "hundesport": "IDRETT", "rollerderby": "IDRETT",
+    "skating": "IDRETT", "paintball": "IDRETT",
+    "roing": "IDRETT", "seiling": "IDRETT", "seilsport": "IDRETT",
+    "sjosport": "IDRETT", "vannsport": "IDRETT",
+    "trim": "IDRETT", "yoga": "IDRETT",
+    "bedriftsidrett": "IDRETT", "fleridrettslag": "IDRETT",
+    "fleiridrettslag": "IDRETT", "idrettskrets sarforbund": "IDRETT",
+    "apen hall": "IDRETT", "gymsal": "IDRETT", "idrettshall": "IDRETT",
+
+    # --- Kultur: spesifikke grener ---
+    "dans": "DANS", "dansing": "DANS", "dans trening": "DANS",
+    "musikk": "MUSIKK", "musikk korps": "MUSIKK", "korps": "MUSIKK",
+    "korps og orkester": "MUSIKK", "band": "MUSIKK", "musikk og dans": "MUSIKK",
+    "kor": "KOR", "kor og sang": "KOR",
+    "teater": "TEATER", "teater og revy": "TEATER",
+    "teaterforestilling": "TEATER", "teater og scenekunst": "TEATER",
     "kunst handtverk media": "KUNST_HANDVERK", "kunst handverk og media": "KUNST_HANDVERK",
+    "kunst og handverk": "KUNST_HANDVERK", "kreativt verksted": "KUNST_HANDVERK",
+    "kreativt verksted og prosesser": "KUNST_HANDVERK",
+    "malegruppe": "KUNST_HANDVERK", "foto": "KUNST_HANDVERK", "video": "KUNST_HANDVERK",
+
+    # --- Kultur: rotnivå ---
+    "kultur": "KULTUR", "kulturlokaler": "KULTUR",
+    "kulturlokaler formidling og oving": "KULTUR",
+    "kulturlokaler oving og verksteder": "KULTUR",
+    "kulturaktiviteter": "KULTUR", "kulturarrangement": "KULTUR",
+    "kulturhus": "KULTUR", "kulturskolen": "KULTUR", "kino": "KULTUR",
+    "konsert": "KULTUR", "galleri": "KULTUR", "museum": "KULTUR",
+    "utstilling": "KULTUR", "litteratur litteraturformidling": "KULTUR",
+    "bibliotek": "KULTUR", "ovingsrom": "KULTUR",
+    "ovingslokaler og verksteder": "KULTUR",
+    "formidlingsarena og forsamlingslokaler": "KULTUR",
+    "kulturvern og sogelag": "KULTUR", "kulturvern og historie": "KULTUR",
+    "kulturvern og historielag": "KULTUR", "buekorps": "KULTUR",
+    "festival": "KULTUR", "festivaler monstringer": "KULTUR",
+    "festivaler og monstringer": "KULTUR", "festivaler monstringar": "KULTUR",
+    "disko": "KULTUR",
+
+    # --- Opplæring og kurs ---
+    "skole": "OPPLARING", "skular": "OPPLARING", "skule": "OPPLARING",
+    "skule oppvekst": "OPPLARING", "vgs": "OPPLARING", "ntnu": "OPPLARING",
+    "barnehage": "OPPLARING", "barnehager": "OPPLARING",
+    "undervisning": "OPPLARING", "undervisning opplaring": "OPPLARING",
+    "kurs": "OPPLARING", "dataundervisning": "OPPLARING",
+    "klasseromsundervisning": "OPPLARING", "leksegruppe": "OPPLARING",
+    "studiegrupper": "OPPLARING", "sprakcafe": "OPPLARING",
+    "forelesning": "OPPLARING", "foredrag": "OPPLARING",
+    "naturskole": "OPPLARING", "voksenopplaringssenteret": "OPPLARING",
+
+    # --- Møte og konferanse ---
+    "moterom": "MOTE", "moter": "MOTE", "mote": "MOTE", "sma moter": "MOTE",
+    "apne moter": "MOTE", "styremoter": "MOTE", "motevirksomhet": "MOTE",
+    "moteaktivitet": "MOTE", "mote presentasjon": "MOTE",
+    "presentasjoner": "MOTE", "informasjons moter": "MOTE",
+    "samlinger": "MOTE", "gruppearbeid": "MOTE", "samtaler": "MOTE",
+    "annet idrett moterom": "MOTE", "annet kultur moterom": "MOTE",
+    "idrett moterom": "MOTE", "kulturlokalar moterom": "MOTE",
+    "drop in arbeidsplasser": "MOTE",
+
+    # --- Privat arrangement ---
+    "privat arrangement": "PRIVAT", "privat lukket arrangement": "PRIVAT",
+    "barnebursdag": "PRIVAT", "barnebursdag 3 12 ar": "PRIVAT",
+    "barnebursdag 3 16 ar": "PRIVAT", "bryllup": "PRIVAT", "dap": "PRIVAT",
+    "konfirmasjon": "PRIVAT", "vielser": "PRIVAT", "seremonier": "PRIVAT",
+    "livsnoytral seremonirom": "PRIVAT", "personlig markering": "PRIVAT",
+    "annet personlig markering": "PRIVAT", "familiefest": "PRIVAT",
+    "klassefest": "PRIVAT", "selskapsarrangement": "PRIVAT",
+
+    # --- Frivillighet og lag (leietakerkategorier fra kilden) ---
+    "grendalag": "FRIVILLIGHET", "grendalag velforening": "FRIVILLIGHET",
+    "humanitare organiasjoner": "FRIVILLIGHET",
+    "humanitare organisasjoner": "FRIVILLIGHET",
+    "humanitare organisasjonar": "FRIVILLIGHET",
+    "interesseorganiasjonar": "FRIVILLIGHET",
+    "interesseorganisasjon": "FRIVILLIGHET",
+    "interesseorganisasjonar": "FRIVILLIGHET",
+    "interesseorganisasjoner": "FRIVILLIGHET",
+    "meningheter og trossamfunn": "FRIVILLIGHET",
+    "menigheter og trossamfunn": "FRIVILLIGHET",
+    "menigheter og trosamfunn": "FRIVILLIGHET",
+    "pensjonistforening": "FRIVILLIGHET", "politisk organisasjon": "FRIVILLIGHET",
+    "frivillighet og organisasjonsaktiviteter": "FRIVILLIGHET",
+    "frivilligsentral": "FRIVILLIGHET", "utenlandsk forening": "FRIVILLIGHET",
+    "batforeingar": "FRIVILLIGHET", "vennelag gruppe": "FRIVILLIGHET",
+    "hobbygrupper": "FRIVILLIGHET", "ungdomsklubb": "FRIVILLIGHET",
+    "sosiale moteplassar": "FRIVILLIGHET", "sosiale moteplasser": "FRIVILLIGHET",
+    "moteplass": "FRIVILLIGHET", "spedbarnsgruppe": "FRIVILLIGHET",
+    "bil mc klubb": "FRIVILLIGHET", "foreldreutval": "FRIVILLIGHET",
+    "sameie": "FRIVILLIGHET", "klesinnsamling": "FRIVILLIGHET",
+    "sondagskafe": "FRIVILLIGHET",
+
+    # --- Friluftsliv ---
+    "speider": "SPEIDER", "speidar": "SPEIDER", "speidarar": "SPEIDER",
+    "speider og friluftsliv": "SPEIDER",
+    "friluftsliv": "FRILUFT", "tur": "FRILUFT", "turar": "FRILUFT",
+    "turgruppe": "FRILUFT", "fisketurer": "FRILUFT", "jakt": "FRILUFT",
+    "gapahuk": "FRILUFT", "grill balpanne": "FRILUFT", "teltplass": "FRILUFT",
+    "sommerleir": "FRILUFT", "uteomrade": "FRILUFT", "overnatting": "FRILUFT",
+    "kajakk": "FRILUFT", "kano kajakk": "FRILUFT", "kanopadling": "FRILUFT",
+
+    # --- Arrangement og marked ---
+    "arrangement": "ARRANGEMENT", "alle typer arrangement": "ARRANGEMENT",
+    "off arrangement": "ARRANGEMENT", "annet offentlig arrangement": "ARRANGEMENT",
+    "sirkus": "ARRANGEMENT", "tivoli": "ARRANGEMENT", "marked": "ARRANGEMENT",
+
+    # --- Næring og kommersiell utleie ---
+    "kommersiell utleie": "NAERING", "kommersiell utleige": "NAERING",
+    "naring og kommersiell virksomhet": "NAERING", "bedrifter o l": "NAERING",
+    "promotering": "NAERING", "profilering": "NAERING",
+    "stand": "NAERING", "stand 2mx3m": "NAERING", "lokalmat": "NAERING",
+    "torg": "NAERING", "pub": "NAERING", "kafe": "NAERING",
+
+    # --- Internt kommunalt ---
+    "internt bergen kommune": "INTERNT", "internt stavanger kommune": "INTERNT",
+    "internt kommune": "INTERNT", "internt bruk kommune": "INTERNT",
+    "kommune eige bruk": "INTERNT", "kommunal aktivitet": "INTERNT",
+    "intern aktivitet": "INTERNT", "interne avdelinger": "INTERNT",
+    "intern avdeling flyk": "INTERNT", "intern avdeling kulturskolen": "INTERNT",
+    "intern avdeling voks": "INTERNT", "flykningekontoret": "INTERNT",
+    "innbyggertorg": "INTERNT", "innbyggerbussen": "INTERNT",
+    "administrasjonslokale": "INTERNT", "sykehjem": "INTERNT",
+    "helsebygg": "INTERNT", "valg": "INTERNT", "politikk valgdag": "INTERNT",
+    "annet internt i kommunen": "INTERNT",
 }
 
 
