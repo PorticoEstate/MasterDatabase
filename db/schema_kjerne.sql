@@ -1,7 +1,7 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
 -- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
--- 17 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
+-- 17 tabeller og 4 visninger. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
 -- matrikkelen. Se db/schema_kjerne_dokumentasjon.md.
 --
 -- To kilder, to roller:
@@ -459,21 +459,86 @@ CREATE INDEX IF NOT EXISTS ix_kildeuttrekk_kilde ON kildeuttrekk (kilde, hentet_
 -- mens bygg- og ressurslistene er filtrert. I Bergen peker 388 av 980
 -- koblingsrader på ressurser som ikke finnes i uttrekket. De må filtreres bort,
 -- men skal loggføres — hvis andelen endrer seg, har noe skjedd hos kommunen.
+--
+-- Hvert avvik peker på kildeuttrekket det oppstod i, slik at et menneske kan
+-- se hele posten som feilet (se v_synk_avvik_detalj) og ikke bare en feiltekst.
+-- RESTRICT, ikke CASCADE: et uttrekk med avvik skal ikke kunne slettes ved et
+-- uhell og ta bevisene med seg.
 CREATE TABLE IF NOT EXISTS synk_avvik
 (
     id               BIGSERIAL PRIMARY KEY,
-    kildeuttrekk_id  BIGINT REFERENCES kildeuttrekk(id) ON DELETE CASCADE,
+    kildeuttrekk_id  BIGINT REFERENCES kildeuttrekk(id) ON DELETE RESTRICT,
     kilde            TEXT NOT NULL,
     samling          TEXT NOT NULL,
     avvikstype       TEXT NOT NULL CHECK (avvikstype IN
                           ('manglende_forelder','ikke_kartlagt','geokoding_feilet',
-                           'ugyldig_verdi','annet')),
+                           'ugyldig_verdi','db_feil','annet')),
     ekstern_id       TEXT,
+    -- Feltet i posten som var galt (f.eks. 'zip_code'). NULL når hele posten er
+    -- problemet.
+    felt             TEXT,
+    -- Hvilket felt i posten i payload->samling som ekstern_id er verdien av.
+    -- 'id' for bygg og ressurser; 'resource_id' / 'building_id' for
+    -- koblingsradene, som ikke har noen egen id.
+    nokkelfelt       TEXT NOT NULL DEFAULT 'id',
     detalj           TEXT,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS ix_synk_avvik_kilde ON synk_avvik (kilde, avvikstype);
+CREATE INDEX IF NOT EXISTS ix_synk_avvik_uttrekk ON synk_avvik (kildeuttrekk_id);
+
+-- Innlastingsskriptene skriver bare SQL og vet ikke hvilken id et uttrekk får.
+-- Derfor registrerer første setning i hver fil uttrekket og husker id-en i en
+-- transaksjonslokal innstilling, og alle avvik i samme transaksjon henter den
+-- derfra. Virker også inne i DO-blokker, der psql-variabler ikke kan brukes.
+CREATE OR REPLACE PROCEDURE registrer_kildeuttrekk(
+    p_kilde TEXT, p_endepunkt TEXT, p_http_status INTEGER, p_payload JSONB,
+    p_hentet_at TIMESTAMPTZ DEFAULT now())
+LANGUAGE plpgsql AS $$
+DECLARE
+    ny_id BIGINT;
+BEGIN
+    INSERT INTO kildeuttrekk (kilde, endepunkt, hentet_at, http_status, payload)
+    VALUES (p_kilde, p_endepunkt, p_hentet_at, p_http_status, p_payload)
+    RETURNING id INTO ny_id;
+    PERFORM set_config('masterdb.kildeuttrekk_id', ny_id::text, true);
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE logg_avvik(
+    p_kilde TEXT, p_samling TEXT, p_avvikstype TEXT, p_ekstern_id TEXT,
+    p_detalj TEXT, p_felt TEXT DEFAULT NULL, p_nokkelfelt TEXT DEFAULT 'id')
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO synk_avvik (kildeuttrekk_id, kilde, samling, avvikstype,
+                            ekstern_id, felt, nokkelfelt, detalj)
+    VALUES (NULLIF(current_setting('masterdb.kildeuttrekk_id', true), '')::bigint,
+            p_kilde, p_samling, p_avvikstype, p_ekstern_id, p_felt,
+            p_nokkelfelt, p_detalj);
+END;
+$$;
+
+-- Beholder de p_behold nyeste uttrekkene per kilde, pluss alle uttrekk som har
+-- minst ett avvik knyttet til seg. Returnerer antall slettede uttrekk.
+-- p_kilde = NULL rydder alle kilder.
+CREATE OR REPLACE FUNCTION rydd_kildeuttrekk(p_kilde TEXT DEFAULT NULL, p_behold INTEGER DEFAULT 2)
+RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE
+    antall BIGINT;
+BEGIN
+    DELETE FROM kildeuttrekk u
+    WHERE (p_kilde IS NULL OR u.kilde = p_kilde)
+      AND NOT EXISTS (SELECT 1 FROM synk_avvik a WHERE a.kildeuttrekk_id = u.id)
+      AND u.id NOT IN (SELECT n.id
+                         FROM (SELECT id, row_number() OVER (
+                                          PARTITION BY kilde ORDER BY hentet_at DESC, id DESC) AS rn
+                                 FROM kildeuttrekk) n
+                        WHERE n.rn <= p_behold);
+    GET DIAGNOSTICS antall = ROW_COUNT;
+    RETURN antall;
+END;
+$$;
 
 
 -- =============================================================================
@@ -541,6 +606,32 @@ FROM kildekode kk
 JOIN fagsystem_instans fi ON fi.id = kk.fagsystem_instans_id
 LEFT JOIN kildekode_mapping m ON m.kildekode_id = kk.id
 WHERE m.id IS NULL OR m.status = 'foreslatt';
+
+-- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
+-- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
+-- finnes, er den logget på nytt i den nyeste kjøringen.
+CREATE OR REPLACE VIEW v_synk_avvik_gjeldende AS
+SELECT a.*
+FROM synk_avvik a
+WHERE a.kildeuttrekk_id IN (
+    SELECT DISTINCT ON (kilde) id
+    FROM kildeuttrekk
+    ORDER BY kilde, hentet_at DESC, id DESC);
+
+-- Arbeidslisten for den som går gjennom avvik: avviket sammen med posten i det
+-- rå svaret som det gjelder. "post" er bare den relevante posten (eller
+-- postene, ved koblingsrader), ikke hele svaret.
+CREATE OR REPLACE VIEW v_synk_avvik_detalj AS
+SELECT a.id AS avvik_id, a.kilde, a.samling, a.avvikstype, a.ekstern_id, a.felt,
+       a.detalj, a.created_at, u.id AS kildeuttrekk_id, u.endepunkt, u.hentet_at,
+       CASE WHEN jsonb_typeof(u.payload -> a.samling) = 'array'
+            THEN (SELECT jsonb_agg(e)
+                    FROM jsonb_array_elements(u.payload -> a.samling) e
+                   WHERE e ->> a.nokkelfelt = a.ekstern_id)
+            ELSE u.payload
+       END AS post
+FROM synk_avvik a
+LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 
 
 -- =============================================================================

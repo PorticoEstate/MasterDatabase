@@ -60,15 +60,33 @@ og **ikke** `organizations`-samlingen fra kilden, som inneholder
 personopplysninger om søkere - se prosjektets minne om dette.
 
 Kjøres skriptet på nytt for en kommune som allerede er lastet inn, oppdateres
-radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). Rader i
-kildens koblingstabeller som peker på bygg eller ressurser utenfor uttrekket
-kan ikke lastes og logges i stedet i `synk_avvik`, med `avvikstype` og en
-kort forklaring - se den tabellen for å forstå datakvaliteten i det som ble
-lastet inn.
+radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
+er geokodet eller satt manuelt, og en kapasitet som er satt manuelt, overskrives
+ikke. Se db/schema_kjerne_dokumentasjon.md for detaljene.
+
+## Avvik og kildeuttrekk
+
+Hver kjøring lagrer først det rå svaret fra kilden i `kildeuttrekk` (uten
+`organizations` og andre personopplysninger), og alt som ikke lar seg laste
+loggføres i `synk_avvik` med peker til det uttrekket: ugyldige verdier,
+koblinger til noe som ikke finnes i uttrekket, databasefeil og feilet henting.
+En enkelt dårlig post stopper aldri hele lasten.
+
+Gå gjennom avvikene fra siste kjøring slik:
+
+```bash
+docker exec portico_masterdb psql -U postgres -d masterdb -c "
+    SELECT d.avvik_id, d.kilde, d.avvikstype, d.felt, d.detalj, d.post
+    FROM v_synk_avvik_gjeldende g JOIN v_synk_avvik_detalj d ON d.avvik_id = g.id
+    WHERE g.avvikstype <> 'manglende_forelder';"
+```
+
+`post` er selve posten fra kilden som feilet. De to nyeste uttrekkene per kilde
+beholdes, pluss alle som har avvik knyttet til seg.
 
 ## Geokoding
 
-`geokod.py` fyller `adresse.posisjon` og `bygning.posisjon` fra Kartverkets åpne Adresse-API. Leser en enkel liste fra standard-inn, skriver SQL til standard-ut - samme mønster som `last_inn.py`, ingen ekstra Python-pakker.
+`geokod.py` fyller `adresse.posisjon` og `bygning.posisjon` fra Kartverkets åpne Adresse-API. Kartverkets svar for hver adresse lagres som ett `kildeuttrekk`, og geokodingsavvik peker dit. Leser en enkel liste fra standard-inn, skriver SQL til standard-ut - samme mønster som `last_inn.py`, ingen ekstra Python-pakker.
 
 ```bash
 docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
@@ -95,6 +113,6 @@ Reelt resultat ved full kjøring (423 bygg, 419 adresser å geokode): 234 geokod
 `kommune_id` settes i dag fra hvilken Aktiv kommune-instans dataene kommer
 fra (`bergen` → kommunenr 4601). Det stemmer for alle 12 instansene som
 finnes i dag. Skjemaet støtter at en instans betjener flere kommuner
-(tabellen `instans_kommune`); den dagen det faktisk skjer for en av
+(tabellen `kommune_fagsystem_instans`); den dagen det faktisk skjer for en av
 instansene vi laster fra, må `kommune_id` i stedet utledes fra en geokodet
 adresse, ikke fra instansen.

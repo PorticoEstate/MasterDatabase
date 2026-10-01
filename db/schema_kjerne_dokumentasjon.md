@@ -1,6 +1,6 @@
 # Kjernemodell for masterdatabasen
 
-Dokumentasjon for `db/schema_kjerne.sql`. 17 egne tabeller, 2 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data.
+Dokumentasjon for `db/schema_kjerne.sql`. 17 egne tabeller, 4 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle tabellene får data fra innlastingen, bortsett fra `matrikkelenhet` og `bygning_matrikkelenhet`, som venter på matrikkelimporten.
 
 **Krever PostGIS.** Docker-imaget er `postgis/postgis:18-3.6` (ikke rent `postgres:18`), og skjemaet starter med `CREATE EXTENSION IF NOT EXISTS postgis;`.
 
@@ -170,9 +170,28 @@ En vanlig fremmednøkkel på `bygning_id` alene ville bare sjekket at bygget fin
 
 ### Innlasting og sporbarhet
 
-**`kildeuttrekk`** — rått JSON-svar fra kilden, lagret før transformasjon. Lar en last kjøres om igjen uten nye kall mot kommunens system.
+**`kildeuttrekk`** — rått JSON-svar fra kilden, ett per kommune per kjøring av `last_inn.py` og ett per kjøring av `geokod.py` (Kartverkets svar for hver adresse). Registreres som første setning i hver SQL-fil, før noe er tolket.
 
-**`synk_avvik`** — 2 635 rader ved full innlasting. Denne finnes av en helt konkret grunn: `searchdataall` er et **delvis** uttrekk. Koblingstabellene eksporteres komplett, men bygg- og ressurslistene er filtrert. I Bergen peker 388 av 980 koblingsrader på ressurser som ikke finnes i uttrekket.
+Uttrekket er **renset for personopplysninger** før det lagres: bare samlingene innlastingen leser tas med (`organizations` er utelatt), og feltene `tilsyn_*`, `contact_info`, `json_representation` og `organizations_ids` fjernes fra postene. Se «Personvern».
+
+Beholdning: de to nyeste uttrekkene per kilde, pluss alle uttrekk som har minst ett avvik knyttet til seg. `rydd_kildeuttrekk(kilde, antall)` kalles automatisk på slutten av hver last. Siden de fleste kjøringer logger *noen* avvik, blir i praksis nesten alle uttrekk stående til avvikene slettes — ryddingen gir først effekt for kilder uten avvik.
+
+**`synk_avvik`** — hver rad er én ting som ikke lot seg laste, med peker til uttrekket den oppstod i (`kildeuttrekk_id`), hvilket felt det gjaldt (`felt`) og hvilket felt i posten `ekstern_id` er verdien av (`nokkelfelt`). Typene:
+
+| `avvikstype` | Når |
+|---|---|
+| `ugyldig_verdi` | Et felt bryter en regel (postnummer ikke fire siffer, kapasitet negativ eller ikke et tall, tomt navn). Feltet settes til NULL eller erstattes med plassholder, og resten av raden lastes. |
+| `manglende_forelder` | En koblingsrad peker på noe som ikke finnes i uttrekket (se under). |
+| `geokoding_feilet` | Ingen eller flere treff hos Kartverket, eller API-kallet feilet. |
+| `db_feil` | Databasen avviste posten av en grunn vi ikke har forutsett (f.eks. et CHECK-brudd). Bare den posten rulles tilbake; feilteksten og SQLSTATE står i `detalj`, og resten av lasten fortsetter. |
+| `annet` | Bl.a. at henting fra kilden feilet, eller at geokodet kommunenummer avviker fra antatt. |
+| `ikke_kartlagt` | Reservert; ukartlagte koder vises i dag i `v_ukartlagte_kildekoder`. |
+
+Mekanikken: skriptene skriver bare SQL og kjenner ikke id-en til uttrekket de oppretter. Første setning, `CALL registrer_kildeuttrekk(...)`, setter derfor id-en i en transaksjonslokal innstilling (`masterdb.kildeuttrekk_id`), og `CALL logg_avvik(...)` henter den derfra. Hver bygning/adresse, hver ressurs og hver geokodet adresse kjøres i sin egen `DO`-blokk med `EXCEPTION`-håndtering, som er det som gjør at én dårlig post ikke stopper hele transaksjonen.
+
+Til å lese avvik finnes to visninger (se «Visningene»).
+
+Eksempelet som motiverte tabellen: Denne finnes av en helt konkret grunn: `searchdataall` er et **delvis** uttrekk. Koblingstabellene eksporteres komplett, men bygg- og ressurslistene er filtrert. I Bergen peker 388 av 980 koblingsrader på ressurser som ikke finnes i uttrekket.
 
 Radene må filtreres bort, ellers stopper innlastingen på fremmednøkkelfeil. Men de skal loggføres — hvis andelen plutselig endrer seg, har noe skjedd hos kommunen, og da vil du vite det.
 
@@ -186,13 +205,25 @@ En **view** er en lagret spørring som oppfører seg som en tabell. Den lagrer i
 
 **`v_ukartlagte_kildekoder`** — arbeidslisten for kuratering. Hver rad er en lokal kode som ennå ikke kan søkes på tvers.
 
+**`v_synk_avvik_gjeldende`** — avvikene fra den siste kjøringen per kilde. Eldre avvik ligger i `synk_avvik` som historikk, men regnes ikke som åpne: finnes feilen fortsatt, er den logget på nytt i nyeste kjøring.
+
+**`v_synk_avvik_detalj`** — avviket sammen med posten det gjelder, hentet ut av det lagrede svaret. Dette er visningen for den som går gjennom avviksslisten:
+
+```sql
+SELECT avvik_id, samling, avvikstype, felt, detalj, jsonb_pretty(post)
+FROM v_synk_avvik_detalj
+WHERE avvikstype = 'ugyldig_verdi';
+```
+
+`post` er bare den relevante posten (eller postene, for koblingsrader) — ikke hele svaret. For geokodingsavvik er det Kartverkets svar for adressen.
+
 ---
 
 ## Personvern
 
 `searchdataall` returnerer en `organizations`-samling med 5 906 rader. En betydelig andel er **privatpersoner**: personnavn i navnefeltet, tomt organisasjonsnummer, privat mobil, privat e-post og hjemmeadresse.
 
-Samlingen lastes ikke. Det finnes ingen tabell for den, og det er bevisst. Søket beskriver lokaler, ikke søkere.
+Samlingen lastes ikke. Det finnes ingen tabell for den, og det er bevisst. Søket beskriver lokaler, ikke søkere. Den lagres heller ikke i `kildeuttrekk`: det rå svaret filtreres først (se `rens_uttrekk` i `etl/last_inn.py`), slik at personopplysningene ikke havner i basen via avviksloggen.
 
 Tilsvarende utelates `buildings.tilsyn_name`, `tilsyn_phone`, `tilsyn_email` med `*2`-variantene, som er navngitte kontaktpersoner, og `resources.contact_info`, som er fritekst og kan inneholde navn.
 
@@ -263,13 +294,18 @@ python3 etl/geokod.py < etl/ut/adresser_a_geokode.txt > etl/ut/geokoding.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/geokoding.sql
 ```
 
-Alle upserts i steg 2 og 3 går på `ON CONFLICT ... DO UPDATE`, slik at gjentatt kjøring oppdaterer i stedet for å duplisere.
+Gjentatt kjøring oppdaterer i stedet for å duplisere, men ikke alt overskrives:
+
+- `bygning`: navn, bydel, hjemmeside, e-post, telefon og åpningstid følger kilden (Aktiv kommune vinner på disse feltene).
+- `adresse`: oppdateres bare mens `geokoding` er `ukjent` eller `feilet`. En geokodet eller manuelt satt adresse røres ikke. Konsekvens: endres adressen i kilden etter geokoding, fanges det ikke opp av innlastingen.
+- `ressurs`: alle felt følger kilden, unntatt `kapasitet`, som beholdes når `kapasitet_kilde` er `manuell` eller `utledet`.
+- `kildekode_mapping`: røres aldri etter at raden er opprettet, så en manuell vurdering overskrives ikke.
 
 **Kjent forenkling, verdt å lese to ganger:** `kommune_id` settes i steg 2 fra hvilken Aktiv kommune-instans dataene kommer fra (instansens slug slås opp direkte mot en kommune), **ikke** fra geokodingen i steg 3. Det stemmer for alle 12 instansene i dag, siden hver av dem betjener nøyaktig én kommune (se `kommune_fagsystem_instans`). Skulle en instans senere betjene flere kommuner, holder ikke denne forenklingen — da må steg 2 vente på steg 3, og `kommune_id` avgjøres av adressens geokodede `kommunenummer` i stedet.
 
 **Matrikkelen** (bygningsnummer, bygningstype, byggeår, BRA, bygningsomriss) krever avtale med Kartverket og er ikke del av denne pipelinen ennå. Eiendomskoblingen (`matrikkelenhet`, `bygning_matrikkelenhet`) kan derimot fylles fra det åpne Adresse-API-et allerede i steg 3, siden det gir gårds- og bruksnummer gratis — ikke implementert i `geokod.py` i dag, men datagrunnlaget er der.
 
-**Ikke del av pipelinen ennå:** ingen automatisk gjentakelse (ingen cron/planlagt jobb — alt kjøres manuelt), ingen bruk av `kildeuttrekk`-tabellen (ingen av skriptene lagrer rå JSON før tolkning, selv om tabellen finnes i skjemaet), og ingen automatisert kuratering av `v_ukartlagte_kildekoder` — det er fortsatt en manuell jobb å lese visningen og redigere ordbøkene i `last_inn.py`.
+**Ikke del av pipelinen ennå:** ingen automatisk gjentakelse (ingen cron/planlagt jobb — alt kjøres manuelt) og ingen automatisert kuratering av `v_ukartlagte_kildekoder` — det er fortsatt en manuell jobb å lese visningen og redigere ordbøkene i `last_inn.py`.
 
 ---
 
@@ -314,6 +350,15 @@ ORDER BY posisjon <-> ST_SetSRID(ST_MakePoint(5.3221, 60.3948), 4326)::geography
 
 `ST_DWithin` er filteret (alt innenfor radiusen), `<->` er sorteringen (nærmest først). Begge bruker GiST-indeksen på `posisjon` — bekreftet med `EXPLAIN`, som viser `Index Scan using ix_bygning_posisjon`, ikke en full tabellskanning.
 
+Åpne avvik fra siste kjøring, med posten de gjelder:
+
+```sql
+SELECT d.avvik_id, d.kilde, d.avvikstype, d.felt, d.detalj, d.post
+FROM v_synk_avvik_gjeldende g
+JOIN v_synk_avvik_detalj d ON d.avvik_id = g.id
+WHERE g.avvikstype IN ('ugyldig_verdi', 'db_feil');
+```
+
 Hvordan en lokal kode ble tolket:
 
 ```sql
@@ -349,9 +394,9 @@ Alle 12 instanser er lastet inn med reelle data:
 | `ressurs` | 1 805 |
 | — med kanonisk lokaletype | 1 755 (97 %) |
 | — med byggtilknytning | 1 613 |
-| `kildekode` | 1 566 |
+| `kildekode` | 1 557 |
 | `ressurs_aktivitet` / `ressurs_fasilitet` | 672 / 1 221 |
-| `synk_avvik` | 2 639 |
+| `synk_avvik` (siste kjøring) | 2 829 |
 
 Radtallene svinger litt fra kjøring til kjøring (kommunene endrer sine egne data daglig); det er `GYMSAL`/`IDRETTSHALL`-mønsteret som er det stabile beviset. Tverrkommunalt søk er verifisert: ett søk på `GYMSAL` finner gymsaler i 3 kommuner, `IDRETTSHALL` i 4 kommuner — alt gjennom én kanonisk kode, til tross for at de lokale ID-ene er uforenlige.
 
