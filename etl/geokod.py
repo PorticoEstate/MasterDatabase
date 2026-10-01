@@ -109,7 +109,6 @@ def main():
         a = treff[0]
         punkt = a["representasjonspunkt"]
         lon, lat = punkt["lon"], punkt["lat"]
-
         adressetekst = a["adressetekst"]
         adressenavn = a["adressenavn"]
         husnr = a["nummer"]
