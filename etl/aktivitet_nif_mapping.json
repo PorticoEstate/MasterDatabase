@@ -1,658 +1,1591 @@
 {
   "mapping": {
     "Allidrett": {
-      "nif_parent": "Idrett for funksjonshemmede",
-      "nif_sport": "Allidrett",
-      "sport_code": 878,
+      "nif_sports": [
+        {
+          "nif_parent": "Idrett for funksjonshemmede",
+          "nif_sport": "Allidrett",
+          "sport_code": 878
+        }
+      ],
       "confidence": "medium",
       "note": "NIF Allidrett is under disability sport; municipal 'allidrett' is usually general multi-sport for children"
     },
     "Amerikansk fotball": {
-      "nif_parent": "Amerikanske idretter",
-      "nif_sport": "Amerikansk fotball",
-      "sport_code": 561,
+      "nif_sports": [
+        {
+          "nif_parent": "Amerikanske idretter",
+          "nif_sport": "Amerikansk fotball",
+          "sport_code": 561
+        }
+      ],
       "confidence": "high"
     },
     "Babysvømming": {
-      "nif_parent": "Svømming",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Svømming",
+          "sport_code": 451
+        }
+      ],
       "confidence": "medium",
-      "note": "Swimming for infants, not competitive swimming"
+      "note": "Swimming for infants; mapped to general Svømming"
     },
     "Badminton": {
-      "nif_parent": "Badminton",
-      "nif_sport": "Badminton",
-      "sport_code": 121,
+      "nif_sports": [
+        {
+          "nif_parent": "Badminton",
+          "nif_sport": "Badminton",
+          "sport_code": 121
+        }
+      ],
       "confidence": "high"
     },
     "Bandy": {
-      "nif_parent": "Bandy",
-      "nif_sport": "Bandy",
-      "sport_code": 131,
+      "nif_sports": [
+        {
+          "nif_parent": "Bandy",
+          "nif_sport": "Bandy",
+          "sport_code": 131
+        }
+      ],
       "confidence": "high"
     },
     "Bandy - inne": {
-      "nif_parent": "Bandy",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "medium",
-      "note": "Indoor bandy – Innebandy or Rinkbandy"
+      "nif_sports": [
+        {
+          "nif_parent": "Bandy",
+          "nif_sport": "Innebandy",
+          "sport_code": 133
+        },
+        {
+          "nif_parent": "Bandy",
+          "nif_sport": "Rinkbandy",
+          "sport_code": 132
+        }
+      ],
+      "confidence": "high",
+      "note": "Indoor bandy: Innebandy and Rinkbandy"
     },
     "Baseball": {
-      "nif_parent": "Soft- og baseball",
-      "nif_sport": "Baseball",
-      "sport_code": 611,
+      "nif_sports": [
+        {
+          "nif_parent": "Soft- og baseball",
+          "nif_sport": "Baseball",
+          "sport_code": 611
+        }
+      ],
       "confidence": "high"
     },
     "Baseball/softball": {
-      "nif_parent": "Soft- og baseball",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Soft- og baseball",
+          "nif_sport": "Baseball",
+          "sport_code": 611
+        },
+        {
+          "nif_parent": "Soft- og baseball",
+          "nif_sport": "Softball",
+          "sport_code": 612
+        }
+      ],
+      "confidence": "high",
+      "note": "Name covers several grener; mapped to each"
     },
     "Basketball": {
-      "nif_parent": "Basketball",
-      "nif_sport": "Basketball",
-      "sport_code": 141,
+      "nif_sports": [
+        {
+          "nif_parent": "Basketball",
+          "nif_sport": "Basketball",
+          "sport_code": 141
+        }
+      ],
       "confidence": "high"
     },
     "Bedriftsidrett": {
-      "nif_parent": "Bedrift",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Aerobic",
+          "sport_code": 887
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Aktiv bedrift",
+          "sport_code": 154
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Cageball",
+          "sport_code": 157
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Dans",
+          "sport_code": 885
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Futsal",
+          "sport_code": 156
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Kanonball",
+          "sport_code": 159
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Mosjonsaktivitet bedrift",
+          "sport_code": 155
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Paintball",
+          "sport_code": 152
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Ski",
+          "sport_code": 892
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Skyting",
+          "sport_code": 883
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Skøyter",
+          "sport_code": 886
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Stavgang",
+          "sport_code": 153
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Sykkel",
+          "sport_code": 881
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Terrengløp",
+          "sport_code": 151
+        },
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Trippel",
+          "sport_code": 934
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Bedrift; mapped to all grener under it"
     },
     "Bil/MC klubb": {
-      "nif_parent": "Motorsport",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "MC Touring",
+          "sport_code": 996
+        }
+      ],
       "confidence": "low",
-      "note": "Club may be non-sporting"
+      "note": "Club may be non-sporting; car clubs may fit Circuit (993)"
     },
     "Boccia": {
-      "nif_parent": "Fleridretter",
-      "nif_sport": "Boccia",
-      "sport_code": 646,
+      "nif_sports": [
+        {
+          "nif_parent": "Fleridretter",
+          "nif_sport": "Boccia",
+          "sport_code": 646
+        }
+      ],
       "confidence": "high"
     },
     "Boksing": {
-      "nif_parent": "Boksing",
-      "nif_sport": "Boksing",
-      "sport_code": 161,
+      "nif_sports": [
+        {
+          "nif_parent": "Boksing",
+          "nif_sport": "Boksing",
+          "sport_code": 161
+        }
+      ],
       "confidence": "high"
     },
     "Bordtennis": {
-      "nif_parent": "Bordtennis",
-      "nif_sport": "Bordtennis",
-      "sport_code": 171,
+      "nif_sports": [
+        {
+          "nif_parent": "Bordtennis",
+          "nif_sport": "Bordtennis",
+          "sport_code": 171
+        }
+      ],
       "confidence": "high"
     },
     "Bryting": {
-      "nif_parent": "Bryting",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Bryting",
+          "nif_sport": "Fristil",
+          "sport_code": 193
+        },
+        {
+          "nif_parent": "Bryting",
+          "nif_sport": "Grappling",
+          "sport_code": 197
+        },
+        {
+          "nif_parent": "Bryting",
+          "nif_sport": "Gresk-Romersk",
+          "sport_code": 191
+        },
+        {
+          "nif_parent": "Bryting",
+          "nif_sport": "Håndbak",
+          "sport_code": 194
+        },
+        {
+          "nif_parent": "Bryting",
+          "nif_sport": "Sandbryting",
+          "sport_code": 195
+        },
+        {
+          "nif_parent": "Bryting",
+          "nif_sport": "Sumo",
+          "sport_code": 192
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Bryting; mapped to all grener under it"
     },
     "Bueskyting": {
-      "nif_parent": "Bueskyting",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Bueskyting",
+          "nif_sport": "Ski - Bueskyting",
+          "sport_code": 203
+        },
+        {
+          "nif_parent": "Bueskyting",
+          "nif_sport": "Skivebueskyting",
+          "sport_code": 201
+        },
+        {
+          "nif_parent": "Bueskyting",
+          "nif_sport": "Skogsskyting (3D og Felt)",
+          "sport_code": 202
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Bueskyting; mapped to all grener under it"
     },
     "Cheerleading": {
-      "nif_parent": "Amerikanske idretter",
-      "nif_sport": "Cheerleading",
-      "sport_code": 563,
+      "nif_sports": [
+        {
+          "nif_parent": "Amerikanske idretter",
+          "nif_sport": "Cheerleading",
+          "sport_code": 563
+        }
+      ],
       "confidence": "high"
     },
     "Cricket": {
-      "nif_parent": "Cricket",
-      "nif_sport": "Cricket",
-      "sport_code": 921,
+      "nif_sports": [
+        {
+          "nif_parent": "Cricket",
+          "nif_sport": "Cricket",
+          "sport_code": 921
+        }
+      ],
       "confidence": "high"
     },
     "Curling": {
-      "nif_parent": "Curling",
-      "nif_sport": "Curling",
-      "sport_code": 221,
+      "nif_sports": [
+        {
+          "nif_parent": "Curling",
+          "nif_sport": "Curling",
+          "sport_code": 221
+        }
+      ],
       "confidence": "high"
     },
     "Dans": {
-      "nif_parent": "Dans",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Dans",
+          "sport_code": 885
+        }
+      ],
       "confidence": "high"
     },
     "Dans/trening": {
-      "nif_parent": "Dans",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "medium",
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Dans",
+          "sport_code": 885
+        }
+      ],
+      "confidence": "high",
       "note": "Combined dance/training"
     },
     "Dansing": {
-      "nif_parent": "Dans",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Dans",
+          "sport_code": 885
+        }
+      ],
       "confidence": "high"
     },
     "Drill": {
-      "nif_parent": "Dans",
-      "nif_sport": "Sportsdrill",
-      "sport_code": 518,
+      "nif_sports": [
+        {
+          "nif_parent": "Dans",
+          "nif_sport": "Sportsdrill",
+          "sport_code": 518
+        }
+      ],
       "confidence": "medium",
       "note": "Also 'Drill' under Studentidrett (981)"
     },
     "Dykking": {
-      "nif_parent": "Dykking",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Dykking",
+          "nif_sport": "Dykking",
+          "sport_code": 245
+        }
+      ],
       "confidence": "high"
     },
     "Fekting": {
-      "nif_parent": "Fekting",
-      "nif_sport": "Fekting",
-      "sport_code": 251,
+      "nif_sports": [
+        {
+          "nif_parent": "Fekting",
+          "nif_sport": "Fekting",
+          "sport_code": 251
+        }
+      ],
       "confidence": "high"
     },
     "Fektting": {
-      "nif_parent": "Fekting",
-      "nif_sport": "Fekting",
-      "sport_code": 251,
+      "nif_sports": [
+        {
+          "nif_parent": "Fekting",
+          "nif_sport": "Fekting",
+          "sport_code": 251
+        }
+      ],
       "confidence": "high",
       "note": "Typo of Fekting"
     },
-    "Fleiridrettslag": {
-      "nif_parent": "Fleridretter",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "medium",
-      "note": "Multi-sport club, not necessarily NIF 'Fleridretter'"
-    },
-    "Fleridrettslag": {
-      "nif_parent": "Fleridretter",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "medium",
-      "note": "Multi-sport club, not necessarily NIF 'Fleridretter'"
-    },
     "Fotball": {
-      "nif_parent": "Fotball",
-      "nif_sport": "Fotball",
-      "sport_code": 261,
+      "nif_sports": [
+        {
+          "nif_parent": "Fotball",
+          "nif_sport": "Fotball",
+          "sport_code": 261
+        }
+      ],
       "confidence": "high"
     },
     "Fotball &amp;#40;1/3 del av 7&#039;er bane&amp;#41;": {
-      "nif_parent": "Fotball",
-      "nif_sport": "Fotball",
-      "sport_code": 261,
+      "nif_sports": [
+        {
+          "nif_parent": "Fotball",
+          "nif_sport": "Fotball",
+          "sport_code": 261
+        }
+      ],
       "confidence": "high",
       "note": "Pitch size in name; HTML-encoded name, decoded: Fotball (1/3 del av 7'er bane)"
     },
     "Fotball &amp;#40;1/4 av 11&#039;er bane&amp;#41;": {
-      "nif_parent": "Fotball",
-      "nif_sport": "Fotball",
-      "sport_code": 261,
+      "nif_sports": [
+        {
+          "nif_parent": "Fotball",
+          "nif_sport": "Fotball",
+          "sport_code": 261
+        }
+      ],
       "confidence": "high",
       "note": "Pitch size in name; HTML-encoded name, decoded: Fotball (1/4 av 11'er bane)"
     },
     "Fotballbane": {
-      "nif_parent": "Fotball",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Fotball",
+          "nif_sport": "Fotball",
+          "sport_code": 261
+        }
+      ],
       "confidence": "medium",
       "note": "Facility name"
     },
     "Friidrett": {
-      "nif_parent": "Friidrett",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Friidrett",
+          "nif_sport": "Friidrett på bane",
+          "sport_code": 271
+        },
+        {
+          "nif_parent": "Friidrett",
+          "nif_sport": "Gang, mosjon og turmarsj",
+          "sport_code": 276
+        },
+        {
+          "nif_parent": "Friidrett",
+          "nif_sport": "Kappgang",
+          "sport_code": 275
+        },
+        {
+          "nif_parent": "Friidrett",
+          "nif_sport": "Løp utenfor bane",
+          "sport_code": 277
+        },
+        {
+          "nif_parent": "Friidrett",
+          "nif_sport": "Øvrig friidrett",
+          "sport_code": 278
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Friidrett; mapped to all grener under it"
     },
     "Friluftsliv": {
-      "nif_parent": "Studentidrett",
-      "nif_sport": "Friluftsliv",
-      "sport_code": 622,
+      "nif_sports": [
+        {
+          "nif_parent": "Studentidrett",
+          "nif_sport": "Friluftsliv",
+          "sport_code": 622
+        }
+      ],
       "confidence": "low",
       "note": "Only exists under Studentidrett in NIF"
     },
-    "Funksjonhemma": {
-      "nif_parent": "Idrett for funksjonshemmede",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "low",
-      "note": "User group, not necessarily sport"
-    },
     "Futsal": {
-      "nif_parent": "Fotball",
-      "nif_sport": "Futsal",
-      "sport_code": 262,
+      "nif_sports": [
+        {
+          "nif_parent": "Fotball",
+          "nif_sport": "Futsal",
+          "sport_code": 262
+        }
+      ],
       "confidence": "high"
     },
     "Golf": {
-      "nif_parent": "Golf",
-      "nif_sport": "Golf",
-      "sport_code": 291,
+      "nif_sports": [
+        {
+          "nif_parent": "Golf",
+          "nif_sport": "Golf",
+          "sport_code": 291
+        }
+      ],
       "confidence": "high"
     },
     "Gymnastikk": {
-      "nif_parent": "Gymnastikk og turn",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Gymnastikk og Breddeaktivitet",
+          "sport_code": 301
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Gymnastikkhjul",
+          "sport_code": 307
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Parkour",
+          "sport_code": 309
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Rytmisk gymnastikk",
+          "sport_code": 303
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Trampoline",
+          "sport_code": 308
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Troppsgymnastikk",
+          "sport_code": 304
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn",
+          "sport_code": 302
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn kvinner",
+          "sport_code": 305
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn menn",
+          "sport_code": 306
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Gymnastikk og turn; mapped to all grener under it"
     },
     "Gymnastikk og turn": {
-      "nif_parent": "Gymnastikk og turn",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Gymnastikk og Breddeaktivitet",
+          "sport_code": 301
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Gymnastikkhjul",
+          "sport_code": 307
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Parkour",
+          "sport_code": 309
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Rytmisk gymnastikk",
+          "sport_code": 303
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Trampoline",
+          "sport_code": 308
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Troppsgymnastikk",
+          "sport_code": 304
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn",
+          "sport_code": 302
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn kvinner",
+          "sport_code": 305
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn menn",
+          "sport_code": 306
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Gymnastikk og turn; mapped to all grener under it"
     },
     "Gymnastikk og Turn": {
-      "nif_parent": "Gymnastikk og turn",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Gymnastikk og Breddeaktivitet",
+          "sport_code": 301
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Gymnastikkhjul",
+          "sport_code": 307
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Parkour",
+          "sport_code": 309
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Rytmisk gymnastikk",
+          "sport_code": 303
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Trampoline",
+          "sport_code": 308
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Troppsgymnastikk",
+          "sport_code": 304
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn",
+          "sport_code": 302
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn kvinner",
+          "sport_code": 305
+        },
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn menn",
+          "sport_code": 306
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Gymnastikk og turn; mapped to all grener under it"
     },
     "Hestesport": {
-      "nif_parent": "Ridning",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
-    },
-    "Hundesport": {
-      "nif_parent": "Hundekjøring",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "low",
-      "note": "Dog sport may be agility etc. (not NIF)"
+      "nif_sports": [
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Distanse",
+          "sport_code": 404
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Dressur",
+          "sport_code": 402
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Feltritt",
+          "sport_code": 403
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Islandshest",
+          "sport_code": 407
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Kjøring",
+          "sport_code": 405
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Mounted Games",
+          "sport_code": 941
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Sprang",
+          "sport_code": 401
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Voltige",
+          "sport_code": 406
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Øvrig ridning",
+          "sport_code": 409
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Ridning; mapped to all grener under it"
     },
     "Hurtigløp": {
-      "nif_parent": "Skøyter",
-      "nif_sport": "Hurtigløp",
-      "sport_code": 441,
+      "nif_sports": [
+        {
+          "nif_parent": "Skøyter",
+          "nif_sport": "Hurtigløp",
+          "sport_code": 441
+        }
+      ],
       "confidence": "high"
     },
     "Håndball": {
-      "nif_parent": "Håndball",
-      "nif_sport": "Håndball",
-      "sport_code": 331,
+      "nif_sports": [
+        {
+          "nif_parent": "Håndball",
+          "nif_sport": "Håndball",
+          "sport_code": 331
+        }
+      ],
       "confidence": "high"
     },
     "Innebandy": {
-      "nif_parent": "Bandy",
-      "nif_sport": "Innebandy",
-      "sport_code": 133,
+      "nif_sports": [
+        {
+          "nif_parent": "Bandy",
+          "nif_sport": "Innebandy",
+          "sport_code": 133
+        }
+      ],
       "confidence": "high"
     },
     "Innefotball": {
-      "nif_parent": "Fotball",
-      "nif_sport": "Futsal",
-      "sport_code": 262,
+      "nif_sports": [
+        {
+          "nif_parent": "Fotball",
+          "nif_sport": "Futsal",
+          "sport_code": 262
+        }
+      ],
       "confidence": "medium"
     },
     "Ishockey": {
-      "nif_parent": "Ishockey",
-      "nif_sport": "Ishockey",
-      "sport_code": 341,
+      "nif_sports": [
+        {
+          "nif_parent": "Ishockey",
+          "nif_sport": "Ishockey",
+          "sport_code": 341
+        }
+      ],
       "confidence": "high"
     },
     "Ju jitsu": {
-      "nif_parent": "Kampsport",
-      "nif_sport": "Jujutsu",
-      "sport_code": 523,
+      "nif_sports": [
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Jujutsu",
+          "sport_code": 523
+        }
+      ],
       "confidence": "high"
     },
     "Ju Jitsu": {
-      "nif_parent": "Kampsport",
-      "nif_sport": "Jujutsu",
-      "sport_code": 523,
+      "nif_sports": [
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Jujutsu",
+          "sport_code": 523
+        }
+      ],
       "confidence": "high"
     },
     "Judo": {
-      "nif_parent": "Judo",
-      "nif_sport": "Judo",
-      "sport_code": 351,
+      "nif_sports": [
+        {
+          "nif_parent": "Judo",
+          "nif_sport": "Judo",
+          "sport_code": 351
+        }
+      ],
       "confidence": "high"
     },
     "Kajakk": {
-      "nif_parent": "Padling",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Padling",
+          "nif_sport": "Havpadling",
+          "sport_code": 363
+        },
+        {
+          "nif_parent": "Padling",
+          "nif_sport": "Flattvann",
+          "sport_code": 361
+        },
+        {
+          "nif_parent": "Padling",
+          "nif_sport": "Elvepadling",
+          "sport_code": 362
+        }
+      ],
+      "confidence": "high",
+      "note": "Name covers several grener; mapped to each"
     },
     "Kampsport": {
-      "nif_parent": "Kampsport",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Fleridretter",
+          "sport_code": 526
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Jujutsu",
+          "sport_code": 523
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Karate",
+          "sport_code": 521
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Kendo",
+          "sport_code": 527
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Mixed Martial Arts (MMA)",
+          "sport_code": 841
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Muay Thai (thaiboksing)",
+          "sport_code": 842
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Taekwondo ITF",
+          "sport_code": 524
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Taekwondo WT",
+          "sport_code": 522
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Wushu",
+          "sport_code": 528
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Kampsport; mapped to all grener under it"
     },
     "Kano/kajakk": {
-      "nif_parent": "Padling",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Padling",
+          "nif_sport": "Kano",
+          "sport_code": 364
+        },
+        {
+          "nif_parent": "Padling",
+          "nif_sport": "Havpadling",
+          "sport_code": 363
+        },
+        {
+          "nif_parent": "Padling",
+          "nif_sport": "Flattvann",
+          "sport_code": 361
+        }
+      ],
+      "confidence": "high",
+      "note": "Name covers several grener; mapped to each"
     },
     "Kanopadling": {
-      "nif_parent": "Padling",
-      "nif_sport": "Kano",
-      "sport_code": 364,
+      "nif_sports": [
+        {
+          "nif_parent": "Padling",
+          "nif_sport": "Kano",
+          "sport_code": 364
+        }
+      ],
       "confidence": "high"
     },
     "Karate": {
-      "nif_parent": "Kampsport",
-      "nif_sport": "Karate",
-      "sport_code": 521,
+      "nif_sports": [
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Karate",
+          "sport_code": 521
+        }
+      ],
       "confidence": "high"
     },
     "Kickboksing": {
-      "nif_parent": "Kickboksing",
-      "nif_sport": "Kickboksing",
-      "sport_code": 581,
+      "nif_sports": [
+        {
+          "nif_parent": "Kickboksing",
+          "nif_sport": "Kickboksing",
+          "sport_code": 581
+        }
+      ],
       "confidence": "high"
     },
     "Klartring": {
-      "nif_parent": "Klatring",
-      "nif_sport": "Klatring",
-      "sport_code": 591,
+      "nif_sports": [
+        {
+          "nif_parent": "Klatring",
+          "nif_sport": "Klatring",
+          "sport_code": 591
+        }
+      ],
       "confidence": "high",
       "note": "Typo of Klatring"
     },
     "Klatrevegg": {
-      "nif_parent": "Klatring",
-      "nif_sport": "Klatring",
-      "sport_code": 591,
+      "nif_sports": [
+        {
+          "nif_parent": "Klatring",
+          "nif_sport": "Klatring",
+          "sport_code": 591
+        }
+      ],
       "confidence": "medium",
       "note": "Facility name"
     },
     "Klatring": {
-      "nif_parent": "Klatring",
-      "nif_sport": "Klatring",
-      "sport_code": 591,
+      "nif_sports": [
+        {
+          "nif_parent": "Klatring",
+          "nif_sport": "Klatring",
+          "sport_code": 591
+        }
+      ],
       "confidence": "high"
     },
     "Klatring/ Buldring": {
-      "nif_parent": "Klatring",
-      "nif_sport": "Klatring",
-      "sport_code": 591,
+      "nif_sports": [
+        {
+          "nif_parent": "Klatring",
+          "nif_sport": "Klatring",
+          "sport_code": 591
+        }
+      ],
       "confidence": "high"
     },
     "Kunstløp": {
-      "nif_parent": "Skøyter",
-      "nif_sport": "Kunstløp",
-      "sport_code": 442,
+      "nif_sports": [
+        {
+          "nif_parent": "Skøyter",
+          "nif_sport": "Kunstløp",
+          "sport_code": 442
+        }
+      ],
       "confidence": "high"
     },
     "Lacrosse": {
-      "nif_parent": "Amerikanske idretter",
-      "nif_sport": "Lacrosse",
-      "sport_code": 564,
+      "nif_sports": [
+        {
+          "nif_parent": "Amerikanske idretter",
+          "nif_sport": "Lacrosse",
+          "sport_code": 564
+        }
+      ],
       "confidence": "high"
     },
     "Leirdueskyting": {
-      "nif_parent": "Skyting",
-      "nif_sport": "Leirdue",
-      "sport_code": 431,
+      "nif_sports": [
+        {
+          "nif_parent": "Skyting",
+          "nif_sport": "Leirdue",
+          "sport_code": 431
+        }
+      ],
       "confidence": "high"
     },
     "Luftsport": {
-      "nif_parent": "Luftsport",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Luftsport",
+          "nif_sport": "Ballongflyging",
+          "sport_code": 374
+        },
+        {
+          "nif_parent": "Luftsport",
+          "nif_sport": "Fallskjerm",
+          "sport_code": 371
+        },
+        {
+          "nif_parent": "Luftsport",
+          "nif_sport": "Hang-, para- og speedglider",
+          "sport_code": 372
+        },
+        {
+          "nif_parent": "Luftsport",
+          "nif_sport": "Modellfly",
+          "sport_code": 375
+        },
+        {
+          "nif_parent": "Luftsport",
+          "nif_sport": "Motorfly",
+          "sport_code": 377
+        },
+        {
+          "nif_parent": "Luftsport",
+          "nif_sport": "Seilfly",
+          "sport_code": 373
+        },
+        {
+          "nif_parent": "Luftsport",
+          "nif_sport": "Sportsfly",
+          "sport_code": 376
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Luftsport; mapped to all grener under it"
     },
     "Maraton": {
-      "nif_parent": "Friidrett",
-      "nif_sport": "Løp utenfor bane",
-      "sport_code": 277,
+      "nif_sports": [
+        {
+          "nif_parent": "Friidrett",
+          "nif_sport": "Løp utenfor bane",
+          "sport_code": 277
+        }
+      ],
       "confidence": "high"
     },
     "Minifotball": {
-      "nif_parent": "Fotball",
-      "nif_sport": "Fotball",
-      "sport_code": 261,
+      "nif_sports": [
+        {
+          "nif_parent": "Fotball",
+          "nif_sport": "Fotball",
+          "sport_code": 261
+        }
+      ],
       "confidence": "high"
     },
     "Minihåndball": {
-      "nif_parent": "Håndball",
-      "nif_sport": "Håndball",
-      "sport_code": 331,
+      "nif_sports": [
+        {
+          "nif_parent": "Håndball",
+          "nif_sport": "Håndball",
+          "sport_code": 331
+        }
+      ],
       "confidence": "high"
     },
     "Minivolleyball": {
-      "nif_parent": "Volleyball",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Volleyball",
+          "nif_sport": "Volleyball",
+          "sport_code": 481
+        }
+      ],
       "confidence": "high",
       "note": "Volleyball for children"
     },
     "Motorsport": {
-      "nif_parent": "Motorsport",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
-    },
-    "Musikk og dans": {
-      "nif_parent": "Dans",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "low",
-      "note": "Mixed music/dance"
+      "nif_sports": [
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Aquabike",
+          "sport_code": 994
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Circuit",
+          "sport_code": 993
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Dragbike",
+          "sport_code": 509
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Enduro",
+          "sport_code": 507
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "MC Touring",
+          "sport_code": 996
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Motocross",
+          "sport_code": 506
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Offshore",
+          "sport_code": 992
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Quad",
+          "sport_code": 504
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Radiostyrt Motorsport",
+          "sport_code": 995
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Roadracing",
+          "sport_code": 501
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Snowcross",
+          "sport_code": 502
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Trackracing",
+          "sport_code": 503
+        },
+        {
+          "nif_parent": "Motorsport",
+          "nif_sport": "Trial",
+          "sport_code": 505
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Motorsport; mapped to all grener under it"
     },
     "Orientering": {
-      "nif_parent": "Orientering",
-      "nif_sport": "Orientering",
-      "sport_code": 381,
+      "nif_sports": [
+        {
+          "nif_parent": "Orientering",
+          "nif_sport": "Orientering",
+          "sport_code": 381
+        }
+      ],
       "confidence": "high"
     },
     "Padeltennis": {
-      "nif_parent": "Tennis",
-      "nif_sport": "Padel",
-      "sport_code": 462,
+      "nif_sports": [
+        {
+          "nif_parent": "Tennis",
+          "nif_sport": "Padel",
+          "sport_code": 462
+        }
+      ],
       "confidence": "high"
     },
     "Paintball": {
-      "nif_parent": "Bedrift",
-      "nif_sport": "Paintball",
-      "sport_code": 152,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Paintball",
+          "sport_code": 152
+        }
+      ],
       "confidence": "medium",
       "note": "Also exists under Studentidrett (984)"
     },
     "Riding": {
-      "nif_parent": "Ridning",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Distanse",
+          "sport_code": 404
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Dressur",
+          "sport_code": 402
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Feltritt",
+          "sport_code": 403
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Islandshest",
+          "sport_code": 407
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Kjøring",
+          "sport_code": 405
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Mounted Games",
+          "sport_code": 941
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Sprang",
+          "sport_code": 401
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Voltige",
+          "sport_code": 406
+        },
+        {
+          "nif_parent": "Ridning",
+          "nif_sport": "Øvrig ridning",
+          "sport_code": 409
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Ridning; mapped to all grener under it"
     },
     "Roing": {
-      "nif_parent": "Roing",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Roing",
+          "nif_sport": "Flattvannsroing",
+          "sport_code": 391
+        },
+        {
+          "nif_parent": "Roing",
+          "nif_sport": "Turroing",
+          "sport_code": 393
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Roing; mapped to all grener under it"
     },
     "Rollerderby": {
-      "nif_parent": "Skøyter",
-      "nif_sport": "Roller Derby",
-      "sport_code": 446,
+      "nif_sports": [
+        {
+          "nif_parent": "Skøyter",
+          "nif_sport": "Roller Derby",
+          "sport_code": 446
+        }
+      ],
       "confidence": "high"
     },
     "Rugby": {
-      "nif_parent": "Rugby",
-      "nif_sport": "Rugby",
-      "sport_code": 721,
+      "nif_sports": [
+        {
+          "nif_parent": "Rugby",
+          "nif_sport": "Rugby",
+          "sport_code": 721
+        }
+      ],
       "confidence": "high"
     },
     "Rytmisk sportsgymnastikk &amp;#40;RG&amp;#41;": {
-      "nif_parent": "Gymnastikk og turn",
-      "nif_sport": "Rytmisk gymnastikk",
-      "sport_code": 303,
+      "nif_sports": [
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Rytmisk gymnastikk",
+          "sport_code": 303
+        }
+      ],
       "confidence": "high",
-      "note": "HTML-encoded name, decoded: Rytmisk sportsgymnastikk (RG)"
+      "note": "HTML-encoded name, decoded: Rytmisk sportsgymnastikk (RG); HTML-encoded name, decoded: Rytmisk sportsgymnastikk (RG)"
     },
     "Seiling": {
-      "nif_parent": "Seiling",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Brettseiling",
+          "sport_code": 411
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Bølgesurf",
+          "sport_code": 415
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Jolle",
+          "sport_code": 412
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Kite",
+          "sport_code": 414
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Kjølbåt",
+          "sport_code": 413
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Stand Up Padle (SUP)",
+          "sport_code": 416
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Seiling; mapped to all grener under it"
     },
     "Seilsport": {
-      "nif_parent": "Seiling",
-      "nif_sport": null,
-      "sport_code": null,
-      "confidence": "high"
+      "nif_sports": [
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Brettseiling",
+          "sport_code": 411
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Bølgesurf",
+          "sport_code": 415
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Jolle",
+          "sport_code": 412
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Kite",
+          "sport_code": 414
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Kjølbåt",
+          "sport_code": 413
+        },
+        {
+          "nif_parent": "Seiling",
+          "nif_sport": "Stand Up Padle (SUP)",
+          "sport_code": 416
+        }
+      ],
+      "confidence": "medium",
+      "note": "Generic name for hovedidrett Seiling; mapped to all grener under it"
     },
     "Skating": {
-      "nif_parent": "Brett",
-      "nif_sport": "Skateboard",
-      "sport_code": 732,
+      "nif_sports": [
+        {
+          "nif_parent": "Brett",
+          "nif_sport": "Skateboard",
+          "sport_code": 732
+        }
+      ],
       "confidence": "low",
       "note": "Could also mean skøyter/rulleskøyter"
     },
     "Ski": {
-      "nif_parent": "Ski",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Ski",
+          "sport_code": 892
+        }
+      ],
       "confidence": "high"
     },
     "Ski &amp;#40;Langrenn/Alpin&amp;#41;": {
-      "nif_parent": "Ski",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Ski",
+          "nif_sport": "Langrenn",
+          "sport_code": 422
+        },
+        {
+          "nif_parent": "Ski",
+          "nif_sport": "Alpint",
+          "sport_code": 424
+        }
+      ],
       "confidence": "high",
-      "note": "Langrenn (422) or Alpint (424); HTML-encoded name, decoded: Ski (Langrenn/Alpin)"
+      "note": "Name covers several grener; mapped to each; HTML-encoded name, decoded: Ski (Langrenn/Alpin)"
     },
     "Skisport": {
-      "nif_parent": "Ski",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Ski",
+          "sport_code": 892
+        }
+      ],
       "confidence": "high"
     },
     "Skyting": {
-      "nif_parent": "Skyting",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Skyting",
+          "sport_code": 883
+        }
+      ],
       "confidence": "high"
     },
     "Skøyter": {
-      "nif_parent": "Skøyter",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Skøyter",
+          "sport_code": 886
+        }
+      ],
       "confidence": "high"
     },
     "Sportsdrill": {
-      "nif_parent": "Dans",
-      "nif_sport": "Sportsdrill",
-      "sport_code": 518,
+      "nif_sports": [
+        {
+          "nif_parent": "Dans",
+          "nif_sport": "Sportsdrill",
+          "sport_code": 518
+        }
+      ],
       "confidence": "high"
     },
     "Squash": {
-      "nif_parent": "Squash",
-      "nif_sport": "Squash",
-      "sport_code": 541,
+      "nif_sports": [
+        {
+          "nif_parent": "Squash",
+          "nif_sport": "Squash",
+          "sport_code": 541
+        }
+      ],
       "confidence": "high"
     },
     "Stup": {
-      "nif_parent": "Svømming",
-      "nif_sport": "Stup",
-      "sport_code": 452,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Stup",
+          "sport_code": 452
+        }
+      ],
       "confidence": "high"
     },
     "Stuping": {
-      "nif_parent": "Svømming",
-      "nif_sport": "Stup",
-      "sport_code": 452,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Stup",
+          "sport_code": 452
+        }
+      ],
       "confidence": "high"
     },
     "Styrkeløft": {
-      "nif_parent": "Styrkeløft",
-      "nif_sport": "Styrkeløft",
-      "sport_code": 551,
+      "nif_sports": [
+        {
+          "nif_parent": "Styrkeløft",
+          "nif_sport": "Styrkeløft",
+          "sport_code": 551
+        }
+      ],
       "confidence": "high"
     },
     "Styrkeløfting": {
-      "nif_parent": "Styrkeløft",
-      "nif_sport": "Styrkeløft",
-      "sport_code": 551,
+      "nif_sports": [
+        {
+          "nif_parent": "Styrkeløft",
+          "nif_sport": "Styrkeløft",
+          "sport_code": 551
+        }
+      ],
       "confidence": "high"
     },
     "Svømmekurs": {
-      "nif_parent": "Svømming",
-      "nif_sport": "Svømming",
-      "sport_code": 451,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Svømming",
+          "sport_code": 451
+        }
+      ],
       "confidence": "high"
     },
     "Svømming": {
-      "nif_parent": "Svømming",
-      "nif_sport": "Svømming",
-      "sport_code": 451,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Svømming",
+          "sport_code": 451
+        }
+      ],
       "confidence": "high"
     },
     "Sykling": {
-      "nif_parent": "Sykkel",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Bedrift",
+          "nif_sport": "Sykkel",
+          "sport_code": 881
+        }
+      ],
       "confidence": "high"
     },
     "Symjehall": {
-      "nif_parent": "Svømming",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Svømming",
+          "sport_code": 451
+        }
+      ],
       "confidence": "medium",
       "note": "Facility name (nynorsk)"
     },
     "Synkronsvømming": {
-      "nif_parent": "Svømming",
-      "nif_sport": "Synkronsvømming",
-      "sport_code": 453,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Synkronsvømming",
+          "sport_code": 453
+        }
+      ],
       "confidence": "high"
     },
     "Taekwondo": {
-      "nif_parent": "Kampsport",
-      "nif_sport": null,
-      "sport_code": null,
+      "nif_sports": [
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Taekwondo WT",
+          "sport_code": 522
+        },
+        {
+          "nif_parent": "Kampsport",
+          "nif_sport": "Taekwondo ITF",
+          "sport_code": 524
+        }
+      ],
       "confidence": "high",
-      "note": "ITF (524) or WT (522) unknown"
+      "note": "Style unknown; mapped to both WT and ITF"
     },
     "Tennis": {
-      "nif_parent": "Tennis",
-      "nif_sport": "Tennis",
-      "sport_code": 461,
+      "nif_sports": [
+        {
+          "nif_parent": "Tennis",
+          "nif_sport": "Tennis",
+          "sport_code": 461
+        }
+      ],
       "confidence": "high"
     },
     "Turn": {
-      "nif_parent": "Gymnastikk og turn",
-      "nif_sport": "Turn",
-      "sport_code": 302,
+      "nif_sports": [
+        {
+          "nif_parent": "Gymnastikk og turn",
+          "nif_sport": "Turn",
+          "sport_code": 302
+        }
+      ],
       "confidence": "high"
     },
     "Undervannsrugby": {
-      "nif_parent": "Dykking",
-      "nif_sport": "Undervannsrugby",
-      "sport_code": 241,
+      "nif_sports": [
+        {
+          "nif_parent": "Dykking",
+          "nif_sport": "Undervannsrugby",
+          "sport_code": 241
+        }
+      ],
       "confidence": "high"
     },
     "Vannpolo": {
-      "nif_parent": "Svømming",
-      "nif_sport": "Vannpolo",
-      "sport_code": 454,
+      "nif_sports": [
+        {
+          "nif_parent": "Svømming",
+          "nif_sport": "Vannpolo",
+          "sport_code": 454
+        }
+      ],
       "confidence": "high"
     },
     "Vektløfting": {
-      "nif_parent": "Vektløfting",
-      "nif_sport": "Vektløfting",
-      "sport_code": 471,
+      "nif_sports": [
+        {
+          "nif_parent": "Vektløfting",
+          "nif_sport": "Vektløfting",
+          "sport_code": 471
+        }
+      ],
       "confidence": "high"
     },
     "Volleyball": {
-      "nif_parent": "Volleyball",
-      "nif_sport": "Volleyball",
-      "sport_code": 481,
+      "nif_sports": [
+        {
+          "nif_parent": "Volleyball",
+          "nif_sport": "Volleyball",
+          "sport_code": 481
+        }
+      ],
       "confidence": "high"
     },
     "Yoga": {
-      "nif_parent": "Studentidrett",
-      "nif_sport": "Yoga",
-      "sport_code": 628,
+      "nif_sports": [
+        {
+          "nif_parent": "Studentidrett",
+          "nif_sport": "Yoga",
+          "sport_code": 628
+        }
+      ],
       "confidence": "medium",
       "note": "Only exists under Studentidrett in NIF"
     }
@@ -721,6 +1654,8 @@
     "Festivaler og mønstringer",
     "Film",
     "Fisketurer",
+    "Fleiridrettslag",
+    "Fleridrettslag",
     "Flykningekontoret",
     "Foredrag",
     "Foreldreutval",
@@ -738,6 +1673,7 @@
     "Frivillig organisasjon",
     "Frivillighet og organisasjonsaktiviteter",
     "Frivilligsentral",
+    "Funksjonhemma",
     "Fysiotimer",
     "Galleri",
     "Gapahuk",
@@ -754,6 +1690,7 @@
     "Humanitære organiasjoner",
     "Humanitære organisasjonar",
     "Humanitære organisasjoner",
+    "Hundesport",
     "Hårklipp",
     "Idrett",
     "Idrett møterom",
@@ -774,8 +1711,8 @@
     "Intern avdeling: Kulturskolen",
     "Intern avdeling: VOKS",
     "Interne avdelinger",
-    "Internt Bergen kommune",
     "Internt Bergen Kommune",
+    "Internt Bergen kommune",
     "Internt bruk - kommune",
     "Internt i kommunen",
     "Internt kommune",
@@ -855,6 +1792,7 @@
     "Museum",
     "Musikk",
     "Musikk / Korps",
+    "Musikk og dans",
     "Møte",
     "Møte/presentasjon",
     "Møteaktivitet",
@@ -863,8 +1801,8 @@
     "Møter",
     "Møter og kurs",
     "Møter, kurs, mindre selskaper",
-    "Møterom",
     "møterom",
+    "Møterom",
     "Møterom i Drammen kommune",
     "Møtevirksomhet",
     "Naturskole",
