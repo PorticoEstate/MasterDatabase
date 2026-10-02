@@ -20,6 +20,11 @@
 -- de grove rektangelsøkene en vanlig indeks på (lon, lat) er begrenset til.
 
 CREATE EXTENSION IF NOT EXISTS postgis;
+-- Trigram-indeks på ressurs.navn: dekker det sokevektor (se der) ikke kan,
+-- siden norsk er et sammensatt-ord-språk og Postgres' innebygde stemmer ikke
+-- splitter dem - "svømme" stammer ikke til samme rot som "svømmebasseng".
+-- Trigram gir substreng-/fuzzy-treff uavhengig av ord-grenser.
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 
 CREATE OR REPLACE FUNCTION sett_updated_at()
@@ -414,6 +419,9 @@ CREATE TABLE IF NOT EXISTS ressurs
 CREATE INDEX IF NOT EXISTS ix_ressurs_kommune ON ressurs (kommune_id);
 CREATE INDEX IF NOT EXISTS ix_ressurs_bygning ON ressurs (bygning_id);
 CREATE INDEX IF NOT EXISTS ix_ressurs_sokevektor ON ressurs USING GIN (sokevektor);
+-- Trigram-indeks på navn, for substreng-/fuzzy-søk som sokevektor ikke
+-- fanger opp (sammensatte ord, stavefeil) - se kommentar ved pg_trgm over.
+CREATE INDEX IF NOT EXISTS ix_ressurs_navn_trgm ON ressurs USING GIN (navn gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS ix_ressurs_sok
     ON ressurs (lokaletype_id, kommune_id) WHERE aktiv AND bookbar;
 
