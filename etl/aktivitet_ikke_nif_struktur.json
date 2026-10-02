@@ -39,13 +39,19 @@
     },
     "Andre idretter": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
+    "Anleggsarbeid": {
+      "parent": "Ikke relevant",
+      "category": "Bookingstatus eller systemtekst",
+      "category_code": "IKR-STA",
       "confidence": "high"
     },
     "Annen idrett": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -97,13 +103,44 @@
       "category_code": "ARR-OFF",
       "confidence": "high"
     },
-    "Ballsport": {
+    "Arrangement og møte": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "low",
+      "note": "Blandet kategori"
+    },
+    "Arrangementer": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Arrangementlokale": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "Bad": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
+    "Bading": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
     "Band": {
+      "parent": "Kultur",
+      "category": "Musikk, kor og korps",
+      "category_code": "KUL-MUS",
+      "confidence": "high"
+    },
+    "Bandøving": {
       "parent": "Kultur",
       "category": "Musikk, kor og korps",
       "category_code": "KUL-MUS",
@@ -139,6 +176,12 @@
       "category_code": "MOP-OPP",
       "confidence": "high"
     },
+    "Barneidrett": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
     "Barnetilbud": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Barn og unge",
@@ -159,7 +202,7 @@
     },
     "Bowls": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "low",
       "note": "Kan være skrivefeil for Bowling (NIF)"
@@ -176,6 +219,12 @@
       "category_code": "ORG-BU",
       "confidence": "low",
       "note": "Bergensk tradisjon, ikke bueskyting"
+    },
+    "Bursdagsfeiring": {
+      "parent": "Arrangementer og selskap",
+      "category": "Private selskap og bursdager",
+      "category_code": "ARR-PRIV",
+      "confidence": "high"
     },
     "Bydelshus": {
       "parent": "Ikke relevant",
@@ -196,10 +245,36 @@
       "confidence": "low",
       "note": "Kan være seiling/padling (NIF)"
     },
+    "Dagsmøte": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
+      "confidence": "high"
+    },
+    "Dans/ Musikk/ Kor/ Korps": {
+      "parent": "Kultur",
+      "category": "Musikk, kor og korps",
+      "category_code": "KUL-MUS",
+      "confidence": "low",
+      "note": "Blandet kategori – dans hører til NIF Dans"
+    },
+    "Datahjelp": {
+      "parent": "Møter og opplæring",
+      "category": "Undervisning og kurs",
+      "category_code": "MOP-OPP",
+      "confidence": "low",
+      "note": "Kan også være kommunal tjeneste"
+    },
     "Dataundervisning": {
       "parent": "Møter og opplæring",
       "category": "Undervisning og kurs",
       "category_code": "MOP-OPP",
+      "confidence": "high"
+    },
+    "Demonstrasjon": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
       "confidence": "high"
     },
     "Disko": {
@@ -208,6 +283,12 @@
       "category_code": "ARR-PRIV",
       "confidence": "low",
       "note": "Kan også være ungdomsarrangement"
+    },
+    "Diskorom": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
     },
     "Drop in": {
       "parent": "Organisasjoner og møteplasser",
@@ -228,9 +309,15 @@
       "category_code": "ARR-SER",
       "confidence": "high"
     },
+    "Dåp/navnedag": {
+      "parent": "Arrangementer og selskap",
+      "category": "Seremonier og markeringer",
+      "category_code": "ARR-SER",
+      "confidence": "high"
+    },
     "E-sport": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -240,13 +327,31 @@
       "category_code": "IKR-USP",
       "confidence": "high"
     },
+    "Ekstra renhold": {
+      "parent": "Ikke relevant",
+      "category": "Bookingstatus eller systemtekst",
+      "category_code": "IKR-STA",
+      "confidence": "high"
+    },
     "Familiefest": {
       "parent": "Arrangementer og selskap",
       "category": "Private selskap og bursdager",
       "category_code": "ARR-PRIV",
       "confidence": "high"
     },
+    "Ferie": {
+      "parent": "Ikke relevant",
+      "category": "Bookingstatus eller systemtekst",
+      "category_code": "IKR-STA",
+      "confidence": "high"
+    },
     "Festival": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Festivaler": {
       "parent": "Arrangementer og selskap",
       "category": "Offentlige arrangementer",
       "category_code": "ARR-OFF",
@@ -268,6 +373,12 @@
       "parent": "Arrangementer og selskap",
       "category": "Offentlige arrangementer",
       "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Film": {
+      "parent": "Kultur",
+      "category": "Scenekunst og film",
+      "category_code": "KUL-SCENE",
       "confidence": "high"
     },
     "Fisketurer": {
@@ -302,6 +413,12 @@
       "category_code": "MOP-MOTE",
       "confidence": "high"
     },
+    "Forestilllinger": {
+      "parent": "Kultur",
+      "category": "Scenekunst og film",
+      "category_code": "KUL-SCENE",
+      "confidence": "high"
+    },
     "Formidlingsarena og forsamlingslokaler": {
       "parent": "Ikke relevant",
       "category": "Lokale eller fasilitet",
@@ -320,6 +437,50 @@
       "category_code": "KUL-KUNST",
       "confidence": "high"
     },
+    "Friluft": {
+      "parent": "Friluftsliv og trening",
+      "category": "Friluftsliv",
+      "category_code": "FRT-FRI",
+      "confidence": "high"
+    },
+    "Friluftsaktiviteter": {
+      "parent": "Friluftsliv og trening",
+      "category": "Friluftsliv",
+      "category_code": "FRT-FRI",
+      "confidence": "high"
+    },
+    "Friområder": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "Frisklivsentralen": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "low",
+      "note": "Kommunal helsetjeneste med treningsgrupper"
+    },
+    "Fritidsklubb": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Barn og unge",
+      "category_code": "ORG-BU",
+      "confidence": "high"
+    },
+    "Fritidstilbud": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Barn og unge",
+      "category_code": "ORG-BU",
+      "confidence": "low",
+      "note": "Generelt fritidstilbud – antatt for barn og unge"
+    },
+    "Frivillig organisasjon": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Lag og foreninger",
+      "category_code": "ORG-LAG",
+      "confidence": "high"
+    },
     "Frivillighet og organisasjonsaktiviteter": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Lag og foreninger",
@@ -330,6 +491,12 @@
       "parent": "Organisasjoner og møteplasser",
       "category": "Lag og foreninger",
       "category_code": "ORG-LAG",
+      "confidence": "high"
+    },
+    "Fysiotimer": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
       "confidence": "high"
     },
     "Galleri": {
@@ -352,7 +519,7 @@
     },
     "Gi bort": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
       "confidence": "high"
     },
@@ -363,6 +530,12 @@
       "confidence": "high"
     },
     "Grendalag/Velforening": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Lag og foreninger",
+      "category_code": "ORG-LAG",
+      "confidence": "high"
+    },
+    "Grendelag": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Lag og foreninger",
       "category_code": "ORG-LAG",
@@ -416,22 +589,15 @@
       "category_code": "ORG-LAG",
       "confidence": "high"
     },
-    "Hund": {
-      "parent": "Friluftsliv og trening",
-      "category": "Friluftsliv",
-      "category_code": "FRT-FRI",
-      "confidence": "low",
-      "note": "Kan være hundekjøring (NIF) eller hundetrening"
-    },
     "Hårklipp": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
       "confidence": "high"
     },
     "Idrett": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -443,7 +609,7 @@
     },
     "Idrettsaktiviteter": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -473,7 +639,7 @@
     },
     "Innbyggerbussen": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
       "confidence": "high"
     },
@@ -484,6 +650,12 @@
       "confidence": "high"
     },
     "Interesseorganiasjonar": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Lag og foreninger",
+      "category_code": "ORG-LAG",
+      "confidence": "high"
+    },
+    "Interesseorganiasjoner": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Lag og foreninger",
       "category_code": "ORG-LAG",
@@ -507,7 +679,7 @@
       "category_code": "ORG-LAG",
       "confidence": "high"
     },
-    "Intern aktivitet": {
+    "Intern": {
       "parent": "Ikke relevant",
       "category": "Intern eller kommersiell bruk",
       "category_code": "IKR-BRUK",
@@ -537,19 +709,25 @@
       "category_code": "IKR-BRUK",
       "confidence": "high"
     },
-    "Internt Bergen Kommune": {
-      "parent": "Ikke relevant",
-      "category": "Intern eller kommersiell bruk",
-      "category_code": "IKR-BRUK",
-      "confidence": "high"
-    },
     "Internt Bergen kommune": {
       "parent": "Ikke relevant",
       "category": "Intern eller kommersiell bruk",
       "category_code": "IKR-BRUK",
       "confidence": "high"
     },
+    "Internt Bergen Kommune": {
+      "parent": "Ikke relevant",
+      "category": "Intern eller kommersiell bruk",
+      "category_code": "IKR-BRUK",
+      "confidence": "high"
+    },
     "Internt bruk - kommune": {
+      "parent": "Ikke relevant",
+      "category": "Intern eller kommersiell bruk",
+      "category_code": "IKR-BRUK",
+      "confidence": "high"
+    },
+    "Internt i kommunen": {
       "parent": "Ikke relevant",
       "category": "Intern eller kommersiell bruk",
       "category_code": "IKR-BRUK",
@@ -579,11 +757,24 @@
       "category_code": "FRT-FRI",
       "confidence": "high"
     },
+    "Kafe": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Sosiale møteplasser og inkludering",
+      "category_code": "ORG-MPL",
+      "confidence": "high"
+    },
     "Kafè": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Sosiale møteplasser og inkludering",
       "category_code": "ORG-MPL",
       "confidence": "high"
+    },
+    "Kamera": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
+      "confidence": "low",
+      "note": "Antatt kamerautstyr"
     },
     "Kino": {
       "parent": "Kultur",
@@ -603,6 +794,12 @@
       "category_code": "ARR-PRIV",
       "confidence": "high"
     },
+    "Klasserom": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
     "Klasseromsundervisning": {
       "parent": "Møter og opplæring",
       "category": "Undervisning og kurs",
@@ -611,8 +808,14 @@
     },
     "Klesinnsamling": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
+      "confidence": "high"
+    },
+    "Klubbmøte": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
       "confidence": "high"
     },
     "Kommersiell utleie": {
@@ -633,10 +836,34 @@
       "category_code": "IKR-BRUK",
       "confidence": "high"
     },
+    "Kommunalt": {
+      "parent": "Ikke relevant",
+      "category": "Intern eller kommersiell bruk",
+      "category_code": "IKR-BRUK",
+      "confidence": "high"
+    },
+    "Kommunalt bruk": {
+      "parent": "Ikke relevant",
+      "category": "Intern eller kommersiell bruk",
+      "category_code": "IKR-BRUK",
+      "confidence": "high"
+    },
     "Kommune eige bruk": {
       "parent": "Ikke relevant",
       "category": "Intern eller kommersiell bruk",
       "category_code": "IKR-BRUK",
+      "confidence": "high"
+    },
+    "Konferanse": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
+      "confidence": "high"
+    },
+    "Konferanser": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
       "confidence": "high"
     },
     "Konfirmasjon": {
@@ -699,6 +926,12 @@
       "category_code": "KUL-GEN",
       "confidence": "high"
     },
+    "Kulturbygg": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
     "Kulturhus": {
       "parent": "Ikke relevant",
       "category": "Lokale eller fasilitet",
@@ -706,6 +939,12 @@
       "confidence": "high"
     },
     "Kulturlokalar møterom": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "Kulturlokale": {
       "parent": "Ikke relevant",
       "category": "Lokale eller fasilitet",
       "category_code": "IKR-LOK",
@@ -724,6 +963,12 @@
       "confidence": "high"
     },
     "Kulturlokaler øving og verksteder": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "Kulturlokaler, formidling og øving": {
       "parent": "Ikke relevant",
       "category": "Lokale eller fasilitet",
       "category_code": "IKR-LOK",
@@ -771,10 +1016,28 @@
       "category_code": "KUL-KUNST",
       "confidence": "high"
     },
+    "Kunst, håndverk, media": {
+      "parent": "Kultur",
+      "category": "Kunst, håndverk og foto",
+      "category_code": "KUL-KUNST",
+      "confidence": "high"
+    },
     "Kurs": {
       "parent": "Møter og opplæring",
       "category": "Undervisning og kurs",
       "category_code": "MOP-OPP",
+      "confidence": "high"
+    },
+    "Kurs og foredrag": {
+      "parent": "Møter og opplæring",
+      "category": "Undervisning og kurs",
+      "category_code": "MOP-OPP",
+      "confidence": "high"
+    },
+    "Lag og foreninger": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Lag og foreninger",
+      "category_code": "ORG-LAG",
       "confidence": "high"
     },
     "Lagt til rette for MMNF": {
@@ -785,8 +1048,26 @@
     },
     "Leie av lastesykkel": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
+      "confidence": "high"
+    },
+    "Leie salgsplass": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Leie standplass": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Leilighet": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
       "confidence": "high"
     },
     "Leksegruppe": {
@@ -799,12 +1080,6 @@
       "parent": "Kultur",
       "category": "Kulturarv og litteratur",
       "category_code": "KUL-ARV",
-      "confidence": "high"
-    },
-    "LIvsnøytral seremonirom": {
-      "parent": "Arrangementer og selskap",
-      "category": "Seremonier og markeringer",
-      "category_code": "ARR-SER",
       "confidence": "high"
     },
     "Lokale aktiviteter-idrett-kultur": {
@@ -820,9 +1095,23 @@
       "category_code": "ARR-OFF",
       "confidence": "high"
     },
+    "Lyd": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
+      "confidence": "low",
+      "note": "Antatt lydutstyr"
+    },
+    "Lys": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
+      "confidence": "low",
+      "note": "Antatt lysutstyr"
+    },
     "Makeup & Hundpleie": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
       "confidence": "low",
       "note": "Uklar verdi"
@@ -839,12 +1128,31 @@
       "category_code": "ARR-OFF",
       "confidence": "high"
     },
+    "Markering": {
+      "parent": "Arrangementer og selskap",
+      "category": "Seremonier og markeringer",
+      "category_code": "ARR-SER",
+      "confidence": "low",
+      "note": "Kan også være offentlig markering/demonstrasjon"
+    },
+    "Markering/demonstrasjon": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
     "Matlaging": {
       "parent": "Møter og opplæring",
       "category": "Undervisning og kurs",
       "category_code": "MOP-OPP",
       "confidence": "low",
       "note": "Kan også være Sosial møteplass"
+    },
+    "Menighet/ Trossamfunn": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Lag og foreninger",
+      "category_code": "ORG-LAG",
+      "confidence": "high"
     },
     "Menigheter og trosamfunn": {
       "parent": "Organisasjoner og møteplasser",
@@ -864,16 +1172,16 @@
       "category_code": "ORG-LAG",
       "confidence": "high"
     },
-    "Mini": {
-      "parent": "Ikke relevant",
-      "category": "Uspesifisert eller ukjent",
-      "category_code": "IKR-USP",
+    "Messe": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
       "confidence": "low",
-      "note": "Ukjent – muligens minihåndball/minifotball"
+      "note": "Kan være varemesse eller gudstjeneste"
     },
     "Mobilitet": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
       "confidence": "high"
     },
@@ -913,6 +1221,12 @@
       "category_code": "MOP-MOTE",
       "confidence": "high"
     },
+    "Møtelokale": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
     "Møteplass": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Sosiale møteplasser og inkludering",
@@ -925,7 +1239,32 @@
       "category_code": "MOP-MOTE",
       "confidence": "high"
     },
+    "Møter og kurs": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
+      "confidence": "high"
+    },
+    "Møter, kurs, mindre selskaper": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
+      "confidence": "low",
+      "note": "Blandet kategori"
+    },
     "Møterom": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "møterom": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "Møterom i Drammen kommune": {
       "parent": "Ikke relevant",
       "category": "Lokale eller fasilitet",
       "category_code": "IKR-LOK",
@@ -968,6 +1307,43 @@
       "category_code": "ARR-OFF",
       "confidence": "high"
     },
+    "Offentlig": {
+      "parent": "Ikke relevant",
+      "category": "Uspesifisert eller ukjent",
+      "category_code": "IKR-USP",
+      "confidence": "low",
+      "note": "Antatt brukertype, ikke aktivitet"
+    },
+    "Offentlig arrangement": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Offentlig bading": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
+    "Opplæring": {
+      "parent": "Møter og opplæring",
+      "category": "Undervisning og kurs",
+      "category_code": "MOP-OPP",
+      "confidence": "high"
+    },
+    "Oppvekst/skule": {
+      "parent": "Møter og opplæring",
+      "category": "Undervisning og kurs",
+      "category_code": "MOP-OPP",
+      "confidence": "high"
+    },
+    "Organisasjon": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Lag og foreninger",
+      "category_code": "ORG-LAG",
+      "confidence": "high"
+    },
     "Organisering av aktivitetar": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Lag og foreninger",
@@ -978,6 +1354,12 @@
       "parent": "Friluftsliv og trening",
       "category": "Friluftsliv",
       "category_code": "FRT-FRI",
+      "confidence": "high"
+    },
+    "Pensjonistbading": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
       "confidence": "high"
     },
     "Pensjonistforening": {
@@ -1010,7 +1392,20 @@
       "category_code": "MOP-MOTE",
       "confidence": "high"
     },
+    "Privat": {
+      "parent": "Arrangementer og selskap",
+      "category": "Private selskap og bursdager",
+      "category_code": "ARR-PRIV",
+      "confidence": "low",
+      "note": "Antatt privat booking – uklart innhold"
+    },
     "Privat arrangement": {
+      "parent": "Arrangementer og selskap",
+      "category": "Private selskap og bursdager",
+      "category_code": "ARR-PRIV",
+      "confidence": "high"
+    },
+    "Privat utleige": {
       "parent": "Arrangementer og selskap",
       "category": "Private selskap og bursdager",
       "category_code": "ARR-PRIV",
@@ -1047,10 +1442,41 @@
       "category_code": "ORG-MPL",
       "confidence": "high"
     },
-    "Sameie": {
-      "parent": "Organisasjoner og møteplasser",
-      "category": "Lag og foreninger",
-      "category_code": "ORG-LAG",
+    "Renhold og vedlikehold": {
+      "parent": "Ikke relevant",
+      "category": "Bookingstatus eller systemtekst",
+      "category_code": "IKR-STA",
+      "confidence": "high"
+    },
+    "Revy og teater": {
+      "parent": "Kultur",
+      "category": "Scenekunst og film",
+      "category_code": "KUL-SCENE",
+      "confidence": "high"
+    },
+    "Salg": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Salgsplass": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Saltimer": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "low",
+      "note": "Generell saltid for ulike aktiviteter"
+    },
+    "Sambruk": {
+      "parent": "Ikke relevant",
+      "category": "Intern eller kommersiell bruk",
+      "category_code": "IKR-BRUK",
       "confidence": "high"
     },
     "Samlinger": {
@@ -1059,10 +1485,34 @@
       "category_code": "MOP-MOTE",
       "confidence": "high"
     },
+    "Samlingsplass": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Sosiale møteplasser og inkludering",
+      "category_code": "ORG-MPL",
+      "confidence": "high"
+    },
+    "Samtale": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
+      "confidence": "high"
+    },
+    "Samtale med innbygger": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
+      "confidence": "high"
+    },
     "Samtaler": {
       "parent": "Møter og opplæring",
       "category": "Møter og foredrag",
       "category_code": "MOP-MOTE",
+      "confidence": "high"
+    },
+    "Selskap": {
+      "parent": "Arrangementer og selskap",
+      "category": "Private selskap og bursdager",
+      "category_code": "ARR-PRIV",
       "confidence": "high"
     },
     "Selskapsarrangement": {
@@ -1084,9 +1534,16 @@
       "confidence": "low",
       "note": "Kan også være sirkustrening/akrobatikk"
     },
+    "Sjakk": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "low",
+      "note": "Sjakk er ikke NIF-idrett"
+    },
     "Sjøsport": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -1094,6 +1551,18 @@
       "parent": "Møter og opplæring",
       "category": "Undervisning og kurs",
       "category_code": "MOP-OPP",
+      "confidence": "high"
+    },
+    "Skolekjøkken": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "Skuespill": {
+      "parent": "Kultur",
+      "category": "Scenekunst og film",
+      "category_code": "KUL-SCENE",
       "confidence": "high"
     },
     "Skular": {
@@ -1138,6 +1607,18 @@
       "category_code": "IKR-STA",
       "confidence": "high"
     },
+    "Sosial møteplass": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Sosiale møteplasser og inkludering",
+      "category_code": "ORG-MPL",
+      "confidence": "high"
+    },
+    "Sosiale aktivteter": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Sosiale møteplasser og inkludering",
+      "category_code": "ORG-MPL",
+      "confidence": "high"
+    },
     "Sosiale møteplassar": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Sosiale møteplasser og inkludering",
@@ -1148,6 +1629,12 @@
       "parent": "Organisasjoner og møteplasser",
       "category": "Sosiale møteplasser og inkludering",
       "category_code": "ORG-MPL",
+      "confidence": "high"
+    },
+    "Sosiale tilstelninger": {
+      "parent": "Arrangementer og selskap",
+      "category": "Private selskap og bursdager",
+      "category_code": "ARR-PRIV",
       "confidence": "high"
     },
     "Spedbarnsgruppe": {
@@ -1180,6 +1667,12 @@
       "category_code": "ORG-BU",
       "confidence": "high"
     },
+    "Speiding": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Barn og unge",
+      "category_code": "ORG-BU",
+      "confidence": "high"
+    },
     "Spill": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Sosiale møteplasser og inkludering",
@@ -1187,9 +1680,15 @@
       "confidence": "low",
       "note": "Kan være brettspill/rollespill eller e-sport"
     },
+    "Spinning": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
     "Sport og idrett": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -1211,7 +1710,31 @@
       "category_code": "ARR-OFF",
       "confidence": "high"
     },
+    "Standplass": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
+    "Stands": {
+      "parent": "Arrangementer og selskap",
+      "category": "Offentlige arrangementer",
+      "category_code": "ARR-OFF",
+      "confidence": "high"
+    },
     "Stengt": {
+      "parent": "Ikke relevant",
+      "category": "Bookingstatus eller systemtekst",
+      "category_code": "IKR-STA",
+      "confidence": "high"
+    },
+    "Stengt grunna vedlikehald eller ferie": {
+      "parent": "Ikke relevant",
+      "category": "Bookingstatus eller systemtekst",
+      "category_code": "IKR-STA",
+      "confidence": "high"
+    },
+    "Stengt pga arrangement": {
       "parent": "Ikke relevant",
       "category": "Bookingstatus eller systemtekst",
       "category_code": "IKR-STA",
@@ -1235,15 +1758,9 @@
       "category_code": "MOP-OPP",
       "confidence": "high"
     },
-    "Styremøter": {
-      "parent": "Møter og opplæring",
-      "category": "Møter og foredrag",
-      "category_code": "MOP-MOTE",
-      "confidence": "high"
-    },
     "Styrketrening": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -1258,6 +1775,13 @@
       "category": "Sosiale møteplasser og inkludering",
       "category_code": "ORG-MPL",
       "confidence": "high"
+    },
+    "Team-building": {
+      "parent": "Møter og opplæring",
+      "category": "Møter og foredrag",
+      "category_code": "MOP-MOTE",
+      "confidence": "low",
+      "note": "Kan også være privat/bedriftsarrangement"
     },
     "Teater": {
       "parent": "Kultur",
@@ -1283,6 +1807,12 @@
       "category_code": "FRT-FRI",
       "confidence": "high"
     },
+    "Terapi": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
+      "confidence": "high"
+    },
     "Tiden er ledig. Sykkelen reserveres fra forrige ledige torsdag.": {
       "parent": "Ikke relevant",
       "category": "Bookingstatus eller systemtekst",
@@ -1301,9 +1831,15 @@
       "category_code": "IKR-LOK",
       "confidence": "high"
     },
+    "Torgplasser": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
     "Transporthjelp": {
       "parent": "Ikke relevant",
-      "category": "Tjenester og utlån",
+      "category": "Tjenester og utstyr",
       "category_code": "IKR-TJE",
       "confidence": "high"
     },
@@ -1314,9 +1850,27 @@
       "confidence": "low",
       "note": "Ukjent – muligens navn på kor/ensemble"
     },
+    "Trening": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
+    "Trening senior": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
     "Trim": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
+    "Trimgrupper": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
       "confidence": "high"
     },
@@ -1356,6 +1910,12 @@
       "category_code": "ORG-BU",
       "confidence": "high"
     },
+    "Uorganisert": {
+      "parent": "Ikke relevant",
+      "category": "Uspesifisert eller ukjent",
+      "category_code": "IKR-USP",
+      "confidence": "high"
+    },
     "Utenlandsk forening": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Lag og foreninger",
@@ -1366,6 +1926,12 @@
       "parent": "Ikke relevant",
       "category": "Lokale eller fasilitet",
       "category_code": "IKR-LOK",
+      "confidence": "high"
+    },
+    "Utholdenhetstrening": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
       "confidence": "high"
     },
     "Utlånsordningen er ikke åpen": {
@@ -1380,16 +1946,34 @@
       "category_code": "KUL-KUNST",
       "confidence": "high"
     },
-    "Valg": {
-      "parent": "Møter og opplæring",
-      "category": "Møter og foredrag",
-      "category_code": "MOP-MOTE",
+    "Utstillinger": {
+      "parent": "Kultur",
+      "category": "Kunst, håndverk og foto",
+      "category_code": "KUL-KUNST",
+      "confidence": "high"
+    },
+    "Utstyr": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
       "confidence": "high"
     },
     "Vannsport": {
       "parent": "Friluftsliv og trening",
-      "category": "Idrett og trening uten NIF-gren",
+      "category": "Idrett, trening og bading uten NIF-gren",
       "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
+    "Vanntrening": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
+    "Varmtvannsbasseng": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
       "confidence": "high"
     },
     "Vedlikehold": {
@@ -1398,10 +1982,34 @@
       "category_code": "IKR-STA",
       "confidence": "high"
     },
+    "Veiledningstime Byggesak": {
+      "parent": "Ikke relevant",
+      "category": "Tjenester og utstyr",
+      "category_code": "IKR-TJE",
+      "confidence": "high"
+    },
+    "Velforeninger": {
+      "parent": "Organisasjoner og møteplasser",
+      "category": "Lag og foreninger",
+      "category_code": "ORG-LAG",
+      "confidence": "high"
+    },
     "Vennelag/gruppe": {
       "parent": "Organisasjoner og møteplasser",
       "category": "Lag og foreninger",
       "category_code": "ORG-LAG",
+      "confidence": "high"
+    },
+    "Verksted": {
+      "parent": "Kultur",
+      "category": "Kunst, håndverk og foto",
+      "category_code": "KUL-KUNST",
+      "confidence": "high"
+    },
+    "Verkstedlokale": {
+      "parent": "Ikke relevant",
+      "category": "Lokale eller fasilitet",
+      "category_code": "IKR-LOK",
       "confidence": "high"
     },
     "VGS": {
@@ -1428,6 +2036,18 @@
       "category_code": "ARR-SER",
       "confidence": "high"
     },
+    "Vigsel": {
+      "parent": "Arrangementer og selskap",
+      "category": "Seremonier og markeringer",
+      "category_code": "ARR-SER",
+      "confidence": "high"
+    },
+    "Voksenbading": {
+      "parent": "Friluftsliv og trening",
+      "category": "Idrett, trening og bading uten NIF-gren",
+      "category_code": "FRT-IDR",
+      "confidence": "high"
+    },
     "Voksenopplæringssenteret": {
       "parent": "Møter og opplæring",
       "category": "Undervisning og kurs",
@@ -1440,6 +2060,12 @@
       "category_code": "FRT-FRI",
       "confidence": "low",
       "note": "Testverdi"
+    },
+    "Workshop": {
+      "parent": "Møter og opplæring",
+      "category": "Undervisning og kurs",
+      "category_code": "MOP-OPP",
+      "confidence": "high"
     },
     "X Annet": {
       "parent": "Ikke relevant",
@@ -1457,6 +2083,12 @@
       "parent": "Møter og opplæring",
       "category": "Møter og foredrag",
       "category_code": "MOP-MOTE",
+      "confidence": "high"
+    },
+    "Åpningstid": {
+      "parent": "Ikke relevant",
+      "category": "Bookingstatus eller systemtekst",
+      "category_code": "IKR-STA",
       "confidence": "high"
     },
     "Øvingslokaler og verksteder": {
