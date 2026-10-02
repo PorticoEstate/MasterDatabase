@@ -1,0 +1,806 @@
+{
+  "mapping": {
+    "Amerikansk fotball": {
+      "nif_parent": "Amerikanske idretter",
+      "nif_sport": "Amerikansk fotball",
+      "sport_code": 561,
+      "confidence": "high"
+    },
+    "Badminton": {
+      "nif_parent": "Badminton",
+      "nif_sport": "Badminton",
+      "sport_code": 121,
+      "confidence": "high"
+    },
+    "Bandy": {
+      "nif_parent": "Bandy",
+      "nif_sport": "Bandy",
+      "sport_code": 131,
+      "confidence": "high"
+    },
+    "Bandy - inne": {
+      "nif_parent": "Bandy",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "medium",
+      "note": "Indoor bandy – Innebandy or Rinkbandy"
+    },
+    "Baseball": {
+      "nif_parent": "Soft- og baseball",
+      "nif_sport": "Baseball",
+      "sport_code": 611,
+      "confidence": "high"
+    },
+    "Baseball/softball": {
+      "nif_parent": "Soft- og baseball",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Basketball": {
+      "nif_parent": "Basketball",
+      "nif_sport": "Basketball",
+      "sport_code": 141,
+      "confidence": "high"
+    },
+    "Bedriftsidrett": {
+      "nif_parent": "Bedrift",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Bil/MC klubb": {
+      "nif_parent": "Motorsport",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "low",
+      "note": "Club may be non-sporting"
+    },
+    "Boccia": {
+      "nif_parent": "Fleridretter",
+      "nif_sport": "Boccia",
+      "sport_code": 646,
+      "confidence": "high"
+    },
+    "Boksing": {
+      "nif_parent": "Boksing",
+      "nif_sport": "Boksing",
+      "sport_code": 161,
+      "confidence": "high"
+    },
+    "Bordtennis": {
+      "nif_parent": "Bordtennis",
+      "nif_sport": "Bordtennis",
+      "sport_code": 171,
+      "confidence": "high"
+    },
+    "Bryting": {
+      "nif_parent": "Bryting",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Bueskyting": {
+      "nif_parent": "Bueskyting",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Cheerleading": {
+      "nif_parent": "Amerikanske idretter",
+      "nif_sport": "Cheerleading",
+      "sport_code": 563,
+      "confidence": "high"
+    },
+    "Cricket": {
+      "nif_parent": "Cricket",
+      "nif_sport": "Cricket",
+      "sport_code": 921,
+      "confidence": "high"
+    },
+    "Curling": {
+      "nif_parent": "Curling",
+      "nif_sport": "Curling",
+      "sport_code": 221,
+      "confidence": "high"
+    },
+    "Dans": {
+      "nif_parent": "Dans",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Dans/trening": {
+      "nif_parent": "Dans",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "medium",
+      "note": "Combined dance/training"
+    },
+    "Dansing": {
+      "nif_parent": "Dans",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Drill": {
+      "nif_parent": "Dans",
+      "nif_sport": "Sportsdrill",
+      "sport_code": 518,
+      "confidence": "medium",
+      "note": "Also 'Drill' under Studentidrett (981)"
+    },
+    "Dykking": {
+      "nif_parent": "Dykking",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Fekting": {
+      "nif_parent": "Fekting",
+      "nif_sport": "Fekting",
+      "sport_code": 251,
+      "confidence": "high"
+    },
+    "Fleiridrettslag": {
+      "nif_parent": "Fleridretter",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "medium",
+      "note": "Multi-sport club, not necessarily NIF 'Fleridretter'"
+    },
+    "Fleridrettslag": {
+      "nif_parent": "Fleridretter",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "medium",
+      "note": "Multi-sport club, not necessarily NIF 'Fleridretter'"
+    },
+    "Fotball": {
+      "nif_parent": "Fotball",
+      "nif_sport": "Fotball",
+      "sport_code": 261,
+      "confidence": "high"
+    },
+    "Fotballbane": {
+      "nif_parent": "Fotball",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "medium",
+      "note": "Facility name"
+    },
+    "Friidrett": {
+      "nif_parent": "Friidrett",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Friluftsliv": {
+      "nif_parent": "Studentidrett",
+      "nif_sport": "Friluftsliv",
+      "sport_code": 622,
+      "confidence": "low",
+      "note": "Only exists under Studentidrett in NIF"
+    },
+    "Funksjonhemma": {
+      "nif_parent": "Idrett for funksjonshemmede",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "low",
+      "note": "User group, not necessarily sport"
+    },
+    "Futsal": {
+      "nif_parent": "Fotball",
+      "nif_sport": "Futsal",
+      "sport_code": 262,
+      "confidence": "high"
+    },
+    "Golf": {
+      "nif_parent": "Golf",
+      "nif_sport": "Golf",
+      "sport_code": 291,
+      "confidence": "high"
+    },
+    "Gymnastikk": {
+      "nif_parent": "Gymnastikk og turn",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Gymnastikk og turn": {
+      "nif_parent": "Gymnastikk og turn",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Hestesport": {
+      "nif_parent": "Ridning",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Hundesport": {
+      "nif_parent": "Hundekjøring",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "low",
+      "note": "Dog sport may be agility etc. (not NIF)"
+    },
+    "Hurtigløp": {
+      "nif_parent": "Skøyter",
+      "nif_sport": "Hurtigløp",
+      "sport_code": 441,
+      "confidence": "high"
+    },
+    "Håndball": {
+      "nif_parent": "Håndball",
+      "nif_sport": "Håndball",
+      "sport_code": 331,
+      "confidence": "high"
+    },
+    "Innebandy": {
+      "nif_parent": "Bandy",
+      "nif_sport": "Innebandy",
+      "sport_code": 133,
+      "confidence": "high"
+    },
+    "Innefotball": {
+      "nif_parent": "Fotball",
+      "nif_sport": "Futsal",
+      "sport_code": 262,
+      "confidence": "medium"
+    },
+    "Ishockey": {
+      "nif_parent": "Ishockey",
+      "nif_sport": "Ishockey",
+      "sport_code": 341,
+      "confidence": "high"
+    },
+    "Ju jitsu": {
+      "nif_parent": "Kampsport",
+      "nif_sport": "Jujutsu",
+      "sport_code": 523,
+      "confidence": "high"
+    },
+    "Judo": {
+      "nif_parent": "Judo",
+      "nif_sport": "Judo",
+      "sport_code": 351,
+      "confidence": "high"
+    },
+    "Kajakk": {
+      "nif_parent": "Padling",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Kampsport": {
+      "nif_parent": "Kampsport",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Kano/kajakk": {
+      "nif_parent": "Padling",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Kanopadling": {
+      "nif_parent": "Padling",
+      "nif_sport": "Kano",
+      "sport_code": 364,
+      "confidence": "high"
+    },
+    "Karate": {
+      "nif_parent": "Kampsport",
+      "nif_sport": "Karate",
+      "sport_code": 521,
+      "confidence": "high"
+    },
+    "Kickboksing": {
+      "nif_parent": "Kickboksing",
+      "nif_sport": "Kickboksing",
+      "sport_code": 581,
+      "confidence": "high"
+    },
+    "Klartring": {
+      "nif_parent": "Klatring",
+      "nif_sport": "Klatring",
+      "sport_code": 591,
+      "confidence": "high",
+      "note": "Typo of Klatring"
+    },
+    "Klatring": {
+      "nif_parent": "Klatring",
+      "nif_sport": "Klatring",
+      "sport_code": 591,
+      "confidence": "high"
+    },
+    "Kunstløp": {
+      "nif_parent": "Skøyter",
+      "nif_sport": "Kunstløp",
+      "sport_code": 442,
+      "confidence": "high"
+    },
+    "Lacrosse": {
+      "nif_parent": "Amerikanske idretter",
+      "nif_sport": "Lacrosse",
+      "sport_code": 564,
+      "confidence": "high"
+    },
+    "Leirdueskyting": {
+      "nif_parent": "Skyting",
+      "nif_sport": "Leirdue",
+      "sport_code": 431,
+      "confidence": "high"
+    },
+    "Luftsport": {
+      "nif_parent": "Luftsport",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Minihåndball": {
+      "nif_parent": "Håndball",
+      "nif_sport": "Håndball",
+      "sport_code": 331,
+      "confidence": "high"
+    },
+    "Motorsport": {
+      "nif_parent": "Motorsport",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Musikk og dans": {
+      "nif_parent": "Dans",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "low",
+      "note": "Mixed music/dance"
+    },
+    "Orientering": {
+      "nif_parent": "Orientering",
+      "nif_sport": "Orientering",
+      "sport_code": 381,
+      "confidence": "high"
+    },
+    "Paintball": {
+      "nif_parent": "Bedrift",
+      "nif_sport": "Paintball",
+      "sport_code": 152,
+      "confidence": "medium",
+      "note": "Also exists under Studentidrett (984)"
+    },
+    "Riding": {
+      "nif_parent": "Ridning",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Roing": {
+      "nif_parent": "Roing",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Rollerderby": {
+      "nif_parent": "Skøyter",
+      "nif_sport": "Roller Derby",
+      "sport_code": 446,
+      "confidence": "high"
+    },
+    "Rugby": {
+      "nif_parent": "Rugby",
+      "nif_sport": "Rugby",
+      "sport_code": 721,
+      "confidence": "high"
+    },
+    "Sandhåndball": {
+      "nif_parent": "Håndball",
+      "nif_sport": "Beach håndball",
+      "sport_code": 332,
+      "confidence": "high"
+    },
+    "Sandvolleyball": {
+      "nif_parent": "Volleyball",
+      "nif_sport": "Sandvolleyball",
+      "sport_code": 482,
+      "confidence": "high"
+    },
+    "Seiling": {
+      "nif_parent": "Seiling",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Seilsport": {
+      "nif_parent": "Seiling",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Skating": {
+      "nif_parent": "Brett",
+      "nif_sport": "Skateboard",
+      "sport_code": 732,
+      "confidence": "low",
+      "note": "Could also mean skøyter/rulleskøyter"
+    },
+    "Ski": {
+      "nif_parent": "Ski",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Skisport": {
+      "nif_parent": "Ski",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Skyting": {
+      "nif_parent": "Skyting",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Skøyter": {
+      "nif_parent": "Skøyter",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Sportsdrill": {
+      "nif_parent": "Dans",
+      "nif_sport": "Sportsdrill",
+      "sport_code": 518,
+      "confidence": "high"
+    },
+    "Squash": {
+      "nif_parent": "Squash",
+      "nif_sport": "Squash",
+      "sport_code": 541,
+      "confidence": "high"
+    },
+    "Stuping": {
+      "nif_parent": "Svømming",
+      "nif_sport": "Stup",
+      "sport_code": 452,
+      "confidence": "high"
+    },
+    "Styrkeløft": {
+      "nif_parent": "Styrkeløft",
+      "nif_sport": "Styrkeløft",
+      "sport_code": 551,
+      "confidence": "high"
+    },
+    "Styrkeløfting": {
+      "nif_parent": "Styrkeløft",
+      "nif_sport": "Styrkeløft",
+      "sport_code": 551,
+      "confidence": "high"
+    },
+    "Svømmehall": {
+      "nif_parent": "Svømming",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "medium",
+      "note": "Facility name"
+    },
+    "Svømming": {
+      "nif_parent": "Svømming",
+      "nif_sport": "Svømming",
+      "sport_code": 451,
+      "confidence": "high"
+    },
+    "Sykling": {
+      "nif_parent": "Sykkel",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high"
+    },
+    "Symjehall": {
+      "nif_parent": "Svømming",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "medium",
+      "note": "Facility name (nynorsk)"
+    },
+    "Taekwondo": {
+      "nif_parent": "Kampsport",
+      "nif_sport": null,
+      "sport_code": null,
+      "confidence": "high",
+      "note": "ITF (524) or WT (522) unknown"
+    },
+    "Tennis": {
+      "nif_parent": "Tennis",
+      "nif_sport": "Tennis",
+      "sport_code": 461,
+      "confidence": "high"
+    },
+    "Turn": {
+      "nif_parent": "Gymnastikk og turn",
+      "nif_sport": "Turn",
+      "sport_code": 302,
+      "confidence": "high"
+    },
+    "Undervannsrugby": {
+      "nif_parent": "Dykking",
+      "nif_sport": "Undervannsrugby",
+      "sport_code": 241,
+      "confidence": "high"
+    },
+    "Vannpolo": {
+      "nif_parent": "Svømming",
+      "nif_sport": "Vannpolo",
+      "sport_code": 454,
+      "confidence": "high"
+    },
+    "Vektløfting": {
+      "nif_parent": "Vektløfting",
+      "nif_sport": "Vektløfting",
+      "sport_code": 471,
+      "confidence": "high"
+    },
+    "Volleyball": {
+      "nif_parent": "Volleyball",
+      "nif_sport": "Volleyball",
+      "sport_code": 481,
+      "confidence": "high"
+    },
+    "Yoga": {
+      "nif_parent": "Studentidrett",
+      "nif_sport": "Yoga",
+      "sport_code": 628,
+      "confidence": "medium",
+      "note": "Only exists under Studentidrett in NIF"
+    }
+  },
+  "unmapped": [
+    "Administrasjonslokale",
+    "Aktivitetshus",
+    "Alle typer arrangement",
+    "Andre",
+    "Andre aktivitetar, konsertar, o.l",
+    "Andre aktivitetar, o.l",
+    "Andre idretter",
+    "Annen idrett",
+    "Annet",
+    "Annet - Idrett møterom",
+    "Annet - Internt i kommunen",
+    "Annet - Kultur møterom",
+    "Annet - Offentlig arrangement",
+    "Annet - Personlig markering",
+    "Arena",
+    "Arrangement",
+    "Ballsport",
+    "Band",
+    "Barnebursdag",
+    "Barnebursdag 3 - 12 år",
+    "Barnebursdag 3 -16 år",
+    "Barnehage",
+    "Barnehager",
+    "Barnetilbud",
+    "Bedrifter o.l",
+    "Bibliotek",
+    "Bowls",
+    "Bryllup",
+    "Buekorps",
+    "Bydelshus",
+    "Byrom",
+    "Båtforeingar",
+    "Dataundervisning",
+    "Disko",
+    "Drop in",
+    "Drop-in / arbeidsplasser",
+    "Dåp",
+    "E-sport",
+    "Egenorganisert",
+    "Familiefest",
+    "Festival",
+    "Festivaler / Mønstringar",
+    "Festivaler / Mønstringer",
+    "Festivaler og mønstringer",
+    "Fisketurer",
+    "Flykningekontoret",
+    "Foredrag",
+    "Foreldreutval",
+    "Forelesning",
+    "Formidlingsarena og forsamlingslokaler",
+    "Forslag",
+    "Foto",
+    "Frivillighet og organisasjonsaktiviteter",
+    "Frivilligsentral",
+    "Galleri",
+    "Gapahuk",
+    "Generelt",
+    "Gi bort",
+    "Grendalag",
+    "Grendalag/Velforening",
+    "Grill/bålpanne",
+    "Gruppearbeid",
+    "Gymsal",
+    "Helsebygg",
+    "Hobbygrupper",
+    "Humanitære organiasjoner",
+    "Humanitære organisasjonar",
+    "Humanitære organisasjoner",
+    "Hund",
+    "Hårklipp",
+    "Idrett",
+    "Idrett møterom",
+    "Idrettsaktiviteter",
+    "Idrettshall",
+    "Idrettskrets - særforbund",
+    "Informasjons møter",
+    "Inkludering",
+    "Innbyggerbussen",
+    "Innbyggertorg",
+    "Interesseorganiasjonar",
+    "Interesseorganisasjon",
+    "Interesseorganisasjonar",
+    "Interesseorganisasjoner",
+    "Intern aktivitet",
+    "Intern avdeling: FLYK",
+    "Intern avdeling: Kulturskolen",
+    "Intern avdeling: VOKS",
+    "Interne avdelinger",
+    "Internt Bergen Kommune",
+    "Internt Bergen kommune",
+    "Internt bruk - kommune",
+    "Internt kommune",
+    "Internt Stavanger kommune",
+    "Involvering",
+    "Jakt",
+    "Kafè",
+    "Kino",
+    "Kjøkken",
+    "Klassefest",
+    "Klasseromsundervisning",
+    "Klesinnsamling",
+    "Kommersiell utleie",
+    "Kommersiell utleige",
+    "Kommunal aktivitet",
+    "Kommune eige bruk",
+    "Konfirmasjon",
+    "Konsert",
+    "Kor",
+    "Korps",
+    "Korps og orkester",
+    "Kreativt verksted",
+    "Kreativt verksted og prosesser",
+    "Kultur",
+    "Kulturaktiviteter",
+    "Kulturarrangement",
+    "Kulturhus",
+    "Kulturlokalar møterom",
+    "Kulturlokaler",
+    "Kulturlokaler formidling og øving",
+    "Kulturlokaler øving og verksteder",
+    "Kulturskolen",
+    "Kulturvern og historie",
+    "Kulturvern og historielag",
+    "Kulturvern og sogelag",
+    "Kunst og håndverk",
+    "Kunst, håndtverk, media",
+    "Kunst, håndverk og media",
+    "Kurs",
+    "Lagt til rette for MMNF",
+    "Leie av lastesykkel",
+    "Leksegruppe",
+    "Litteratur/litteraturformidling",
+    "LIvsnøytral seremonirom",
+    "Lokale aktiviteter-idrett-kultur",
+    "Lokalmat",
+    "Makeup & Hundpleie",
+    "Malegruppe",
+    "Marked",
+    "Matlaging",
+    "Menigheter og trosamfunn",
+    "Menigheter og trossamfunn",
+    "Meningheter og trossamfunn",
+    "Mini",
+    "Mobilitet",
+    "Museum",
+    "Musikk",
+    "Musikk / Korps",
+    "Møte",
+    "Møte/presentasjon",
+    "Møteaktivitet",
+    "Møteplass",
+    "Møter",
+    "Møterom",
+    "Møtevirksomhet",
+    "Naturskole",
+    "NRG",
+    "NTNU",
+    "Næring og kommersiell virksomhet",
+    "Off.arrangement",
+    "Organisering av aktivitetar",
+    "Overnatting",
+    "Pensjonistforening",
+    "Personlig markering",
+    "Politikk/valgdag",
+    "Politisk organisasjon",
+    "Presentasjoner",
+    "Privat arrangement",
+    "Privat/ lukket arrangement",
+    "Profilering",
+    "Promotering",
+    "PU/HU",
+    "Pub",
+    "Sameie",
+    "Samlinger",
+    "Samtaler",
+    "Selskapsarrangement",
+    "Seremonier",
+    "Sirkus",
+    "Sjøsport",
+    "Skole",
+    "Skular",
+    "Skule",
+    "Skule - oppvekst",
+    "Slettet/utgått",
+    "Små møter",
+    "Sommerleir",
+    "Sommerstengt - sommertrening",
+    "Sosiale møteplassar",
+    "Sosiale møteplasser",
+    "Spedbarnsgruppe",
+    "Speidar",
+    "Speidarar",
+    "Speider",
+    "Speider og friluftsliv",
+    "Spill",
+    "Sport og idrett",
+    "Språkcafé",
+    "Stand",
+    "Stand (2mx3m)",
+    "Stengt",
+    "Stengt pga ferie eller arrangement",
+    "Stengt pga vedlikehold/reperasjon av utstyr",
+    "Studiegrupper",
+    "Styremøter",
+    "Styrketrening",
+    "Sykehjem",
+    "Søndagskafé",
+    "Teater",
+    "Teater og scenekunst",
+    "Teaterforestilling",
+    "Teltplass",
+    "Tiden er ledig. Sykkelen reserveres fra forrige ledige torsdag.",
+    "Tivoli",
+    "Torg",
+    "Transporthjelp",
+    "Treklang",
+    "Trim",
+    "Tur",
+    "Turar",
+    "Turgruppe",
+    "Undervisning",
+    "Undervisning/opplæring",
+    "Ungdomsklubb",
+    "Utenlandsk forening",
+    "Uteområde",
+    "Utlånsordningen er ikke åpen",
+    "Utstilling",
+    "Valg",
+    "Vannsport",
+    "Vedlikehold",
+    "Vennelag/gruppe",
+    "VGS",
+    "VID",
+    "Video",
+    "Vielser",
+    "Voksenopplæringssenteret",
+    "Walk and talk - test",
+    "X Annet",
+    "Åpen hall",
+    "Åpne møter",
+    "Øvingslokaler og verksteder",
+    "Øvingsrom"
+  ]
+}
