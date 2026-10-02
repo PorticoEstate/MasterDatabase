@@ -25,9 +25,10 @@ Bruk (tre kommandoer, ingen av dem gjør noe før den tredje):
 
 Se etl/README.md for full forklaring.
 
-Hver kjøring registrerer Kartverkets svar (ett oppslag per adresse) som ett
-kildeuttrekk, og alle avvik - ingen eller flere treff, API-feil, avvikende
-kommunenummer og databasefeil - peker dit via synk_avvik.
+Hver kjøring registrerer et kildeuttrekk (metadata, ikke hele svaret). Hvert
+geokodingsavvik - ingen eller flere treff, API-feil, avvikende kommunenummer,
+databasefeil - lagrer selve oppslaget og Kartverkets svar direkte på avviket
+(synk_avvik.rapost), uavhengig av hvor lenge kildeuttrekket beholdes.
 
 Prinsipp: ett eksakt treff brukes. Null treff eller flere enn ett treff
 logges som avvik og gjettes IKKE på - et geokodet punkt som er feil er verre
@@ -77,24 +78,29 @@ def q_json(obj) -> str:
     return q(tekst) + "::jsonb"
 
 
-def logg(adresse_id, avvikstype, detalj) -> str:
+def logg(adresse_id, avvikstype, detalj, rapost=None) -> str:
+    """rapost er oppslaget og Kartverkets svar for nettopp denne adressen -
+    lagres direkte på avviket, ikke i et delt kildeuttrekk."""
+    rapost_sql = q_json(rapost) if rapost is not None else "NULL"
     return (f"CALL logg_avvik('kartverket-adresse','adresse',{q(avvikstype)},{q(adresse_id)},"
-            f"{q(detalj)},NULL,'adresse_id');\n")
+            f"{q(detalj)},NULL,'adresse_id',{rapost_sql});\n")
 
 
-def i_blokk(adresse_id, sql) -> str:
+def i_blokk(adresse_id, sql, rapost=None) -> str:
     """Én DO-blokk per adresse: feiler en UPDATE i databasen, rulles bare den
     adressen tilbake og feilen loggføres som db_feil."""
+    rapost_sql = q_json(rapost) if rapost is not None else "NULL"
     return ("DO $blk$ BEGIN\n" + sql + "EXCEPTION WHEN OTHERS THEN\n"
             f"CALL logg_avvik('kartverket-adresse','adresse','db_feil',{q(adresse_id)},"
-            "SQLSTATE || ': ' || SQLERRM,NULL,'adresse_id');\nEND $blk$;\n")
+            f"SQLSTATE || ': ' || SQLERRM,NULL,'adresse_id',{rapost_sql});\nEND $blk$;\n")
 
 
 def main():
-    # SQL samles i minnet fordi kildeuttrekket (med alle oppslagene) må stå
-    # først i filen, men først er kjent når alle adressene er slått opp.
-    kropp = []
-    oppslag = []
+    out = sys.stdout
+    # Trenger ikke lenger vente til alle adressene er slått opp: payload=NULL,
+    # så registreringen kan skje først igjen, slik FK-en krever.
+    out.write("BEGIN;\n\n")
+    out.write(f"CALL registrer_kildeuttrekk('kartverket-adresse',{q(API)},NULL,NULL);\n\n")
     antall_ok = antall_feilet = antall_mismatch = 0
 
     for rad in sys.stdin:
@@ -112,23 +118,22 @@ def main():
         print(f"geokoder [{adresse_id}] {adressetekst!r} ({postnummer or '?'})...", file=sys.stderr)
         post = {"adresse_id": adresse_id, "sok": adressetekst, "postnummer": postnummer or None,
                 "forventet_kommunenr": forventet_kommunenr or None}
-        oppslag.append(post)
 
         try:
             treff, alle_treff = sok_adresse(adressetekst, postnummer or None)
             post["svar"] = alle_treff
         except Exception as e:
             post["svar"] = {"feil": f"{type(e).__name__}: {str(e)[:200]}"}
-            kropp.append(logg(adresse_id, "geokoding_feilet", "API-kall feilet: " + str(e)[:200])
-                         + f"UPDATE adresse SET geokoding='feilet' WHERE id={int(adresse_id)};\n")
+            out.write(logg(adresse_id, "geokoding_feilet", "API-kall feilet: " + str(e)[:200], rapost=post)
+                       + f"UPDATE adresse SET geokoding='feilet' WHERE id={int(adresse_id)};\n")
             antall_feilet += 1
             time.sleep(0.2)
             continue
 
         if len(treff) != 1:
             grunn = "ingen treff" if not treff else f"{len(treff)} treff, ingen valgt automatisk"
-            kropp.append(logg(adresse_id, "geokoding_feilet", grunn + " for " + adressetekst)
-                         + f"UPDATE adresse SET geokoding='feilet' WHERE id={int(adresse_id)};\n")
+            out.write(logg(adresse_id, "geokoding_feilet", grunn + " for " + adressetekst, rapost=post)
+                       + f"UPDATE adresse SET geokoding='feilet' WHERE id={int(adresse_id)};\n")
             antall_feilet += 1
             time.sleep(0.2)
             continue
@@ -163,17 +168,13 @@ def main():
             # oppslag. Dette er nettopp scenarioet der en instans kan tenkes
             # å betjene en annen kommune enn vi antok.
             sql += logg(adresse_id, "annet",
-                        f"Geokodet kommunenr {funnet_kommunenr} stemmer ikke med antatt {forventet_kommunenr}")
+                        f"Geokodet kommunenr {funnet_kommunenr} stemmer ikke med antatt {forventet_kommunenr}",
+                        rapost=post)
             antall_mismatch += 1
 
-        kropp.append(i_blokk(adresse_id, sql))
+        out.write(i_blokk(adresse_id, sql, rapost=post))
         time.sleep(0.2)
 
-    out = sys.stdout
-    out.write("BEGIN;\n\n")
-    out.write(f"CALL registrer_kildeuttrekk('kartverket-adresse',{q(API)},NULL,"
-              f"{q_json({'adresse': oppslag})});\n\n")
-    out.writelines(kropp)
     out.write("\nDO $$ BEGIN PERFORM rydd_kildeuttrekk('kartverket-adresse'); END $$;\n")
     out.write("COMMIT;\n")
     print(f"\ngeokodet: {antall_ok}, feilet: {antall_feilet}, kommune-mismatch: {antall_mismatch}",

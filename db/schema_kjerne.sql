@@ -448,8 +448,10 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 -- 8. Innlasting og sporbarhet
 -- =============================================================================
 
--- Rått JSON-svar, lagret før transformasjon. Gjør at en last kan kjøres om igjen
--- uten nye kall mot kommunens system.
+-- Metadata om én henting fra en kilde (kilde, endepunkt, tidspunkt,
+-- HTTP-status). payload er valgfri og brukes ikke lenger til å lagre hele
+-- kildens retur — den aktuelle posten bak et avvik lagres i stedet direkte på
+-- avviket selv (synk_avvik.rapost), se der for begrunnelse.
 CREATE TABLE IF NOT EXISTS kildeuttrekk
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -468,14 +470,16 @@ CREATE INDEX IF NOT EXISTS ix_kildeuttrekk_kilde ON kildeuttrekk (kilde, hentet_
 -- koblingsrader på ressurser som ikke finnes i uttrekket. De må filtreres bort,
 -- men skal loggføres — hvis andelen endrer seg, har noe skjedd hos kommunen.
 --
--- Hvert avvik peker på kildeuttrekket det oppstod i, slik at et menneske kan
--- se hele posten som feilet (se v_synk_avvik_detalj) og ikke bare en feiltekst.
--- RESTRICT, ikke CASCADE: et uttrekk med avvik skal ikke kunne slettes ved et
--- uhell og ta bevisene med seg.
+-- rapost er posten (eller postene) som utløste avviket, lagret direkte her av
+-- innlastingsskriptet idet avviket oppdages — ikke hele kildens retur lagret
+-- et annet sted og gravd ut igjen i ettertid. Det holder avviksbevis uavhengig
+-- av hvor lenge det tilhørende kildeuttrekket beholdes, og lar kildeuttrekk
+-- forbli ren metadata. SET NULL, ikke RESTRICT: et gammelt uttrekk skal kunne
+-- ryddes bort uten at det blokkeres av avvik som uansett bærer sitt eget bevis.
 CREATE TABLE IF NOT EXISTS synk_avvik
 (
     id               BIGSERIAL PRIMARY KEY,
-    kildeuttrekk_id  BIGINT REFERENCES kildeuttrekk(id) ON DELETE RESTRICT,
+    kildeuttrekk_id  BIGINT REFERENCES kildeuttrekk(id) ON DELETE SET NULL,
     kilde            TEXT NOT NULL,
     samling          TEXT NOT NULL,
     avvikstype       TEXT NOT NULL CHECK (avvikstype IN
@@ -485,11 +489,12 @@ CREATE TABLE IF NOT EXISTS synk_avvik
     -- Feltet i posten som var galt (f.eks. 'zip_code'). NULL når hele posten er
     -- problemet.
     felt             TEXT,
-    -- Hvilket felt i posten i payload->samling som ekstern_id er verdien av.
-    -- 'id' for bygg og ressurser; 'resource_id' / 'building_id' for
-    -- koblingsradene, som ikke har noen egen id.
+    -- Hvilket felt i rapost som ekstern_id er verdien av. 'id' for bygg og
+    -- ressurser; 'resource_id' / 'building_id' for koblingsradene, som ikke
+    -- har noen egen id.
     nokkelfelt       TEXT NOT NULL DEFAULT 'id',
     detalj           TEXT,
+    rapost           JSONB,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -516,20 +521,22 @@ $$;
 
 CREATE OR REPLACE PROCEDURE logg_avvik(
     p_kilde TEXT, p_samling TEXT, p_avvikstype TEXT, p_ekstern_id TEXT,
-    p_detalj TEXT, p_felt TEXT DEFAULT NULL, p_nokkelfelt TEXT DEFAULT 'id')
+    p_detalj TEXT, p_felt TEXT DEFAULT NULL, p_nokkelfelt TEXT DEFAULT 'id',
+    p_rapost JSONB DEFAULT NULL)
 LANGUAGE plpgsql AS $$
 BEGIN
     INSERT INTO synk_avvik (kildeuttrekk_id, kilde, samling, avvikstype,
-                            ekstern_id, felt, nokkelfelt, detalj)
+                            ekstern_id, felt, nokkelfelt, detalj, rapost)
     VALUES (NULLIF(current_setting('masterdb.kildeuttrekk_id', true), '')::bigint,
             p_kilde, p_samling, p_avvikstype, p_ekstern_id, p_felt,
-            p_nokkelfelt, p_detalj);
+            p_nokkelfelt, p_detalj, p_rapost);
 END;
 $$;
 
--- Beholder de p_behold nyeste uttrekkene per kilde, pluss alle uttrekk som har
--- minst ett avvik knyttet til seg. Returnerer antall slettede uttrekk.
--- p_kilde = NULL rydder alle kilder.
+-- Beholder de p_behold nyeste uttrekkene per kilde, uforbeholdent - bevis for
+-- avvik bor nå på selve avviket (synk_avvik.rapost), ikke i uttrekket, så
+-- rydding trenger ikke lenger ta hensyn til avvik. Returnerer antall slettede
+-- uttrekk. p_kilde = NULL rydder alle kilder.
 CREATE OR REPLACE FUNCTION rydd_kildeuttrekk(p_kilde TEXT DEFAULT NULL, p_behold INTEGER DEFAULT 2)
 RETURNS BIGINT LANGUAGE plpgsql AS $$
 DECLARE
@@ -537,7 +544,6 @@ DECLARE
 BEGIN
     DELETE FROM kildeuttrekk u
     WHERE (p_kilde IS NULL OR u.kilde = p_kilde)
-      AND NOT EXISTS (SELECT 1 FROM synk_avvik a WHERE a.kildeuttrekk_id = u.id)
       AND u.id NOT IN (SELECT n.id
                          FROM (SELECT id, row_number() OVER (
                                           PARTITION BY kilde ORDER BY hentet_at DESC, id DESC) AS rn
@@ -626,18 +632,13 @@ WHERE a.kildeuttrekk_id IN (
     FROM kildeuttrekk
     ORDER BY kilde, hentet_at DESC, id DESC);
 
--- Arbeidslisten for den som går gjennom avvik: avviket sammen med posten i det
--- rå svaret som det gjelder. "post" er bare den relevante posten (eller
--- postene, ved koblingsrader), ikke hele svaret.
+-- Arbeidslisten for den som går gjennom avvik: avviket sammen med posten som
+-- utløste det. "post" er rapost, lagret direkte på avviket idet det oppstod -
+-- krever ikke lenger at kildeuttrekket det skjedde i fortsatt finnes.
 CREATE OR REPLACE VIEW v_synk_avvik_detalj AS
 SELECT a.id AS avvik_id, a.kilde, a.samling, a.avvikstype, a.ekstern_id, a.felt,
-       a.detalj, a.created_at, u.id AS kildeuttrekk_id, u.endepunkt, u.hentet_at,
-       CASE WHEN jsonb_typeof(u.payload -> a.samling) = 'array'
-            THEN (SELECT jsonb_agg(e)
-                    FROM jsonb_array_elements(u.payload -> a.samling) e
-                   WHERE e ->> a.nokkelfelt = a.ekstern_id)
-            ELSE u.payload
-       END AS post
+       a.detalj, a.rapost AS post, a.created_at,
+       u.id AS kildeuttrekk_id, u.endepunkt, u.hentet_at
 FROM synk_avvik a
 LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 

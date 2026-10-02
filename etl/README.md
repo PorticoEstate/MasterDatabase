@@ -66,11 +66,12 @@ ikke. Se db/schema_kjerne_dokumentasjon.md for detaljene.
 
 ## Avvik og kildeuttrekk
 
-Hver kjøring lagrer først det rå svaret fra kilden i `kildeuttrekk` (uten
-`organizations` og andre personopplysninger), og alt som ikke lar seg laste
-loggføres i `synk_avvik` med peker til det uttrekket: ugyldige verdier,
-koblinger til noe som ikke finnes i uttrekket, databasefeil og feilet henting.
-En enkelt dårlig post stopper aldri hele lasten.
+Hver kjøring registrerer et `kildeuttrekk` (kilde, endepunkt, tidspunkt,
+HTTP-status - ikke hele svaret fra kilden). Alt som ikke lar seg laste
+loggføres i `synk_avvik` sammen med selve posten som feilet (`rapost`, renset
+for personopplysninger som `organizations` og andre persondatafelt): ugyldige
+verdier, koblinger til noe som ikke finnes i uttrekket, databasefeil og feilet
+henting. En enkelt dårlig post stopper aldri hele lasten.
 
 Gå gjennom avvikene fra siste kjøring slik:
 
@@ -81,12 +82,13 @@ docker exec portico_masterdb psql -U postgres -d masterdb -c "
     WHERE g.avvikstype <> 'manglende_forelder';"
 ```
 
-`post` er selve posten fra kilden som feilet. De to nyeste uttrekkene per kilde
-beholdes, pluss alle som har avvik knyttet til seg.
+`post` er selve posten fra kilden som feilet, lagret direkte på avviket. De to
+nyeste uttrekkene per kilde beholdes, uforbeholdent - bevis for et avvik ligger
+på avviket selv, ikke i uttrekket, så gammel metadata kan ryddes trygt bort.
 
 ## Geokoding
 
-`geokod.py` fyller `adresse.posisjon` og `bygning.posisjon` fra Kartverkets åpne Adresse-API. Kartverkets svar for hver adresse lagres som ett `kildeuttrekk`, og geokodingsavvik peker dit. Leser en enkel liste fra standard-inn, skriver SQL til standard-ut - samme mønster som `last_inn.py`, ingen ekstra Python-pakker.
+`geokod.py` fyller `adresse.posisjon` og `bygning.posisjon` fra Kartverkets åpne Adresse-API. Hvert geokodingsavvik lagrer oppslaget og Kartverkets svar direkte på avviket (`rapost`). Leser en enkel liste fra standard-inn, skriver SQL til standard-ut - samme mønster som `last_inn.py`, ingen ekstra Python-pakker.
 
 ```bash
 docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "

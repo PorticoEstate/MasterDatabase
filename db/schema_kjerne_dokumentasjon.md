@@ -170,13 +170,11 @@ En vanlig fremmednøkkel på `bygning_id` alene ville bare sjekket at bygget fin
 
 ### Innlasting og sporbarhet
 
-**`kildeuttrekk`** — rått JSON-svar fra kilden, ett per kommune per kjøring av `last_inn.py` og ett per kjøring av `geokod.py` (Kartverkets svar for hver adresse). Registreres som første setning i hver SQL-fil, før noe er tolket.
+**`kildeuttrekk`** — metadata om én henting fra en kilde: `kilde`, `endepunkt`, `hentet_at`, `http_status`. Ett per kommune per kjøring av `last_inn.py` og ett per kjøring av `geokod.py`. Registreres som første setning i hver SQL-fil, før noe er tolket. `payload` lagrer **ikke** hele kildens retur — se begrunnelsen under `synk_avvik`.
 
-Uttrekket er **renset for personopplysninger** før det lagres: bare samlingene innlastingen leser tas med (`organizations` er utelatt), og feltene `tilsyn_*`, `contact_info`, `json_representation` og `organizations_ids` fjernes fra postene. Se «Personvern».
+Beholdning: de to nyeste uttrekkene per kilde, uforbeholdent. `rydd_kildeuttrekk(kilde, antall)` kalles automatisk på slutten av hver last.
 
-Beholdning: de to nyeste uttrekkene per kilde, pluss alle uttrekk som har minst ett avvik knyttet til seg. `rydd_kildeuttrekk(kilde, antall)` kalles automatisk på slutten av hver last. Siden de fleste kjøringer logger *noen* avvik, blir i praksis nesten alle uttrekk stående til avvikene slettes — ryddingen gir først effekt for kilder uten avvik.
-
-**`synk_avvik`** — hver rad er én ting som ikke lot seg laste, med peker til uttrekket den oppstod i (`kildeuttrekk_id`), hvilket felt det gjaldt (`felt`) og hvilket felt i posten `ekstern_id` er verdien av (`nokkelfelt`). Typene:
+**`synk_avvik`** — hver rad er én ting som ikke lot seg laste, sammen med **selve posten som utløste det** (`rapost`, renset for personopplysninger - se «Personvern»), hvilket felt det gjaldt (`felt`) og hvilket felt i `rapost` som `ekstern_id` er verdien av (`nokkelfelt`). `kildeuttrekk_id` peker til uttrekket avviket oppstod i, men er bare til orientering (`endepunkt`/`hentet_at`) — selve beviset ligger i `rapost`, ikke i det uttrekket. Det er derfor FK-en er `ON DELETE SET NULL`: et gammelt uttrekk kan ryddes bort uten at avviksbeviset forsvinner med det. Typene:
 
 | `avvikstype` | Når |
 |---|---|
@@ -187,7 +185,7 @@ Beholdning: de to nyeste uttrekkene per kilde, pluss alle uttrekk som har minst 
 | `annet` | Bl.a. at henting fra kilden feilet, eller at geokodet kommunenummer avviker fra antatt. |
 | `ikke_kartlagt` | Reservert; ukartlagte koder vises i dag i `v_ukartlagte_kildekoder`. |
 
-Mekanikken: skriptene skriver bare SQL og kjenner ikke id-en til uttrekket de oppretter. Første setning, `CALL registrer_kildeuttrekk(...)`, setter derfor id-en i en transaksjonslokal innstilling (`masterdb.kildeuttrekk_id`), og `CALL logg_avvik(...)` henter den derfra. Hver bygning/adresse, hver ressurs og hver geokodet adresse kjøres i sin egen `DO`-blokk med `EXCEPTION`-håndtering, som er det som gjør at én dårlig post ikke stopper hele transaksjonen.
+Mekanikken: skriptene skriver bare SQL og kjenner ikke id-en til uttrekket de oppretter. Første setning, `CALL registrer_kildeuttrekk(...)`, setter derfor id-en i en transaksjonslokal innstilling (`masterdb.kildeuttrekk_id`), og `CALL logg_avvik(...)` henter den derfra. Hver bygning/adresse, hver ressurs og hver geokodet adresse kjøres i sin egen `DO`-blokk med `EXCEPTION`-håndtering, som er det som gjør at én dårlig post ikke stopper hele transaksjonen. Python-skriptet har posten i minnet akkurat når avviket oppdages, og sender den rett med i `logg_avvik`-kallet som `rapost` — databasen trenger aldri grave den ut igjen av et lagret svar.
 
 Til å lese avvik finnes to visninger (se «Visningene»).
 
@@ -207,7 +205,7 @@ En **view** er en lagret spørring som oppfører seg som en tabell. Den lagrer i
 
 **`v_synk_avvik_gjeldende`** — avvikene fra den siste kjøringen per kilde. Eldre avvik ligger i `synk_avvik` som historikk, men regnes ikke som åpne: finnes feilen fortsatt, er den logget på nytt i nyeste kjøring.
 
-**`v_synk_avvik_detalj`** — avviket sammen med posten det gjelder, hentet ut av det lagrede svaret. Dette er visningen for den som går gjennom avviksslisten:
+**`v_synk_avvik_detalj`** — avviket sammen med posten det gjelder (`rapost`, lagret direkte på avviket - se «Innlasting og sporbarhet»). Dette er visningen for den som går gjennom avviksslisten:
 
 ```sql
 SELECT avvik_id, samling, avvikstype, felt, detalj, jsonb_pretty(post)
@@ -215,7 +213,7 @@ FROM v_synk_avvik_detalj
 WHERE avvikstype = 'ugyldig_verdi';
 ```
 
-`post` er bare den relevante posten (eller postene, for koblingsrader) — ikke hele svaret. For geokodingsavvik er det Kartverkets svar for adressen.
+`post` er bare den relevante posten (eller postene, for koblingsrader) — ikke hele svaret, og krever ikke at det tilhørende `kildeuttrekk` fortsatt finnes. For geokodingsavvik er det Kartverkets svar for adressen.
 
 ---
 
@@ -223,9 +221,9 @@ WHERE avvikstype = 'ugyldig_verdi';
 
 `searchdataall` returnerer en `organizations`-samling med 5 906 rader. En betydelig andel er **privatpersoner**: personnavn i navnefeltet, tomt organisasjonsnummer, privat mobil, privat e-post og hjemmeadresse.
 
-Samlingen lastes ikke. Det finnes ingen tabell for den, og det er bevisst. Søket beskriver lokaler, ikke søkere. Den lagres heller ikke i `kildeuttrekk`: det rå svaret filtreres først (se `rens_uttrekk` i `etl/last_inn.py`), slik at personopplysningene ikke havner i basen via avviksloggen.
+Samlingen lastes ikke. Det finnes ingen tabell for den, og det er bevisst. Søket beskriver lokaler, ikke søkere. Den brukes heller aldri av innlastingsskriptet, og havner derfor aldri i en `rapost` på et avvik.
 
-Tilsvarende utelates `buildings.tilsyn_name`, `tilsyn_phone`, `tilsyn_email` med `*2`-variantene, som er navngitte kontaktpersoner, og `resources.contact_info`, som er fritekst og kan inneholde navn.
+Tilsvarende utelates `buildings.tilsyn_name`, `tilsyn_phone`, `tilsyn_email` med `*2`-variantene, som er navngitte kontaktpersoner, og `resources.contact_info`, som er fritekst og kan inneholde navn: `rens_post()` i `etl/last_inn.py` fjerner disse feltene fra enhver post før den limes inn som `rapost`, slik at personopplysningene ikke havner i basen via avviksloggen.
 
 > Behandlingsgrunnlag og vurdering av om `organizations` bør ligge på et uautentisert endepunkt, må avklares med Capgeminis Data Privacy Officer og med kommunene som behandlingsansvarlige. Dokumentet tar ikke stilling til det rettslige spørsmålet.
 

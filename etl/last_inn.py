@@ -16,10 +16,11 @@ Bruk:
 
 Se etl/README.md for full forklaring.
 
-Hver kjøring registrerer først det rå svaret (renset for personopplysninger)
-i kildeuttrekk, og alle avvik som oppstår - ugyldige verdier, brutte
-referanser og databasefeil - loggføres i synk_avvik med peker til det
-uttrekket. Se db/schema_kjerne_dokumentasjon.md, "Innlasting og sporbarhet".
+Hver kjøring registrerer et kildeuttrekk (metadata: kilde, endepunkt,
+tidspunkt, HTTP-status - ikke hele svaret). Ethvert avvik - ugyldige verdier,
+brutte referanser, databasefeil - loggføres i synk_avvik sammen med den
+konkrete posten (renset for personopplysninger) som utløste det, ikke bare en
+feiltekst. Se db/schema_kjerne_dokumentasjon.md, "Innlasting og sporbarhet".
 
 Kjent forenkling: kommune_id settes her fra hvilken Aktiv kommune-instans
 ressursen kommer fra (f.eks. "bergen" -> kommunenr 4601). Det er riktig for
@@ -177,26 +178,20 @@ AKTIVITET = {
 }
 
 
-# Samlinger fra searchdataall som lastes. Alt annet - først og fremst
-# "organizations" (privatpersoner) - tas aldri med i det rå uttrekket som
-# lagres i kildeuttrekk.
-LAGRES_I_UTTREKK = (
-    "activities", "buildings", "building_resources", "facilities", "resources",
-    "resource_activities", "resource_facilities", "resource_categories", "towns",
-)
-
-
 def er_persondatafelt(felt: str) -> bool:
     """Felt som kan inneholde navngitte personer (tilsynsperson, kontaktinfo-
     fritekst) eller en kopi av dem (json_representation), og som derfor ikke
-    lagres i kildeuttrekk. Se "Personvern" i db/schema_kjerne_dokumentasjon.md."""
+    tas med i en post som lagres som rapost på et avvik. "organizations"
+    (privatpersoner som søkere) brukes aldri i det hele tatt av dette
+    skriptet. Se "Personvern" i db/schema_kjerne_dokumentasjon.md."""
     return felt.startswith("tilsyn") or felt in ("contact_info", "json_representation",
                                                 "organizations_ids")
 
 
-def rens_uttrekk(d: dict) -> dict:
-    return {samling: [{k: v for k, v in rad.items() if not er_persondatafelt(k)} for rad in d[samling]]
-            for samling in LAGRES_I_UTTREKK if isinstance(d.get(samling), list)}
+def rens_post(d: dict) -> dict:
+    """Fjerner persondatafelt fra én enkelt post før den limes inn som rapost
+    på et avvik - se er_persondatafelt."""
+    return {k: v for k, v in d.items() if not er_persondatafelt(k)}
 
 
 def hent_json(url: str) -> tuple[int, dict]:
@@ -248,21 +243,25 @@ def q_json(obj) -> str:
     return q(tekst) + "::jsonb"
 
 
-def logg(kn, samling, avvikstype, ekstern_id, detalj, felt=None, nokkelfelt="id") -> str:
+def logg(kn, samling, avvikstype, ekstern_id, detalj, felt=None, nokkelfelt="id", rapost=None) -> str:
     """Setning som loggfører et avvik mot kildeuttrekket som er registrert
-    først i samme transaksjon (se registrer_kildeuttrekk i schema_kjerne.sql)."""
+    først i samme transaksjon (se registrer_kildeuttrekk i schema_kjerne.sql).
+    rapost er posten som utløste avviket - lagres direkte på avviket (renset
+    for personopplysninger), ikke i et delt uttrekk som må graves ut igjen."""
+    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
     return (f"CALL logg_avvik({q(kn)},{q(samling)},{q(avvikstype)},{q(ekstern_id)},"
-            f"{q(detalj)},{q(felt)},{q(nokkelfelt)});\n")
+            f"{q(detalj)},{q(felt)},{q(nokkelfelt)},{rapost_sql});\n")
 
 
-def i_blokk(kn, samling, ekstern_id, sql) -> str:
+def i_blokk(kn, samling, ekstern_id, sql, rapost=None) -> str:
     """Pakker setningene for én post i en DO-blokk. Feiler noe i databasen
     (f.eks. et CHECK-brudd vi ikke har forutsett), rulles bare denne posten
     tilbake og feilen loggføres som db_feil - resten av lasten fortsetter i
     stedet for at hele transaksjonen stopper."""
+    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
     return ("DO $blk$ BEGIN\n" + sql + "EXCEPTION WHEN OTHERS THEN\n"
             f"CALL logg_avvik({q(kn)},{q(samling)},'db_feil',{q(ekstern_id)},"
-            "SQLSTATE || ': ' || SQLERRM,NULL,'id');\nEND $blk$;\n")
+            f"SQLSTATE || ': ' || SQLERRM,NULL,'id',{rapost_sql});\nEND $blk$;\n")
 
 
 def som_heltall(v):
@@ -302,7 +301,9 @@ def generer_sql(slug: str, ut) -> bool:
 
     w("BEGIN;\n\n")
     # Må være første setning: alle avvik under henter uttrekk-id-en herfra.
-    w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status},{q_json(rens_uttrekk(d))},{q(hentet)});\n\n")
+    # payload=NULL: hele svaret lagres ikke lenger - se kommentar ved
+    # kildeuttrekk i schema_kjerne.sql.
+    w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status},NULL,{q(hentet)});\n\n")
 
     w(f"-- {knavn}\n")
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
@@ -326,7 +327,7 @@ def generer_sql(slug: str, ut) -> bool:
     ]:
         for rad in d.get(samling, []):
             if rad.get("id") is None:
-                w(logg(kn, samling, "ugyldig_verdi", None, "posten mangler id", "id"))
+                w(logg(kn, samling, "ugyldig_verdi", None, "posten mangler id", "id", rapost=rad))
                 continue
             navn = rens(rad.get("name"))
             if not navn:
@@ -357,11 +358,12 @@ def generer_sql(slug: str, ut) -> bool:
     bydel_per_bygg = {t["b_id"]: rens(t["name"]) for t in d.get("towns", [])}
     for b in d.get("buildings", []):
         if b.get("id") is None:
-            w(logg(kn, "buildings", "ugyldig_verdi", None, "posten mangler id", "id"))
+            w(logg(kn, "buildings", "ugyldig_verdi", None, "posten mangler id", "id", rapost=b))
             continue
         navn = rens(b.get("name"))
         if not navn:
-            w(logg(kn, "buildings", "ugyldig_verdi", b["id"], "name er tomt; erstattet med plassholder", "name"))
+            w(logg(kn, "buildings", "ugyldig_verdi", b["id"], "name er tomt; erstattet med plassholder",
+                   "name", rapost=b))
             navn = f"Bygg {b['id']}"
 
         # Mykt avvik: feltet settes til NULL, resten av raden lastes.
@@ -370,7 +372,7 @@ def generer_sql(slug: str, ut) -> bool:
         avvik = ""
         if postnr and not re.fullmatch(r"[0-9]{4}", postnr):
             avvik = logg(kn, "buildings", "ugyldig_verdi", b["id"],
-                         "zip_code er ikke fire siffer: " + postnr[:60], "zip_code")
+                         "zip_code er ikke fire siffer: " + postnr[:60], "zip_code", rapost=b)
             postnr = None
 
         # Kildedata gir ikke gatenavn og husnummer separat, bare hele
@@ -404,7 +406,7 @@ def generer_sql(slug: str, ut) -> bool:
                 f"poststed=EXCLUDED.poststed WHERE adresse.geokoding IN ('ukjent','feilet');\n"
             )
         w(avvik)
-        w(i_blokk(kn, "buildings", b["id"], sql))
+        w(i_blokk(kn, "buildings", b["id"], sql, rapost=b))
     w("\n")
 
     # --- ressurser ---
@@ -416,11 +418,12 @@ def generer_sql(slug: str, ut) -> bool:
 
     for r in d.get("resources", []):
         if r.get("id") is None:
-            w(logg(kn, "resources", "ugyldig_verdi", None, "posten mangler id", "id"))
+            w(logg(kn, "resources", "ugyldig_verdi", None, "posten mangler id", "id", rapost=r))
             continue
         navn = rens(r.get("name"))
         if not navn:
-            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "name er tomt; erstattet med plassholder", "name"))
+            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "name er tomt; erstattet med plassholder",
+                   "name", rapost=r))
             navn = f"Ressurs {r['id']}"
         beskr = None
         try:
@@ -431,7 +434,7 @@ def generer_sql(slug: str, ut) -> bool:
         bid = bygg_for_ressurs.get(r["id"])
         kap, kap_feil = som_heltall(r.get("capacity"))
         if kap_feil:
-            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "capacity " + kap_feil, "capacity"))
+            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "capacity " + kap_feil, "capacity", rapost=r))
         bookbar = "FALSE" if r.get("deactivate_application") else "TRUE"
         aktiv = "TRUE" if r.get("active") else "FALSE"
 
@@ -461,7 +464,7 @@ def generer_sql(slug: str, ut) -> bool:
             f"kapasitet_kilde=CASE WHEN ressurs.kapasitet_kilde IN ('manuell','utledet') "
             f"THEN ressurs.kapasitet_kilde ELSE EXCLUDED.kapasitet_kilde END;\n"
         )
-        w(i_blokk(kn, "resources", r["id"], sql))
+        w(i_blokk(kn, "resources", r["id"], sql, rapost=r))
     w("\n")
 
     # --- koblinger, med avviksloggføring for brutte referanser ---
@@ -477,7 +480,7 @@ def generer_sql(slug: str, ut) -> bool:
         for rad in d.get(samling, []):
             if rad["resource_id"] not in kjente_ressurser:
                 w(logg(kn, samling, "manglende_forelder", rad["resource_id"],
-                       "resource_id finnes ikke i uttrekket", "resource_id", "resource_id"))
+                       "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=rad))
                 continue
             w(f"INSERT INTO {koblingstabell} (ressurs_id,{maalkol}) "
               f"SELECT r.id,m.{maalkol} "
@@ -492,12 +495,12 @@ def generer_sql(slug: str, ut) -> bool:
     for br in d.get("building_resources", []):
         if br["building_id"] not in kjente_bygg:
             w(logg(kn, "building_resources", "manglende_forelder", br["building_id"],
-                   "building_id finnes ikke i uttrekket", "building_id", "building_id"))
+                   "building_id finnes ikke i uttrekket", "building_id", "building_id", rapost=br))
         if br["resource_id"] not in kjente_ressurser:
             w(logg(kn, "building_resources", "manglende_forelder", br["resource_id"],
-                   "resource_id finnes ikke i uttrekket", "resource_id", "resource_id"))
+                   "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=br))
 
-    # Beholder de to siste uttrekkene per kilde pluss alle med avvik.
+    # Beholder de to siste uttrekkene per kilde, uforbeholdent.
     w(f"\nDO $$ BEGIN PERFORM rydd_kildeuttrekk({q(kn)}); END $$;\n")
     w("COMMIT;\n")
     print(f"  {len(d.get('buildings', []))} bygg, {len(d.get('resources', []))} ressurser", file=sys.stderr)
