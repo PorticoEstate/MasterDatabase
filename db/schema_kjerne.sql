@@ -20,6 +20,11 @@
 -- de grove rektangelsøkene en vanlig indeks på (lon, lat) er begrenset til.
 
 CREATE EXTENSION IF NOT EXISTS postgis;
+-- Trigram-indeks på ressurs.navn: dekker det sokevektor (se der) ikke kan,
+-- siden norsk er et sammensatt-ord-språk og Postgres' innebygde stemmer ikke
+-- splitter dem - "svømme" stammer ikke til samme rot som "svømmebasseng".
+-- Trigram gir substreng-/fuzzy-treff uavhengig av ord-grenser.
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 
 CREATE OR REPLACE FUNCTION sett_updated_at()
@@ -418,6 +423,9 @@ CREATE TABLE IF NOT EXISTS ressurs
 CREATE INDEX IF NOT EXISTS ix_ressurs_kommune ON ressurs (kommune_id);
 CREATE INDEX IF NOT EXISTS ix_ressurs_bygning ON ressurs (bygning_id);
 CREATE INDEX IF NOT EXISTS ix_ressurs_sokevektor ON ressurs USING GIN (sokevektor);
+-- Trigram-indeks på navn, for substreng-/fuzzy-søk som sokevektor ikke
+-- fanger opp (sammensatte ord, stavefeil) - se kommentar ved pg_trgm over.
+CREATE INDEX IF NOT EXISTS ix_ressurs_navn_trgm ON ressurs USING GIN (navn gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS ix_ressurs_sok
     ON ressurs (lokaletype_id, kommune_id) WHERE aktiv AND bookbar;
 
@@ -444,8 +452,10 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 -- 9. Innlasting og sporbarhet
 -- =============================================================================
 
--- Rått JSON-svar, lagret før transformasjon. Gjør at en last kan kjøres om igjen
--- uten nye kall mot kommunens system.
+-- Metadata om én henting fra en kilde (kilde, endepunkt, tidspunkt,
+-- HTTP-status). payload er valgfri og brukes ikke lenger til å lagre hele
+-- kildens retur — den aktuelle posten bak et avvik lagres i stedet direkte på
+-- avviket selv (synk_avvik.rapost), se der for begrunnelse.
 CREATE TABLE IF NOT EXISTS kildeuttrekk
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -463,21 +473,90 @@ CREATE INDEX IF NOT EXISTS ix_kildeuttrekk_kilde ON kildeuttrekk (kilde, hentet_
 -- mens bygg- og ressurslistene er filtrert. I Bergen peker 388 av 980
 -- koblingsrader på ressurser som ikke finnes i uttrekket. De må filtreres bort,
 -- men skal loggføres — hvis andelen endrer seg, har noe skjedd hos kommunen.
+--
+-- rapost er posten (eller postene) som utløste avviket, lagret direkte her av
+-- innlastingsskriptet idet avviket oppdages — ikke hele kildens retur lagret
+-- et annet sted og gravd ut igjen i ettertid. Det holder avviksbevis uavhengig
+-- av hvor lenge det tilhørende kildeuttrekket beholdes, og lar kildeuttrekk
+-- forbli ren metadata. SET NULL, ikke RESTRICT: et gammelt uttrekk skal kunne
+-- ryddes bort uten at det blokkeres av avvik som uansett bærer sitt eget bevis.
 CREATE TABLE IF NOT EXISTS synk_avvik
 (
     id               BIGSERIAL PRIMARY KEY,
-    kildeuttrekk_id  BIGINT REFERENCES kildeuttrekk(id) ON DELETE CASCADE,
+    kildeuttrekk_id  BIGINT REFERENCES kildeuttrekk(id) ON DELETE SET NULL,
     kilde            TEXT NOT NULL,
     samling          TEXT NOT NULL,
     avvikstype       TEXT NOT NULL CHECK (avvikstype IN
                           ('manglende_forelder','ikke_kartlagt','geokoding_feilet',
-                           'ugyldig_verdi','annet')),
+                           'ugyldig_verdi','db_feil','annet')),
     ekstern_id       TEXT,
+    -- Feltet i posten som var galt (f.eks. 'zip_code'). NULL når hele posten er
+    -- problemet.
+    felt             TEXT,
+    -- Hvilket felt i rapost som ekstern_id er verdien av. 'id' for bygg og
+    -- ressurser; 'resource_id' / 'building_id' for koblingsradene, som ikke
+    -- har noen egen id.
+    nokkelfelt       TEXT NOT NULL DEFAULT 'id',
     detalj           TEXT,
+    rapost           JSONB,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS ix_synk_avvik_kilde ON synk_avvik (kilde, avvikstype);
+CREATE INDEX IF NOT EXISTS ix_synk_avvik_uttrekk ON synk_avvik (kildeuttrekk_id);
+
+-- Innlastingsskriptene skriver bare SQL og vet ikke hvilken id et uttrekk får.
+-- Derfor registrerer første setning i hver fil uttrekket og husker id-en i en
+-- transaksjonslokal innstilling, og alle avvik i samme transaksjon henter den
+-- derfra. Virker også inne i DO-blokker, der psql-variabler ikke kan brukes.
+CREATE OR REPLACE PROCEDURE registrer_kildeuttrekk(
+    p_kilde TEXT, p_endepunkt TEXT, p_http_status INTEGER, p_payload JSONB,
+    p_hentet_at TIMESTAMPTZ DEFAULT now())
+LANGUAGE plpgsql AS $$
+DECLARE
+    ny_id BIGINT;
+BEGIN
+    INSERT INTO kildeuttrekk (kilde, endepunkt, hentet_at, http_status, payload)
+    VALUES (p_kilde, p_endepunkt, p_hentet_at, p_http_status, p_payload)
+    RETURNING id INTO ny_id;
+    PERFORM set_config('masterdb.kildeuttrekk_id', ny_id::text, true);
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE logg_avvik(
+    p_kilde TEXT, p_samling TEXT, p_avvikstype TEXT, p_ekstern_id TEXT,
+    p_detalj TEXT, p_felt TEXT DEFAULT NULL, p_nokkelfelt TEXT DEFAULT 'id',
+    p_rapost JSONB DEFAULT NULL)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO synk_avvik (kildeuttrekk_id, kilde, samling, avvikstype,
+                            ekstern_id, felt, nokkelfelt, detalj, rapost)
+    VALUES (NULLIF(current_setting('masterdb.kildeuttrekk_id', true), '')::bigint,
+            p_kilde, p_samling, p_avvikstype, p_ekstern_id, p_felt,
+            p_nokkelfelt, p_detalj, p_rapost);
+END;
+$$;
+
+-- Beholder de p_behold nyeste uttrekkene per kilde, uforbeholdent - bevis for
+-- avvik bor nå på selve avviket (synk_avvik.rapost), ikke i uttrekket, så
+-- rydding trenger ikke lenger ta hensyn til avvik. Returnerer antall slettede
+-- uttrekk. p_kilde = NULL rydder alle kilder.
+CREATE OR REPLACE FUNCTION rydd_kildeuttrekk(p_kilde TEXT DEFAULT NULL, p_behold INTEGER DEFAULT 2)
+RETURNS BIGINT LANGUAGE plpgsql AS $$
+DECLARE
+    antall BIGINT;
+BEGIN
+    DELETE FROM kildeuttrekk u
+    WHERE (p_kilde IS NULL OR u.kilde = p_kilde)
+      AND u.id NOT IN (SELECT n.id
+                         FROM (SELECT id, row_number() OVER (
+                                          PARTITION BY kilde ORDER BY hentet_at DESC, id DESC) AS rn
+                                 FROM kildeuttrekk) n
+                        WHERE n.rn <= p_behold);
+    GET DIAGNOSTICS antall = ROW_COUNT;
+    RETURN antall;
+END;
+$$;
 
 
 -- =============================================================================
@@ -544,6 +623,27 @@ FROM kildekode kk
 JOIN fagsystem_instans fi ON fi.id = kk.fagsystem_instans_id
 LEFT JOIN kildekode_mapping m ON m.kildekode_id = kk.id
 WHERE m.id IS NULL OR m.status = 'foreslatt';
+
+-- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
+-- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
+-- finnes, er den logget på nytt i den nyeste kjøringen.
+CREATE OR REPLACE VIEW v_synk_avvik_gjeldende AS
+SELECT a.*
+FROM synk_avvik a
+WHERE a.kildeuttrekk_id IN (
+    SELECT DISTINCT ON (kilde) id
+    FROM kildeuttrekk
+    ORDER BY kilde, hentet_at DESC, id DESC);
+
+-- Arbeidslisten for den som går gjennom avvik: avviket sammen med posten som
+-- utløste det. "post" er rapost, lagret direkte på avviket idet det oppstod -
+-- krever ikke lenger at kildeuttrekket det skjedde i fortsatt finnes.
+CREATE OR REPLACE VIEW v_synk_avvik_detalj AS
+SELECT a.id AS avvik_id, a.kilde, a.samling, a.avvikstype, a.ekstern_id, a.felt,
+       a.detalj, a.rapost AS post, a.created_at,
+       u.id AS kildeuttrekk_id, u.endepunkt, u.hentet_at
+FROM synk_avvik a
+LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 
 
 -- =============================================================================

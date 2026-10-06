@@ -16,6 +16,12 @@ Bruk:
 
 Se etl/README.md for full forklaring.
 
+Hver kjøring registrerer et kildeuttrekk (metadata: kilde, endepunkt,
+tidspunkt, HTTP-status - ikke hele svaret). Ethvert avvik - ugyldige verdier,
+brutte referanser, databasefeil - loggføres i synk_avvik sammen med den
+konkrete posten (renset for personopplysninger) som utløste det, ikke bare en
+feiltekst. Se db/schema_kjerne_dokumentasjon.md, "Innlasting og sporbarhet".
+
 Kjent forenkling: kommune_id settes her fra hvilken Aktiv kommune-instans
 ressursen kommer fra (f.eks. "bergen" -> kommunenr 4601). Det er riktig for
 alle de 12 instansene vi kjenner i dag, som hver betjener nøyaktig én kommune.
@@ -28,7 +34,9 @@ import json
 import re
 import sys
 import unicodedata
+import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 
 KOMMUNER = {
     "bergen": ("4601", "Bergen", "Vestland"),
@@ -153,7 +161,7 @@ FASILITET = {
     "hc toalett": "HC_TOALETT", "teleslynge": "TELESLYNGE", "heis": "HEIS",
     "projektor": "PROSJEKTOR", "prosjektor": "PROSJEKTOR", "lydanlegg": "LYDANLEGG",
     "musikkanlegg m blatann": "LYDANLEGG", "mikrofon": "MIKROFON",
-    "flygel": "PIANO", "piano": "PIANO", "parkettgulv": "PARKETTGULV",
+    "flygel": "FLYGEL", "piano": "FLYGEL", "parkettgulv": "PARKETTGULV",
     "tribune": "TRIBUNE", "kiosk": "KIOSK", "kjokken": "KJOKKEN",
     "parkering": "PARKERING", "balpanne": "BAALPLASS", "whiteboard": "WHITEBOARD",
     "flomlys": "FLOMLYS", "wifi": "WIFI",
@@ -170,11 +178,34 @@ AKTIVITET = {
 }
 
 
-def hent_json(url: str) -> dict:
+def er_persondatafelt(felt: str) -> bool:
+    """Felt som kan inneholde navngitte personer (tilsynsperson, kontaktinfo-
+    fritekst) eller en kopi av dem (json_representation), og som derfor ikke
+    tas med i en post som lagres som rapost på et avvik. "organizations"
+    (privatpersoner som søkere) brukes aldri i det hele tatt av dette
+    skriptet. Se "Personvern" i db/schema_kjerne_dokumentasjon.md."""
+    return felt.startswith("tilsyn") or felt in ("contact_info", "json_representation",
+                                                "organizations_ids")
+
+
+def rens_post(d: dict) -> dict:
+    """Fjerner persondatafelt fra én enkelt post før den limes inn som rapost
+    på et avvik - se er_persondatafelt."""
+    return {k: v for k, v in d.items() if not er_persondatafelt(k)}
+
+
+def hent_json(url: str) -> tuple[int, dict]:
     """Henter JSON fra url med Pythons innebygde urllib. Krever at Capgeminis
-    CA-sertifikat er installert i systemets tillitslager (se etl/README.md)."""
-    with urllib.request.urlopen(url, timeout=60) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    CA-sertifikat er installert i systemets tillitslager (se etl/README.md).
+    Prøver to ganger: enkelte instanser (Stavanger) svarer av og til tregere
+    enn tidsavbruddet. Returnerer (http_status, innhold)."""
+    for forsok in (1, 2):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as resp:
+                return resp.status, json.loads(resp.read().decode("utf-8"))
+        except (TimeoutError, urllib.error.URLError):
+            if forsok == 2:
+                raise
 
 
 def rens(s):
@@ -206,16 +237,73 @@ def q(v):
     return "'" + str(v).replace("'", "''").replace("\x00", "") + "'"
 
 
-def generer_sql(slug: str, ut) -> None:
+def q_json(obj) -> str:
+    """JSON-literal. jsonb avviser \\u0000, så den escapen fjernes."""
+    tekst = json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("\\u0000", "")
+    return q(tekst) + "::jsonb"
+
+
+def logg(kn, samling, avvikstype, ekstern_id, detalj, felt=None, nokkelfelt="id", rapost=None) -> str:
+    """Setning som loggfører et avvik mot kildeuttrekket som er registrert
+    først i samme transaksjon (se registrer_kildeuttrekk i schema_kjerne.sql).
+    rapost er posten som utløste avviket - lagres direkte på avviket (renset
+    for personopplysninger), ikke i et delt uttrekk som må graves ut igjen."""
+    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
+    return (f"CALL logg_avvik({q(kn)},{q(samling)},{q(avvikstype)},{q(ekstern_id)},"
+            f"{q(detalj)},{q(felt)},{q(nokkelfelt)},{rapost_sql});\n")
+
+
+def i_blokk(kn, samling, ekstern_id, sql, rapost=None) -> str:
+    """Pakker setningene for én post i en DO-blokk. Feiler noe i databasen
+    (f.eks. et CHECK-brudd vi ikke har forutsett), rulles bare denne posten
+    tilbake og feilen loggføres som db_feil - resten av lasten fortsetter i
+    stedet for at hele transaksjonen stopper."""
+    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
+    return ("DO $blk$ BEGIN\n" + sql + "EXCEPTION WHEN OTHERS THEN\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'db_feil',{q(ekstern_id)},"
+            f"SQLSTATE || ': ' || SQLERRM,NULL,'id',{rapost_sql});\nEND $blk$;\n")
+
+
+def som_heltall(v):
+    """(verdi, feilmelding). Tom/0 gir (None, None); ugyldig gir (None, melding)."""
+    if v in (None, "", 0):
+        return None, None
+    try:
+        n = int(v)
+    except (ValueError, TypeError):
+        return None, f"ikke et heltall: {str(v)[:60]}"
+    if n < 0:
+        return None, f"negativt tall: {n}"
+    return n, None
+
+
+def generer_sql(slug: str, ut) -> bool:
+    """Skriver SQL for én kommune. Returnerer False hvis henting feilet."""
     knr, knavn, fylke = KOMMUNER[slug]
     kn = f"aktiv-kommune:{slug}"
     url = f"https://{slug}.aktiv-kommune.no/bookingfrontend/searchdataall"
+    hentet = datetime.now(timezone.utc).isoformat()
+    w = ut.write
 
     print(f"henter {url} ...", file=sys.stderr)
-    d = hent_json(url)
+    try:
+        status, d = hent_json(url)
+        if not isinstance(d, dict):
+            raise ValueError("svaret er ikke et JSON-objekt")
+    except Exception as e:
+        # Ingenting å laste, men feilen skal fortsatt kunne ses i basen.
+        status = getattr(e, "code", None)
+        w(f"BEGIN;\nCALL registrer_kildeuttrekk({q(kn)},{q(url)},{status or 'NULL'},NULL,{q(hentet)});\n")
+        w(logg(kn, "searchdataall", "annet", None, f"Henting feilet: {type(e).__name__}: {str(e)[:200]}"))
+        w("COMMIT;\n")
+        print(f"  FEILET: {e}", file=sys.stderr)
+        return False
 
-    w = ut.write
     w("BEGIN;\n\n")
+    # Må være første setning: alle avvik under henter uttrekk-id-en herfra.
+    # payload=NULL: hele svaret lagres ikke lenger - se kommentar ved
+    # kildeuttrekk i schema_kjerne.sql.
+    w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status},NULL,{q(hentet)});\n\n")
 
     w(f"-- {knavn}\n")
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
@@ -238,7 +326,10 @@ def generer_sql(slug: str, ut) -> None:
         ("fasilitet", "facilities", FASILITET),
     ]:
         for rad in d.get(samling, []):
-            navn = rens(rad["name"])
+            if rad.get("id") is None:
+                w(logg(kn, samling, "ugyldig_verdi", None, "posten mangler id", "id", rapost=rad))
+                continue
+            navn = rens(rad.get("name"))
             if not navn:
                 continue
             w(f"INSERT INTO kildekode (fagsystem_instans_id,kodetype,kode,navn) "
@@ -277,20 +368,56 @@ def generer_sql(slug: str, ut) -> None:
         # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
         # den; gate_id/husnr/posisjon står tomme til geokoding (et senere,
         # separat steg) fyller dem fra Kartverkets Adresse-API.
+        if b.get("id") is None:
+            w(logg(kn, "buildings", "ugyldig_verdi", None, "posten mangler id", "id", rapost=b))
+            continue
+        navn = rens(b.get("name"))
+        if not navn:
+            w(logg(kn, "buildings", "ugyldig_verdi", b["id"], "name er tomt; erstattet med plassholder",
+                   "name", rapost=b))
+            navn = f"Bygg {b['id']}"
+
+        # Mykt avvik: feltet settes til NULL, resten av raden lastes.
         gate = rens(b.get("street"))
+        postnr = (b.get("zip_code") or "").strip()
+        avvik = ""
+        if postnr and not re.fullmatch(r"[0-9]{4}", postnr):
+            avvik = logg(kn, "buildings", "ugyldig_verdi", b["id"],
+                         "zip_code er ikke fire siffer: " + postnr[:60], "zip_code", rapost=b)
+            postnr = None
+
+        # Kildedata gir ikke gatenavn og husnummer separat, bare hele
+        # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
+        # den; gatenavn/husnr/posisjon fylles av geokod.py.
+        sql = (
+            f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id,"
+            f"hjemmeside,epost,telefon,apningstid_tekst) "
+            f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])},"
+            f"{q(rens(b.get('homepage')))},{q(rens(b.get('email')))},{q(rens(b.get('phone')))},"
+            f"{q(rens(b.get('opening_hours')))} "
+            f"FROM kommune k, fagsystem_instans fi "
+            f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
+            # Aktiv kommune vinner på disse feltene (se "Autoritet" i dokumentasjonen).
+            f"ON CONFLICT (fagsystem_instans_id,ekstern_id) "
+            f"WHERE fagsystem_instans_id IS NOT NULL AND ekstern_id IS NOT NULL "
+            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn, "
+            f"hjemmeside=EXCLUDED.hjemmeside, epost=EXCLUDED.epost, telefon=EXCLUDED.telefon, "
+            f"apningstid_tekst=EXCLUDED.apningstid_tekst;\n"
+        )
         if gate:
-            postnr = (b.get("zip_code") or "").strip()
-            if postnr and not re.fullmatch(r"[0-9]{4}", postnr):
-                w(f"INSERT INTO synk_avvik (kilde,samling,avvikstype,ekstern_id,detalj) "
-                  f"VALUES ({q(kn)},'buildings','ugyldig_verdi',{q(b['id'])},"
-                  f"{q('zip_code er ikke fire siffer: ' + postnr[:60])});\n")
-                postnr = None
-            w(f"INSERT INTO adresse (bygning_id,adressetekst,postnummer,poststed,"
-              f"geokoding,er_hovedadresse) "
-              f"SELECT b.id,{q(gate)},{q(postnr)},{q(rens(b.get('city')))},'ukjent',TRUE "
-              f"FROM bygning b JOIN fagsystem_instans fi ON fi.id=b.fagsystem_instans_id "
-              f"WHERE fi.kildenokkel={q(kn)} AND b.ekstern_id={q(b['id'])} "
-              f"ON CONFLICT DO NOTHING;\n")
+            sql += (
+                f"INSERT INTO adresse (bygning_id,adressetekst,postnummer,poststed,"
+                f"geokoding,er_hovedadresse) "
+                f"SELECT b.id,{q(gate)},{q(postnr)},{q(rens(b.get('city')))},'ukjent',TRUE "
+                f"FROM bygning b JOIN fagsystem_instans fi ON fi.id=b.fagsystem_instans_id "
+                f"WHERE fi.kildenokkel={q(kn)} AND b.ekstern_id={q(b['id'])} "
+                # Rører ikke en adresse som allerede er geokodet eller satt manuelt.
+                f"ON CONFLICT (bygning_id) WHERE er_hovedadresse "
+                f"DO UPDATE SET adressetekst=EXCLUDED.adressetekst, postnummer=EXCLUDED.postnummer, "
+                f"poststed=EXCLUDED.poststed WHERE adresse.geokoding IN ('ukjent','feilet');\n"
+            )
+        w(avvik)
+        w(i_blokk(kn, "buildings", b["id"], sql, rapost=b))
     w("\n")
 
     # --- ressurser ---
@@ -301,12 +428,19 @@ def generer_sql(slug: str, ut) -> None:
             bygg_for_ressurs.setdefault(br["resource_id"], br["building_id"])
 
     for r in d.get("resources", []):
-        navn = rens(r["name"]) or f"Ressurs {r['id']}"
+        if r.get("id") is None:
+            w(logg(kn, "resources", "ugyldig_verdi", None, "posten mangler id", "id", rapost=r))
+            continue
+        navn = rens(r.get("name"))
+        if not navn:
+            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "name er tomt; erstattet med plassholder",
+                   "name", rapost=r))
+            navn = f"Ressurs {r['id']}"
         beskr = None
         try:
             dj = json.loads(r.get("description_json") or "{}")
             beskr = rens(dj.get("no") or dj.get("nn") or dj.get("en"))
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, AttributeError):
             pass
         bid = bygg_for_ressurs.get(r["id"])
         bookbar = "FALSE" if r.get("deactivate_application") else "TRUE"
@@ -341,9 +475,8 @@ def generer_sql(slug: str, ut) -> None:
     ]:
         for rad in d.get(samling, []):
             if rad["resource_id"] not in kjente_ressurser:
-                w(f"INSERT INTO synk_avvik (kilde,samling,avvikstype,ekstern_id,detalj) "
-                  f"VALUES ({q(kn)},{q(samling)},'manglende_forelder',{q(rad['resource_id'])},"
-                  f"'resource_id finnes ikke i uttrekket');\n")
+                w(logg(kn, samling, "manglende_forelder", rad["resource_id"],
+                       "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=rad))
                 continue
             w(f"INSERT INTO {koblingstabell} (ressurs_id,{maalkol}) "
               f"SELECT r.id,m.{maalkol} "
@@ -357,16 +490,17 @@ def generer_sql(slug: str, ut) -> None:
 
     for br in d.get("building_resources", []):
         if br["building_id"] not in kjente_bygg:
-            w(f"INSERT INTO synk_avvik (kilde,samling,avvikstype,ekstern_id,detalj) "
-              f"VALUES ({q(kn)},'building_resources','manglende_forelder',{q(br['building_id'])},"
-              f"'building_id finnes ikke i uttrekket');\n")
+            w(logg(kn, "building_resources", "manglende_forelder", br["building_id"],
+                   "building_id finnes ikke i uttrekket", "building_id", "building_id", rapost=br))
         if br["resource_id"] not in kjente_ressurser:
-            w(f"INSERT INTO synk_avvik (kilde,samling,avvikstype,ekstern_id,detalj) "
-              f"VALUES ({q(kn)},'building_resources','manglende_forelder',{q(br['resource_id'])},"
-              f"'resource_id finnes ikke i uttrekket');\n")
+            w(logg(kn, "building_resources", "manglende_forelder", br["resource_id"],
+                   "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=br))
 
-    w("\nCOMMIT;\n")
+    # Beholder de to siste uttrekkene per kilde, uforbeholdent.
+    w(f"\nDO $$ BEGIN PERFORM rydd_kildeuttrekk({q(kn)}); END $$;\n")
+    w("COMMIT;\n")
     print(f"  {len(d.get('buildings', []))} bygg, {len(d.get('resources', []))} ressurser", file=sys.stderr)
+    return True
 
 
 def main():
@@ -376,8 +510,10 @@ def main():
         sys.exit(1)
 
     valg = list(KOMMUNER) if sys.argv[1] == "alle" else [sys.argv[1]]
-    for slug in valg:
-        generer_sql(slug, sys.stdout)
+    feilet = [slug for slug in valg if not generer_sql(slug, sys.stdout)]
+    if feilet:
+        print(f"\nHenting feilet for: {', '.join(feilet)} (loggført i synk_avvik)", file=sys.stderr)
+        sys.exit(2)
 
 
 if __name__ == "__main__":
