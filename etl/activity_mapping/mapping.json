@@ -1,4517 +1,1400 @@
 {
-  "source": "AktivKommune_activity_mapping_v0.2.xlsx",
-  "approvedOnly": false,
-  "normalisation": "html-decode x2, trim, collapse spaces, lowercase",
-  "values": {
-    "administrasjonslokale": {
-      "concepts": [
-        "VEN-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Administrasjonslokale"
-      ]
-    },
-    "aktivitetshus": {
-      "concepts": [
-        "VEN-008"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Aktivitetshus"
-      ]
-    },
-    "alle typer arrangement": {
-      "concepts": [
-        "EVT-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Alle typer arrangement"
-      ]
-    },
-    "allidrett": {
-      "concepts": [
-        "ACT-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Allidrett"
-      ]
-    },
-    "amerikansk fotball": {
-      "concepts": [
-        "ACT-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Amerikansk fotball"
-      ]
-    },
-    "andre": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unspecified",
-      "status": "Proposed",
-      "sourceNames": [
-        "Andre"
-      ]
-    },
-    "andre aktivitetar, konsertar, o.l": {
-      "concepts": [
-        "EVT-012",
-        "EXC-004"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Andre aktivitetar, konsertar, o.l"
-      ]
-    },
-    "andre aktivitetar, o.l": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unspecified",
-      "status": "Proposed",
-      "sourceNames": [
-        "Andre aktivitetar, o.l"
-      ]
-    },
-    "andre idretter": {
-      "concepts": [
-        "ACT-010"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Andre idretter"
-      ]
-    },
-    "anleggsarbeid": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Anleggsarbeid"
-      ]
-    },
-    "annen idrett": {
-      "concepts": [
-        "ACT-010"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Annen idrett"
-      ]
-    },
-    "annet": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unspecified",
-      "status": "Proposed",
-      "sourceNames": [
-        "Annet"
-      ]
-    },
-    "annet - idrett møterom": {
-      "concepts": [
-        "VEN-021",
-        "ACT-010"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Annet - Idrett møterom"
-      ]
-    },
-    "annet - internt i kommunen": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Annet - Internt i kommunen"
-      ]
-    },
-    "annet - kultur møterom": {
-      "concepts": [
-        "VEN-021",
-        "ACT-092"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Annet - Kultur møterom"
-      ]
-    },
-    "annet - offentlig arrangement": {
-      "concepts": [
-        "EVT-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Annet - Offentlig arrangement"
-      ]
-    },
-    "annet - personlig markering": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Annet - Personlig markering"
-      ]
-    },
-    "arena": {
-      "concepts": [
-        "VEN-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Arena"
-      ]
-    },
-    "arrangement": {
-      "concepts": [
-        "EVT-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Arrangement"
-      ]
-    },
-    "arrangement og møte": {
-      "concepts": [
-        "EVT-001",
-        "EVT-002"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Arrangement og møte"
-      ]
-    },
-    "arrangementer": {
-      "concepts": [
-        "EVT-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Arrangementer"
-      ]
-    },
-    "arrangementlokale": {
-      "concepts": [
-        "VEN-007"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Arrangementlokale"
-      ]
-    },
-    "babysvømming": {
-      "concepts": [
-        "ACT-083",
-        "GRP-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Babysvømming"
-      ]
-    },
-    "bad": {
-      "concepts": [
-        "ACT-074"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bad"
-      ]
-    },
-    "bading": {
-      "concepts": [
-        "ACT-074"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bading"
-      ]
-    },
-    "badminton": {
-      "concepts": [
-        "ACT-058"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Badminton"
-      ]
-    },
-    "band": {
-      "concepts": [
-        "ACT-099"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Band"
-      ]
-    },
-    "bandy": {
-      "concepts": [
-        "ACT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bandy"
-      ]
-    },
-    "bandy - inne": {
-      "concepts": [
-        "ACT-021"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bandy - inne"
-      ]
-    },
-    "bandøving": {
-      "concepts": [
-        "ACT-099"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bandøving"
-      ]
-    },
-    "barnebursdag": {
-      "concepts": [
-        "EVT-021"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Barnebursdag"
-      ]
-    },
-    "barnebursdag 3 - 12 år": {
-      "concepts": [
-        "EVT-021",
-        "GRP-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "attributes": {
-        "ageMin": 3,
-        "ageMax": 12
-      },
-      "sourceNames": [
-        "Barnebursdag 3 - 12 år"
-      ]
-    },
-    "barnebursdag 3 -16 år": {
-      "concepts": [
-        "EVT-021",
-        "GRP-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "attributes": {
-        "ageMin": 3,
-        "ageMax": 16
-      },
-      "sourceNames": [
-        "Barnebursdag 3 -16 år"
-      ]
-    },
-    "barnehage": {
-      "concepts": [
-        "GRP-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Barnehage"
-      ]
-    },
-    "barnehager": {
-      "concepts": [
-        "GRP-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Barnehager"
-      ]
-    },
-    "barneidrett": {
-      "concepts": [
-        "ACT-011",
-        "GRP-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Barneidrett"
-      ]
-    },
-    "barnetilbud": {
-      "concepts": [
-        "GRP-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Barnetilbud"
-      ]
-    },
-    "baseball": {
-      "concepts": [
-        "ACT-015"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Baseball"
-      ]
-    },
-    "baseball/softball": {
-      "concepts": [
-        "ACT-015"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Baseball/softball"
-      ]
-    },
-    "basketball": {
-      "concepts": [
-        "ACT-016"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Basketball"
-      ]
-    },
-    "bedrifter o.l": {
-      "concepts": [
-        "ORG-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bedrifter o.l"
-      ]
-    },
-    "bedriftsidrett": {
-      "concepts": [
-        "ORG-012",
-        "ACT-010"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bedriftsidrett"
-      ]
-    },
-    "bibliotek": {
-      "concepts": [
-        "VEN-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bibliotek"
-      ]
-    },
-    "bil/mc klubb": {
-      "concepts": [
-        "ORG-014",
-        "ACT-046"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bil/MC klubb"
-      ]
-    },
-    "boccia": {
-      "concepts": [
-        "ACT-050"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Boccia"
-      ]
-    },
-    "boksing": {
-      "concepts": [
-        "ACT-036"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Boksing"
-      ]
-    },
-    "bordtennis": {
-      "concepts": [
-        "ACT-059"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bordtennis"
-      ]
-    },
-    "bowls": {
-      "concepts": [
-        "ACT-051"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bowls"
-      ]
-    },
-    "bryllup": {
-      "concepts": [
-        "EVT-023"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bryllup"
-      ]
-    },
-    "bryting": {
-      "concepts": [
-        "ACT-037"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bryting"
-      ]
-    },
-    "buekorps": {
-      "concepts": [
-        "ACT-100"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Buekorps"
-      ]
-    },
-    "bueskyting": {
-      "concepts": [
-        "ACT-052"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bueskyting"
-      ]
-    },
-    "bursdagsfeiring": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bursdagsfeiring"
-      ]
-    },
-    "bydelshus": {
-      "concepts": [
-        "VEN-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Bydelshus"
-      ]
-    },
-    "byrom": {
-      "concepts": [
-        "VEN-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Byrom"
-      ]
-    },
-    "båtforeingar": {
-      "concepts": [
-        "ORG-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Båtforeingar"
-      ]
-    },
-    "cheerleading": {
-      "concepts": [
-        "ACT-029"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Cheerleading"
-      ]
-    },
-    "cricket": {
-      "concepts": [
-        "ACT-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Cricket"
-      ]
-    },
-    "curling": {
-      "concepts": [
-        "ACT-053"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Curling"
-      ]
-    },
-    "dagsmøte": {
-      "concepts": [
-        "EVT-004",
-        "EVT-002"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dagsmøte"
-      ]
-    },
-    "dans": {
-      "concepts": [
-        "ACT-093"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dans"
-      ]
-    },
-    "dans/ musikk/ kor/ korps": {
-      "concepts": [
-        "ACT-098",
-        "ACT-093"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dans/ Musikk/ Kor/ Korps"
-      ]
-    },
-    "dans/trening": {
-      "concepts": [
-        "ACT-093",
-        "ACT-065"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dans/trening"
-      ]
-    },
-    "dansing": {
-      "concepts": [
-        "ACT-093"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dansing"
-      ]
-    },
-    "datahjelp": {
-      "concepts": [
-        "SRV-006"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Datahjelp"
-      ]
-    },
-    "dataundervisning": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dataundervisning"
-      ]
-    },
-    "demonstrasjon": {
-      "concepts": [
-        "EVT-015"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Demonstrasjon"
-      ]
-    },
-    "disko": {
-      "concepts": [
-        "EVT-007"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Disko"
-      ]
-    },
-    "diskorom": {
-      "concepts": [
-        "EVT-007"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Diskorom"
-      ]
-    },
-    "drill": {
-      "concepts": [
-        "ACT-030"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Drill"
-      ]
-    },
-    "drop in": {
-      "concepts": [
-        "EVT-027"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Drop in"
-      ]
-    },
-    "drop-in / arbeidsplasser": {
-      "concepts": [
-        "VEN-002"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Drop-in / arbeidsplasser"
-      ]
-    },
-    "dykking": {
-      "concepts": [
-        "ACT-075"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dykking"
-      ]
-    },
-    "dåp": {
-      "concepts": [
-        "EVT-024"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dåp"
-      ]
-    },
-    "dåp/navnedag": {
-      "concepts": [
-        "EVT-024"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Dåp/navnedag"
-      ]
-    },
-    "e-sport": {
-      "concepts": [
-        "ACT-025"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "E-sport"
-      ]
-    },
-    "egenorganisert": {
-      "concepts": [
-        "ORG-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Egenorganisert"
-      ]
-    },
-    "ekstra renhold": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Ekstra renhold"
-      ]
-    },
-    "familiefest": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Familiefest"
-      ]
-    },
-    "fekting": {
-      "concepts": [
-        "ACT-038"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fekting"
-      ]
-    },
-    "fektting": {
-      "concepts": [
-        "ACT-038"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fektting"
-      ]
-    },
-    "ferie": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Ferie"
-      ]
-    },
-    "festival": {
-      "concepts": [
-        "EVT-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Festival"
-      ]
-    },
-    "festivaler": {
-      "concepts": [
-        "EVT-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Festivaler"
-      ]
-    },
-    "festivaler / mønstringar": {
-      "concepts": [
-        "EVT-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Festivaler / Mønstringar"
-      ]
-    },
-    "festivaler / mønstringer": {
-      "concepts": [
-        "EVT-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Festivaler / Mønstringer"
-      ]
-    },
-    "festivaler og mønstringer": {
-      "concepts": [
-        "EVT-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Festivaler og mønstringer"
-      ]
-    },
-    "film": {
-      "concepts": [
-        "EVT-011"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Film"
-      ]
-    },
-    "fisketurer": {
-      "concepts": [
-        "ACT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fisketurer"
-      ]
-    },
-    "fleiridrettslag": {
-      "concepts": [
-        "ORG-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fleiridrettslag"
-      ]
-    },
-    "fleridrettslag": {
-      "concepts": [
-        "ORG-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fleridrettslag"
-      ]
-    },
-    "flykningekontoret": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Flykningekontoret"
-      ]
-    },
-    "foredrag": {
-      "concepts": [
-        "EVT-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Foredrag"
-      ]
-    },
-    "foreldreutval": {
-      "concepts": [
-        "ORG-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Foreldreutval"
-      ]
-    },
-    "forelesning": {
-      "concepts": [
-        "EVT-003",
-        "ACT-109"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Forelesning"
-      ]
-    },
-    "forestilllinger": {
-      "concepts": [
-        "EVT-010"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Forestilllinger"
-      ]
-    },
-    "formidlingsarena og forsamlingslokaler": {
-      "concepts": [
-        "VEN-007"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Formidlingsarena og forsamlingslokaler"
-      ]
-    },
-    "forslag": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "test_or_system_text",
-      "status": "Proposed",
-      "sourceNames": [
-        "Forslag"
-      ]
-    },
-    "fotball": {
-      "concepts": [
-        "ACT-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fotball"
-      ]
-    },
-    "fotball (1/3 del av 7'er bane)": {
-      "concepts": [
-        "ACT-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fotball &amp;#40;1/3 del av 7&#039;er bane&amp;#41;"
-      ]
-    },
-    "fotball (1/4 av 11'er bane)": {
-      "concepts": [
-        "ACT-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fotball &amp;#40;1/4 av 11&#039;er bane&amp;#41;"
-      ]
-    },
-    "fotballbane": {
-      "concepts": [
-        "VEN-011",
-        "ACT-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fotballbane"
-      ]
-    },
-    "foto": {
-      "concepts": [
-        "ACT-094"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Foto"
-      ]
-    },
-    "friidrett": {
-      "concepts": [
-        "ACT-026"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Friidrett"
-      ]
-    },
-    "friluft": {
-      "concepts": [
-        "ACT-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Friluft"
-      ]
-    },
-    "friluftsaktiviteter": {
-      "concepts": [
-        "ACT-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Friluftsaktiviteter"
-      ]
-    },
-    "friluftsliv": {
-      "concepts": [
-        "ACT-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Friluftsliv"
-      ]
-    },
-    "friområder": {
-      "concepts": [
-        "VEN-023"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Friområder"
-      ]
-    },
-    "frisklivsentralen": {
-      "concepts": [
-        "ORG-002",
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Frisklivsentralen"
-      ]
-    },
-    "fritidsklubb": {
-      "concepts": [
-        "GRP-007",
-        "EVT-026"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fritidsklubb"
-      ]
-    },
-    "fritidstilbud": {
-      "concepts": [
-        "ACT-005"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fritidstilbud"
-      ]
-    },
-    "frivillig organisasjon": {
-      "concepts": [
-        "ORG-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Frivillig organisasjon"
-      ]
-    },
-    "frivillighet og organisasjonsaktiviteter": {
-      "concepts": [
-        "ORG-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Frivillighet og organisasjonsaktiviteter"
-      ]
-    },
-    "frivilligsentral": {
-      "concepts": [
-        "ORG-007"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Frivilligsentral"
-      ]
-    },
-    "funksjonhemma": {
-      "concepts": [
-        "GRP-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Funksjonhemma"
-      ]
-    },
-    "futsal": {
-      "concepts": [
-        "ACT-019"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Futsal"
-      ]
-    },
-    "fysiotimer": {
-      "concepts": [
-        "SRV-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Fysiotimer"
-      ]
-    },
-    "galleri": {
-      "concepts": [
-        "VEN-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Galleri"
-      ]
-    },
-    "gapahuk": {
-      "concepts": [
-        "VEN-024"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Gapahuk"
-      ]
-    },
-    "generelt": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unspecified",
-      "status": "Proposed",
-      "sourceNames": [
-        "Generelt"
-      ]
-    },
-    "gi bort": {
-      "concepts": [
-        "SRV-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Gi bort"
-      ]
-    },
-    "golf": {
-      "concepts": [
-        "ACT-054"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Golf"
-      ]
-    },
-    "grendalag": {
-      "concepts": [
-        "ORG-008"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Grendalag"
-      ]
-    },
-    "grendalag/velforening": {
-      "concepts": [
-        "ORG-008"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Grendalag/Velforening"
-      ]
-    },
-    "grendelag": {
-      "concepts": [
-        "ORG-008"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Grendelag"
-      ]
-    },
-    "grill/bålpanne": {
-      "concepts": [
-        "SRV-005"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Grill/bålpanne"
-      ]
-    },
-    "gruppearbeid": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Gruppearbeid"
-      ]
-    },
-    "gymnastikk": {
-      "concepts": [
-        "ACT-028"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Gymnastikk"
-      ]
-    },
-    "gymnastikk og turn": {
-      "concepts": [
-        "ACT-028"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Gymnastikk og Turn",
-        "Gymnastikk og turn"
-      ]
-    },
-    "gymsal": {
-      "concepts": [
-        "VEN-012"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Gymsal"
-      ]
-    },
-    "helsebygg": {
-      "concepts": [
-        "VEN-010"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Helsebygg"
-      ]
-    },
-    "hestesport": {
-      "concepts": [
-        "ACT-033"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Hestesport"
-      ]
-    },
-    "hobbygrupper": {
-      "concepts": [
-        "ACT-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Hobbygrupper"
-      ]
-    },
-    "humanitære organiasjoner": {
-      "concepts": [
-        "ORG-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Humanitære organiasjoner"
-      ]
-    },
-    "humanitære organisasjonar": {
-      "concepts": [
-        "ORG-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Humanitære organisasjonar"
-      ]
-    },
-    "humanitære organisasjoner": {
-      "concepts": [
-        "ORG-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Humanitære organisasjoner"
-      ]
-    },
-    "hundesport": {
-      "concepts": [
-        "ACT-034"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Hundesport"
-      ]
-    },
-    "hurtigløp": {
-      "concepts": [
-        "ACT-090"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Hurtigløp"
-      ]
-    },
-    "håndball": {
-      "concepts": [
-        "ACT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Håndball"
-      ]
-    },
-    "hårklipp": {
-      "concepts": [
-        "SRV-003"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Hårklipp"
-      ]
-    },
-    "idrett": {
-      "concepts": [
-        "ACT-010"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Idrett"
-      ]
-    },
-    "idrett møterom": {
-      "concepts": [
-        "VEN-021",
-        "ACT-010"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Idrett møterom"
-      ]
-    },
-    "idrettsaktiviteter": {
-      "concepts": [
-        "ACT-010"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Idrettsaktiviteter"
-      ]
-    },
-    "idrettshall": {
-      "concepts": [
-        "VEN-012"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Idrettshall"
-      ]
-    },
-    "idrettskrets - særforbund": {
-      "concepts": [
-        "ORG-010"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Idrettskrets - særforbund"
-      ]
-    },
-    "informasjons møter": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Informasjons møter"
-      ]
-    },
-    "inkludering": {
-      "concepts": [
-        "GRP-002"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Inkludering"
-      ]
-    },
-    "innbyggerbussen": {
-      "concepts": [
-        "SRV-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Innbyggerbussen"
-      ]
-    },
-    "innbyggertorg": {
-      "concepts": [
-        "VEN-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Innbyggertorg"
-      ]
-    },
-    "innebandy": {
-      "concepts": [
-        "ACT-021"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Innebandy"
-      ]
-    },
-    "innefotball": {
-      "concepts": [
-        "ACT-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Innefotball"
-      ]
-    },
-    "interesseorganiasjonar": {
-      "concepts": [
-        "ORG-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Interesseorganiasjonar"
-      ]
-    },
-    "interesseorganiasjoner": {
-      "concepts": [
-        "ORG-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Interesseorganiasjoner"
-      ]
-    },
-    "interesseorganisasjon": {
-      "concepts": [
-        "ORG-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Interesseorganisasjon"
-      ]
-    },
-    "interesseorganisasjonar": {
-      "concepts": [
-        "ORG-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Interesseorganisasjonar"
-      ]
-    },
-    "interesseorganisasjoner": {
-      "concepts": [
-        "ORG-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Interesseorganisasjoner"
-      ]
-    },
-    "intern": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Intern"
-      ]
-    },
-    "intern avdeling: flyk": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Intern avdeling: FLYK"
-      ]
-    },
-    "intern avdeling: kulturskolen": {
-      "concepts": [
-        "ORG-019",
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Intern avdeling: Kulturskolen"
-      ]
-    },
-    "intern avdeling: voks": {
-      "concepts": [
-        "ORG-024",
-        "GRP-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Intern avdeling: VOKS"
-      ]
-    },
-    "interne avdelinger": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Interne avdelinger"
-      ]
-    },
-    "internt bergen kommune": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Internt Bergen Kommune",
-        "Internt Bergen kommune"
-      ]
-    },
-    "internt bruk - kommune": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Internt bruk - kommune"
-      ]
-    },
-    "internt i kommunen": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Internt i kommunen"
-      ]
-    },
-    "internt kommune": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Internt kommune"
-      ]
-    },
-    "internt stavanger kommune": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Internt Stavanger kommune"
-      ]
-    },
-    "involvering": {
-      "concepts": [
-        "EVT-005"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Involvering"
-      ]
-    },
-    "ishockey": {
-      "concepts": [
-        "ACT-087"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Ishockey"
-      ]
-    },
-    "jakt": {
-      "concepts": [
-        "ACT-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Jakt"
-      ]
-    },
-    "ju jitsu": {
-      "concepts": [
-        "ACT-040"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Ju Jitsu",
-        "Ju jitsu"
-      ]
-    },
-    "judo": {
-      "concepts": [
-        "ACT-039"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Judo"
-      ]
-    },
-    "kafe": {
-      "concepts": [
-        "EVT-028"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kafe"
-      ]
-    },
-    "kafè": {
-      "concepts": [
-        "EVT-028"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kafè"
-      ]
-    },
-    "kajakk": {
-      "concepts": [
-        "ACT-078"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kajakk"
-      ]
-    },
-    "kamera": {
-      "concepts": [
-        "SRV-005",
-        "ACT-094"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kamera"
-      ]
-    },
-    "kampsport": {
-      "concepts": [
-        "ACT-035"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kampsport"
-      ]
-    },
-    "kano/kajakk": {
-      "concepts": [
-        "ACT-079",
-        "ACT-078"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kano/kajakk"
-      ]
-    },
-    "kanopadling": {
-      "concepts": [
-        "ACT-079"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kanopadling"
-      ]
-    },
-    "karate": {
-      "concepts": [
-        "ACT-041"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Karate"
-      ]
-    },
-    "kickboksing": {
-      "concepts": [
-        "ACT-042"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kickboksing"
-      ]
-    },
-    "kino": {
-      "concepts": [
-        "EVT-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kino"
-      ]
-    },
-    "kjøkken": {
-      "concepts": [
-        "VEN-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kjøkken"
-      ]
-    },
-    "klartring": {
-      "concepts": [
-        "ACT-044"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klartring"
-      ]
-    },
-    "klassefest": {
-      "concepts": [
-        "EVT-020",
-        "GRP-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klassefest"
-      ]
-    },
-    "klasserom": {
-      "concepts": [
-        "VEN-015"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klasserom"
-      ]
-    },
-    "klasseromsundervisning": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klasseromsundervisning"
-      ]
-    },
-    "klatrevegg": {
-      "concepts": [
-        "ACT-044"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klatrevegg"
-      ]
-    },
-    "klatring": {
-      "concepts": [
-        "ACT-044"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klatring"
-      ]
-    },
-    "klatring/ buldring": {
-      "concepts": [
-        "ACT-044"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klatring/ Buldring"
-      ]
-    },
-    "klesinnsamling": {
-      "concepts": [
-        "SRV-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klesinnsamling"
-      ]
-    },
-    "klubbmøte": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Klubbmøte"
-      ]
-    },
-    "kommersiell utleie": {
-      "concepts": [
-        "ORG-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kommersiell utleie"
-      ]
-    },
-    "kommersiell utleige": {
-      "concepts": [
-        "ORG-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kommersiell utleige"
-      ]
-    },
-    "kommunal aktivitet": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kommunal aktivitet"
-      ]
-    },
-    "kommunalt": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kommunalt"
-      ]
-    },
-    "kommunalt bruk": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kommunalt bruk"
-      ]
-    },
-    "kommune eige bruk": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kommune eige bruk"
-      ]
-    },
-    "konferanse": {
-      "concepts": [
-        "EVT-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Konferanse"
-      ]
-    },
-    "konferanser": {
-      "concepts": [
-        "EVT-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Konferanser"
-      ]
-    },
-    "konfirmasjon": {
-      "concepts": [
-        "EVT-025"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Konfirmasjon"
-      ]
-    },
-    "konsert": {
-      "concepts": [
-        "EVT-012"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Konsert"
-      ]
-    },
-    "kor": {
-      "concepts": [
-        "ACT-101"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kor"
-      ]
-    },
-    "korps": {
-      "concepts": [
-        "ACT-102"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Korps"
-      ]
-    },
-    "korps og orkester": {
-      "concepts": [
-        "ACT-102",
-        "ACT-103"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Korps og orkester"
-      ]
-    },
-    "kreativt verksted": {
-      "concepts": [
-        "ACT-096"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kreativt verksted"
-      ]
-    },
-    "kreativt verksted og prosesser": {
-      "concepts": [
-        "ACT-096"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kreativt verksted og prosesser"
-      ]
-    },
-    "kultur": {
-      "concepts": [
-        "ACT-092"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kultur"
-      ]
-    },
-    "kulturaktiviteter": {
-      "concepts": [
-        "ACT-092"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturaktiviteter"
-      ]
-    },
-    "kulturarrangement": {
-      "concepts": [
-        "EVT-008"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturarrangement"
-      ]
-    },
-    "kulturbygg": {
-      "concepts": [
-        "VEN-016"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturbygg"
-      ]
-    },
-    "kulturhus": {
-      "concepts": [
-        "VEN-016"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturhus"
-      ]
-    },
-    "kulturlokalar møterom": {
-      "concepts": [
-        "VEN-021",
-        "ACT-092"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturlokalar møterom"
-      ]
-    },
-    "kulturlokale": {
-      "concepts": [
-        "VEN-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturlokale"
-      ]
-    },
-    "kulturlokaler": {
-      "concepts": [
-        "VEN-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturlokaler"
-      ]
-    },
-    "kulturlokaler formidling og øving": {
-      "concepts": [
-        "VEN-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturlokaler formidling og øving"
-      ]
-    },
-    "kulturlokaler øving og verksteder": {
-      "concepts": [
-        "VEN-019"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturlokaler øving og verksteder"
-      ]
-    },
-    "kulturlokaler, formidling og øving": {
-      "concepts": [
-        "VEN-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturlokaler, formidling og øving"
-      ]
-    },
-    "kulturskolen": {
-      "concepts": [
-        "ORG-019"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturskolen"
-      ]
-    },
-    "kulturvern og historie": {
-      "concepts": [
-        "ACT-095"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturvern og historie"
-      ]
-    },
-    "kulturvern og historielag": {
-      "concepts": [
-        "ACT-095"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturvern og historielag"
-      ]
-    },
-    "kulturvern og sogelag": {
-      "concepts": [
-        "ACT-095"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kulturvern og sogelag"
-      ]
-    },
-    "kunst og håndverk": {
-      "concepts": [
-        "ACT-096"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kunst og håndverk"
-      ]
-    },
-    "kunst, håndtverk, media": {
-      "concepts": [
-        "ACT-096",
-        "ACT-094"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kunst, håndtverk, media"
-      ]
-    },
-    "kunst, håndverk og media": {
-      "concepts": [
-        "ACT-096",
-        "ACT-094"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kunst, håndverk og media"
-      ]
-    },
-    "kunst, håndverk, media": {
-      "concepts": [
-        "ACT-096",
-        "ACT-094"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kunst, håndverk, media"
-      ]
-    },
-    "kunstløp": {
-      "concepts": [
-        "ACT-091"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kunstløp"
-      ]
-    },
-    "kurs": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kurs"
-      ]
-    },
-    "kurs og foredrag": {
-      "concepts": [
-        "ACT-109",
-        "EVT-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Kurs og foredrag"
-      ]
-    },
-    "lacrosse": {
-      "concepts": [
-        "ACT-022"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Lacrosse"
-      ]
-    },
-    "lag og foreninger": {
-      "concepts": [
-        "ORG-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Lag og foreninger"
-      ]
-    },
-    "lagt til rette for mmnf": {
-      "concepts": [
-        "GRP-004"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Lagt til rette for MMNF"
-      ]
-    },
-    "leie av lastesykkel": {
-      "concepts": [
-        "SRV-005",
-        "SRV-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Leie av lastesykkel"
-      ]
-    },
-    "leie salgsplass": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Leie salgsplass"
-      ]
-    },
-    "leie standplass": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Leie standplass"
-      ]
-    },
-    "leilighet": {
-      "concepts": [
-        "VEN-005"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Leilighet"
-      ]
-    },
-    "leirdueskyting": {
-      "concepts": [
-        "ACT-056"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Leirdueskyting"
-      ]
-    },
-    "leksegruppe": {
-      "concepts": [
-        "ACT-109",
-        "GRP-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Leksegruppe"
-      ]
-    },
-    "litteratur/litteraturformidling": {
-      "concepts": [
-        "ACT-097"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Litteratur/litteraturformidling"
-      ]
-    },
-    "lokale aktiviteter-idrett-kultur": {
-      "concepts": [
-        "ACT-010",
-        "ACT-092"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Lokale aktiviteter-idrett-kultur"
-      ]
-    },
-    "lokalmat": {
-      "concepts": [
-        "ACT-007"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Lokalmat"
-      ]
-    },
-    "luftsport": {
-      "concepts": [
-        "ACT-045"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Luftsport"
-      ]
-    },
-    "lyd": {
-      "concepts": [
-        "SRV-005"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Lyd"
-      ]
-    },
-    "lys": {
-      "concepts": [
-        "SRV-005"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Lys"
-      ]
-    },
-    "makeup & hundpleie": {
-      "concepts": [
-        "SRV-003"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Makeup & Hundpleie"
-      ]
-    },
-    "malegruppe": {
-      "concepts": [
-        "ACT-096"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Malegruppe"
-      ]
-    },
-    "maraton": {
-      "concepts": [
-        "ACT-027"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Maraton"
-      ]
-    },
-    "marked": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Marked"
-      ]
-    },
-    "markering": {
-      "concepts": [
-        "EVT-015"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Markering"
-      ]
-    },
-    "markering/demonstrasjon": {
-      "concepts": [
-        "EVT-015"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Markering/demonstrasjon"
-      ]
-    },
-    "matlaging": {
-      "concepts": [
-        "ACT-007"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Matlaging"
-      ]
-    },
-    "menighet/ trossamfunn": {
-      "concepts": [
-        "ORG-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Menighet/ Trossamfunn"
-      ]
-    },
-    "menigheter og trosamfunn": {
-      "concepts": [
-        "ORG-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Menigheter og trosamfunn"
-      ]
-    },
-    "menigheter og trossamfunn": {
-      "concepts": [
-        "ORG-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Menigheter og trossamfunn"
-      ]
-    },
-    "meningheter og trossamfunn": {
-      "concepts": [
-        "ORG-018"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Meningheter og trossamfunn"
-      ]
-    },
-    "messe": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Messe"
-      ]
-    },
-    "minifotball": {
-      "concepts": [
-        "ACT-018",
-        "GRP-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Minifotball"
-      ]
-    },
-    "minihåndball": {
-      "concepts": [
-        "ACT-020",
-        "GRP-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Minihåndball"
-      ]
-    },
-    "minivolleyball": {
-      "concepts": [
-        "ACT-024",
-        "GRP-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Minivolleyball"
-      ]
-    },
-    "mobilitet": {
-      "concepts": [
-        "SRV-004"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Mobilitet"
-      ]
-    },
-    "motorsport": {
-      "concepts": [
-        "ACT-046"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Motorsport"
-      ]
-    },
-    "museum": {
-      "concepts": [
-        "VEN-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Museum"
-      ]
-    },
-    "musikk": {
-      "concepts": [
-        "ACT-098"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Musikk"
-      ]
-    },
-    "musikk / korps": {
-      "concepts": [
-        "ACT-098",
-        "ACT-102"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Musikk / Korps"
-      ]
-    },
-    "musikk og dans": {
-      "concepts": [
-        "ACT-098",
-        "ACT-093"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Musikk og dans"
-      ]
-    },
-    "møte": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møte"
-      ]
-    },
-    "møte/presentasjon": {
-      "concepts": [
-        "EVT-002",
-        "EVT-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møte/presentasjon"
-      ]
-    },
-    "møteaktivitet": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møteaktivitet"
-      ]
-    },
-    "møtelokale": {
-      "concepts": [
-        "VEN-021"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møtelokale"
-      ]
-    },
-    "møteplass": {
-      "concepts": [
-        "EVT-026"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møteplass"
-      ]
-    },
-    "møter": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møter"
-      ]
-    },
-    "møter og kurs": {
-      "concepts": [
-        "EVT-002",
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møter og kurs"
-      ]
-    },
-    "møter, kurs, mindre selskaper": {
-      "concepts": [
-        "EVT-002",
-        "ACT-109"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møter, kurs, mindre selskaper"
-      ]
-    },
-    "møterom": {
-      "concepts": [
-        "VEN-021"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møterom",
-        "møterom"
-      ]
-    },
-    "møterom i drammen kommune": {
-      "concepts": [
-        "VEN-021",
-        "GRP-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møterom i Drammen kommune"
-      ]
-    },
-    "møtevirksomhet": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Møtevirksomhet"
-      ]
-    },
-    "naturskole": {
-      "concepts": [
-        "ACT-001",
-        "ACT-109"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Naturskole"
-      ]
-    },
-    "nrg": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unknown",
-      "status": "Proposed",
-      "sourceNames": [
-        "NRG"
-      ]
-    },
-    "ntnu": {
-      "concepts": [
-        "GRP-010"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "NTNU"
-      ]
-    },
-    "næring og kommersiell virksomhet": {
-      "concepts": [
-        "ORG-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Næring og kommersiell virksomhet"
-      ]
-    },
-    "off.arrangement": {
-      "concepts": [
-        "EVT-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Off.arrangement"
-      ]
-    },
-    "offentlig": {
-      "concepts": [
-        "ORG-021"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Offentlig"
-      ]
-    },
-    "offentlig arrangement": {
-      "concepts": [
-        "EVT-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Offentlig arrangement"
-      ]
-    },
-    "offentlig bading": {
-      "concepts": [
-        "ACT-074"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Offentlig bading"
-      ]
-    },
-    "opplæring": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Opplæring"
-      ]
-    },
-    "oppvekst/skule": {
-      "concepts": [
-        "GRP-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Oppvekst/skule"
-      ]
-    },
-    "organisasjon": {
-      "concepts": [
-        "ORG-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Organisasjon"
-      ]
-    },
-    "organisering av aktivitetar": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unspecified",
-      "status": "Proposed",
-      "sourceNames": [
-        "Organisering av aktivitetar"
-      ]
-    },
-    "orientering": {
-      "concepts": [
-        "ACT-047"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Orientering"
-      ]
-    },
-    "overnatting": {
-      "concepts": [
-        "EVT-019"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Overnatting"
-      ]
-    },
-    "padeltennis": {
-      "concepts": [
-        "ACT-060"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Padeltennis"
-      ]
-    },
-    "paintball": {
-      "concepts": [
-        "ACT-048"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Paintball"
-      ]
-    },
-    "pensjonistbading": {
-      "concepts": [
-        "ACT-074",
-        "GRP-005"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Pensjonistbading"
-      ]
-    },
-    "pensjonistforening": {
-      "concepts": [
-        "ORG-015",
-        "GRP-005"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Pensjonistforening"
-      ]
-    },
-    "personlig markering": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Personlig markering"
-      ]
-    },
-    "politikk/valgdag": {
-      "concepts": [
-        "EVT-018",
-        "ORG-016"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Politikk/valgdag"
-      ]
-    },
-    "politisk organisasjon": {
-      "concepts": [
-        "ORG-016"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Politisk organisasjon"
-      ]
-    },
-    "presentasjoner": {
-      "concepts": [
-        "EVT-003"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Presentasjoner"
-      ]
-    },
-    "privat": {
-      "concepts": [
-        "ORG-022"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Privat"
-      ]
-    },
-    "privat arrangement": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Privat arrangement"
-      ]
-    },
-    "privat utleige": {
-      "concepts": [
-        "ORG-022"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Privat utleige"
-      ]
-    },
-    "privat/ lukket arrangement": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Privat/ lukket arrangement"
-      ]
-    },
-    "profilering": {
-      "concepts": [
-        "EVT-016"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Profilering"
-      ]
-    },
-    "promotering": {
-      "concepts": [
-        "EVT-016"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Promotering"
-      ]
-    },
-    "pu/hu": {
-      "concepts": [
-        "GRP-004"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "PU/HU"
-      ]
-    },
-    "pub": {
-      "concepts": [
-        "EVT-028"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Pub"
-      ]
-    },
-    "renhold og vedlikehold": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Renhold og vedlikehold"
-      ]
-    },
-    "revy og teater": {
-      "concepts": [
-        "ACT-106"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Revy og teater"
-      ]
-    },
-    "riding": {
-      "concepts": [
-        "ACT-033"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Riding"
-      ]
-    },
-    "roing": {
-      "concepts": [
-        "ACT-080"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Roing"
-      ]
-    },
-    "rollerderby": {
-      "concepts": [
-        "ACT-064"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Rollerderby"
-      ]
-    },
-    "rugby": {
-      "concepts": [
-        "ACT-023"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Rugby"
-      ]
-    },
-    "rytmisk sportsgymnastikk (rg)": {
-      "concepts": [
-        "ACT-031"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Rytmisk sportsgymnastikk &amp;#40;RG&amp;#41;"
-      ]
-    },
-    "salg": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Salg"
-      ]
-    },
-    "salgsplass": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Salgsplass"
-      ]
-    },
-    "saltimer": {
-      "concepts": [
-        "VEN-007"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Saltimer"
-      ]
-    },
-    "sambruk": {
-      "concepts": [
-        "GRP-003"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sambruk"
-      ]
-    },
-    "samlinger": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Samlinger"
-      ]
-    },
-    "samlingsplass": {
-      "concepts": [
-        "VEN-007"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Samlingsplass"
-      ]
-    },
-    "samtale": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Samtale"
-      ]
-    },
-    "samtale med innbygger": {
-      "concepts": [
-        "SRV-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Samtale med innbygger"
-      ]
-    },
-    "samtaler": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Samtaler"
-      ]
-    },
-    "seiling": {
-      "concepts": [
-        "ACT-081"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Seiling"
-      ]
-    },
-    "seilsport": {
-      "concepts": [
-        "ACT-081"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Seilsport"
-      ]
-    },
-    "selskap": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Selskap"
-      ]
-    },
-    "selskapsarrangement": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Selskapsarrangement"
-      ]
-    },
-    "seremonier": {
-      "concepts": [
-        "EVT-022"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Seremonier"
-      ]
-    },
-    "sirkus": {
-      "concepts": [
-        "ACT-105"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sirkus"
-      ]
-    },
-    "sjakk": {
-      "concepts": [
-        "ACT-009"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sjakk"
-      ]
-    },
-    "sjøsport": {
-      "concepts": [
-        "ACT-073"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sjøsport"
-      ]
-    },
-    "skating": {
-      "concepts": [
-        "ACT-063"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skating"
-      ]
-    },
-    "ski": {
-      "concepts": [
-        "ACT-088"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Ski"
-      ]
-    },
-    "ski (langrenn/alpin)": {
-      "concepts": [
-        "ACT-088"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Ski &amp;#40;Langrenn/Alpin&amp;#41;"
-      ]
-    },
-    "skisport": {
-      "concepts": [
-        "ACT-088"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skisport"
-      ]
-    },
-    "skole": {
-      "concepts": [
-        "GRP-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skole"
-      ]
-    },
-    "skolekjøkken": {
-      "concepts": [
-        "VEN-014",
-        "GRP-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skolekjøkken"
-      ]
-    },
-    "skuespill": {
-      "concepts": [
-        "ACT-106"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skuespill"
-      ]
-    },
-    "skular": {
-      "concepts": [
-        "GRP-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skular"
-      ]
-    },
-    "skule": {
-      "concepts": [
-        "GRP-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skule"
-      ]
-    },
-    "skule - oppvekst": {
-      "concepts": [
-        "GRP-011"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skule - oppvekst"
-      ]
-    },
-    "skyting": {
-      "concepts": [
-        "ACT-055"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skyting"
-      ]
-    },
-    "skøyter": {
-      "concepts": [
-        "ACT-089"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Skøyter"
-      ]
-    },
-    "slettet/utgått": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "test_or_system_text",
-      "status": "Proposed",
-      "sourceNames": [
-        "Slettet/utgått"
-      ]
-    },
-    "små møter": {
-      "concepts": [
-        "EVT-002"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Små møter"
-      ]
-    },
-    "sommerleir": {
-      "concepts": [
-        "EVT-019",
-        "GRP-001"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sommerleir"
-      ]
-    },
-    "sommerstengt - sommertrening": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sommerstengt - sommertrening"
-      ]
-    },
-    "sosial møteplass": {
-      "concepts": [
-        "EVT-026"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sosial møteplass"
-      ]
-    },
-    "sosiale aktivteter": {
-      "concepts": [
-        "EVT-026"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sosiale aktivteter"
-      ]
-    },
-    "sosiale møteplassar": {
-      "concepts": [
-        "EVT-026"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sosiale møteplassar"
-      ]
-    },
-    "sosiale møteplasser": {
-      "concepts": [
-        "EVT-026"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sosiale møteplasser"
-      ]
-    },
-    "sosiale tilstelninger": {
-      "concepts": [
-        "EVT-020"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sosiale tilstelninger"
-      ]
-    },
-    "spedbarnsgruppe": {
-      "concepts": [
-        "GRP-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Spedbarnsgruppe"
-      ]
-    },
-    "speidar": {
-      "concepts": [
-        "ORG-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Speidar"
-      ]
-    },
-    "speidarar": {
-      "concepts": [
-        "ORG-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Speidarar"
-      ]
-    },
-    "speider": {
-      "concepts": [
-        "ORG-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Speider"
-      ]
-    },
-    "speider og friluftsliv": {
-      "concepts": [
-        "ORG-017",
-        "ACT-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Speider og friluftsliv"
-      ]
-    },
-    "speiding": {
-      "concepts": [
-        "ORG-017",
-        "ACT-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Speiding"
-      ]
-    },
-    "spill": {
-      "concepts": [
-        "ACT-008"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Spill"
-      ]
-    },
-    "spinning": {
-      "concepts": [
-        "ACT-066"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Spinning"
-      ]
-    },
-    "sport og idrett": {
-      "concepts": [
-        "ACT-010"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sport og idrett"
-      ]
-    },
-    "sportsdrill": {
-      "concepts": [
-        "ACT-030"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sportsdrill"
-      ]
-    },
-    "språkcafé": {
-      "concepts": [
-        "ACT-108"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Språkcafé"
-      ]
-    },
-    "squash": {
-      "concepts": [
-        "ACT-061"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Squash"
-      ]
-    },
-    "stand": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stand"
-      ]
-    },
-    "stand (2mx3m)": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stand (2mx3m)"
-      ]
-    },
-    "standplass": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Standplass"
-      ]
-    },
-    "stands": {
-      "concepts": [
-        "EVT-014"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stands"
-      ]
-    },
-    "stengt": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stengt"
-      ]
-    },
-    "stengt grunna vedlikehald eller ferie": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stengt grunna vedlikehald eller ferie"
-      ]
-    },
-    "stengt pga arrangement": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stengt pga arrangement"
-      ]
-    },
-    "stengt pga ferie eller arrangement": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stengt pga ferie eller arrangement"
-      ]
-    },
-    "stengt pga vedlikehold/reperasjon av utstyr": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stengt pga vedlikehold/reperasjon av utstyr"
-      ]
-    },
-    "studiegrupper": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Studiegrupper"
-      ]
-    },
-    "stup": {
-      "concepts": [
-        "ACT-082"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stup"
-      ]
-    },
-    "stuping": {
-      "concepts": [
-        "ACT-082"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Stuping"
-      ]
-    },
-    "styrkeløft": {
-      "concepts": [
-        "ACT-067"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Styrkeløft"
-      ]
-    },
-    "styrkeløfting": {
-      "concepts": [
-        "ACT-067"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Styrkeløfting"
-      ]
-    },
-    "styrketrening": {
-      "concepts": [
-        "ACT-068"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Styrketrening"
-      ]
-    },
-    "svømmekurs": {
-      "concepts": [
-        "ACT-083",
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Svømmekurs"
-      ]
-    },
-    "svømming": {
-      "concepts": [
-        "ACT-083"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Svømming"
-      ]
-    },
-    "sykehjem": {
-      "concepts": [
-        "VEN-010",
-        "GRP-005"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sykehjem"
-      ]
-    },
-    "sykling": {
-      "concepts": [
-        "ACT-072"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Sykling"
-      ]
-    },
-    "symjehall": {
-      "concepts": [
-        "VEN-022"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Symjehall"
-      ]
-    },
-    "synkronsvømming": {
-      "concepts": [
-        "ACT-084"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Synkronsvømming"
-      ]
-    },
-    "søndagskafé": {
-      "concepts": [
-        "EVT-028"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Søndagskafé"
-      ]
-    },
-    "taekwondo": {
-      "concepts": [
-        "ACT-043"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Taekwondo"
-      ]
-    },
-    "team-building": {
-      "concepts": [
-        "EVT-001",
-        "ORG-020"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "Team-building"
-      ]
-    },
-    "teater": {
-      "concepts": [
-        "ACT-106"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Teater"
-      ]
-    },
-    "teater og scenekunst": {
-      "concepts": [
-        "ACT-106",
-        "ACT-104"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Teater og scenekunst"
-      ]
-    },
-    "teaterforestilling": {
-      "concepts": [
-        "EVT-010",
-        "ACT-106"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Teaterforestilling"
-      ]
-    },
-    "teltplass": {
-      "concepts": [
-        "VEN-025"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Teltplass"
-      ]
-    },
-    "tennis": {
-      "concepts": [
-        "ACT-062"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Tennis"
-      ]
-    },
-    "terapi": {
-      "concepts": [
-        "SRV-002"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Terapi"
-      ]
-    },
-    "tiden er ledig. sykkelen reserveres fra forrige ledige torsdag.": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "test_or_system_text",
-      "status": "Proposed",
-      "sourceNames": [
-        "Tiden er ledig. Sykkelen reserveres fra forrige ledige torsdag."
-      ]
-    },
-    "tivoli": {
-      "concepts": [
-        "EVT-017"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Tivoli"
-      ]
-    },
-    "torg": {
-      "concepts": [
-        "VEN-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Torg"
-      ]
-    },
-    "torgplasser": {
-      "concepts": [
-        "VEN-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Torgplasser"
-      ]
-    },
-    "transporthjelp": {
-      "concepts": [
-        "SRV-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Transporthjelp"
-      ]
-    },
-    "treklang": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unknown",
-      "status": "Proposed",
-      "sourceNames": [
-        "Treklang"
-      ]
-    },
-    "trening": {
-      "concepts": [
-        "ACT-069"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Trening"
-      ]
-    },
-    "trening senior": {
-      "concepts": [
-        "ACT-069",
-        "GRP-005"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Trening senior"
-      ]
-    },
-    "trim": {
-      "concepts": [
-        "ACT-069"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Trim"
-      ]
-    },
-    "trimgrupper": {
-      "concepts": [
-        "ACT-069"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Trimgrupper"
-      ]
-    },
-    "tur": {
-      "concepts": [
-        "ACT-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Tur"
-      ]
-    },
-    "turar": {
-      "concepts": [
-        "ACT-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Turar"
-      ]
-    },
-    "turgruppe": {
-      "concepts": [
-        "ACT-004"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Turgruppe"
-      ]
-    },
-    "turn": {
-      "concepts": [
-        "ACT-032"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Turn"
-      ]
-    },
-    "undervannsrugby": {
-      "concepts": [
-        "ACT-076"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Undervannsrugby"
-      ]
-    },
-    "undervisning": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Undervisning"
-      ]
-    },
-    "undervisning/opplæring": {
-      "concepts": [
-        "ACT-109"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Undervisning/opplæring"
-      ]
-    },
-    "ungdomsklubb": {
-      "concepts": [
-        "GRP-007",
-        "EVT-026"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Ungdomsklubb"
-      ]
-    },
-    "uorganisert": {
-      "concepts": [
-        "ORG-001"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Uorganisert"
-      ]
-    },
-    "utenlandsk forening": {
-      "concepts": [
-        "ORG-005"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Utenlandsk forening"
-      ]
-    },
-    "uteområde": {
-      "concepts": [
-        "VEN-023"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Uteområde"
-      ]
-    },
-    "utholdenhetstrening": {
-      "concepts": [
-        "ACT-069"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Utholdenhetstrening"
-      ]
-    },
-    "utlånsordningen er ikke åpen": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Utlånsordningen er ikke åpen"
-      ]
-    },
-    "utstilling": {
-      "concepts": [
-        "EVT-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Utstilling"
-      ]
-    },
-    "utstillinger": {
-      "concepts": [
-        "EVT-013"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Utstillinger"
-      ]
-    },
-    "utstyr": {
-      "concepts": [
-        "SRV-005"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Utstyr"
-      ]
-    },
-    "vannpolo": {
-      "concepts": [
-        "ACT-085"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vannpolo"
-      ]
-    },
-    "vannsport": {
-      "concepts": [
-        "ACT-073"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vannsport"
-      ]
-    },
-    "vanntrening": {
-      "concepts": [
-        "ACT-069",
-        "ACT-074"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vanntrening"
-      ]
-    },
-    "varmtvannsbasseng": {
-      "concepts": [
-        "VEN-022"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Varmtvannsbasseng"
-      ]
-    },
-    "vedlikehold": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vedlikehold"
-      ]
-    },
-    "veiledningstime byggesak": {
-      "concepts": [
-        "SRV-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Veiledningstime Byggesak"
-      ]
-    },
-    "vektløfting": {
-      "concepts": [
-        "ACT-070"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vektløfting"
-      ]
-    },
-    "velforeninger": {
-      "concepts": [
-        "ORG-008"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Velforeninger"
-      ]
-    },
-    "vennelag/gruppe": {
-      "concepts": [
-        "ORG-023"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vennelag/gruppe"
-      ]
-    },
-    "verksted": {
-      "concepts": [
-        "ACT-096"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Verksted"
-      ]
-    },
-    "verkstedlokale": {
-      "concepts": [
-        "VEN-019"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Verkstedlokale"
-      ]
-    },
-    "vgs": {
-      "concepts": [
-        "GRP-012"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "VGS"
-      ]
-    },
-    "vid": {
-      "concepts": [
-        "GRP-010"
-      ],
-      "confidence": "L",
-      "status": "Proposed",
-      "sourceNames": [
-        "VID"
-      ]
-    },
-    "video": {
-      "concepts": [
-        "ACT-094"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Video"
-      ]
-    },
-    "vielser": {
-      "concepts": [
-        "EVT-023"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vielser"
-      ]
-    },
-    "vigsel": {
-      "concepts": [
-        "EVT-023"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Vigsel"
-      ]
-    },
-    "voksenbading": {
-      "concepts": [
-        "ACT-074"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "attributes": {
-        "ageMin": 18
-      },
-      "sourceNames": [
-        "Voksenbading"
-      ]
-    },
-    "voksenopplæringssenteret": {
-      "concepts": [
-        "ORG-024"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Voksenopplæringssenteret"
-      ]
-    },
-    "volleyball": {
-      "concepts": [
-        "ACT-024"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Volleyball"
-      ]
-    },
-    "walk and talk - test": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "test_or_system_text",
-      "status": "Proposed",
-      "sourceNames": [
-        "Walk and talk - test"
-      ]
-    },
-    "workshop": {
-      "concepts": [
-        "ACT-109",
-        "ACT-096"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Workshop"
-      ]
-    },
-    "x annet": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "unspecified",
-      "status": "Proposed",
-      "sourceNames": [
-        "X Annet"
-      ]
-    },
-    "yoga": {
-      "concepts": [
-        "ACT-071"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Yoga"
-      ]
-    },
-    "åpen hall": {
-      "concepts": [
-        "EVT-027",
-        "VEN-012"
-      ],
-      "confidence": "M",
-      "status": "Proposed",
-      "sourceNames": [
-        "Åpen hall"
-      ]
-    },
-    "åpne møter": {
-      "concepts": [
-        "EVT-002",
-        "EVT-006"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Åpne møter"
-      ]
-    },
-    "åpningstid": {
-      "concepts": [],
-      "exclude": true,
-      "reason": "status",
-      "status": "Proposed",
-      "sourceNames": [
-        "Åpningstid"
-      ]
-    },
-    "øvingslokaler og verksteder": {
-      "concepts": [
-        "VEN-019"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Øvingslokaler og verksteder"
-      ]
-    },
-    "øvingsrom": {
-      "concepts": [
-        "VEN-019"
-      ],
-      "confidence": "H",
-      "status": "Proposed",
-      "sourceNames": [
-        "Øvingsrom"
-      ]
-    }
-  }
+  "administrasjonslokale": [
+    "VEN-001"
+  ],
+  "aktivitetshus": [
+    "VEN-008"
+  ],
+  "alle typer arrangement": [
+    "EVT-001"
+  ],
+  "allidrett": [
+    "ACT-011"
+  ],
+  "amerikansk fotball": [
+    "ACT-013"
+  ],
+  "andre": [
+    "EXC-004"
+  ],
+  "andre aktivitetar, konsertar, o.l": [
+    "EVT-012",
+    "EXC-004"
+  ],
+  "andre aktivitetar, o.l": [
+    "EXC-004"
+  ],
+  "andre idretter": [
+    "ACT-010"
+  ],
+  "anleggsarbeid": [
+    "EXC-002"
+  ],
+  "annen idrett": [
+    "ACT-010"
+  ],
+  "annet": [
+    "EXC-004"
+  ],
+  "annet - idrett møterom": [
+    "VEN-021",
+    "ACT-010"
+  ],
+  "annet - internt i kommunen": [
+    "GRP-003"
+  ],
+  "annet - kultur møterom": [
+    "VEN-021",
+    "ACT-092"
+  ],
+  "annet - offentlig arrangement": [
+    "EVT-006"
+  ],
+  "annet - personlig markering": [
+    "EVT-020"
+  ],
+  "arena": [
+    "VEN-003"
+  ],
+  "arrangement": [
+    "EVT-001"
+  ],
+  "arrangement og møte": [
+    "EVT-001",
+    "EVT-002"
+  ],
+  "arrangementer": [
+    "EVT-001"
+  ],
+  "arrangementlokale": [
+    "VEN-007"
+  ],
+  "babysvømming": [
+    "ACT-083",
+    "GRP-006"
+  ],
+  "bad": [
+    "ACT-074"
+  ],
+  "bading": [
+    "ACT-074"
+  ],
+  "badminton": [
+    "ACT-058"
+  ],
+  "band": [
+    "ACT-099"
+  ],
+  "bandy": [
+    "ACT-014"
+  ],
+  "bandy - inne": [
+    "ACT-021"
+  ],
+  "bandøving": [
+    "ACT-099"
+  ],
+  "barnebursdag": [
+    "EVT-021"
+  ],
+  "barnebursdag 3 - 12 år": [
+    "EVT-021",
+    "GRP-001"
+  ],
+  "barnebursdag 3 -16 år": [
+    "EVT-021",
+    "GRP-001"
+  ],
+  "barnehage": [
+    "GRP-009"
+  ],
+  "barnehager": [
+    "GRP-009"
+  ],
+  "barneidrett": [
+    "ACT-011",
+    "GRP-001"
+  ],
+  "barnetilbud": [
+    "GRP-001"
+  ],
+  "baseball": [
+    "ACT-015"
+  ],
+  "baseball/softball": [
+    "ACT-015"
+  ],
+  "basketball": [
+    "ACT-016"
+  ],
+  "bedrifter o.l": [
+    "ORG-020"
+  ],
+  "bedriftsidrett": [
+    "ORG-012",
+    "ACT-010"
+  ],
+  "bibliotek": [
+    "VEN-004"
+  ],
+  "bil/mc klubb": [
+    "ORG-014",
+    "ACT-046"
+  ],
+  "boccia": [
+    "ACT-050"
+  ],
+  "boksing": [
+    "ACT-036"
+  ],
+  "bordtennis": [
+    "ACT-059"
+  ],
+  "bowls": [
+    "ACT-051"
+  ],
+  "bryllup": [
+    "EVT-023"
+  ],
+  "bryting": [
+    "ACT-037"
+  ],
+  "buekorps": [
+    "ACT-100"
+  ],
+  "bueskyting": [
+    "ACT-052"
+  ],
+  "bursdagsfeiring": [
+    "EVT-020"
+  ],
+  "bydelshus": [
+    "VEN-009"
+  ],
+  "byrom": [
+    "VEN-006"
+  ],
+  "båtforeingar": [
+    "ORG-004"
+  ],
+  "cheerleading": [
+    "ACT-029"
+  ],
+  "cricket": [
+    "ACT-017"
+  ],
+  "curling": [
+    "ACT-053"
+  ],
+  "dagsmøte": [
+    "EVT-004",
+    "EVT-002"
+  ],
+  "dans": [
+    "ACT-093"
+  ],
+  "dans/ musikk/ kor/ korps": [
+    "ACT-098",
+    "ACT-093"
+  ],
+  "dans/trening": [
+    "ACT-093",
+    "ACT-065"
+  ],
+  "dansing": [
+    "ACT-093"
+  ],
+  "datahjelp": [
+    "SRV-006"
+  ],
+  "dataundervisning": [
+    "ACT-109"
+  ],
+  "demonstrasjon": [
+    "EVT-015"
+  ],
+  "disko": [
+    "EVT-007"
+  ],
+  "diskorom": [
+    "EVT-007"
+  ],
+  "drill": [
+    "ACT-030"
+  ],
+  "drop in": [
+    "EVT-027"
+  ],
+  "drop-in / arbeidsplasser": [
+    "VEN-002"
+  ],
+  "dykking": [
+    "ACT-075"
+  ],
+  "dåp": [
+    "EVT-024"
+  ],
+  "dåp/navnedag": [
+    "EVT-024"
+  ],
+  "e-sport": [
+    "ACT-025"
+  ],
+  "egenorganisert": [
+    "ORG-001"
+  ],
+  "ekstra renhold": [
+    "EXC-002"
+  ],
+  "familiefest": [
+    "EVT-020"
+  ],
+  "fekting": [
+    "ACT-038"
+  ],
+  "fektting": [
+    "ACT-038"
+  ],
+  "ferie": [
+    "EXC-002"
+  ],
+  "festival": [
+    "EVT-009"
+  ],
+  "festivaler": [
+    "EVT-009"
+  ],
+  "festivaler / mønstringar": [
+    "EVT-009"
+  ],
+  "festivaler / mønstringer": [
+    "EVT-009"
+  ],
+  "festivaler og mønstringer": [
+    "EVT-009"
+  ],
+  "film": [
+    "EVT-011"
+  ],
+  "fisketurer": [
+    "ACT-002"
+  ],
+  "fleiridrettslag": [
+    "ORG-011"
+  ],
+  "fleridrettslag": [
+    "ORG-011"
+  ],
+  "flykningekontoret": [
+    "GRP-003"
+  ],
+  "foredrag": [
+    "EVT-003"
+  ],
+  "foreldreutval": [
+    "ORG-006"
+  ],
+  "forelesning": [
+    "EVT-003",
+    "ACT-109"
+  ],
+  "forestilllinger": [
+    "EVT-010"
+  ],
+  "formidlingsarena og forsamlingslokaler": [
+    "VEN-007"
+  ],
+  "forslag": [
+    "EXC-003"
+  ],
+  "fotball": [
+    "ACT-018"
+  ],
+  "fotball (1/3 del av 7'er bane)": [
+    "ACT-018"
+  ],
+  "fotball (1/4 av 11'er bane)": [
+    "ACT-018"
+  ],
+  "fotballbane": [
+    "VEN-011",
+    "ACT-018"
+  ],
+  "foto": [
+    "ACT-094"
+  ],
+  "friidrett": [
+    "ACT-026"
+  ],
+  "friluft": [
+    "ACT-001"
+  ],
+  "friluftsaktiviteter": [
+    "ACT-001"
+  ],
+  "friluftsliv": [
+    "ACT-001"
+  ],
+  "friområder": [
+    "VEN-023"
+  ],
+  "frisklivsentralen": [
+    "ORG-002",
+    "GRP-003"
+  ],
+  "fritidsklubb": [
+    "GRP-007",
+    "EVT-026"
+  ],
+  "fritidstilbud": [
+    "ACT-005"
+  ],
+  "frivillig organisasjon": [
+    "ORG-003"
+  ],
+  "frivillighet og organisasjonsaktiviteter": [
+    "ORG-003"
+  ],
+  "frivilligsentral": [
+    "ORG-007"
+  ],
+  "funksjonhemma": [
+    "GRP-004"
+  ],
+  "futsal": [
+    "ACT-019"
+  ],
+  "fysiotimer": [
+    "SRV-002"
+  ],
+  "galleri": [
+    "VEN-018"
+  ],
+  "gapahuk": [
+    "VEN-024"
+  ],
+  "generelt": [
+    "EXC-004"
+  ],
+  "gi bort": [
+    "SRV-001"
+  ],
+  "golf": [
+    "ACT-054"
+  ],
+  "grendalag": [
+    "ORG-008"
+  ],
+  "grendalag/velforening": [
+    "ORG-008"
+  ],
+  "grendelag": [
+    "ORG-008"
+  ],
+  "grill/bålpanne": [
+    "SRV-005"
+  ],
+  "gruppearbeid": [
+    "ACT-109"
+  ],
+  "gymnastikk": [
+    "ACT-028"
+  ],
+  "gymnastikk og turn": [
+    "ACT-028"
+  ],
+  "gymsal": [
+    "VEN-012"
+  ],
+  "helsebygg": [
+    "VEN-010"
+  ],
+  "hestesport": [
+    "ACT-033"
+  ],
+  "hobbygrupper": [
+    "ACT-006"
+  ],
+  "humanitære organiasjoner": [
+    "ORG-009"
+  ],
+  "humanitære organisasjonar": [
+    "ORG-009"
+  ],
+  "humanitære organisasjoner": [
+    "ORG-009"
+  ],
+  "hundesport": [
+    "ACT-034"
+  ],
+  "hurtigløp": [
+    "ACT-090"
+  ],
+  "håndball": [
+    "ACT-020"
+  ],
+  "hårklipp": [
+    "SRV-003"
+  ],
+  "idrett": [
+    "ACT-010"
+  ],
+  "idrett møterom": [
+    "VEN-021",
+    "ACT-010"
+  ],
+  "idrettsaktiviteter": [
+    "ACT-010"
+  ],
+  "idrettshall": [
+    "VEN-012"
+  ],
+  "idrettskrets - særforbund": [
+    "ORG-010"
+  ],
+  "informasjons møter": [
+    "EVT-002"
+  ],
+  "inkludering": [
+    "GRP-002"
+  ],
+  "innbyggerbussen": [
+    "SRV-004"
+  ],
+  "innbyggertorg": [
+    "VEN-013"
+  ],
+  "innebandy": [
+    "ACT-021"
+  ],
+  "innefotball": [
+    "ACT-018"
+  ],
+  "interesseorganiasjonar": [
+    "ORG-013"
+  ],
+  "interesseorganiasjoner": [
+    "ORG-013"
+  ],
+  "interesseorganisasjon": [
+    "ORG-013"
+  ],
+  "interesseorganisasjonar": [
+    "ORG-013"
+  ],
+  "interesseorganisasjoner": [
+    "ORG-013"
+  ],
+  "intern": [
+    "GRP-003"
+  ],
+  "intern avdeling: flyk": [
+    "GRP-003"
+  ],
+  "intern avdeling: kulturskolen": [
+    "ORG-019",
+    "GRP-003"
+  ],
+  "intern avdeling: voks": [
+    "ORG-024",
+    "GRP-003"
+  ],
+  "interne avdelinger": [
+    "GRP-003"
+  ],
+  "internt bergen kommune": [
+    "GRP-003"
+  ],
+  "internt bruk - kommune": [
+    "GRP-003"
+  ],
+  "internt i kommunen": [
+    "GRP-003"
+  ],
+  "internt kommune": [
+    "GRP-003"
+  ],
+  "internt stavanger kommune": [
+    "GRP-003"
+  ],
+  "involvering": [
+    "EVT-005"
+  ],
+  "ishockey": [
+    "ACT-087"
+  ],
+  "jakt": [
+    "ACT-003"
+  ],
+  "ju jitsu": [
+    "ACT-040"
+  ],
+  "judo": [
+    "ACT-039"
+  ],
+  "kafe": [
+    "EVT-028"
+  ],
+  "kafè": [
+    "EVT-028"
+  ],
+  "kajakk": [
+    "ACT-078"
+  ],
+  "kamera": [
+    "SRV-005",
+    "ACT-094"
+  ],
+  "kampsport": [
+    "ACT-035"
+  ],
+  "kano/kajakk": [
+    "ACT-079",
+    "ACT-078"
+  ],
+  "kanopadling": [
+    "ACT-079"
+  ],
+  "karate": [
+    "ACT-041"
+  ],
+  "kickboksing": [
+    "ACT-042"
+  ],
+  "kino": [
+    "EVT-011"
+  ],
+  "kjøkken": [
+    "VEN-014"
+  ],
+  "klartring": [
+    "ACT-044"
+  ],
+  "klassefest": [
+    "EVT-020",
+    "GRP-011"
+  ],
+  "klasserom": [
+    "VEN-015"
+  ],
+  "klasseromsundervisning": [
+    "ACT-109"
+  ],
+  "klatrevegg": [
+    "ACT-044"
+  ],
+  "klatring": [
+    "ACT-044"
+  ],
+  "klatring/ buldring": [
+    "ACT-044"
+  ],
+  "klesinnsamling": [
+    "SRV-001"
+  ],
+  "klubbmøte": [
+    "EVT-002"
+  ],
+  "kommersiell utleie": [
+    "ORG-020"
+  ],
+  "kommersiell utleige": [
+    "ORG-020"
+  ],
+  "kommunal aktivitet": [
+    "GRP-003"
+  ],
+  "kommunalt": [
+    "GRP-003"
+  ],
+  "kommunalt bruk": [
+    "GRP-003"
+  ],
+  "kommune eige bruk": [
+    "GRP-003"
+  ],
+  "konferanse": [
+    "EVT-004"
+  ],
+  "konferanser": [
+    "EVT-004"
+  ],
+  "konfirmasjon": [
+    "EVT-025"
+  ],
+  "konsert": [
+    "EVT-012"
+  ],
+  "kor": [
+    "ACT-101"
+  ],
+  "korps": [
+    "ACT-102"
+  ],
+  "korps og orkester": [
+    "ACT-102",
+    "ACT-103"
+  ],
+  "kreativt verksted": [
+    "ACT-096"
+  ],
+  "kreativt verksted og prosesser": [
+    "ACT-096"
+  ],
+  "kultur": [
+    "ACT-092"
+  ],
+  "kulturaktiviteter": [
+    "ACT-092"
+  ],
+  "kulturarrangement": [
+    "EVT-008"
+  ],
+  "kulturbygg": [
+    "VEN-016"
+  ],
+  "kulturhus": [
+    "VEN-016"
+  ],
+  "kulturlokalar møterom": [
+    "VEN-021",
+    "ACT-092"
+  ],
+  "kulturlokale": [
+    "VEN-017"
+  ],
+  "kulturlokaler": [
+    "VEN-017"
+  ],
+  "kulturlokaler formidling og øving": [
+    "VEN-017"
+  ],
+  "kulturlokaler øving og verksteder": [
+    "VEN-019"
+  ],
+  "kulturlokaler, formidling og øving": [
+    "VEN-017"
+  ],
+  "kulturskolen": [
+    "ORG-019"
+  ],
+  "kulturvern og historie": [
+    "ACT-095"
+  ],
+  "kulturvern og historielag": [
+    "ACT-095"
+  ],
+  "kulturvern og sogelag": [
+    "ACT-095"
+  ],
+  "kunst og håndverk": [
+    "ACT-096"
+  ],
+  "kunst, håndtverk, media": [
+    "ACT-096",
+    "ACT-094"
+  ],
+  "kunst, håndverk og media": [
+    "ACT-096",
+    "ACT-094"
+  ],
+  "kunst, håndverk, media": [
+    "ACT-096",
+    "ACT-094"
+  ],
+  "kunstløp": [
+    "ACT-091"
+  ],
+  "kurs": [
+    "ACT-109"
+  ],
+  "kurs og foredrag": [
+    "ACT-109",
+    "EVT-003"
+  ],
+  "lacrosse": [
+    "ACT-022"
+  ],
+  "lag og foreninger": [
+    "ORG-003"
+  ],
+  "lagt til rette for mmnf": [
+    "GRP-004"
+  ],
+  "leie av lastesykkel": [
+    "SRV-005",
+    "SRV-004"
+  ],
+  "leie salgsplass": [
+    "EVT-014"
+  ],
+  "leie standplass": [
+    "EVT-014"
+  ],
+  "leilighet": [
+    "VEN-005"
+  ],
+  "leirdueskyting": [
+    "ACT-056"
+  ],
+  "leksegruppe": [
+    "ACT-109",
+    "GRP-001"
+  ],
+  "litteratur/litteraturformidling": [
+    "ACT-097"
+  ],
+  "lokale aktiviteter-idrett-kultur": [
+    "ACT-010",
+    "ACT-092"
+  ],
+  "lokalmat": [
+    "ACT-007"
+  ],
+  "luftsport": [
+    "ACT-045"
+  ],
+  "lyd": [
+    "SRV-005"
+  ],
+  "lys": [
+    "SRV-005"
+  ],
+  "makeup & hundpleie": [
+    "SRV-003"
+  ],
+  "malegruppe": [
+    "ACT-096"
+  ],
+  "maraton": [
+    "ACT-027"
+  ],
+  "marked": [
+    "EVT-014"
+  ],
+  "markering": [
+    "EVT-015"
+  ],
+  "markering/demonstrasjon": [
+    "EVT-015"
+  ],
+  "matlaging": [
+    "ACT-007"
+  ],
+  "menighet/ trossamfunn": [
+    "ORG-018"
+  ],
+  "menigheter og trosamfunn": [
+    "ORG-018"
+  ],
+  "menigheter og trossamfunn": [
+    "ORG-018"
+  ],
+  "meningheter og trossamfunn": [
+    "ORG-018"
+  ],
+  "messe": [
+    "EVT-014"
+  ],
+  "minifotball": [
+    "ACT-018",
+    "GRP-001"
+  ],
+  "minihåndball": [
+    "ACT-020",
+    "GRP-001"
+  ],
+  "minivolleyball": [
+    "ACT-024",
+    "GRP-001"
+  ],
+  "mobilitet": [
+    "SRV-004"
+  ],
+  "motorsport": [
+    "ACT-046"
+  ],
+  "museum": [
+    "VEN-020"
+  ],
+  "musikk": [
+    "ACT-098"
+  ],
+  "musikk / korps": [
+    "ACT-098",
+    "ACT-102"
+  ],
+  "musikk og dans": [
+    "ACT-098",
+    "ACT-093"
+  ],
+  "møte": [
+    "EVT-002"
+  ],
+  "møte/presentasjon": [
+    "EVT-002",
+    "EVT-003"
+  ],
+  "møteaktivitet": [
+    "EVT-002"
+  ],
+  "møtelokale": [
+    "VEN-021"
+  ],
+  "møteplass": [
+    "EVT-026"
+  ],
+  "møter": [
+    "EVT-002"
+  ],
+  "møter og kurs": [
+    "EVT-002",
+    "ACT-109"
+  ],
+  "møter, kurs, mindre selskaper": [
+    "EVT-002",
+    "ACT-109"
+  ],
+  "møterom": [
+    "VEN-021"
+  ],
+  "møterom i drammen kommune": [
+    "VEN-021",
+    "GRP-003"
+  ],
+  "møtevirksomhet": [
+    "EVT-002"
+  ],
+  "naturskole": [
+    "ACT-001",
+    "ACT-109"
+  ],
+  "nrg": [
+    "EXC-001"
+  ],
+  "ntnu": [
+    "GRP-010"
+  ],
+  "næring og kommersiell virksomhet": [
+    "ORG-020"
+  ],
+  "off.arrangement": [
+    "EVT-006"
+  ],
+  "offentlig": [
+    "ORG-021"
+  ],
+  "offentlig arrangement": [
+    "EVT-006"
+  ],
+  "offentlig bading": [
+    "ACT-074"
+  ],
+  "opplæring": [
+    "ACT-109"
+  ],
+  "oppvekst/skule": [
+    "GRP-011"
+  ],
+  "organisasjon": [
+    "ORG-003"
+  ],
+  "organisering av aktivitetar": [
+    "EXC-004"
+  ],
+  "orientering": [
+    "ACT-047"
+  ],
+  "overnatting": [
+    "EVT-019"
+  ],
+  "padeltennis": [
+    "ACT-060"
+  ],
+  "paintball": [
+    "ACT-048"
+  ],
+  "pensjonistbading": [
+    "ACT-074",
+    "GRP-005"
+  ],
+  "pensjonistforening": [
+    "ORG-015",
+    "GRP-005"
+  ],
+  "personlig markering": [
+    "EVT-020"
+  ],
+  "politikk/valgdag": [
+    "EVT-018",
+    "ORG-016"
+  ],
+  "politisk organisasjon": [
+    "ORG-016"
+  ],
+  "presentasjoner": [
+    "EVT-003"
+  ],
+  "privat": [
+    "ORG-022"
+  ],
+  "privat arrangement": [
+    "EVT-020"
+  ],
+  "privat utleige": [
+    "ORG-022"
+  ],
+  "privat/ lukket arrangement": [
+    "EVT-020"
+  ],
+  "profilering": [
+    "EVT-016"
+  ],
+  "promotering": [
+    "EVT-016"
+  ],
+  "pu/hu": [
+    "GRP-004"
+  ],
+  "pub": [
+    "EVT-028"
+  ],
+  "renhold og vedlikehold": [
+    "EXC-002"
+  ],
+  "revy og teater": [
+    "ACT-106"
+  ],
+  "riding": [
+    "ACT-033"
+  ],
+  "roing": [
+    "ACT-080"
+  ],
+  "rollerderby": [
+    "ACT-064"
+  ],
+  "rugby": [
+    "ACT-023"
+  ],
+  "rytmisk sportsgymnastikk (rg)": [
+    "ACT-031"
+  ],
+  "salg": [
+    "EVT-014"
+  ],
+  "salgsplass": [
+    "EVT-014"
+  ],
+  "saltimer": [
+    "VEN-007"
+  ],
+  "sambruk": [
+    "GRP-003"
+  ],
+  "samlinger": [
+    "EVT-002"
+  ],
+  "samlingsplass": [
+    "VEN-007"
+  ],
+  "samtale": [
+    "EVT-002"
+  ],
+  "samtale med innbygger": [
+    "SRV-006"
+  ],
+  "samtaler": [
+    "EVT-002"
+  ],
+  "seiling": [
+    "ACT-081"
+  ],
+  "seilsport": [
+    "ACT-081"
+  ],
+  "selskap": [
+    "EVT-020"
+  ],
+  "selskapsarrangement": [
+    "EVT-020"
+  ],
+  "seremonier": [
+    "EVT-022"
+  ],
+  "sirkus": [
+    "ACT-105"
+  ],
+  "sjakk": [
+    "ACT-009"
+  ],
+  "sjøsport": [
+    "ACT-073"
+  ],
+  "skating": [
+    "ACT-063"
+  ],
+  "ski": [
+    "ACT-088"
+  ],
+  "ski (langrenn/alpin)": [
+    "ACT-088"
+  ],
+  "skisport": [
+    "ACT-088"
+  ],
+  "skole": [
+    "GRP-011"
+  ],
+  "skolekjøkken": [
+    "VEN-014",
+    "GRP-011"
+  ],
+  "skuespill": [
+    "ACT-106"
+  ],
+  "skular": [
+    "GRP-011"
+  ],
+  "skule": [
+    "GRP-011"
+  ],
+  "skule - oppvekst": [
+    "GRP-011"
+  ],
+  "skyting": [
+    "ACT-055"
+  ],
+  "skøyter": [
+    "ACT-089"
+  ],
+  "slettet/utgått": [
+    "EXC-003"
+  ],
+  "små møter": [
+    "EVT-002"
+  ],
+  "sommerleir": [
+    "EVT-019",
+    "GRP-001"
+  ],
+  "sommerstengt - sommertrening": [
+    "EXC-002"
+  ],
+  "sosial møteplass": [
+    "EVT-026"
+  ],
+  "sosiale aktivteter": [
+    "EVT-026"
+  ],
+  "sosiale møteplassar": [
+    "EVT-026"
+  ],
+  "sosiale møteplasser": [
+    "EVT-026"
+  ],
+  "sosiale tilstelninger": [
+    "EVT-020"
+  ],
+  "spedbarnsgruppe": [
+    "GRP-006"
+  ],
+  "speidar": [
+    "ORG-017"
+  ],
+  "speidarar": [
+    "ORG-017"
+  ],
+  "speider": [
+    "ORG-017"
+  ],
+  "speider og friluftsliv": [
+    "ORG-017",
+    "ACT-001"
+  ],
+  "speiding": [
+    "ORG-017",
+    "ACT-001"
+  ],
+  "spill": [
+    "ACT-008"
+  ],
+  "spinning": [
+    "ACT-066"
+  ],
+  "sport og idrett": [
+    "ACT-010"
+  ],
+  "sportsdrill": [
+    "ACT-030"
+  ],
+  "språkcafé": [
+    "ACT-108"
+  ],
+  "squash": [
+    "ACT-061"
+  ],
+  "stand": [
+    "EVT-014"
+  ],
+  "stand (2mx3m)": [
+    "EVT-014"
+  ],
+  "standplass": [
+    "EVT-014"
+  ],
+  "stands": [
+    "EVT-014"
+  ],
+  "stengt": [
+    "EXC-002"
+  ],
+  "stengt grunna vedlikehald eller ferie": [
+    "EXC-002"
+  ],
+  "stengt pga arrangement": [
+    "EXC-002"
+  ],
+  "stengt pga ferie eller arrangement": [
+    "EXC-002"
+  ],
+  "stengt pga vedlikehold/reperasjon av utstyr": [
+    "EXC-002"
+  ],
+  "studiegrupper": [
+    "ACT-109"
+  ],
+  "stup": [
+    "ACT-082"
+  ],
+  "stuping": [
+    "ACT-082"
+  ],
+  "styrkeløft": [
+    "ACT-067"
+  ],
+  "styrkeløfting": [
+    "ACT-067"
+  ],
+  "styrketrening": [
+    "ACT-068"
+  ],
+  "svømmekurs": [
+    "ACT-083",
+    "ACT-109"
+  ],
+  "svømming": [
+    "ACT-083"
+  ],
+  "sykehjem": [
+    "VEN-010",
+    "GRP-005"
+  ],
+  "sykling": [
+    "ACT-072"
+  ],
+  "symjehall": [
+    "VEN-022"
+  ],
+  "synkronsvømming": [
+    "ACT-084"
+  ],
+  "søndagskafé": [
+    "EVT-028"
+  ],
+  "taekwondo": [
+    "ACT-043"
+  ],
+  "team-building": [
+    "EVT-001",
+    "ORG-020"
+  ],
+  "teater": [
+    "ACT-106"
+  ],
+  "teater og scenekunst": [
+    "ACT-106",
+    "ACT-104"
+  ],
+  "teaterforestilling": [
+    "EVT-010",
+    "ACT-106"
+  ],
+  "teltplass": [
+    "VEN-025"
+  ],
+  "tennis": [
+    "ACT-062"
+  ],
+  "terapi": [
+    "SRV-002"
+  ],
+  "tiden er ledig. sykkelen reserveres fra forrige ledige torsdag.": [
+    "EXC-003"
+  ],
+  "tivoli": [
+    "EVT-017"
+  ],
+  "torg": [
+    "VEN-006"
+  ],
+  "torgplasser": [
+    "VEN-006"
+  ],
+  "transporthjelp": [
+    "SRV-004"
+  ],
+  "treklang": [
+    "EXC-001"
+  ],
+  "trening": [
+    "ACT-069"
+  ],
+  "trening senior": [
+    "ACT-069",
+    "GRP-005"
+  ],
+  "trim": [
+    "ACT-069"
+  ],
+  "trimgrupper": [
+    "ACT-069"
+  ],
+  "tur": [
+    "ACT-004"
+  ],
+  "turar": [
+    "ACT-004"
+  ],
+  "turgruppe": [
+    "ACT-004"
+  ],
+  "turn": [
+    "ACT-032"
+  ],
+  "undervannsrugby": [
+    "ACT-076"
+  ],
+  "undervisning": [
+    "ACT-109"
+  ],
+  "undervisning/opplæring": [
+    "ACT-109"
+  ],
+  "ungdomsklubb": [
+    "GRP-007",
+    "EVT-026"
+  ],
+  "uorganisert": [
+    "ORG-001"
+  ],
+  "utenlandsk forening": [
+    "ORG-005"
+  ],
+  "uteområde": [
+    "VEN-023"
+  ],
+  "utholdenhetstrening": [
+    "ACT-069"
+  ],
+  "utlånsordningen er ikke åpen": [
+    "EXC-002"
+  ],
+  "utstilling": [
+    "EVT-013"
+  ],
+  "utstillinger": [
+    "EVT-013"
+  ],
+  "utstyr": [
+    "SRV-005"
+  ],
+  "vannpolo": [
+    "ACT-085"
+  ],
+  "vannsport": [
+    "ACT-073"
+  ],
+  "vanntrening": [
+    "ACT-069",
+    "ACT-074"
+  ],
+  "varmtvannsbasseng": [
+    "VEN-022"
+  ],
+  "vedlikehold": [
+    "EXC-002"
+  ],
+  "veiledningstime byggesak": [
+    "SRV-006"
+  ],
+  "vektløfting": [
+    "ACT-070"
+  ],
+  "velforeninger": [
+    "ORG-008"
+  ],
+  "vennelag/gruppe": [
+    "ORG-023"
+  ],
+  "verksted": [
+    "ACT-096"
+  ],
+  "verkstedlokale": [
+    "VEN-019"
+  ],
+  "vgs": [
+    "GRP-012"
+  ],
+  "vid": [
+    "GRP-010"
+  ],
+  "video": [
+    "ACT-094"
+  ],
+  "vielser": [
+    "EVT-023"
+  ],
+  "vigsel": [
+    "EVT-023"
+  ],
+  "voksenbading": [
+    "ACT-074"
+  ],
+  "voksenopplæringssenteret": [
+    "ORG-024"
+  ],
+  "volleyball": [
+    "ACT-024"
+  ],
+  "walk and talk - test": [
+    "EXC-003"
+  ],
+  "workshop": [
+    "ACT-109",
+    "ACT-096"
+  ],
+  "x annet": [
+    "EXC-004"
+  ],
+  "yoga": [
+    "ACT-071"
+  ],
+  "åpen hall": [
+    "EVT-027",
+    "VEN-012"
+  ],
+  "åpne møter": [
+    "EVT-002",
+    "EVT-006"
+  ],
+  "åpningstid": [
+    "EXC-002"
+  ],
+  "øvingslokaler og verksteder": [
+    "VEN-019"
+  ],
+  "øvingsrom": [
+    "VEN-019"
+  ]
 }

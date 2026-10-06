@@ -1,6 +1,5 @@
 {
   "source": "AktivKommune_activity_mapping_v0.2.xlsx",
-  "approvedOnly": false,
   "facets": {
     "activity": {
       "ACT-001": {

@@ -36,7 +36,13 @@ import sys
 import unicodedata
 import urllib.error
 import urllib.request
+from pathlib import Path
 from datetime import datetime, timezone
+
+def last_mapping(mappe: str) -> dict:
+    with open(Path(__file__).parent / mappe / "mapping.json", encoding="utf-8") as f:
+        return json.load(f)["values"]
+
 
 KOMMUNER = {
     "bergen": ("4601", "Bergen", "Vestland"),
@@ -57,80 +63,8 @@ KOMMUNER = {
 # fasilitet, seedet i schema_kjerne.sql). Navn som ikke finnes her, lastes inn
 # i kildekode uendret, men får ingen kartlegging - de dukker opp i
 # v_ukartlagte_kildekoder og må kobles manuelt.
-LOKALETYPE = {
-    "gymsal": "GYMSAL", "idrettshall": "IDRETTSHALL", "idrettshall privateid": "IDRETTSHALL",
-    "idrettsanlegg": "IDRETTSHALL", "idrettsanlegg privateid": "IDRETTSHALL",
-    "svommehall": "SVOMMEANLEGG", "svommeanlegg": "SVOMMEANLEGG", "basseng": "SVOMMEANLEGG",
-    "basseng symjehall": "SVOMMEANLEGG",
-    "ishall": "ISHALL", "utendors isbane": "ISHALL", "kunstisbane": "ISHALL",
-    "friidrettsanlegg": "FRIIDRETTSANLEGG", "friidrettsbane": "FRIIDRETTSANLEGG",
-    "friidrettshall": "FRIIDRETTSANLEGG", "kastfelt grus": "FRIIDRETTSANLEGG",
-    "kastfelt gress": "FRIIDRETTSANLEGG", "sprintstripe": "FRIIDRETTSANLEGG",
-    "kunstgressbane": "FOTBALLBANE", "kunstgrasbane": "FOTBALLBANE",
-    "gressbane": "FOTBALLBANE", "grasbane": "FOTBALLBANE", "grusbane": "FOTBALLBANE",
-    "ballbinger": "BALLBANE", "sandvolleyballbane": "BALLBANE", "bordtennis": "BALLBANE",
-    "tennisbane": "TENNISANLEGG", "tennishall": "TENNISANLEGG",
-    "styrkerom": "STYRKEROM", "vektlofterlokale": "STYRKEROM",
-    "styrkeloftlokale": "STYRKEROM", "apparatsal": "STYRKEROM", "oppvarmingsrom": "STYRKEROM",
-    "kampsportrom": "KAMPSPORTROM", "kampsportmatte": "KAMPSPORTROM",
-    "klatrevegg": "KLATREANLEGG", "turnomrade": "TURNANLEGG",
-    "skateanlegg": "SKATEANLEGG", "skatepark": "SKATEANLEGG",
-    "skytebane skytehall": "SKYTEBANE", "standplass": "SKYTEBANE",
-    "sjosportsanlegg": "SJOSPORTANLEGG", "garderobe": "GARDEROBE",
-
-    "konsertsal": "KONSERTSAL", "kultursal": "KONSERTSAL",
-    "scene": "SCENE", "utendorsscene": "UTESCENE",
-    "auditorium": "AUDITORIUM", "foredragssal": "AUDITORIUM",
-    "ovingsrom": "OVINGSROM", "ovingslokale": "OVINGSROM", "musikkrom": "OVINGSROM",
-    "musikk og danserom": "OVINGSROM",
-    "dansesal": "DANSESAL", "lydstudio": "LYDSTUDIO",
-    "utstillingslokale": "UTSTILLINGSLOKALE", "ateliet": "UTSTILLINGSLOKALE",
-    "bibliotek": "BIBLIOTEK", "foaje": "FOAJE",
-
-    "klasserom": "KLASSEROM", "lite undervisningsrom": "KLASSEROM",
-    "stort undervisningsrom": "KLASSEROM", "kursrom": "KLASSEROM",
-    "grupperom": "GRUPPEROM", "prosjektrom": "GRUPPEROM",
-    "moterom": "MOTEROM", "motelokale": "MOTEROM", "konferanserom": "MOTEROM",
-    "samhandlingslab": "MOTEROM", "datarom": "DATAROM", "aula": "AULA",
-
-    "sloydsal": "SLOYDSAL", "kunst og designverksted": "KUNSTVERKSTED",
-    "kunst og handverk": "KUNSTVERKSTED", "kreativt verksted": "KUNSTVERKSTED",
-    "systue": "SYSTUE", "multimediaverksted": "MEDIEVERKSTED",
-    "streaming": "MEDIEVERKSTED", "frisorsalong": "FRISORSALONG",
-
-    "selskapslokale": "SELSKAPSLOKALE", "selskapslokale storsal": "SELSKAPSLOKALE",
-    "forsamlingslokale": "FORSAMLINGSLOKALE",
-    "forsamlingslokale privateid": "FORSAMLINGSLOKALE",
-    "seremonirom": "SEREMONIROM", "sermonirom": "SEREMONIROM",
-    "bursdagslokale": "BURSDAGSLOKALE", "barnebursdag": "BURSDAGSLOKALE",
-    "arrangementsarena": "ARRANGEMENTSARENA", "arrangementslokale": "ARRANGEMENTSARENA",
-    "torgplass": "TORGPLASS", "moteplass": "TORGPLASS",
-
-    "kjokken": "KJOKKEN", "kantine": "KANTINE",
-    "kantine kunnskapshjornet": "KANTINE", "kantine kunnskapshjorne": "KANTINE",
-    "kafe": "KAFE", "kiosk minkjokken": "KAFE", "sondagskafe": "KAFE",
-    "bevertning": "KAFE",
-
-    "allaktivitetshus": "ALLAKTIVITETSHUS", "aktivitetshus": "ALLAKTIVITETSHUS",
-    "aktivitetsrom": "AKTIVITETSROM", "aktivitetssal": "AKTIVITETSROM",
-    "flerbruksrom": "AKTIVITETSROM", "fellesrom": "AKTIVITETSROM",
-    "ungdomslokale": "UNGDOMSLOKALE", "dagsenter": "DAGSENTER", "miljostue": "DAGSENTER",
-
-    "friluftsomrade": "FRILUFTSOMRAADE", "utendorsomrade": "UTEOMRAADE",
-    "uterom uteomrade": "UTEOMRAADE", "turveier": "TURVEI",
-    "gapahuk": "GAPAHUK", "balpanne": "GAPAHUK",
-
-    "overnatting": "OVERNATTINGSROM", "beboerrom": "BEBOERROM",
-    "ovingsleilighet": "OVINGSLEILIGHET",
-
-    "kontor": "KONTOR", "arbeidsplasser": "KONTOR", "butikklokale": "BUTIKKLOKALE",
-    "frilager": "LAGER", "lokale": "GENERELT_LOKALE", "ovrige lokalar": "GENERELT_LOKALE",
-    "anlegg": "GENERELT_LOKALE",
-
-    "sykler": "SYKKEL", "el sykler": "SYKKEL", "kano kajakk": "KANO_KAJAKK",
-    "kano": "KANO_KAJAKK", "kajakk": "KANO_KAJAKK", "fiskestengar": "FISKEUTSTYR",
-    "redningsvestar": "REDNINGSVEST", "lydanlegg": "LYDANLEGG", "utstyr": "ANNET_UTSTYR",
-}
+LOKALETYPE = last_mapping("lokaletype_mapping")
+FASILITET = last_mapping("fasilitet_mapping")
 
 # Junk uansett kodetype: adresser, stedsnavn og driftsstatus som aldri kan
 # være en ekte lokaletype, aktivitet eller fasilitet.
@@ -155,17 +89,6 @@ IKKE_RELEVANT_PER_TYPE = {
 def er_ikke_relevant(kodetype: str, navn_normalisert: str) -> bool:
     return (navn_normalisert in IKKE_RELEVANT_UNIVERSELT
             or navn_normalisert in IKKE_RELEVANT_PER_TYPE.get(kodetype, set()))
-
-FASILITET = {
-    "garderobe": "GARDEROBE", "dusj": "DUSJ", "toalett": "TOALETT", "wc": "TOALETT",
-    "hc toalett": "HC_TOALETT", "teleslynge": "TELESLYNGE", "heis": "HEIS",
-    "projektor": "PROSJEKTOR", "prosjektor": "PROSJEKTOR", "lydanlegg": "LYDANLEGG",
-    "musikkanlegg m blatann": "LYDANLEGG", "mikrofon": "MIKROFON",
-    "flygel": "FLYGEL", "piano": "FLYGEL", "parkettgulv": "PARKETTGULV",
-    "tribune": "TRIBUNE", "kiosk": "KIOSK", "kjokken": "KJOKKEN",
-    "parkering": "PARKERING", "balpanne": "BAALPLASS", "whiteboard": "WHITEBOARD",
-    "flomlys": "FLOMLYS", "wifi": "WIFI",
-}
 
 AKTIVITET = {
     "fotball": "FOTBALL", "handball": "HANDBALL", "basketball": "BASKETBALL",
