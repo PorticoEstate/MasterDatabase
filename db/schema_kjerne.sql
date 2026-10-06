@@ -1,7 +1,7 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
 -- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
--- 17 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
+-- 18 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
 -- matrikkelen. Se db/schema_kjerne_dokumentasjon.md.
 --
 -- To kilder, to roller:
@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS kommune
 -- verdi. Kopien finnes bare for at UNIQUE (kommune_id, type) skal kunne
 -- håndheve "maks én instans per type per kommune"; Postgres kan ikke
 -- håndheve en unik-regel som refererer en kolonne i en annen tabell direkte.
+
 CREATE TABLE IF NOT EXISTS kommune_fagsystem_instans
 (
     kommune_id           BIGINT NOT NULL REFERENCES kommune(id) ON DELETE CASCADE,
@@ -88,12 +89,11 @@ CREATE TABLE IF NOT EXISTS kommune_fagsystem_instans
 CREATE INDEX IF NOT EXISTS ix_kommune_fagsystem_instans_instans
     ON kommune_fagsystem_instans (fagsystem_instans_id);
 
-
 -- =============================================================================
 -- 2. Matrikkel
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS matrikkelenhet
+CREATE TABLE IF NOT EXISTS matrikkelinfo
 (
     id             BIGSERIAL PRIMARY KEY,
     kommunenr      CHAR(4) NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
@@ -101,11 +101,6 @@ CREATE TABLE IF NOT EXISTS matrikkelenhet
     bruksnr        INTEGER NOT NULL,
     festenr        INTEGER,
     seksjonsnr     INTEGER,
-    enhetstype     TEXT CHECK (enhetstype IS NULL OR enhetstype IN
-                       ('grunneiendom','festegrunn','seksjon','anleggseiendom','jordsameie')),
-    areal_m2       NUMERIC(12,2) CHECK (areal_m2 IS NULL OR areal_m2 >= 0),
-    geom_wkt       TEXT,
-    ekstern_id     TEXT,
     sist_oppdatert TIMESTAMPTZ,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -114,10 +109,9 @@ CREATE TABLE IF NOT EXISTS matrikkelenhet
 -- COALESCE fordi festenr og seksjonsnr er NULL for vanlige grunneiendommer, og
 -- NULL regnes ikke som lik NULL i en unik indeks. Uten dette ville samme
 -- eiendom kunne lagres mange ganger.
-CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelenhet
-    ON matrikkelenhet (kommunenr, gardsnr, bruksnr,
+CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelinfo
+    ON matrikkelinfo (kommunenr, gardsnr, bruksnr,
                        COALESCE(festenr, 0), COALESCE(seksjonsnr, 0));
-
 
 -- =============================================================================
 -- 3. Bygning
@@ -130,10 +124,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelenhet
 -- avgjøres derfor per ressurs, via ressurs.lokaletype_id (se UTEAREAL-gruppen
 -- og de utendørs-spesifikke kodene i lokaletype).
 --
--- Raden bærer to identiteter samtidig:
---   (fagsystem_instans_id, ekstern_id)  identiteten i kommunens bookingsystem
---   bygningsnr                          identiteten i matrikkelen
--- Derfor trengs ingen egen tabell for identitetskobling.
+-- Identitet: (fagsystem_instans_id, ekstern_id) fra bookingsystemet.
+-- bygningsnr er en referanse til matrikkelen, ikke en identitet: flere
+-- Aktiv kommune-bygg (f.eks. hall og bane) kan ligge i samme matrikkelbygg.
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS bygning
@@ -148,24 +141,19 @@ CREATE TABLE IF NOT EXISTS bygning
     -- håndheves av den sammensatte fremmednøkkelen nedenfor.
     fagsystem_instans_id BIGINT,
     ekstern_id     TEXT,
-    hjemmeside     TEXT,
-    -- Kun funksjonelle adresser. Navngitte kontaktpersoner (tilsyn_name m.fl.)
-    -- er personopplysninger og lastes ikke inn.
-    epost          TEXT,
-    telefon        TEXT,
-    apningstid_tekst TEXT,
 
     -- Fra matrikkelen
     bygningsnr     BIGINT,
     bygningstype   TEXT,
-    byggeaar       INTEGER CHECK (byggeaar IS NULL OR byggeaar BETWEEN 800 AND 2200),
     bra_m2         NUMERIC(12,2) CHECK (bra_m2 IS NULL OR bra_m2 >= 0),
     geom_wkt       TEXT,
-    -- Aktiv kommune oppgir ikke bygningsnummer, bare gateadresse. Kobling mot
-    -- matrikkelen er derfor en kvalifisert gjetning som må kunne overprøves.
+
+	-- Hvilket nivå koblingen mot matrikkelen ble funnet på: bygningsnr (fra
+	-- cadastral_references), gnr_bnr, adresse, manuell - eller ikke_funnet.
+
     matrikkel_match TEXT NOT NULL DEFAULT 'ikke_forsokt'
                        CHECK (matrikkel_match IN
-                           ('ikke_forsokt','bekreftet','sannsynlig','usikker','ikke_funnet')),
+                           ('ikke_forsokt', 'bygningsnr', 'gnr_bnr' , 'adresse', 'manuell', 'ikke_funnet')),
     -- Fra matrikkelen: antall etasjer i bygget som helhet (ikke en egen rad
     -- per etasje - kilden har bare et tall her).
     antall_etasjer INTEGER CHECK (antall_etasjer IS NULL OR antall_etasjer > 0),
@@ -193,9 +181,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_bygning_ekstern
     ON bygning (fagsystem_instans_id, ekstern_id)
     WHERE fagsystem_instans_id IS NOT NULL AND ekstern_id IS NOT NULL;
 
--- Identitet fra matrikkelen, unik der den finnes. Partiell fordi de fleste bygg
--- mangler bygningsnr til matrikkelen er koblet på.
-CREATE UNIQUE INDEX IF NOT EXISTS ux_bygning_bygningsnr
+-- Ikke unik: flere Aktiv kommune-bygg (f.eks hall og bane) kan ligge i samme
+-- matrikkelbygg. Indeksen finnes for oppslag ved matrikkelkobling.
+CREATE INDEX IF NOT EXISTS ix_bygning_bygningsnr
     ON bygning (bygningsnr)
     WHERE bygningsnr IS NOT NULL;
 
@@ -204,35 +192,57 @@ CREATE INDEX IF NOT EXISTS ix_bygning_kommune ON bygning (kommune_id);
 -- bruke indeksen. En vanlig btree-indeks kan ikke svare på "innenfor 5 km".
 CREATE INDEX IF NOT EXISTS ix_bygning_posisjon ON bygning USING GIST (posisjon);
 
--- Et bygg kan stå på flere eiendommer, og en eiendom kan ha flere bygg.
-CREATE TABLE IF NOT EXISTS bygning_matrikkelenhet
+-- =============================================================================
+-- 4. Gate har mange adresser (adresse.gate_id). Identiteten er
+-- (kommune, adressekode) fra matrikkelen, ikke navnet: samme gatenavn kan
+-- finnes flere ganger i en kommune, og samme adressekode brukes i flere
+-- kommuner. Postnummer ligger på adresse, ikke her, siden en gate kan krysse
+-- flere postnummer.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS gate
 (
-    bygning_id       BIGINT NOT NULL REFERENCES bygning(id) ON DELETE CASCADE,
-    matrikkelenhet_id BIGINT NOT NULL REFERENCES matrikkelenhet(id) ON DELETE CASCADE,
-    rolle            TEXT,
-    PRIMARY KEY (bygning_id, matrikkelenhet_id)
+    id       BIGSERIAL PRIMARY KEY,
+    kommune_id BIGINT NOT NULL REFERENCES kommune(id) ON DELETE CASCADE,
+    adressekode INTEGER NOT NULL,
+    gatenavn TEXT NOT NULL,
+	created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+   	updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+ CONSTRAINT uq_gate_kommune_adressekode UNIQUE (kommune_id, adressekode)
 );
 
-CREATE INDEX IF NOT EXISTS ix_bygning_matrikkelenhet_enhet
-    ON bygning_matrikkelenhet (matrikkelenhet_id);
+CREATE INDEX IF NOT EXISTS ix_gate_navn
+ON gate (kommune_id, lower(gatenavn));
+-- Et bygg kan stå på flere eiendommer, og en eiendom kan ha flere bygg.
+CREATE TABLE IF NOT EXISTS bygning_matrikkelinfo
+(
+    bygning_id       BIGINT NOT NULL REFERENCES bygning(id) ON DELETE CASCADE,
+    matrikkelinfo_id BIGINT NOT NULL REFERENCES matrikkelinfo(id) ON DELETE CASCADE,
+    rolle            TEXT,
+    PRIMARY KEY (bygning_id, matrikkelinfo_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_bygning_matrikkelinfo_enhet
+    ON bygning_matrikkelinfo (matrikkelinfo_id);
 
 
 -- =============================================================================
--- 4. Adresse
+-- 5. Adresse
 --
 -- Egen tabell, ikke kolonner på bygning, fordi matrikkelen gir flere adresser
 -- per bygg (flere innganger) og fordi representasjonspunktet hører til adressen.
--- Gatenavn ligger som tekst; en egen gate-tabell tjener lite før noen skal
--- vedlikeholde gatenavn som eget register.
+-- Hver adresse tilhører én bygning og (etter geokoding/etter matrikkelkobling) én gate. Et hjørnebygg
+-- med innganger i to gater har to adresser.
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS adresse
 (
     id             BIGSERIAL PRIMARY KEY,
     bygning_id     BIGINT NOT NULL REFERENCES bygning(id) ON DELETE CASCADE,
+	-- NULL før geokoding har funnet gaten:
+	gate_id 		BIGINT REFERENCES gate(id) ON DELETE SET NULL,
     adressetekst   TEXT,
-    gatenavn       TEXT,
-    husnr          TEXT,
+    husnr          INTEGER,
     bokstav        CHAR(1),
     postnummer     CHAR(4) CHECK (postnummer IS NULL OR postnummer ~ '^[0-9]{4}$'),
     poststed       TEXT,
@@ -251,14 +261,17 @@ CREATE TABLE IF NOT EXISTS adresse
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_adresse_hovedadresse
     ON adresse (bygning_id) WHERE er_hovedadresse;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_adresse_ekstern
+	ON adresse (bygning_id, ekstern_id) WHERE ekstern_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS ix_adresse_bygning ON adresse (bygning_id);
+CREATE INDEX IF NOT EXISTS ix_adresse_gate ON adresse (gate_id);
 CREATE INDEX IF NOT EXISTS ix_adresse_postnummer ON adresse (postnummer);
 CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 
 
 -- =============================================================================
--- 5. Kanoniske søkefasetter
+-- 6. Kanoniske søkefasetter
 --
 -- Kjernen i tverrkommunalt søk. Hver kommune har sitt eget kodeverk der samme
 -- ID betyr ulike ting: kategori 13 er "Overnatting" i Bergen og "Skateanlegg" i
@@ -275,7 +288,6 @@ CREATE TABLE IF NOT EXISTS lokaletype
     -- "lokaletype_id", for å skille den tydelig fra en referanse til en annen
     -- tabell.
     parent_id  BIGINT REFERENCES lokaletype(id) ON DELETE SET NULL,
-    sortering  INTEGER,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -286,7 +298,6 @@ CREATE TABLE IF NOT EXISTS aktivitet
     kode       TEXT UNIQUE NOT NULL,
     navn       TEXT NOT NULL,
     parent_id  BIGINT REFERENCES aktivitet(id) ON DELETE SET NULL,
-    sortering  INTEGER,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -298,14 +309,13 @@ CREATE TABLE IF NOT EXISTS fasilitet
     navn       TEXT NOT NULL,
     gruppe     TEXT NOT NULL CHECK (gruppe IN
                    ('tilgjengelighet','sanitaer','teknisk','kjokken','sport','moblering','uteareal','annet')),
-    sortering  INTEGER,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 
 -- =============================================================================
--- 6. Lokale kildekoder og oversettelse
+-- 7. Lokale kildekoder og oversettelse
 -- =============================================================================
 
 -- Kommunens egen kode, lagret uendret for sporbarhet. Instansen er med i
@@ -362,7 +372,7 @@ CREATE INDEX IF NOT EXISTS ix_mapping_status ON kildekode_mapping (status);
 
 
 -- =============================================================================
--- 7. Ressurs: det søkbare og bookbare
+-- 8. Ressurs: det søkbare og bookbare
 --
 -- fagsystem_instans_id og ekstern_id gir både identitet og ruting: base_url
 -- fra instansen pluss ekstern_id gir bookinglenken. Ingen egen rutingtabell
@@ -381,14 +391,8 @@ CREATE TABLE IF NOT EXISTS ressurs
     navn                 TEXT NOT NULL,
     lokaletype_id        BIGINT REFERENCES lokaletype(id) ON DELETE SET NULL,
 
-    -- Kapasitet er utfylt på under 1 % av ressursene i kilden, og Stavanger
-    -- koder den som fasilitet ("Kapasitet 1-20"). Opphavet må følge verdien.
-    kapasitet       INTEGER CHECK (kapasitet IS NULL OR kapasitet >= 0),
-    kapasitet_kilde TEXT CHECK (kapasitet_kilde IS NULL OR kapasitet_kilde IN
-                        ('kilde','utledet','manuell')),
     areal_m2        NUMERIC(10,2) CHECK (areal_m2 IS NULL OR areal_m2 >= 0),
     beskrivelse     TEXT,
-    apningstid_tekst TEXT,
 
     aktiv          BOOLEAN NOT NULL DEFAULT TRUE,
     bookbar        BOOLEAN NOT NULL DEFAULT TRUE,
@@ -404,7 +408,7 @@ CREATE TABLE IF NOT EXISTS ressurs
     -- Sammensatt fremmednøkkel: hindrer at en ressurs havner i et bygg som
     -- ligger i en annen kommune enn ressursen selv.
     CONSTRAINT fk_ressurs_bygning FOREIGN KEY (bygning_id, kommune_id)
-        REFERENCES bygning (id, kommune_id) ON DELETE SET NULL,
+        REFERENCES bygning (id, kommune_id),
     -- Ressursen kan bare høre til en kommune instansen faktisk betjener.
     CONSTRAINT fk_ressurs_fagsystem_instans_kommune FOREIGN KEY (kommune_id, fagsystem_instans_id)
         REFERENCES kommune_fagsystem_instans (kommune_id, fagsystem_instans_id),
@@ -437,7 +441,7 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 
 
 -- =============================================================================
--- 8. Innlasting og sporbarhet
+-- 9. Innlasting og sporbarhet
 -- =============================================================================
 
 -- Rått JSON-svar, lagret før transformasjon. Gjør at en last kan kjøres om igjen
@@ -477,7 +481,7 @@ CREATE INDEX IF NOT EXISTS ix_synk_avvik_kilde ON synk_avvik (kilde, avvikstype)
 
 
 -- =============================================================================
--- 9. Søkevisninger
+-- 10. Søkevisninger
 -- =============================================================================
 
 -- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
@@ -487,7 +491,6 @@ CREATE OR REPLACE VIEW v_ressurs_sok AS
 SELECT
     r.id                           AS ressurs_id,
     r.navn,
-    r.kapasitet,
     r.beskrivelse,
     k.id                           AS kommune_id,
     k.kommunenr,
@@ -544,186 +547,188 @@ WHERE m.id IS NULL OR m.status = 'foreslatt';
 
 
 -- =============================================================================
--- 10. Kanonisk kodeverk (startsett)
+-- 11. Kanonisk kodeverk (startsett)
 --
 -- Utledet fra de 142 distinkte kategorinavnene i de 12 Aktiv kommune-instansene,
 -- slått sammen på tvers av målform, skrivefeil og synonymer.
 -- =============================================================================
 
-INSERT INTO lokaletype (kode, navn, sortering) VALUES
-    ('IDRETT','Idrett og fysisk aktivitet',10),
-    ('KULTUR','Kultur og scene',20),
-    ('UNDERVISNING','Undervisning og møte',30),
-    ('VERKSTED','Verksted og produksjon',40),
-    ('ARRANGEMENT','Selskap og arrangement',50),
-    ('BEVERTNING','Mat og bevertning',60),
-    ('NAERMILJO','Aktivitets- og nærmiljøhus',70),
-    ('UTEAREAL','Utendørs areal',80),
-    ('OVERNATTING','Overnatting og bolig',90),
-    ('ANNET_LOKALE','Kontor og andre lokaler',100),
-    ('UTSTYR','Utstyr',110)
+INSERT INTO lokaletype (kode, navn)
+VALUES
+    ('IDRETT','Idrett og fysisk aktivitet'),
+    ('KULTUR','Kultur og scene'),
+    ('UNDERVISNING','Undervisning og møte'),
+    ('VERKSTED','Verksted og produksjon'),
+    ('ARRANGEMENT','Selskap og arrangement'),
+    ('BEVERTNING','Mat og bevertning'),
+    ('NAERMILJO','Aktivitets- og nærmiljøhus'),
+    ('UTEAREAL','Utendørs areal'),
+    ('OVERNATTING','Overnatting og bolig'),
+    ('ANNET_LOKALE','Kontor og andre lokaler'),
+    ('UTSTYR','Utstyr')
 ON CONFLICT (kode) DO NOTHING;
 
-INSERT INTO lokaletype (kode, navn, parent_id, sortering)
-SELECT v.kode, v.navn, p.id, v.sortering
+INSERT INTO lokaletype (kode, navn, parent_id)
+SELECT v.kode, v.navn, p.id
 FROM (VALUES
-    ('IDRETTSHALL','Idrettshall','IDRETT',11),
-    ('GYMSAL','Gymsal','IDRETT',12),
-    ('SVOMMEANLEGG','Svømmeanlegg','IDRETT',13),
-    ('ISHALL','Ishall og isbane','IDRETT',14),
-    ('FRIIDRETTSANLEGG','Friidrettsanlegg','IDRETT',15),
-    ('FOTBALLBANE','Fotballbane','IDRETT',16),
-    ('BALLBANE','Ballbane og ballbinge','IDRETT',17),
-    ('TENNISANLEGG','Tennisanlegg','IDRETT',18),
-    ('STYRKEROM','Styrke- og treningsrom','IDRETT',19),
-    ('KAMPSPORTROM','Kampsportrom','IDRETT',20),
-    ('KLATREANLEGG','Klatreanlegg','IDRETT',21),
-    ('TURNANLEGG','Turnanlegg','IDRETT',22),
-    ('SKATEANLEGG','Skateanlegg','IDRETT',23),
-    ('SKYTEBANE','Skytebane','IDRETT',24),
-    ('SJOSPORTANLEGG','Sjøsportanlegg','IDRETT',25),
-    ('GARDEROBE','Garderobe','IDRETT',26),
+    ('IDRETTSHALL','Idrettshall','IDRETT'),
+    ('GYMSAL','Gymsal','IDRETT'),
+    ('SVOMMEANLEGG','Svømmeanlegg','IDRETT'),
+    ('ISHALL','Ishall og isbane','IDRETT'),
+    ('FRIIDRETTSANLEGG','Friidrettsanlegg','IDRETT'),
+    ('FOTBALLBANE','Fotballbane','IDRETT'),
+    ('BALLBANE','Ballbane og ballbinge','IDRETT'),
+    ('TENNISANLEGG','Tennisanlegg','IDRETT'),
+    ('STYRKEROM','Styrke- og treningsrom','IDRETT'),
+    ('KAMPSPORTROM','Kampsportrom','IDRETT'),
+    ('KLATREANLEGG','Klatreanlegg','IDRETT'),
+    ('TURNANLEGG','Turnanlegg','IDRETT'),
+    ('SKATEANLEGG','Skateanlegg','IDRETT'),
+    ('SKYTEBANE','Skytebane','IDRETT'),
+    ('SJOSPORTANLEGG','Sjøsportanlegg','IDRETT'),
+    ('GARDEROBE','Garderobe','IDRETT'),
 
-    ('KONSERTSAL','Konsertsal og kultursal','KULTUR',21),
-    ('SCENE','Scene','KULTUR',22),
-    ('AUDITORIUM','Auditorium og foredragssal','KULTUR',23),
-    ('OVINGSROM','Øvingsrom og musikkrom','KULTUR',24),
-    ('DANSESAL','Dansesal','KULTUR',25),
-    ('LYDSTUDIO','Lydstudio','KULTUR',26),
-    ('UTSTILLINGSLOKALE','Utstillingslokale og atelier','KULTUR',27),
-    ('BIBLIOTEK','Bibliotek','KULTUR',28),
-    ('FOAJE','Foajé','KULTUR',29),
+    ('KONSERTSAL','Konsertsal og kultursal','KULTUR'),
+    ('SCENE','Scene','KULTUR'),
+    ('AUDITORIUM','Auditorium og foredragssal','KULTUR'),
+    ('OVINGSROM','Øvingsrom og musikkrom','KULTUR'),
+    ('DANSESAL','Dansesal','KULTUR'),
+    ('LYDSTUDIO','Lydstudio','KULTUR'),
+    ('UTSTILLINGSLOKALE','Utstillingslokale og atelier','KULTUR'),
+    ('BIBLIOTEK','Bibliotek','KULTUR'),
+    ('FOAJE','Foajé','KULTUR'),
 
-    ('KLASSEROM','Klasserom og undervisningsrom','UNDERVISNING',31),
-    ('GRUPPEROM','Grupperom og prosjektrom','UNDERVISNING',32),
-    ('MOTEROM','Møterom og konferanserom','UNDERVISNING',33),
-    ('DATAROM','Datarom','UNDERVISNING',34),
-    ('AULA','Aula','UNDERVISNING',35),
+('KLASSEROM','Klasserom og undervisningsrom','UNDERVISNING'),
+('GRUPPEROM','Grupperom og prosjektrom','UNDERVISNING'),
+('MOTEROM','Møterom og konferanserom','UNDERVISNING'),
+('DATAROM','Datarom','UNDERVISNING'),
+('AULA','Aula','UNDERVISNING'),
 
-    ('SLOYDSAL','Sløydsal','VERKSTED',41),
-    ('KUNSTVERKSTED','Kunst- og håndverksverksted','VERKSTED',42),
-    ('SYSTUE','Systue','VERKSTED',43),
-    ('MEDIEVERKSTED','Multimedia- og streamingverksted','VERKSTED',44),
-    ('FRISORSALONG','Frisørsalong','VERKSTED',45),
+('SLOYDSAL','Sløydsal','VERKSTED'),
+('KUNSTVERKSTED','Kunst- og håndverksverksted','VERKSTED'),
+('SYSTUE','Systue','VERKSTED'),
+('MEDIEVERKSTED','Multimedia- og streamingverksted','VERKSTED'),
+('FRISORSALONG','Frisørsalong','VERKSTED'),
 
-    ('SELSKAPSLOKALE','Selskapslokale','ARRANGEMENT',51),
-    ('FORSAMLINGSLOKALE','Forsamlingslokale','ARRANGEMENT',52),
-    ('SEREMONIROM','Seremonirom','ARRANGEMENT',53),
-    ('BURSDAGSLOKALE','Bursdagslokale','ARRANGEMENT',54),
-    ('ARRANGEMENTSARENA','Arrangementsarena','ARRANGEMENT',55),
-    ('TORGPLASS','Torg og møteplass','ARRANGEMENT',56),
+('SELSKAPSLOKALE','Selskapslokale','ARRANGEMENT'),
+('FORSAMLINGSLOKALE','Forsamlingslokale','ARRANGEMENT'),
+('SEREMONIROM','Seremonirom','ARRANGEMENT'),
+('BURSDAGSLOKALE','Bursdagslokale','ARRANGEMENT'),
+('ARRANGEMENTSARENA','Arrangementsarena','ARRANGEMENT'),
+('TORGPLASS','Torg og møteplass','ARRANGEMENT'),
 
-    ('KJOKKEN','Kjøkken','BEVERTNING',61),
-    ('KANTINE','Kantine','BEVERTNING',62),
-    ('KAFE','Kafé og kiosk','BEVERTNING',63),
+('KJOKKEN','Kjøkken','BEVERTNING'),
+('KANTINE','Kantine','BEVERTNING'),
+('KAFE','Kafé og kiosk','BEVERTNING'),
 
-    ('ALLAKTIVITETSHUS','Allaktivitetshus','NAERMILJO',71),
-    ('AKTIVITETSROM','Aktivitetsrom og flerbruksrom','NAERMILJO',72),
-    ('UNGDOMSLOKALE','Ungdomslokale','NAERMILJO',73),
-    ('DAGSENTER','Dagsenter og miljøstue','NAERMILJO',74),
-    ('INNBYGGERTORG','Innbyggertorg','NAERMILJO',75),
+('ALLAKTIVITETSHUS','Allaktivitetshus','NAERMILJO'),
+('AKTIVITETSROM','Aktivitetsrom og flerbruksrom','NAERMILJO'),
+('UNGDOMSLOKALE','Ungdomslokale','NAERMILJO'),
+('DAGSENTER','Dagsenter og miljøstue','NAERMILJO'),
+('INNBYGGERTORG','Innbyggertorg','NAERMILJO'),
 
-    ('FRILUFTSOMRAADE','Friluftsområde','UTEAREAL',81),
-    ('UTEOMRAADE','Uteområde','UTEAREAL',82),
-    ('TURVEI','Turvei og løype','UTEAREAL',83),
-    ('GAPAHUK','Gapahuk og bålplass','UTEAREAL',84),
-    ('UTESCENE','Utendørsscene','UTEAREAL',85),
+('FRILUFTSOMRAADE','Friluftsområde','UTEAREAL'),
+('UTEOMRAADE','Uteområde','UTEAREAL'),
+('TURVEI','Turvei og løype','UTEAREAL'),
+('GAPAHUK','Gapahuk og bålplass','UTEAREAL'),
+('UTESCENE','Utendørsscene','UTEAREAL'),
 
-    ('OVERNATTINGSROM','Overnattingsrom','OVERNATTING',91),
-    ('BEBOERROM','Beboerrom','OVERNATTING',92),
-    ('OVINGSLEILIGHET','Øvingsleilighet','OVERNATTING',93),
+('OVERNATTINGSROM','Overnattingsrom','OVERNATTING'),
+('BEBOERROM','Beboerrom','OVERNATTING'),
+('OVINGSLEILIGHET','Øvingsleilighet','OVERNATTING'),
 
-    ('KONTOR','Kontor og arbeidsplass','ANNET_LOKALE',101),
-    ('BUTIKKLOKALE','Butikklokale','ANNET_LOKALE',102),
-    ('LAGER','Lager','ANNET_LOKALE',103),
-    ('GENERELT_LOKALE','Generelt lokale','ANNET_LOKALE',104),
+('KONTOR','Kontor og arbeidsplass','ANNET_LOKALE'),
+('BUTIKKLOKALE','Butikklokale','ANNET_LOKALE'),
+('LAGER','Lager','ANNET_LOKALE'),
+('GENERELT_LOKALE','Generelt lokale','ANNET_LOKALE'),
 
-    ('SYKKEL','Sykkel og el-sykkel','UTSTYR',111),
-    ('KANO_KAJAKK','Kano og kajakk','UTSTYR',112),
-    ('FISKEUTSTYR','Fiskeutstyr','UTSTYR',113),
-    ('REDNINGSVEST','Redningsvest','UTSTYR',114),
-    ('LYDANLEGG','Lyd- og lysanlegg','UTSTYR',115),
-    ('ANNET_UTSTYR','Annet utstyr','UTSTYR',116)
-) AS v(kode, navn, parent_kode, sortering)
+('SYKKEL','Sykkel og el-sykkel','UTSTYR'),
+('KANO_KAJAKK','Kano og kajakk','UTSTYR'),
+('FISKEUTSTYR','Fiskeutstyr','UTSTYR'),
+('REDNINGSVEST','Redningsvest','UTSTYR'),
+('LYDANLEGG','Lyd- og lysanlegg','UTSTYR'),
+('ANNET_UTSTYR','Annet utstyr','UTSTYR')
+) AS v(kode, navn, parent_kode)
 JOIN lokaletype p ON p.kode = v.parent_kode
 ON CONFLICT (kode) DO NOTHING;
 
-INSERT INTO aktivitet (kode, navn, sortering) VALUES
-    ('IDRETT','Idrett',10),
-    ('KULTUR','Kultur',20),
-    ('OPPLARING','Opplæring og kurs',30),
-    ('MOTE','Møte og konferanse',40),
-    ('PRIVAT','Privat arrangement',50),
-    ('FRIVILLIGHET','Frivillighet og lag',60),
-    ('FRILUFT','Friluftsliv',70),
-    ('INTERNT','Internt kommunalt',80)
+INSERT INTO aktivitet (kode, navn)
+VALUES
+    ('IDRETT','Idrett'),
+    ('KULTUR','Kultur'),
+    ('OPPLARING','Opplæring og kurs'),
+    ('MOTE','Møte og konferanse'),
+    ('PRIVAT','Privat arrangement'),
+    ('FRIVILLIGHET','Frivillighet og lag'),
+    ('FRILUFT','Friluftsliv'),
+    ('INTERNT','Internt kommunalt')
 ON CONFLICT (kode) DO NOTHING;
 
-INSERT INTO aktivitet (kode, navn, parent_id, sortering)
-SELECT v.kode, v.navn, p.id, v.sortering
+INSERT INTO aktivitet (kode, navn, parent_id)
+SELECT v.kode, v.navn, p.id
 FROM (VALUES
-    ('FOTBALL','Fotball','IDRETT',11),
-    ('HANDBALL','Håndball','IDRETT',12),
-    ('BASKETBALL','Basketball','IDRETT',13),
-    ('VOLLEYBALL','Volleyball','IDRETT',14),
-    ('TURN','Turn','IDRETT',15),
-    ('KAMPSPORT','Kampsport','IDRETT',16),
-    ('SVOMMING','Svømming','IDRETT',17),
-    ('FRIIDRETT','Friidrett','IDRETT',18),
-    ('ISHOCKEY','Ishockey og skøyter','IDRETT',19),
-    ('KLATRING','Klatring','IDRETT',20),
-    ('STYRKETRENING','Styrketrening','IDRETT',21),
-    ('TENNIS','Tennis','IDRETT',22),
-    ('SKYTING','Skyting','IDRETT',23),
-    ('DANS','Dans','KULTUR',24),
-    ('MUSIKK','Musikk og korps','KULTUR',25),
-    ('KOR','Kor og sang','KULTUR',26),
-    ('TEATER','Teater og revy','KULTUR',27),
-    ('KUNST_HANDVERK','Kunst, håndverk og media','KULTUR',28),
-    ('SPEIDER','Speider','FRILUFT',29),
-    ('SYKLING','Sykling','FRILUFT',30)
-) AS v(kode, navn, parent_kode, sortering)
+    ('FOTBALL','Fotball','IDRETT'),
+    ('HANDBALL','Håndball','IDRETT'),
+    ('BASKETBALL','Basketball','IDRETT'),
+    ('VOLLEYBALL','Volleyball','IDRETT'),
+    ('TURN','Turn','IDRETT'),
+    ('KAMPSPORT','Kampsport','IDRETT'),
+    ('SVOMMING','Svømming','IDRETT'),
+    ('FRIIDRETT','Friidrett','IDRETT'),
+    ('ISHOCKEY','Ishockey og skøyter','IDRETT'),
+    ('KLATRING','Klatring','IDRETT'),
+    ('STYRKETRENING','Styrketrening','IDRETT'),
+    ('TENNIS','Tennis','IDRETT'),
+    ('SKYTING','Skyting','IDRETT'),
+    ('DANS','Dans','KULTUR'),
+    ('MUSIKK','Musikk og korps','KULTUR'),
+    ('KOR','Kor og sang','KULTUR'),
+    ('TEATER','Teater og revy','KULTUR'),
+    ('KUNST_HANDVERK','Kunst, håndverk og media','KULTUR'),
+    ('SPEIDER','Speider','FRILUFT'),
+    ('SYKLING','Sykling','FRILUFT')
+) AS v(kode, navn, parent_kode)
 JOIN aktivitet p ON p.kode = v.parent_kode
 ON CONFLICT (kode) DO NOTHING;
 
-INSERT INTO fasilitet (kode, navn, gruppe, sortering) VALUES
-    ('HC_TILGANG','Rullestoltilgang','tilgjengelighet',10),
-    ('HC_TOALETT','HC-toalett','tilgjengelighet',11),
-    ('TELESLYNGE','Teleslynge','tilgjengelighet',12),
-    ('HEIS','Heis','tilgjengelighet',13),
-    ('GARDEROBE','Garderobe','sanitaer',20),
-    ('DUSJ','Dusj','sanitaer',21),
-    ('TOALETT','Toalett','sanitaer',22),
-    ('PROSJEKTOR','Prosjektor','teknisk',30),
-    ('SKJERM','Skjerm','teknisk',31),
-    ('LYDANLEGG','Lydanlegg','teknisk',32),
-    ('MIKROFON','Mikrofon','teknisk',33),
-    ('WIFI','Trådløst nett','teknisk',34),
-    ('STREAMING','Streamingutstyr','teknisk',35),
-    ('FLYGEL','Flygel eller piano','teknisk',36),
-    ('SCENELYS','Scenelys','teknisk',37),
-    ('KJOKKEN','Kjøkken','kjokken',40),
-    ('KJOLESKAP','Kjøleskap','kjokken',41),
-    ('OPPVASKMASKIN','Oppvaskmaskin','kjokken',42),
-    ('KIOSK','Kiosk','kjokken',43),
-    ('TRIBUNE','Tribune','sport',50),
-    ('MAALBUR','Målbur','sport',51),
-    ('TIDTAKING','Tidtakingsanlegg','sport',52),
-    ('BANEDELING','Delbar bane','sport',53),
-    ('BORD_STOLER','Bord og stoler','moblering',60),
-    ('WHITEBOARD','Whiteboard','moblering',61),
-    ('PARKETTGULV','Parkettgulv','moblering',62),
-    ('PARKERING','Parkering','uteareal',70),
-    ('HC_PARKERING','HC-parkering','uteareal',71),
-    ('SYKKELPARKERING','Sykkelparkering','uteareal',72),
-    ('BAALPLASS','Bålplass','uteareal',73),
-    ('FLOMLYS','Flomlys','uteareal',74),
-    ('ELEKTRONISK_LAS','Elektronisk låssystem','annet',80)
+INSERT INTO fasilitet (kode, navn, gruppe)
+VALUES
+    ('HC_TILGANG','Rullestoltilgang','tilgjengelighet'),
+    ('HC_TOALETT','HC-toalett','tilgjengelighet'),
+    ('TELESLYNGE','Teleslynge','tilgjengelighet'),
+    ('HEIS','Heis','tilgjengelighet'),
+    ('GARDEROBE','Garderobe','sanitaer'),
+    ('DUSJ','Dusj','sanitaer'),
+    ('TOALETT','Toalett','sanitaer'),
+    ('PROSJEKTOR','Prosjektor','teknisk'),
+    ('SKJERM','Skjerm','teknisk'),
+    ('LYDANLEGG','Lydanlegg','teknisk'),
+    ('MIKROFON','Mikrofon','teknisk'),
+    ('WIFI','Trådløst nett','teknisk'),
+    ('STREAMING','Streamingutstyr','teknisk'),
+    ('FLYGEL','Flygel eller piano','teknisk'),
+    ('SCENELYS','Scenelys','teknisk'),
+    ('KJOKKEN','Kjøkken','kjokken'),
+    ('KJOLESKAP','Kjøleskap','kjokken'),
+    ('OPPVASKMASKIN','Oppvaskmaskin','kjokken'),
+    ('KIOSK','Kiosk','kjokken'),
+    ('TRIBUNE','Tribune','sport'),
+    ('MAALBUR','Målbur','sport'),
+    ('TIDTAKING','Tidtakingsanlegg','sport'),
+    ('BANEDELING','Delbar bane','sport'),
+    ('BORD_STOLER','Bord og stoler','moblering'),
+    ('WHITEBOARD','Whiteboard','moblering'),
+    ('PARKETTGULV','Parkettgulv','moblering'),
+    ('PARKERING','Parkering','uteareal'),
+    ('HC_PARKERING','HC-parkering','uteareal'),
+    ('SYKKELPARKERING','Sykkelparkering','uteareal'),
+    ('BAALPLASS','Bålplass','uteareal'),
+    ('FLOMLYS','Flomlys','uteareal'),
+    ('ELEKTRONISK_LAS','Elektronisk låssystem','annet')
 ON CONFLICT (kode) DO NOTHING;
 
-
 -- =============================================================================
--- 11. updated_at-triggere
+-- 12. updated_at-triggere
 -- =============================================================================
 
 DO $$
@@ -731,7 +736,7 @@ DECLARE
     t TEXT;
 BEGIN
     FOREACH t IN ARRAY ARRAY[
-        'kommune','fagsystem_instans','matrikkelenhet','bygning','adresse',
+        'kommune','fagsystem_instans', 'matrikkelinfo','bygning','gate','adresse',
         'lokaletype','aktivitet','fasilitet','kildekode','kildekode_mapping','ressurs'
     ]
     LOOP

@@ -111,7 +111,6 @@ def main():
         lon, lat = punkt["lon"], punkt["lat"]
 
         adressetekst = a["adressetekst"]
-        adressenavn = a["adressenavn"]
         husnr = a["nummer"]
         bokstav = a["bokstav"]
         poststed = a["poststed"]
@@ -122,7 +121,6 @@ def main():
             f"UPDATE adresse SET "
             f"posisjon = ST_SetSRID(ST_MakePoint({lon},{lat}),4326)::geography,"
             f"adressetekst = {q(adressetekst)}, "
-            f"gatenavn = {q(adressenavn)}, "
             f"husnr = {q(husnr)}, "
             f"bokstav = {q(bokstav)}, "
             f"poststed = {q(poststed)}, "

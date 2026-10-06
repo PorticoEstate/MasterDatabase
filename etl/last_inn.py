@@ -20,7 +20,7 @@ Kjent forenkling: kommune_id settes her fra hvilken Aktiv kommune-instans
 ressursen kommer fra (f.eks. "bergen" -> kommunenr 4601). Det er riktig for
 alle de 12 instansene vi kjenner i dag, som hver betjener nøyaktig én kommune.
 Skjemaet (schema_kjerne.sql) tillater at en instans betjener flere kommuner
-via instans_kommune-tabellen; den dagen det faktisk skjer, må kommune_id i
+via kommune_fagsystem_instans; den dagen det faktisk skjer, må kommune_id i
 stedet utledes fra en geokodet adresse. Se db/schema_kjerne_dokumentasjon.md.
 """
 import html
@@ -267,18 +267,15 @@ def generer_sql(slug: str, ut) -> None:
     bydel_per_bygg = {t["b_id"]: rens(t["name"]) for t in d.get("towns", [])}
     for b in d.get("buildings", []):
         navn = rens(b["name"]) or f"Bygg {b['id']}"
-        w(f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id,"
-          f"hjemmeside,epost,telefon,apningstid_tekst) "
-          f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])},"
-          f"{q(rens(b.get('homepage')))},{q(rens(b.get('email')))},{q(rens(b.get('phone')))},"
-          f"{q(rens(b.get('opening_hours')))} "
-          f"FROM kommune k, fagsystem_instans fi "
+        w(f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id) "
+ 			f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])} "
+  			f"FROM kommune k, fagsystem_instans fi "
           f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
           f"ON CONFLICT DO NOTHING;\n")
 
         # Aktiv kommune gir ikke gatenavn og husnummer separat, bare hele
         # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
-        # den; gatenavn/husnr/lat/lon står tomme til geokoding (et senere,
+        # den; gate_id/husnr/posisjon står tomme til geokoding (et senere,
         # separat steg) fyller dem fra Kartverkets Adresse-API.
         gate = rens(b.get("street"))
         if gate:
@@ -312,7 +309,6 @@ def generer_sql(slug: str, ut) -> None:
         except (ValueError, TypeError):
             pass
         bid = bygg_for_ressurs.get(r["id"])
-        kap = r.get("capacity") or None
         bookbar = "FALSE" if r.get("deactivate_application") else "TRUE"
         aktiv = "TRUE" if r.get("active") else "FALSE"
 
@@ -325,10 +321,9 @@ def generer_sql(slug: str, ut) -> None:
                   f"AND kk.kode={q(r.get('rescategory_id'))})")
 
         w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
-          f"kapasitet,kapasitet_kilde,beskrivelse,apningstid_tekst,aktiv,bookbar) "
+          f"beskrivelse,aktiv,bookbar) "
           f"SELECT fi.id,{q(r['id'])},k.id,{bygg_sel},{q(navn)},{lt_sel},"
-          f"{kap or 'NULL'},{q('kilde') if kap else 'NULL'},{q(beskr)},{q(rens(r.get('opening_hours')))},"
-          f"{aktiv},{bookbar} "
+          f"{q(beskr)},{aktiv},{bookbar} "
           f"FROM kommune k, fagsystem_instans fi "
           f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
           f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn;\n")
