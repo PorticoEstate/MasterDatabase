@@ -27,7 +27,7 @@ ressursen kommer fra (f.eks. "bergen" -> kommunenr 4601). Det er riktig for
 alle de 12 instansene vi kjenner i dag, som hver betjener nøyaktig én kommune.
 Skjemaet (schema_kjerne.sql) tillater at en instans betjener flere kommuner
 via kommune_fagsystem_instans; den dagen det faktisk skjer, må kommune_id i
-stedet utledes fra en geokodet adresse.
+stedet utledes fra en geokodet adresse. Se db/schema_kjerne_dokumentasjon.md.
 """
 import html
 import json
@@ -357,6 +357,17 @@ def generer_sql(slug: str, ut) -> bool:
     # --- bygg + adresse ---
     bydel_per_bygg = {t["b_id"]: rens(t["name"]) for t in d.get("towns", [])}
     for b in d.get("buildings", []):
+        navn = rens(b["name"]) or f"Bygg {b['id']}"
+        w(f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id) "
+ 			f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])} "
+  			f"FROM kommune k, fagsystem_instans fi "
+          f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
+          f"ON CONFLICT DO NOTHING;\n")
+
+        # Aktiv kommune gir ikke gatenavn og husnummer separat, bare hele
+        # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
+        # den; gate_id/husnr/posisjon står tomme til geokoding (et senere,
+        # separat steg) fyller dem fra Kartverkets Adresse-API.
         if b.get("id") is None:
             w(logg(kn, "buildings", "ugyldig_verdi", None, "posten mangler id", "id", rapost=b))
             continue
@@ -432,9 +443,6 @@ def generer_sql(slug: str, ut) -> bool:
         except (ValueError, TypeError, AttributeError):
             pass
         bid = bygg_for_ressurs.get(r["id"])
-        kap, kap_feil = som_heltall(r.get("capacity"))
-        if kap_feil:
-            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "capacity " + kap_feil, "capacity", rapost=r))
         bookbar = "FALSE" if r.get("deactivate_application") else "TRUE"
         aktiv = "TRUE" if r.get("active") else "FALSE"
 
@@ -446,25 +454,13 @@ def generer_sql(slug: str, ut) -> bool:
                   f"WHERE f3.kildenokkel={q(kn)} AND kk.kodetype='lokaletype' "
                   f"AND kk.kode={q(r.get('rescategory_id'))})")
 
-        sql = (
-            f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
-            f"kapasitet,kapasitet_kilde,beskrivelse,apningstid_tekst,aktiv,bookbar) "
-            f"SELECT fi.id,{q(r['id'])},k.id,{bygg_sel},{q(navn)},{lt_sel},"
-            f"{kap if kap is not None else 'NULL'},{q('kilde') if kap is not None else 'NULL'},"
-            f"{q(beskr)},{q(rens(r.get('opening_hours')))},{aktiv},{bookbar} "
-            f"FROM kommune k, fagsystem_instans fi "
-            f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
-            f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET "
-            f"navn=EXCLUDED.navn, bygning_id=EXCLUDED.bygning_id, lokaletype_id=EXCLUDED.lokaletype_id, "
-            f"beskrivelse=EXCLUDED.beskrivelse, apningstid_tekst=EXCLUDED.apningstid_tekst, "
-            f"aktiv=EXCLUDED.aktiv, bookbar=EXCLUDED.bookbar, "
-            # En manuell eller utledet kapasitet skal ikke overskrives av kilden.
-            f"kapasitet=CASE WHEN ressurs.kapasitet_kilde IN ('manuell','utledet') "
-            f"THEN ressurs.kapasitet ELSE EXCLUDED.kapasitet END, "
-            f"kapasitet_kilde=CASE WHEN ressurs.kapasitet_kilde IN ('manuell','utledet') "
-            f"THEN ressurs.kapasitet_kilde ELSE EXCLUDED.kapasitet_kilde END;\n"
-        )
-        w(i_blokk(kn, "resources", r["id"], sql, rapost=r))
+        w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
+          f"beskrivelse,aktiv,bookbar) "
+          f"SELECT fi.id,{q(r['id'])},k.id,{bygg_sel},{q(navn)},{lt_sel},"
+          f"{q(beskr)},{aktiv},{bookbar} "
+          f"FROM kommune k, fagsystem_instans fi "
+          f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
+          f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn;\n")
     w("\n")
 
     # --- koblinger, med avviksloggføring for brutte referanser ---
