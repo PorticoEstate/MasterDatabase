@@ -8,6 +8,9 @@ import base64
 import os
 import urllib.error
 import urllib.request
+import xml.dom.minidom
+
+UT_FIL = os.path.join(os.path.dirname(__file__), "ut", "siste_svar.xml")
 
 BASE_URL = "https://prodtest.matrikkel.no"  # testmiljø - matcher strukturen i produksjon
 
@@ -42,11 +45,24 @@ def main():
     )
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
-            print(f"HTTP {resp.status} - innlogging virker.\n")
-            print(resp.read().decode("utf-8")[:1500])
+            status, svar = resp.status, resp.read().decode("utf-8")
+            print(f"HTTP {status} - innlogging virker.\n")
     except urllib.error.HTTPError as e:
-        print(f"HTTP {e.code} - innlogging feilet eller tjenesten avviste kallet.")
-        print(e.read().decode("utf-8", errors="replace")[:1500])
+        status, svar = e.code, e.read().decode("utf-8", errors="replace")
+        print(f"HTTP {status} - innlogging feilet eller tjenesten avviste kallet.")
+
+    try:
+        pen = xml.dom.minidom.parseString(svar).toprettyxml(indent="  ")
+        # toprettyxml legger inn mange tomme linjer for tekstnoder - luk dem bort.
+        pen = "\n".join(l for l in pen.splitlines() if l.strip())
+    except Exception:
+        pen = svar  # ikke gyldig XML (f.eks. en HTML-feilside) - vis rått i stedet
+
+    os.makedirs(os.path.dirname(UT_FIL), exist_ok=True)
+    with open(UT_FIL, "w", encoding="utf-8") as f:
+        f.write(pen)
+    print(f"Fullt svar (formatert) lagret i {UT_FIL} - åpne den i VS Code for oversikt.\n")
+    print(pen[:1500])
 
 
 if __name__ == "__main__":
