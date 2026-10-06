@@ -9,7 +9,7 @@ import os
 import urllib.error
 import urllib.request
 
-BASE_URL = "https://www.matrikkel.no"  # bekreft at dette er riktig endepunkt for avtalen vår
+BASE_URL = "https://prodtest.matrikkel.no"  # testmiljø - matcher strukturen i produksjon
 
 ENVELOPE = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:kod="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/kodeliste"
