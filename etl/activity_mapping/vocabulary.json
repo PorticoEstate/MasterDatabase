@@ -1,0 +1,2507 @@
+{
+  "source": "AktivKommune_activity_mapping_v0.2.xlsx",
+  "approvedOnly": false,
+  "facets": {
+    "activity": {
+      "ACT-001": {
+        "label": {
+          "nb": "Friluftsliv"
+        },
+        "altLabels": [
+          "friluft",
+          "friluftsaktiviteter",
+          "naturskole"
+        ],
+        "nif": {
+          "match": "broad"
+        },
+        "note": "NIF 622 Friluftsliv (Studentidrett only) - treat as own root"
+      },
+      "ACT-002": {
+        "label": {
+          "nb": "Fiske"
+        },
+        "broader": [
+          "ACT-001"
+        ],
+        "altLabels": [
+          "fisketurer"
+        ]
+      },
+      "ACT-003": {
+        "label": {
+          "nb": "Jakt"
+        },
+        "broader": [
+          "ACT-001"
+        ]
+      },
+      "ACT-004": {
+        "label": {
+          "nb": "Tur og vandring"
+        },
+        "broader": [
+          "ACT-001"
+        ],
+        "altLabels": [
+          "tur",
+          "turar",
+          "turgruppe"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 276,
+          "name": "Gang, mosjon og turmarsj"
+        },
+        "note": "NIF: Gang, mosjon og turmarsj"
+      },
+      "ACT-005": {
+        "label": {
+          "nb": "Fritid og hobby"
+        },
+        "altLabels": [
+          "fritidstilbud"
+        ]
+      },
+      "ACT-006": {
+        "label": {
+          "nb": "Hobby (generelt)"
+        },
+        "broader": [
+          "ACT-005"
+        ],
+        "altLabels": [
+          "hobbygrupper"
+        ]
+      },
+      "ACT-007": {
+        "label": {
+          "nb": "Mat og matlaging"
+        },
+        "broader": [
+          "ACT-005"
+        ],
+        "altLabels": [
+          "lokalmat",
+          "matlaging"
+        ]
+      },
+      "ACT-008": {
+        "label": {
+          "nb": "Spill"
+        },
+        "broader": [
+          "ACT-005"
+        ],
+        "note": "Brett-, kort- og rollespill"
+      },
+      "ACT-009": {
+        "label": {
+          "nb": "Sjakk"
+        },
+        "broader": [
+          "ACT-008"
+        ],
+        "note": "Not in NIF"
+      },
+      "ACT-010": {
+        "label": {
+          "nb": "Idrett"
+        },
+        "altLabels": [
+          "andre idretter",
+          "annen idrett",
+          "idrettsaktiviteter",
+          "lokale aktiviteter-idrett-kultur",
+          "sport og idrett"
+        ],
+        "nif": {
+          "match": "broad"
+        }
+      },
+      "ACT-011": {
+        "label": {
+          "nb": "Allidrett/barneidrett"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "altLabels": [
+          "allidrett",
+          "barneidrett"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 878,
+          "name": "Allidrett"
+        },
+        "note": "NIF 878 Allidrett sits under Idrett for funksjonshemmede"
+      },
+      "ACT-012": {
+        "label": {
+          "nb": "Ballsport"
+        },
+        "broader": [
+          "ACT-010"
+        ]
+      },
+      "ACT-013": {
+        "label": {
+          "nb": "Amerikansk fotball"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 561,
+          "name": "Amerikansk fotball"
+        }
+      },
+      "ACT-014": {
+        "label": {
+          "nb": "Bandy"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 131,
+          "name": "Bandy"
+        }
+      },
+      "ACT-015": {
+        "label": {
+          "nb": "Baseball/softball"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "altLabels": [
+          "baseball"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 611,
+          "name": "Baseball"
+        },
+        "note": "NIF splits: 611 Baseball, 612 Softball"
+      },
+      "ACT-016": {
+        "label": {
+          "nb": "Basketball"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 141,
+          "name": "Basketball"
+        }
+      },
+      "ACT-017": {
+        "label": {
+          "nb": "Cricket"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 921,
+          "name": "Cricket"
+        }
+      },
+      "ACT-018": {
+        "label": {
+          "nb": "Fotball"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "altLabels": [
+          "fotball (1/3 del av 7'er bane)",
+          "fotball (1/4 av 11'er bane)",
+          "innefotball",
+          "minifotball"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 261,
+          "name": "Fotball"
+        }
+      },
+      "ACT-019": {
+        "label": {
+          "nb": "Futsal"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 262,
+          "name": "Futsal"
+        },
+        "note": "NIF also 156 (Bedrift), 983 (Studentidrett)"
+      },
+      "ACT-020": {
+        "label": {
+          "nb": "Håndball"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "altLabels": [
+          "minihåndball"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 331,
+          "name": "Håndball"
+        }
+      },
+      "ACT-021": {
+        "label": {
+          "nb": "Innebandy"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "altLabels": [
+          "bandy - inne"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 133,
+          "name": "Innebandy"
+        },
+        "note": "NIF parent is Bandy"
+      },
+      "ACT-022": {
+        "label": {
+          "nb": "Lacrosse"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 564,
+          "name": "Lacrosse"
+        },
+        "note": "NIF also 626 Lacross (Studentidrett)"
+      },
+      "ACT-023": {
+        "label": {
+          "nb": "Rugby"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 721,
+          "name": "Rugby"
+        }
+      },
+      "ACT-024": {
+        "label": {
+          "nb": "Volleyball"
+        },
+        "broader": [
+          "ACT-012"
+        ],
+        "altLabels": [
+          "minivolleyball"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 481,
+          "name": "Volleyball"
+        }
+      },
+      "ACT-025": {
+        "label": {
+          "nb": "E-sport"
+        },
+        "broader": [
+          "ACT-010",
+          "ACT-008"
+        ],
+        "note": "Not in NIF list"
+      },
+      "ACT-026": {
+        "label": {
+          "nb": "Friidrett"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Friidrett"
+        }
+      },
+      "ACT-027": {
+        "label": {
+          "nb": "Løping"
+        },
+        "broader": [
+          "ACT-026"
+        ],
+        "altLabels": [
+          "maraton"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 277,
+          "name": "Løp utenfor bane"
+        },
+        "note": "NIF: Løp utenfor bane"
+      },
+      "ACT-028": {
+        "label": {
+          "nb": "Gymnastikk og turn"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "altLabels": [
+          "gymnastikk"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 301,
+          "name": "Gymnastikk og Breddeaktivitet"
+        },
+        "note": "NIF: Gymnastikk og Breddeaktivitet"
+      },
+      "ACT-029": {
+        "label": {
+          "nb": "Cheerleading"
+        },
+        "broader": [
+          "ACT-028"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 563,
+          "name": "Cheerleading"
+        }
+      },
+      "ACT-030": {
+        "label": {
+          "nb": "Drill"
+        },
+        "broader": [
+          "ACT-028"
+        ],
+        "altLabels": [
+          "sportsdrill"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 518,
+          "name": "Sportsdrill"
+        },
+        "note": "NIF: Sportsdrill (Dans); 981 Drill (Studentidrett)"
+      },
+      "ACT-031": {
+        "label": {
+          "nb": "Rytmisk gymnastikk"
+        },
+        "broader": [
+          "ACT-028"
+        ],
+        "altLabels": [
+          "rytmisk sportsgymnastikk (rg)"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 303,
+          "name": "Rytmisk gymnastikk"
+        }
+      },
+      "ACT-032": {
+        "label": {
+          "nb": "Turn"
+        },
+        "broader": [
+          "ACT-028"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 302,
+          "name": "Turn"
+        }
+      },
+      "ACT-033": {
+        "label": {
+          "nb": "Hestesport"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "altLabels": [
+          "riding"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Ridning"
+        }
+      },
+      "ACT-034": {
+        "label": {
+          "nb": "Hundesport"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Hundekjøring"
+        }
+      },
+      "ACT-035": {
+        "label": {
+          "nb": "Kampsport"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Kampsport"
+        }
+      },
+      "ACT-036": {
+        "label": {
+          "nb": "Boksing"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 161,
+          "name": "Boksing"
+        }
+      },
+      "ACT-037": {
+        "label": {
+          "nb": "Bryting"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Bryting"
+        }
+      },
+      "ACT-038": {
+        "label": {
+          "nb": "Fekting"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "altLabels": [
+          "fektting"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 251,
+          "name": "Fekting"
+        }
+      },
+      "ACT-039": {
+        "label": {
+          "nb": "Judo"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 351,
+          "name": "Judo"
+        }
+      },
+      "ACT-040": {
+        "label": {
+          "nb": "Jujutsu"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "altLabels": [
+          "ju jitsu"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 523,
+          "name": "Jujutsu"
+        }
+      },
+      "ACT-041": {
+        "label": {
+          "nb": "Karate"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 521,
+          "name": "Karate"
+        }
+      },
+      "ACT-042": {
+        "label": {
+          "nb": "Kickboksing"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 581,
+          "name": "Kickboksing"
+        }
+      },
+      "ACT-043": {
+        "label": {
+          "nb": "Taekwondo"
+        },
+        "broader": [
+          "ACT-035"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 522,
+          "name": "Taekwondo WT"
+        },
+        "note": "NIF splits: 522 WT, 524 ITF"
+      },
+      "ACT-044": {
+        "label": {
+          "nb": "Klatring"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "altLabels": [
+          "klartring",
+          "klatrevegg",
+          "klatring/ buldring"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 591,
+          "name": "Klatring"
+        }
+      },
+      "ACT-045": {
+        "label": {
+          "nb": "Luftsport"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Luftsport"
+        }
+      },
+      "ACT-046": {
+        "label": {
+          "nb": "Motorsport"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Motorsport"
+        }
+      },
+      "ACT-047": {
+        "label": {
+          "nb": "Orientering"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 381,
+          "name": "Orientering"
+        }
+      },
+      "ACT-048": {
+        "label": {
+          "nb": "Paintball"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 152,
+          "name": "Paintball"
+        },
+        "note": "NIF lists under Bedrift (152) and Studentidrett (984)"
+      },
+      "ACT-049": {
+        "label": {
+          "nb": "Presisjonsidrett"
+        },
+        "broader": [
+          "ACT-010"
+        ]
+      },
+      "ACT-050": {
+        "label": {
+          "nb": "Boccia"
+        },
+        "broader": [
+          "ACT-049"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 646,
+          "name": "Boccia"
+        }
+      },
+      "ACT-051": {
+        "label": {
+          "nb": "Bowls"
+        },
+        "broader": [
+          "ACT-049"
+        ],
+        "note": "Not in NIF list"
+      },
+      "ACT-052": {
+        "label": {
+          "nb": "Bueskyting"
+        },
+        "broader": [
+          "ACT-049"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Bueskyting"
+        }
+      },
+      "ACT-053": {
+        "label": {
+          "nb": "Curling"
+        },
+        "broader": [
+          "ACT-049",
+          "ACT-086"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 221,
+          "name": "Curling"
+        }
+      },
+      "ACT-054": {
+        "label": {
+          "nb": "Golf"
+        },
+        "broader": [
+          "ACT-049"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 291,
+          "name": "Golf"
+        }
+      },
+      "ACT-055": {
+        "label": {
+          "nb": "Skyting"
+        },
+        "broader": [
+          "ACT-049"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Skyting"
+        }
+      },
+      "ACT-056": {
+        "label": {
+          "nb": "Leirdueskyting"
+        },
+        "broader": [
+          "ACT-055"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 431,
+          "name": "Leirdue"
+        },
+        "note": "NIF: Leirdue"
+      },
+      "ACT-057": {
+        "label": {
+          "nb": "Racketsport"
+        },
+        "broader": [
+          "ACT-010"
+        ]
+      },
+      "ACT-058": {
+        "label": {
+          "nb": "Badminton"
+        },
+        "broader": [
+          "ACT-057"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 121,
+          "name": "Badminton"
+        }
+      },
+      "ACT-059": {
+        "label": {
+          "nb": "Bordtennis"
+        },
+        "broader": [
+          "ACT-057"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 171,
+          "name": "Bordtennis"
+        }
+      },
+      "ACT-060": {
+        "label": {
+          "nb": "Padel"
+        },
+        "broader": [
+          "ACT-057"
+        ],
+        "altLabels": [
+          "padeltennis"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 462,
+          "name": "Padel"
+        }
+      },
+      "ACT-061": {
+        "label": {
+          "nb": "Squash"
+        },
+        "broader": [
+          "ACT-057"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 541,
+          "name": "Squash"
+        }
+      },
+      "ACT-062": {
+        "label": {
+          "nb": "Tennis"
+        },
+        "broader": [
+          "ACT-057"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 461,
+          "name": "Tennis"
+        }
+      },
+      "ACT-063": {
+        "label": {
+          "nb": "Skateboard og rullesport"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "altLabels": [
+          "skating"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 732,
+          "name": "Skateboard"
+        },
+        "note": "NIF: Skateboard"
+      },
+      "ACT-064": {
+        "label": {
+          "nb": "Rollerderby"
+        },
+        "broader": [
+          "ACT-063"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 446,
+          "name": "Roller Derby"
+        }
+      },
+      "ACT-065": {
+        "label": {
+          "nb": "Styrke og trening"
+        },
+        "broader": [
+          "ACT-010"
+        ]
+      },
+      "ACT-066": {
+        "label": {
+          "nb": "Spinning"
+        },
+        "broader": [
+          "ACT-065"
+        ],
+        "note": "Indoor cycling; not in NIF"
+      },
+      "ACT-067": {
+        "label": {
+          "nb": "Styrkeløft"
+        },
+        "broader": [
+          "ACT-065"
+        ],
+        "altLabels": [
+          "styrkeløfting"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 551,
+          "name": "Styrkeløft"
+        }
+      },
+      "ACT-068": {
+        "label": {
+          "nb": "Styrketrening"
+        },
+        "broader": [
+          "ACT-065"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 741,
+          "name": "Functional Fitness"
+        },
+        "note": "NIF: Functional Fitness"
+      },
+      "ACT-069": {
+        "label": {
+          "nb": "Trim og mosjon"
+        },
+        "broader": [
+          "ACT-065"
+        ],
+        "altLabels": [
+          "trening",
+          "trening senior",
+          "trim",
+          "trimgrupper",
+          "utholdenhetstrening",
+          "vanntrening"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 879,
+          "name": "Trim/Mosjon"
+        },
+        "note": "NIF: Trim/Mosjon (under Idrett for funksjonshemmede)"
+      },
+      "ACT-070": {
+        "label": {
+          "nb": "Vektløfting"
+        },
+        "broader": [
+          "ACT-065"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 471,
+          "name": "Vektløfting"
+        }
+      },
+      "ACT-071": {
+        "label": {
+          "nb": "Yoga"
+        },
+        "broader": [
+          "ACT-065"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 628,
+          "name": "Yoga"
+        },
+        "note": "NIF lists Yoga only under Studentidrett"
+      },
+      "ACT-072": {
+        "label": {
+          "nb": "Sykling"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Sykkel"
+        }
+      },
+      "ACT-073": {
+        "label": {
+          "nb": "Vannsport"
+        },
+        "broader": [
+          "ACT-010"
+        ],
+        "altLabels": [
+          "sjøsport"
+        ]
+      },
+      "ACT-074": {
+        "label": {
+          "nb": "Bading"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "altLabels": [
+          "bad",
+          "offentlig bading",
+          "pensjonistbading",
+          "voksenbading"
+        ],
+        "note": "Recreational/public bathing (offentlig bading)"
+      },
+      "ACT-075": {
+        "label": {
+          "nb": "Dykking"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 245,
+          "name": "Dykking"
+        }
+      },
+      "ACT-076": {
+        "label": {
+          "nb": "Undervannsrugby"
+        },
+        "broader": [
+          "ACT-075"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 241,
+          "name": "Undervannsrugby"
+        }
+      },
+      "ACT-077": {
+        "label": {
+          "nb": "Padling"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Padling"
+        }
+      },
+      "ACT-078": {
+        "label": {
+          "nb": "Kajakk"
+        },
+        "broader": [
+          "ACT-077"
+        ],
+        "note": "NIF has no generic kajakk; see Havpadling 363, Flattvann 361"
+      },
+      "ACT-079": {
+        "label": {
+          "nb": "Kano"
+        },
+        "broader": [
+          "ACT-077"
+        ],
+        "altLabels": [
+          "kano/kajakk",
+          "kanopadling"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 364,
+          "name": "Kano"
+        }
+      },
+      "ACT-080": {
+        "label": {
+          "nb": "Roing"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Roing"
+        }
+      },
+      "ACT-081": {
+        "label": {
+          "nb": "Seiling"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "altLabels": [
+          "seilsport"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Seiling"
+        }
+      },
+      "ACT-082": {
+        "label": {
+          "nb": "Stuping"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "altLabels": [
+          "stup"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 452,
+          "name": "Stup"
+        },
+        "note": "NIF: Stup"
+      },
+      "ACT-083": {
+        "label": {
+          "nb": "Svømming"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "altLabels": [
+          "babysvømming",
+          "svømmekurs"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 451,
+          "name": "Svømming"
+        }
+      },
+      "ACT-084": {
+        "label": {
+          "nb": "Synkronsvømming"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 453,
+          "name": "Synkronsvømming"
+        }
+      },
+      "ACT-085": {
+        "label": {
+          "nb": "Vannpolo"
+        },
+        "broader": [
+          "ACT-073"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 454,
+          "name": "Vannpolo"
+        }
+      },
+      "ACT-086": {
+        "label": {
+          "nb": "Vintersport"
+        },
+        "broader": [
+          "ACT-010"
+        ]
+      },
+      "ACT-087": {
+        "label": {
+          "nb": "Ishockey"
+        },
+        "broader": [
+          "ACT-086"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 341,
+          "name": "Ishockey"
+        }
+      },
+      "ACT-088": {
+        "label": {
+          "nb": "Ski"
+        },
+        "broader": [
+          "ACT-086"
+        ],
+        "altLabels": [
+          "ski (langrenn/alpin)",
+          "skisport"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Ski"
+        }
+      },
+      "ACT-089": {
+        "label": {
+          "nb": "Skøyter"
+        },
+        "broader": [
+          "ACT-086"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Skøyter"
+        }
+      },
+      "ACT-090": {
+        "label": {
+          "nb": "Hurtigløp"
+        },
+        "broader": [
+          "ACT-089"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 441,
+          "name": "Hurtigløp"
+        }
+      },
+      "ACT-091": {
+        "label": {
+          "nb": "Kunstløp"
+        },
+        "broader": [
+          "ACT-089"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 442,
+          "name": "Kunstløp"
+        }
+      },
+      "ACT-092": {
+        "label": {
+          "nb": "Kultur"
+        },
+        "altLabels": [
+          "kulturaktiviteter"
+        ],
+        "nif": {
+          "match": "broad"
+        }
+      },
+      "ACT-093": {
+        "label": {
+          "nb": "Dans"
+        },
+        "broader": [
+          "ACT-092",
+          "ACT-010"
+        ],
+        "altLabels": [
+          "dans/trening",
+          "dansing"
+        ],
+        "nif": {
+          "match": "parent",
+          "parent": "Dans (avoid 885 Dans under Bedrift)"
+        }
+      },
+      "ACT-094": {
+        "label": {
+          "nb": "Foto og film"
+        },
+        "broader": [
+          "ACT-092"
+        ],
+        "altLabels": [
+          "foto",
+          "video"
+        ]
+      },
+      "ACT-095": {
+        "label": {
+          "nb": "Kulturvern og lokalhistorie"
+        },
+        "broader": [
+          "ACT-092"
+        ],
+        "altLabels": [
+          "kulturvern og historie",
+          "kulturvern og historielag",
+          "kulturvern og sogelag"
+        ]
+      },
+      "ACT-096": {
+        "label": {
+          "nb": "Kunst og håndverk"
+        },
+        "broader": [
+          "ACT-092"
+        ],
+        "altLabels": [
+          "kreativt verksted",
+          "kreativt verksted og prosesser",
+          "kunst, håndtverk, media",
+          "kunst, håndverk og media",
+          "kunst, håndverk, media",
+          "malegruppe",
+          "verksted"
+        ]
+      },
+      "ACT-097": {
+        "label": {
+          "nb": "Litteratur"
+        },
+        "broader": [
+          "ACT-092"
+        ],
+        "altLabels": [
+          "litteratur/litteraturformidling"
+        ]
+      },
+      "ACT-098": {
+        "label": {
+          "nb": "Musikk"
+        },
+        "broader": [
+          "ACT-092"
+        ],
+        "altLabels": [
+          "dans/ musikk/ kor/ korps",
+          "musikk / korps",
+          "musikk og dans"
+        ]
+      },
+      "ACT-099": {
+        "label": {
+          "nb": "Band"
+        },
+        "broader": [
+          "ACT-098"
+        ],
+        "altLabels": [
+          "bandøving"
+        ]
+      },
+      "ACT-100": {
+        "label": {
+          "nb": "Buekorps"
+        },
+        "broader": [
+          "ACT-098"
+        ],
+        "note": "Bergen tradition; also youth organisation"
+      },
+      "ACT-101": {
+        "label": {
+          "nb": "Kor"
+        },
+        "broader": [
+          "ACT-098"
+        ]
+      },
+      "ACT-102": {
+        "label": {
+          "nb": "Korps"
+        },
+        "broader": [
+          "ACT-098"
+        ],
+        "altLabels": [
+          "korps og orkester"
+        ]
+      },
+      "ACT-103": {
+        "label": {
+          "nb": "Orkester"
+        },
+        "broader": [
+          "ACT-098"
+        ]
+      },
+      "ACT-104": {
+        "label": {
+          "nb": "Scenekunst"
+        },
+        "broader": [
+          "ACT-092"
+        ]
+      },
+      "ACT-105": {
+        "label": {
+          "nb": "Sirkus"
+        },
+        "broader": [
+          "ACT-104"
+        ]
+      },
+      "ACT-106": {
+        "label": {
+          "nb": "Teater"
+        },
+        "broader": [
+          "ACT-104"
+        ],
+        "altLabels": [
+          "revy og teater",
+          "skuespill",
+          "teater og scenekunst"
+        ]
+      },
+      "ACT-107": {
+        "label": {
+          "nb": "Læring"
+        }
+      },
+      "ACT-108": {
+        "label": {
+          "nb": "Språkkafé"
+        },
+        "broader": [
+          "ACT-107"
+        ],
+        "altLabels": [
+          "språkcafé"
+        ]
+      },
+      "ACT-109": {
+        "label": {
+          "nb": "Undervisning og kurs"
+        },
+        "broader": [
+          "ACT-107"
+        ],
+        "altLabels": [
+          "dataundervisning",
+          "gruppearbeid",
+          "klasseromsundervisning",
+          "kurs",
+          "kurs og foredrag",
+          "leksegruppe",
+          "opplæring",
+          "studiegrupper",
+          "undervisning",
+          "undervisning/opplæring",
+          "workshop"
+        ]
+      }
+    },
+    "event": {
+      "EVT-001": {
+        "label": {
+          "nb": "Arrangement (generelt)"
+        },
+        "altLabels": [
+          "alle typer arrangement",
+          "arrangement",
+          "arrangement og møte",
+          "arrangementer",
+          "team-building"
+        ]
+      },
+      "EVT-002": {
+        "label": {
+          "nb": "Møte"
+        },
+        "broader": [
+          "EVT-001"
+        ],
+        "altLabels": [
+          "informasjons møter",
+          "klubbmøte",
+          "møte/presentasjon",
+          "møteaktivitet",
+          "møter",
+          "møter og kurs",
+          "møter, kurs, mindre selskaper",
+          "møtevirksomhet",
+          "samlinger",
+          "samtale",
+          "samtaler",
+          "små møter",
+          "åpne møter"
+        ]
+      },
+      "EVT-003": {
+        "label": {
+          "nb": "Foredrag og presentasjon"
+        },
+        "broader": [
+          "EVT-002"
+        ],
+        "altLabels": [
+          "foredrag",
+          "forelesning",
+          "presentasjoner"
+        ]
+      },
+      "EVT-004": {
+        "label": {
+          "nb": "Konferanse"
+        },
+        "broader": [
+          "EVT-002"
+        ],
+        "altLabels": [
+          "dagsmøte",
+          "konferanser"
+        ]
+      },
+      "EVT-005": {
+        "label": {
+          "nb": "Medvirkning og involvering"
+        },
+        "broader": [
+          "EVT-002"
+        ],
+        "altLabels": [
+          "involvering"
+        ]
+      },
+      "EVT-006": {
+        "label": {
+          "nb": "Offentlig arrangement"
+        },
+        "broader": [
+          "EVT-001"
+        ],
+        "altLabels": [
+          "annet - offentlig arrangement",
+          "off.arrangement"
+        ]
+      },
+      "EVT-007": {
+        "label": {
+          "nb": "Fest og disko"
+        },
+        "broader": [
+          "EVT-006"
+        ],
+        "altLabels": [
+          "disko",
+          "diskorom"
+        ]
+      },
+      "EVT-008": {
+        "label": {
+          "nb": "Kulturarrangement"
+        },
+        "broader": [
+          "EVT-006"
+        ]
+      },
+      "EVT-009": {
+        "label": {
+          "nb": "Festival og mønstring"
+        },
+        "broader": [
+          "EVT-008"
+        ],
+        "altLabels": [
+          "festival",
+          "festivaler",
+          "festivaler / mønstringar",
+          "festivaler / mønstringer",
+          "festivaler og mønstringer"
+        ]
+      },
+      "EVT-010": {
+        "label": {
+          "nb": "Forestilling"
+        },
+        "broader": [
+          "EVT-008"
+        ],
+        "altLabels": [
+          "forestilllinger",
+          "teaterforestilling"
+        ]
+      },
+      "EVT-011": {
+        "label": {
+          "nb": "Kino og film"
+        },
+        "broader": [
+          "EVT-008"
+        ],
+        "altLabels": [
+          "film",
+          "kino"
+        ]
+      },
+      "EVT-012": {
+        "label": {
+          "nb": "Konsert"
+        },
+        "broader": [
+          "EVT-008"
+        ],
+        "altLabels": [
+          "andre aktivitetar, konsertar, o.l"
+        ]
+      },
+      "EVT-013": {
+        "label": {
+          "nb": "Utstilling"
+        },
+        "broader": [
+          "EVT-008"
+        ],
+        "altLabels": [
+          "utstillinger"
+        ]
+      },
+      "EVT-014": {
+        "label": {
+          "nb": "Marked og stand"
+        },
+        "broader": [
+          "EVT-006"
+        ],
+        "altLabels": [
+          "leie salgsplass",
+          "leie standplass",
+          "marked",
+          "messe",
+          "salg",
+          "salgsplass",
+          "stand",
+          "stand (2mx3m)",
+          "standplass",
+          "stands"
+        ]
+      },
+      "EVT-015": {
+        "label": {
+          "nb": "Markering og demonstrasjon"
+        },
+        "broader": [
+          "EVT-006"
+        ],
+        "altLabels": [
+          "demonstrasjon",
+          "markering",
+          "markering/demonstrasjon"
+        ]
+      },
+      "EVT-016": {
+        "label": {
+          "nb": "Promotering"
+        },
+        "broader": [
+          "EVT-006"
+        ],
+        "altLabels": [
+          "profilering"
+        ]
+      },
+      "EVT-017": {
+        "label": {
+          "nb": "Tivoli"
+        },
+        "broader": [
+          "EVT-006"
+        ]
+      },
+      "EVT-018": {
+        "label": {
+          "nb": "Valg"
+        },
+        "broader": [
+          "EVT-006"
+        ],
+        "altLabels": [
+          "politikk/valgdag"
+        ]
+      },
+      "EVT-019": {
+        "label": {
+          "nb": "Overnatting"
+        },
+        "broader": [
+          "EVT-001"
+        ],
+        "altLabels": [
+          "sommerleir"
+        ]
+      },
+      "EVT-020": {
+        "label": {
+          "nb": "Privat arrangement/selskap"
+        },
+        "broader": [
+          "EVT-001"
+        ],
+        "altLabels": [
+          "annet - personlig markering",
+          "bursdagsfeiring",
+          "familiefest",
+          "klassefest",
+          "personlig markering",
+          "privat arrangement",
+          "privat/ lukket arrangement",
+          "selskap",
+          "selskapsarrangement",
+          "sosiale tilstelninger"
+        ]
+      },
+      "EVT-021": {
+        "label": {
+          "nb": "Barnebursdag"
+        },
+        "broader": [
+          "EVT-020"
+        ],
+        "altLabels": [
+          "barnebursdag 3 - 12 år",
+          "barnebursdag 3 -16 år"
+        ]
+      },
+      "EVT-022": {
+        "label": {
+          "nb": "Seremoni"
+        },
+        "broader": [
+          "EVT-001"
+        ],
+        "altLabels": [
+          "seremonier"
+        ]
+      },
+      "EVT-023": {
+        "label": {
+          "nb": "Bryllup og vielse"
+        },
+        "broader": [
+          "EVT-022"
+        ],
+        "altLabels": [
+          "bryllup",
+          "vielser",
+          "vigsel"
+        ]
+      },
+      "EVT-024": {
+        "label": {
+          "nb": "Dåp og navnefest"
+        },
+        "broader": [
+          "EVT-022"
+        ],
+        "altLabels": [
+          "dåp",
+          "dåp/navnedag"
+        ]
+      },
+      "EVT-025": {
+        "label": {
+          "nb": "Konfirmasjon"
+        },
+        "broader": [
+          "EVT-022"
+        ]
+      },
+      "EVT-026": {
+        "label": {
+          "nb": "Sosial møteplass"
+        },
+        "broader": [
+          "EVT-001"
+        ],
+        "altLabels": [
+          "møteplass",
+          "sosiale aktivteter",
+          "sosiale møteplassar",
+          "sosiale møteplasser"
+        ]
+      },
+      "EVT-027": {
+        "label": {
+          "nb": "Drop-in / åpent tilbud"
+        },
+        "broader": [
+          "EVT-026"
+        ],
+        "altLabels": [
+          "drop in",
+          "åpen hall"
+        ]
+      },
+      "EVT-028": {
+        "label": {
+          "nb": "Servering (kafé/pub)"
+        },
+        "broader": [
+          "EVT-026"
+        ],
+        "altLabels": [
+          "kafe",
+          "kafè",
+          "pub",
+          "søndagskafé"
+        ]
+      }
+    },
+    "organisation": {
+      "ORG-001": {
+        "label": {
+          "nb": "Egenorganisert"
+        },
+        "altLabels": [
+          "uorganisert"
+        ]
+      },
+      "ORG-002": {
+        "label": {
+          "nb": "Frisklivssentral"
+        },
+        "altLabels": [
+          "frisklivsentralen"
+        ],
+        "note": "Municipal unit"
+      },
+      "ORG-003": {
+        "label": {
+          "nb": "Frivillig organisasjon (generelt)"
+        },
+        "altLabels": [
+          "frivillig organisasjon",
+          "frivillighet og organisasjonsaktiviteter",
+          "lag og foreninger",
+          "organisasjon"
+        ]
+      },
+      "ORG-004": {
+        "label": {
+          "nb": "Båtforening"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "båtforeingar"
+        ]
+      },
+      "ORG-005": {
+        "label": {
+          "nb": "Flerkulturell forening"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "utenlandsk forening"
+        ]
+      },
+      "ORG-006": {
+        "label": {
+          "nb": "Foreldreutvalg (FAU)"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "foreldreutval"
+        ]
+      },
+      "ORG-007": {
+        "label": {
+          "nb": "Frivilligsentral"
+        },
+        "broader": [
+          "ORG-003"
+        ]
+      },
+      "ORG-008": {
+        "label": {
+          "nb": "Grendelag/velforening"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "grendalag",
+          "grendalag/velforening",
+          "grendelag",
+          "velforeninger"
+        ]
+      },
+      "ORG-009": {
+        "label": {
+          "nb": "Humanitær organisasjon"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "humanitære organiasjoner",
+          "humanitære organisasjonar",
+          "humanitære organisasjoner"
+        ]
+      },
+      "ORG-010": {
+        "label": {
+          "nb": "Idrettskrets/særforbund"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "idrettskrets - særforbund"
+        ]
+      },
+      "ORG-011": {
+        "label": {
+          "nb": "Idrettslag/fleridrettslag"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "fleiridrettslag",
+          "fleridrettslag"
+        ]
+      },
+      "ORG-012": {
+        "label": {
+          "nb": "Bedriftsidrettslag"
+        },
+        "broader": [
+          "ORG-011"
+        ],
+        "altLabels": [
+          "bedriftsidrett"
+        ]
+      },
+      "ORG-013": {
+        "label": {
+          "nb": "Interesseorganisasjon"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "interesseorganiasjonar",
+          "interesseorganiasjoner",
+          "interesseorganisasjonar",
+          "interesseorganisasjoner"
+        ]
+      },
+      "ORG-014": {
+        "label": {
+          "nb": "Motorklubb (bil/MC)"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "bil/mc klubb"
+        ]
+      },
+      "ORG-015": {
+        "label": {
+          "nb": "Pensjonistforening"
+        },
+        "broader": [
+          "ORG-003"
+        ]
+      },
+      "ORG-016": {
+        "label": {
+          "nb": "Politisk organisasjon"
+        },
+        "broader": [
+          "ORG-003"
+        ]
+      },
+      "ORG-017": {
+        "label": {
+          "nb": "Speiderorganisasjon"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "speidar",
+          "speidarar",
+          "speider",
+          "speider og friluftsliv",
+          "speiding"
+        ]
+      },
+      "ORG-018": {
+        "label": {
+          "nb": "Tros- og livssynssamfunn"
+        },
+        "broader": [
+          "ORG-003"
+        ],
+        "altLabels": [
+          "menighet/ trossamfunn",
+          "menigheter og trosamfunn",
+          "menigheter og trossamfunn",
+          "meningheter og trossamfunn"
+        ]
+      },
+      "ORG-019": {
+        "label": {
+          "nb": "Kulturskole"
+        },
+        "altLabels": [
+          "intern avdeling: kulturskolen",
+          "kulturskolen"
+        ],
+        "note": "Municipal unit"
+      },
+      "ORG-020": {
+        "label": {
+          "nb": "Næringsliv/kommersiell"
+        },
+        "altLabels": [
+          "bedrifter o.l",
+          "kommersiell utleie",
+          "kommersiell utleige",
+          "næring og kommersiell virksomhet"
+        ]
+      },
+      "ORG-021": {
+        "label": {
+          "nb": "Offentlig virksomhet"
+        },
+        "altLabels": [
+          "offentlig"
+        ],
+        "note": "Booker category (Offentlig/Privat/Frivillig) - consider own attribute"
+      },
+      "ORG-022": {
+        "label": {
+          "nb": "Privatperson"
+        },
+        "altLabels": [
+          "privat",
+          "privat utleige"
+        ],
+        "note": "Booker category - consider own attribute"
+      },
+      "ORG-023": {
+        "label": {
+          "nb": "Uformell gruppe/vennelag"
+        },
+        "altLabels": [
+          "vennelag/gruppe"
+        ]
+      },
+      "ORG-024": {
+        "label": {
+          "nb": "Voksenopplæring"
+        },
+        "altLabels": [
+          "intern avdeling: voks",
+          "voksenopplæringssenteret"
+        ],
+        "note": "Municipal unit"
+      }
+    },
+    "targetGroup": {
+      "GRP-001": {
+        "label": {
+          "nb": "Barn"
+        },
+        "altLabels": [
+          "barnetilbud"
+        ]
+      },
+      "GRP-002": {
+        "label": {
+          "nb": "Inkludering og integrering"
+        },
+        "altLabels": [
+          "inkludering"
+        ]
+      },
+      "GRP-003": {
+        "label": {
+          "nb": "Kommunal intern bruk"
+        },
+        "altLabels": [
+          "annet - internt i kommunen",
+          "flykningekontoret",
+          "intern",
+          "intern avdeling: flyk",
+          "interne avdelinger",
+          "internt bergen kommune",
+          "internt bruk - kommune",
+          "internt i kommunen",
+          "internt kommune",
+          "internt stavanger kommune",
+          "kommunal aktivitet",
+          "kommunalt",
+          "kommunalt bruk",
+          "kommune eige bruk",
+          "sambruk"
+        ]
+      },
+      "GRP-004": {
+        "label": {
+          "nb": "Personer med funksjonsnedsettelse"
+        },
+        "altLabels": [
+          "funksjonhemma",
+          "lagt til rette for mmnf",
+          "pu/hu"
+        ]
+      },
+      "GRP-005": {
+        "label": {
+          "nb": "Seniorer"
+        }
+      },
+      "GRP-006": {
+        "label": {
+          "nb": "Spedbarn og foreldre"
+        },
+        "altLabels": [
+          "spedbarnsgruppe"
+        ]
+      },
+      "GRP-007": {
+        "label": {
+          "nb": "Ungdom"
+        },
+        "altLabels": [
+          "fritidsklubb",
+          "ungdomsklubb"
+        ]
+      },
+      "GRP-008": {
+        "label": {
+          "nb": "Utdanning"
+        }
+      },
+      "GRP-009": {
+        "label": {
+          "nb": "Barnehage"
+        },
+        "broader": [
+          "GRP-008"
+        ],
+        "altLabels": [
+          "barnehager"
+        ]
+      },
+      "GRP-010": {
+        "label": {
+          "nb": "Høyere utdanning"
+        },
+        "broader": [
+          "GRP-008"
+        ],
+        "altLabels": [
+          "ntnu",
+          "vid"
+        ]
+      },
+      "GRP-011": {
+        "label": {
+          "nb": "Skole (grunnskole)"
+        },
+        "broader": [
+          "GRP-008"
+        ],
+        "altLabels": [
+          "oppvekst/skule",
+          "skole",
+          "skular",
+          "skule",
+          "skule - oppvekst"
+        ]
+      },
+      "GRP-012": {
+        "label": {
+          "nb": "Videregående skole"
+        },
+        "broader": [
+          "GRP-008"
+        ],
+        "altLabels": [
+          "vgs"
+        ]
+      }
+    },
+    "venue": {
+      "VEN-001": {
+        "label": {
+          "nb": "Administrasjonslokale"
+        }
+      },
+      "VEN-002": {
+        "label": {
+          "nb": "Arbeidsplass/kontorplass"
+        },
+        "altLabels": [
+          "drop-in / arbeidsplasser"
+        ]
+      },
+      "VEN-003": {
+        "label": {
+          "nb": "Arena"
+        }
+      },
+      "VEN-004": {
+        "label": {
+          "nb": "Bibliotek"
+        }
+      },
+      "VEN-005": {
+        "label": {
+          "nb": "Bolig/leilighet"
+        },
+        "altLabels": [
+          "leilighet"
+        ]
+      },
+      "VEN-006": {
+        "label": {
+          "nb": "Byrom/uterom"
+        },
+        "altLabels": [
+          "byrom",
+          "torg",
+          "torgplasser"
+        ]
+      },
+      "VEN-007": {
+        "label": {
+          "nb": "Forsamlingslokale"
+        },
+        "altLabels": [
+          "arrangementlokale",
+          "formidlingsarena og forsamlingslokaler",
+          "saltimer",
+          "samlingsplass"
+        ]
+      },
+      "VEN-008": {
+        "label": {
+          "nb": "Aktivitetshus"
+        },
+        "broader": [
+          "VEN-007"
+        ]
+      },
+      "VEN-009": {
+        "label": {
+          "nb": "Bydelshus/grendehus"
+        },
+        "broader": [
+          "VEN-007"
+        ],
+        "altLabels": [
+          "bydelshus"
+        ]
+      },
+      "VEN-010": {
+        "label": {
+          "nb": "Helse- og omsorgsbygg"
+        },
+        "altLabels": [
+          "helsebygg",
+          "sykehjem"
+        ]
+      },
+      "VEN-011": {
+        "label": {
+          "nb": "Idrettsanlegg utendørs"
+        },
+        "altLabels": [
+          "fotballbane"
+        ]
+      },
+      "VEN-012": {
+        "label": {
+          "nb": "Idrettshall/gymsal"
+        },
+        "altLabels": [
+          "gymsal",
+          "idrettshall"
+        ]
+      },
+      "VEN-013": {
+        "label": {
+          "nb": "Innbyggertorg"
+        }
+      },
+      "VEN-014": {
+        "label": {
+          "nb": "Kjøkken"
+        },
+        "altLabels": [
+          "skolekjøkken"
+        ]
+      },
+      "VEN-015": {
+        "label": {
+          "nb": "Klasserom"
+        }
+      },
+      "VEN-016": {
+        "label": {
+          "nb": "Kulturhus"
+        },
+        "altLabels": [
+          "kulturbygg"
+        ]
+      },
+      "VEN-017": {
+        "label": {
+          "nb": "Kulturlokale"
+        },
+        "altLabels": [
+          "kulturlokaler",
+          "kulturlokaler formidling og øving",
+          "kulturlokaler, formidling og øving"
+        ]
+      },
+      "VEN-018": {
+        "label": {
+          "nb": "Galleri og utstillingslokale"
+        },
+        "broader": [
+          "VEN-017"
+        ],
+        "altLabels": [
+          "galleri"
+        ]
+      },
+      "VEN-019": {
+        "label": {
+          "nb": "Øvingslokale/verksted"
+        },
+        "broader": [
+          "VEN-017"
+        ],
+        "altLabels": [
+          "kulturlokaler øving og verksteder",
+          "verkstedlokale",
+          "øvingslokaler og verksteder",
+          "øvingsrom"
+        ]
+      },
+      "VEN-020": {
+        "label": {
+          "nb": "Museum"
+        }
+      },
+      "VEN-021": {
+        "label": {
+          "nb": "Møterom"
+        },
+        "altLabels": [
+          "annet - idrett møterom",
+          "annet - kultur møterom",
+          "idrett møterom",
+          "kulturlokalar møterom",
+          "møtelokale",
+          "møterom i drammen kommune"
+        ]
+      },
+      "VEN-022": {
+        "label": {
+          "nb": "Svømmehall"
+        },
+        "altLabels": [
+          "symjehall",
+          "varmtvannsbasseng"
+        ]
+      },
+      "VEN-023": {
+        "label": {
+          "nb": "Uteområde"
+        },
+        "altLabels": [
+          "friområder"
+        ]
+      },
+      "VEN-024": {
+        "label": {
+          "nb": "Gapahuk/bålplass"
+        },
+        "broader": [
+          "VEN-023"
+        ],
+        "altLabels": [
+          "gapahuk"
+        ]
+      },
+      "VEN-025": {
+        "label": {
+          "nb": "Teltplass"
+        },
+        "broader": [
+          "VEN-023"
+        ]
+      }
+    },
+    "service": {
+      "SRV-001": {
+        "label": {
+          "nb": "Gi bort / ombruk"
+        },
+        "altLabels": [
+          "gi bort",
+          "klesinnsamling"
+        ]
+      },
+      "SRV-002": {
+        "label": {
+          "nb": "Helse og terapi"
+        },
+        "altLabels": [
+          "fysiotimer",
+          "terapi"
+        ]
+      },
+      "SRV-003": {
+        "label": {
+          "nb": "Personlig pleie"
+        },
+        "altLabels": [
+          "hårklipp",
+          "makeup & hundpleie"
+        ]
+      },
+      "SRV-004": {
+        "label": {
+          "nb": "Transport"
+        },
+        "altLabels": [
+          "innbyggerbussen",
+          "mobilitet",
+          "transporthjelp"
+        ]
+      },
+      "SRV-005": {
+        "label": {
+          "nb": "Utlån av utstyr"
+        },
+        "altLabels": [
+          "grill/bålpanne",
+          "kamera",
+          "leie av lastesykkel",
+          "lyd",
+          "lys",
+          "utstyr"
+        ]
+      },
+      "SRV-006": {
+        "label": {
+          "nb": "Veiledning og rådgivning"
+        },
+        "altLabels": [
+          "datahjelp",
+          "samtale med innbygger",
+          "veiledningstime byggesak"
+        ],
+        "note": "Citizen services (byggesak, datahjelp)"
+      }
+    },
+    "exclude": {
+      "EXC-001": {
+        "label": {
+          "nb": "Avklares"
+        },
+        "altLabels": [
+          "nrg",
+          "treklang"
+        ],
+        "note": "Meaning unknown - ask source owner"
+      },
+      "EXC-002": {
+        "label": {
+          "nb": "Stengt/utilgjengelig"
+        },
+        "altLabels": [
+          "anleggsarbeid",
+          "ekstra renhold",
+          "ferie",
+          "renhold og vedlikehold",
+          "sommerstengt - sommertrening",
+          "stengt",
+          "stengt grunna vedlikehald eller ferie",
+          "stengt pga arrangement",
+          "stengt pga ferie eller arrangement",
+          "stengt pga vedlikehold/reperasjon av utstyr",
+          "utlånsordningen er ikke åpen",
+          "vedlikehold",
+          "åpningstid"
+        ],
+        "note": "Availability status, not an activity - move to booking status"
+      },
+      "EXC-003": {
+        "label": {
+          "nb": "Testdata/systemtekst"
+        },
+        "altLabels": [
+          "forslag",
+          "slettet/utgått",
+          "tiden er ledig. sykkelen reserveres fra forrige ledige torsdag.",
+          "walk and talk - test"
+        ],
+        "note": "Delete at source"
+      },
+      "EXC-004": {
+        "label": {
+          "nb": "Uspesifisert"
+        },
+        "altLabels": [
+          "andre",
+          "andre aktivitetar, o.l",
+          "annet",
+          "generelt",
+          "organisering av aktivitetar",
+          "x annet"
+        ],
+        "note": "Generic catch-all; hide from search facets"
+      }
+    }
+  }
+}
