@@ -1,5 +1,6 @@
 {
-  "source": "AktivKommune_activity_mapping_v0.2.xlsx",
+  "source": "AktivKommune_activity_mapping_v0.3.xlsx",
+  "approvedOnly": false,
   "facets": {
     "activity": {
       "ACT-001": {
@@ -262,6 +263,20 @@
           "name": "Håndball"
         }
       },
+      "ACT-110": {
+        "label": {
+          "nb": "Sandhåndball"
+        },
+        "broader": [
+          "ACT-020"
+        ],
+        "nif": {
+          "match": "close",
+          "code": 332,
+          "name": "Beach håndball"
+        },
+        "note": "NIF: Beach håndball"
+      },
       "ACT-021": {
         "label": {
           "nb": "Innebandy"
@@ -320,6 +335,19 @@
           "match": "exact",
           "code": 481,
           "name": "Volleyball"
+        }
+      },
+      "ACT-111": {
+        "label": {
+          "nb": "Sandvolleyball"
+        },
+        "broader": [
+          "ACT-024"
+        ],
+        "nif": {
+          "match": "exact",
+          "code": 482,
+          "name": "Sandvolleyball"
         }
       },
       "ACT-025": {
@@ -458,6 +486,9 @@
         },
         "broader": [
           "ACT-010"
+        ],
+        "altLabels": [
+          "hund"
         ],
         "nif": {
           "match": "parent",
@@ -1457,6 +1488,7 @@
           "samtale",
           "samtaler",
           "små møter",
+          "styremøter",
           "åpne møter"
         ]
       },
@@ -2021,6 +2053,14 @@
         ],
         "note": "Booker category - consider own attribute"
       },
+      "ORG-025": {
+        "label": {
+          "nb": "Sameie/borettslag"
+        },
+        "altLabels": [
+          "sameie"
+        ]
+      },
       "ORG-023": {
         "label": {
           "nb": "Uformell gruppe/vennelag"
@@ -2065,6 +2105,7 @@
           "annet - internt i kommunen",
           "flykningekontoret",
           "intern",
+          "intern aktivitet",
           "intern avdeling: flyk",
           "interne avdelinger",
           "internt bergen kommune",
@@ -2343,6 +2384,14 @@
           "møterom i drammen kommune"
         ]
       },
+      "VEN-026": {
+        "label": {
+          "nb": "Seremonirom"
+        },
+        "altLabels": [
+          "livsnøytral seremonirom"
+        ]
+      },
       "VEN-022": {
         "label": {
           "nb": "Svømmehall"
@@ -2449,6 +2498,7 @@
           "nb": "Avklares"
         },
         "altLabels": [
+          "mini",
           "nrg",
           "treklang"
         ],
