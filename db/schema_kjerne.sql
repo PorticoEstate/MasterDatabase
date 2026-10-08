@@ -297,10 +297,19 @@ CREATE TABLE IF NOT EXISTS lokaletype
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Holder mer enn rene aktiviteter: alle fasettene i etl/activity_mapping/
+-- activities.json unntatt "exclude" (aktivitet, arrangement, organisasjon,
+-- målgruppe, lokale, tjeneste). Fasetten bæres av prefikset i kode (ACT-,
+-- EVT-, ORG-, GRP-, VEN-, SRV-), ikke av en egen kolonne. Vokabularet eies av
+-- JSON-filen og lastes av etl/last_inn.py - det seedes ikke her.
+--
+-- Noen få konsepter har to foreldre i vokabularet (Dans under både Kultur og
+-- Idrett); parent_id får den første.
 CREATE TABLE IF NOT EXISTS aktivitet
 (
     id         BIGSERIAL PRIMARY KEY,
-    kode       TEXT UNIQUE NOT NULL,
+    kode       TEXT UNIQUE NOT NULL
+                   CHECK (kode ~ '^(ACT|EVT|ORG|GRP|VEN|SRV)-[0-9]{3}$'),
     navn       TEXT NOT NULL,
     parent_id  BIGINT REFERENCES aktivitet(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -346,6 +355,9 @@ CREATE INDEX IF NOT EXISTS ix_kildekode_navn ON kildekode (lower(navn));
 -- lokaletyper: "Stengt", "Fiktivt rom", "Streaming", og stedsnavn som
 -- "Judaberg innbyggertorg".
 --
+-- Gjelder lokaletype og fasilitet, der hver kildekode har høyst ett mål.
+-- Aktivitet har sin egen tabell, aktivitet_mapping (under).
+--
 -- Egen "id" pluss en UNIQUE "kildekode_id", i stedet for å la kildekode_id
 -- være primærnøkkel direkte: det holder mønsteret "PK heter id, FK heter
 -- <tabell>_id" konsekvent, selv om denne tabellen i praksis er en ett-til-én
@@ -355,7 +367,6 @@ CREATE TABLE IF NOT EXISTS kildekode_mapping
     id            BIGSERIAL PRIMARY KEY,
     kildekode_id  BIGINT UNIQUE NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
     lokaletype_id BIGINT REFERENCES lokaletype(id) ON DELETE CASCADE,
-    aktivitet_id  BIGINT REFERENCES aktivitet(id) ON DELETE CASCADE,
     fasilitet_id  BIGINT REFERENCES fasilitet(id) ON DELETE CASCADE,
     status        TEXT NOT NULL DEFAULT 'foreslatt'
                       CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
@@ -366,7 +377,6 @@ CREATE TABLE IF NOT EXISTS kildekode_mapping
     CONSTRAINT chk_mapping_ett_mal
         CHECK (
             (CASE WHEN lokaletype_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN aktivitet_id IS NOT NULL THEN 1 ELSE 0 END)
           + (CASE WHEN fasilitet_id IS NOT NULL THEN 1 ELSE 0 END)
           = CASE WHEN status = 'ikke_relevant' THEN 0 ELSE 1 END
         )
@@ -374,6 +384,33 @@ CREATE TABLE IF NOT EXISTS kildekode_mapping
 
 CREATE INDEX IF NOT EXISTS ix_mapping_lokaletype ON kildekode_mapping (lokaletype_id);
 CREATE INDEX IF NOT EXISTS ix_mapping_status ON kildekode_mapping (status);
+
+-- Oversettelse av aktivitetskoder. Egen tabell fordi ett kildenavn kan bære
+-- flere konsepter ("Barnebursdag 3 - 12 år" -> Barnebursdag + Barn), og da får
+-- kildekoden én rad per konsept - noe kildekode_mapping (én rad per kode) ikke
+-- tillater, og som ellers ville gitt rader med to alltid tomme målkolonner.
+-- 'ikke_relevant' (EXC-konsepter i activity_mapping) ligger her med
+-- aktivitet_id = NULL, slik at all aktivitetskartlegging finnes på ett sted.
+CREATE TABLE IF NOT EXISTS aktivitet_mapping
+(
+    id           BIGSERIAL PRIMARY KEY,
+    kildekode_id BIGINT NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
+    aktivitet_id BIGINT REFERENCES aktivitet(id) ON DELETE CASCADE,
+    status       TEXT NOT NULL DEFAULT 'foreslatt'
+                     CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
+    kartlagt_av  TEXT,
+    merknad      TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_aktivitet_mapping_mal
+        CHECK ((aktivitet_id IS NULL) = (status = 'ikke_relevant'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping
+    ON aktivitet_mapping (kildekode_id, aktivitet_id) WHERE aktivitet_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping_ikke_relevant
+    ON aktivitet_mapping (kildekode_id) WHERE aktivitet_id IS NULL;
+CREATE INDEX IF NOT EXISTS ix_aktivitet_mapping_aktivitet ON aktivitet_mapping (aktivitet_id);
 
 
 -- =============================================================================
@@ -621,8 +658,13 @@ SELECT kk.id AS kildekode_id, fi.kildenokkel,
        kk.kodetype, kk.kode, kk.navn, kk.sist_sett
 FROM kildekode kk
 JOIN fagsystem_instans fi ON fi.id = kk.fagsystem_instans_id
-LEFT JOIN kildekode_mapping m ON m.kildekode_id = kk.id
-WHERE m.id IS NULL OR m.status = 'foreslatt';
+-- Aktivitet kartlegges i aktivitet_mapping, alt annet i kildekode_mapping.
+WHERE CASE WHEN kk.kodetype = 'aktivitet'
+           THEN NOT EXISTS (SELECT 1 FROM aktivitet_mapping m
+                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
+           ELSE NOT EXISTS (SELECT 1 FROM kildekode_mapping m
+                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
+      END;
 
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
 -- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
@@ -650,7 +692,8 @@ LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 -- 11. Kanonisk kodeverk (startsett)
 --
 -- Utledet fra de 142 distinkte kategorinavnene i de 12 Aktiv kommune-instansene,
--- slått sammen på tvers av målform, skrivefeil og synonymer.
+-- slått sammen på tvers av målform, skrivefeil og synonymer. aktivitet seedes
+-- ikke her - vokabularet lastes av etl/last_inn.py fra activities.json.
 -- =============================================================================
 
 INSERT INTO lokaletype (kode, navn)
@@ -752,45 +795,6 @@ FROM (VALUES
 JOIN lokaletype p ON p.kode = v.parent_kode
 ON CONFLICT (kode) DO NOTHING;
 
-INSERT INTO aktivitet (kode, navn)
-VALUES
-    ('IDRETT','Idrett'),
-    ('KULTUR','Kultur'),
-    ('OPPLARING','Opplæring og kurs'),
-    ('MOTE','Møte og konferanse'),
-    ('PRIVAT','Privat arrangement'),
-    ('FRIVILLIGHET','Frivillighet og lag'),
-    ('FRILUFT','Friluftsliv'),
-    ('INTERNT','Internt kommunalt')
-ON CONFLICT (kode) DO NOTHING;
-
-INSERT INTO aktivitet (kode, navn, parent_id)
-SELECT v.kode, v.navn, p.id
-FROM (VALUES
-    ('FOTBALL','Fotball','IDRETT'),
-    ('HANDBALL','Håndball','IDRETT'),
-    ('BASKETBALL','Basketball','IDRETT'),
-    ('VOLLEYBALL','Volleyball','IDRETT'),
-    ('TURN','Turn','IDRETT'),
-    ('KAMPSPORT','Kampsport','IDRETT'),
-    ('SVOMMING','Svømming','IDRETT'),
-    ('FRIIDRETT','Friidrett','IDRETT'),
-    ('ISHOCKEY','Ishockey og skøyter','IDRETT'),
-    ('KLATRING','Klatring','IDRETT'),
-    ('STYRKETRENING','Styrketrening','IDRETT'),
-    ('TENNIS','Tennis','IDRETT'),
-    ('SKYTING','Skyting','IDRETT'),
-    ('DANS','Dans','KULTUR'),
-    ('MUSIKK','Musikk og korps','KULTUR'),
-    ('KOR','Kor og sang','KULTUR'),
-    ('TEATER','Teater og revy','KULTUR'),
-    ('KUNST_HANDVERK','Kunst, håndverk og media','KULTUR'),
-    ('SPEIDER','Speider','FRILUFT'),
-    ('SYKLING','Sykling','FRILUFT')
-) AS v(kode, navn, parent_kode)
-JOIN aktivitet p ON p.kode = v.parent_kode
-ON CONFLICT (kode) DO NOTHING;
-
 INSERT INTO fasilitet (kode, navn, gruppe)
 VALUES
     ('HC_TILGANG','Rullestoltilgang','tilgjengelighet'),
@@ -837,7 +841,8 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'kommune','fagsystem_instans', 'matrikkelinfo','bygning','gate','adresse',
-        'lokaletype','aktivitet','fasilitet','kildekode','kildekode_mapping','ressurs'
+        'lokaletype','aktivitet','fasilitet','kildekode','kildekode_mapping',
+        'aktivitet_mapping','ressurs'
     ]
     LOOP
         EXECUTE format('DROP TRIGGER IF EXISTS trg_%1$s_updated_at ON %1$I', t);
