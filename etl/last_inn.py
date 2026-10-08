@@ -72,7 +72,8 @@ FASILITET = last_mapping("fasilitet_mapping")
 # i "activities", og activities.json er vokabularet de peker på, gruppert per
 # fasett. Øvrige felt (confidence, status, attributes, reason, sourceNames)
 # brukes ikke foreløpig. Alle fasetter unntatt "exclude" lastes inn i tabellen
-# aktivitet; EXC-konsepter gir status 'ikke_relevant'.
+# aktivitet; EXC-konsepter gir status 'ikke_relevant'. Kartleggingen skrives
+# til tabellen aktivitet_mapping, ikke kildekode_mapping.
 with open(Path(__file__).parent / "activity_mapping" / "mapping.json", encoding="utf-8") as f:
     _aktivitet_mapping = json.load(f)
 AKTIVITET = {navn: v["activities"] for navn, v in _aktivitet_mapping["values"].items()}
@@ -233,16 +234,17 @@ def vokabular_sql() -> str:
 
 
 def aktivitet_mapping_sql(kn, kode, navn) -> str:
-    """Kartlegging av én aktivitetskode via activity_mapping/mapping.json. Ett
-    navn kan gi flere konsepter, og da én mapping-rad per konsept. Tidligere
+    """Kartlegging av én aktivitetskode via activity_mapping/mapping.json, til
+    tabellen aktivitet_mapping. Ett navn kan gi flere konsepter, og da én rad
+    per konsept. Tidligere
     ETL-rader for koden fjernes først, slik at endringer i mapping.json slår
     igjennom - men bare når koden ikke har noen manuell mapping, som aldri
     overskrives."""
     kk = (f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
           f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} ")
-    uten_manuell = ("AND NOT EXISTS (SELECT 1 FROM kildekode_mapping m2 WHERE m2.kildekode_id=kk.id "
+    uten_manuell = ("AND NOT EXISTS (SELECT 1 FROM aktivitet_mapping m2 WHERE m2.kildekode_id=kk.id "
                     "AND m2.kartlagt_av IS DISTINCT FROM 'etl')")
-    sql = (f"DELETE FROM kildekode_mapping m USING kildekode kk "
+    sql = (f"DELETE FROM aktivitet_mapping m USING kildekode kk "
            f"JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
            f"WHERE m.kildekode_id=kk.id AND m.kartlagt_av='etl' AND fi.kildenokkel={q(kn)} "
            f"AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} {uten_manuell};\n")
@@ -256,7 +258,7 @@ def aktivitet_mapping_sql(kn, kode, navn) -> str:
         ekte = [c for c in konsepter if c not in EKSKLUDER]
         if ekte:
             return sql + (
-                f"INSERT INTO kildekode_mapping (kildekode_id,aktivitet_id,status,merknad,kartlagt_av) "
+                f"INSERT INTO aktivitet_mapping (kildekode_id,aktivitet_id,status,merknad,kartlagt_av) "
                 f"SELECT kk.id,t.id,'godkjent',{q(AKTIVITET_MERKNAD)},'etl' "
                 f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, aktivitet t "
                 f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} "
@@ -264,7 +266,7 @@ def aktivitet_mapping_sql(kn, kode, navn) -> str:
                 f"ON CONFLICT (kildekode_id,aktivitet_id) WHERE aktivitet_id IS NOT NULL DO NOTHING;\n")
         merknad = f"{EKSKLUDER[konsepter[0]]} ({AKTIVITET_MERKNAD})"
     return sql + (
-        f"INSERT INTO kildekode_mapping (kildekode_id,status,merknad,kartlagt_av) "
+        f"INSERT INTO aktivitet_mapping (kildekode_id,status,merknad,kartlagt_av) "
         f"SELECT kk.id,'ikke_relevant',{q(merknad)},'etl' {kk}{uten_manuell} "
         f"ON CONFLICT (kildekode_id) WHERE aktivitet_id IS NULL DO NOTHING;\n")
 
@@ -337,7 +339,7 @@ def generer_sql(slug: str, ut) -> bool:
                   f"SELECT kk.id,'ikke_relevant',{q(f'Ikke en gyldig {kodetype}')},'etl' "
                   f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
                   f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(rad['id'])} "
-                  f"ON CONFLICT (kildekode_id) WHERE aktivitet_id IS NULL DO NOTHING;\n")
+                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
             elif n in tabell:
                 maalkol = {"lokaletype": "lokaletype_id", "fasilitet": "fasilitet_id"}[kodetype]
                 w(f"INSERT INTO kildekode_mapping (kildekode_id,{maalkol},status,kartlagt_av) "
@@ -345,7 +347,7 @@ def generer_sql(slug: str, ut) -> bool:
                   f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, {kodetype} t "
                   f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} "
                   f"AND kk.kode={q(rad['id'])} AND t.kode={q(tabell[n])} "
-                  f"ON CONFLICT (kildekode_id) WHERE aktivitet_id IS NULL DO NOTHING;\n")
+                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
     w("\n")
 
     # --- bygg + adresse ---
@@ -468,9 +470,9 @@ def generer_sql(slug: str, ut) -> bool:
     # activity_mapping/mapping.json bli liggende.
     w(f"DELETE FROM ressurs_aktivitet ra USING ressurs r JOIN fagsystem_instans fi "
       f"ON fi.id=r.fagsystem_instans_id WHERE ra.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
-    for samling, kodetype, koblingstabell, maalkol, idfelt in [
-        ("resource_activities", "aktivitet", "ressurs_aktivitet", "aktivitet_id", "activity_id"),
-        ("resource_facilities", "fasilitet", "ressurs_fasilitet", "fasilitet_id", "facility_id"),
+    for samling, kodetype, koblingstabell, mappingtabell, maalkol, idfelt in [
+        ("resource_activities", "aktivitet", "ressurs_aktivitet", "aktivitet_mapping", "aktivitet_id", "activity_id"),
+        ("resource_facilities", "fasilitet", "ressurs_fasilitet", "kildekode_mapping", "fasilitet_id", "facility_id"),
     ]:
         for rad in d.get(samling, []):
             if rad["resource_id"] not in kjente_ressurser:
@@ -482,7 +484,7 @@ def generer_sql(slug: str, ut) -> bool:
               f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id "
               f"JOIN kildekode kk ON kk.fagsystem_instans_id=fi.id AND kk.kodetype={q(kodetype)} "
               f"AND kk.kode={q(rad[idfelt])} "
-              f"JOIN kildekode_mapping m ON m.kildekode_id=kk.id "
+              f"JOIN {mappingtabell} m ON m.kildekode_id=kk.id "
               f"AND m.status='godkjent' AND m.{maalkol} IS NOT NULL "
               f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(rad['resource_id'])} "
               f"ON CONFLICT DO NOTHING;\n")

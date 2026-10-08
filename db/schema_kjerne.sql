@@ -355,16 +355,18 @@ CREATE INDEX IF NOT EXISTS ix_kildekode_navn ON kildekode (lower(navn));
 -- lokaletyper: "Stengt", "Fiktivt rom", "Streaming", og stedsnavn som
 -- "Judaberg innbyggertorg".
 --
--- Én rad per mål. Lokaletype, fasilitet og 'ikke_relevant' har høyst én rad
--- per kildekode; en aktivitetskode kan ha flere, fordi ett kildenavn kan bære
--- flere konsepter ("Barnebursdag 3 - 12 år" -> Barnebursdag + Barn). Håndhevet
--- av de to partielle unike indeksene under tabellen.
+-- Gjelder lokaletype og fasilitet, der hver kildekode har høyst ett mål.
+-- Aktivitet har sin egen tabell, aktivitet_mapping (under).
+--
+-- Egen "id" pluss en UNIQUE "kildekode_id", i stedet for å la kildekode_id
+-- være primærnøkkel direkte: det holder mønsteret "PK heter id, FK heter
+-- <tabell>_id" konsekvent, selv om denne tabellen i praksis er en ett-til-én
+-- utvidelse av kildekode.
 CREATE TABLE IF NOT EXISTS kildekode_mapping
 (
     id            BIGSERIAL PRIMARY KEY,
-    kildekode_id  BIGINT NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
+    kildekode_id  BIGINT UNIQUE NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
     lokaletype_id BIGINT REFERENCES lokaletype(id) ON DELETE CASCADE,
-    aktivitet_id  BIGINT REFERENCES aktivitet(id) ON DELETE CASCADE,
     fasilitet_id  BIGINT REFERENCES fasilitet(id) ON DELETE CASCADE,
     status        TEXT NOT NULL DEFAULT 'foreslatt'
                       CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
@@ -375,19 +377,40 @@ CREATE TABLE IF NOT EXISTS kildekode_mapping
     CONSTRAINT chk_mapping_ett_mal
         CHECK (
             (CASE WHEN lokaletype_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN aktivitet_id IS NOT NULL THEN 1 ELSE 0 END)
           + (CASE WHEN fasilitet_id IS NOT NULL THEN 1 ELSE 0 END)
           = CASE WHEN status = 'ikke_relevant' THEN 0 ELSE 1 END
         )
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS ux_mapping_kildekode
-    ON kildekode_mapping (kildekode_id) WHERE aktivitet_id IS NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS ux_mapping_kildekode_aktivitet
-    ON kildekode_mapping (kildekode_id, aktivitet_id) WHERE aktivitet_id IS NOT NULL;
-
 CREATE INDEX IF NOT EXISTS ix_mapping_lokaletype ON kildekode_mapping (lokaletype_id);
 CREATE INDEX IF NOT EXISTS ix_mapping_status ON kildekode_mapping (status);
+
+-- Oversettelse av aktivitetskoder. Egen tabell fordi ett kildenavn kan bære
+-- flere konsepter ("Barnebursdag 3 - 12 år" -> Barnebursdag + Barn), og da får
+-- kildekoden én rad per konsept - noe kildekode_mapping (én rad per kode) ikke
+-- tillater, og som ellers ville gitt rader med to alltid tomme målkolonner.
+-- 'ikke_relevant' (EXC-konsepter i activity_mapping) ligger her med
+-- aktivitet_id = NULL, slik at all aktivitetskartlegging finnes på ett sted.
+CREATE TABLE IF NOT EXISTS aktivitet_mapping
+(
+    id           BIGSERIAL PRIMARY KEY,
+    kildekode_id BIGINT NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
+    aktivitet_id BIGINT REFERENCES aktivitet(id) ON DELETE CASCADE,
+    status       TEXT NOT NULL DEFAULT 'foreslatt'
+                     CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
+    kartlagt_av  TEXT,
+    merknad      TEXT,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_aktivitet_mapping_mal
+        CHECK ((aktivitet_id IS NULL) = (status = 'ikke_relevant'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping
+    ON aktivitet_mapping (kildekode_id, aktivitet_id) WHERE aktivitet_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping_ikke_relevant
+    ON aktivitet_mapping (kildekode_id) WHERE aktivitet_id IS NULL;
+CREATE INDEX IF NOT EXISTS ix_aktivitet_mapping_aktivitet ON aktivitet_mapping (aktivitet_id);
 
 
 -- =============================================================================
@@ -635,8 +658,13 @@ SELECT kk.id AS kildekode_id, fi.kildenokkel,
        kk.kodetype, kk.kode, kk.navn, kk.sist_sett
 FROM kildekode kk
 JOIN fagsystem_instans fi ON fi.id = kk.fagsystem_instans_id
-LEFT JOIN kildekode_mapping m ON m.kildekode_id = kk.id
-WHERE m.id IS NULL OR m.status = 'foreslatt';
+-- Aktivitet kartlegges i aktivitet_mapping, alt annet i kildekode_mapping.
+WHERE CASE WHEN kk.kodetype = 'aktivitet'
+           THEN NOT EXISTS (SELECT 1 FROM aktivitet_mapping m
+                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
+           ELSE NOT EXISTS (SELECT 1 FROM kildekode_mapping m
+                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
+      END;
 
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
 -- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
@@ -813,7 +841,8 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'kommune','fagsystem_instans', 'matrikkelinfo','bygning','gate','adresse',
-        'lokaletype','aktivitet','fasilitet','kildekode','kildekode_mapping','ressurs'
+        'lokaletype','aktivitet','fasilitet','kildekode','kildekode_mapping',
+        'aktivitet_mapping','ressurs'
     ]
     LOOP
         EXECUTE format('DROP TRIGGER IF EXISTS trg_%1$s_updated_at ON %1$I', t);

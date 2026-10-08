@@ -53,7 +53,8 @@ Skjemaet er idempotent - du kan kjøre den kommandoen på nytt uten å ødelegge
 Laster: kommune, bygg, adresser (som de står i kilden, uten koordinater),
 ressurser, kildekoder, og en automatisk kartlegging av de vanligste kildekodene
 til vårt eget kodeverk (`lokaletype`/`aktivitet`/`fasilitet`). Aktivitetsvokabularet
-og -mappingen leses fra `activity_mapping/`. ETL-mappinger fornyes ved hver kjøring,
+og -mappingen leses fra `activity_mapping/` og skrives til tabellen `aktivitet_mapping`.
+ETL-mappinger fornyes ved hver kjøring,
 men en manuell mapping (`kartlagt_av` ulik `etl`) overskrives aldri.
 
 Laster **ikke**: koordinater (krever et eget geokodingssteg mot Kartverkets
