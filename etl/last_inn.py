@@ -45,19 +45,33 @@ def last_mapping(mappe: str) -> dict:
 
 
 KOMMUNER = {
-    "bergen": ("4601", "Bergen", "Vestland"),
-    "stavanger": ("1103", "Stavanger", "Rogaland"),
-    "baerum": ("3201", "Bærum", "Akershus"),
-    "oygarden": ("4626", "Øygarden", "Vestland"),
-    "narvik": ("1806", "Narvik", "Nordland"),
     "afjord": ("5058", "Åfjord", "Trøndelag"),
+    "alesund": ("1508", "Ålesund", "Møre og Romsdal"),
+    "alver": ("4631", "Alver", "Vestland"),
     "averoy": ("1554", "Averøy", "Møre og Romsdal"),
-    "gamvik": ("5628", "Gamvik", "Finnmark"),
+    "baerum": ("3201", "Bærum", "Akershus"),
+    "bergen": ("4601", "Bergen", "Vestland"),
+    "eigersund": ("1101", "Eigersund", "Rogaland"),
+    "gamvik": ("5626", "Gamvik", "Finnmark"),
     "inderoy": ("5053", "Inderøy", "Trøndelag"),
-    "nordreisa": ("5540", "Nordreisa", "Troms"),
+    "kristiansand": ("4204", "Kristiansand", "Agder"),
+    "kvam": ("4622", "Kvam", "Vestland"),
+    "larvik": ("3909", "Larvik", "Vestfold"),
+    "narvik": ("1806", "Narvik", "Nordland"),
+    "nordreisa": ("5544", "Nordreisa", "Troms"),
     "oksnes": ("1868", "Øksnes", "Nordland"),
+    "oygarden": ("4626", "Øygarden", "Vestland"),
+    "sandnes": ("1108", "Sandnes", "Rogaland"),
     "sogndal": ("4640", "Sogndal", "Vestland"),
+    "sola": ("1124", "Sola", "Rogaland"),
+    "stavanger": ("1103", "Stavanger", "Rogaland"),
+    "sunnfjord": ("4647", "Sunnfjord", "Vestland"),
+    "time": ("1121", "Time", "Rogaland"),
 }
+#Kommuner som ligger i aktiviteetsanalysen men som er helt tomme og mangler endepunkt:
+# "bardu": ("5520", "Bardu", "Troms"),
+# "drammen": ("3301", "Drammen", "Buskerud"),
+# "suldal": ("1134", "Suldal", "Rogaland"),
 
 # Normalisert kildenavn -> kode i vårt eget kodeverk (lokaletype/fasilitet,
 # seedet i schema_kjerne.sql; aktivitet, se under). Navn som ikke finnes her, lastes inn
