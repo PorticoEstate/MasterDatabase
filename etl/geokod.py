@@ -147,7 +147,9 @@ def main():
             f"UPDATE adresse SET "
             f"posisjon = ST_SetSRID(ST_MakePoint({lon},{lat}),4326)::geography,"
             f"adressetekst = {q(a['adressetekst'])}, "
-            f"gatenavn = {q(a['adressenavn'])}, "
+            # gate_id settes ikke her: det krever adressekode fra Matrikkelen,
+            # som dette (åpne, Kartverket-baserte) søket ikke gir - se
+            # etl/matrikkel_adresse.py og schema_kjerne_dokumentasjon.md.
             f"husnr = {q(a['nummer'])}, "
             f"bokstav = {q(a['bokstav'])}, "
             f"poststed = {q(a['poststed'])}, "
