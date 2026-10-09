@@ -95,31 +95,7 @@ CREATE INDEX IF NOT EXISTS ix_kommune_fagsystem_instans_instans
     ON kommune_fagsystem_instans (fagsystem_instans_id);
 
 -- =============================================================================
--- 2. Matrikkel
--- =============================================================================
-
-CREATE TABLE IF NOT EXISTS matrikkelinfo
-(
-    id             BIGSERIAL PRIMARY KEY,
-    kommunenr      CHAR(4) NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
-    gardsnr        INTEGER NOT NULL,
-    bruksnr        INTEGER NOT NULL,
-    festenr        INTEGER,
-    seksjonsnr     INTEGER,
-    sist_oppdatert TIMESTAMPTZ,
-    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- COALESCE fordi festenr og seksjonsnr er NULL for vanlige grunneiendommer, og
--- NULL regnes ikke som lik NULL i en unik indeks. Uten dette ville samme
--- eiendom kunne lagres mange ganger.
-CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelinfo
-    ON matrikkelinfo (kommunenr, gardsnr, bruksnr,
-                       COALESCE(festenr, 0), COALESCE(seksjonsnr, 0));
-
--- =============================================================================
--- 3. Bygning
+-- 2. Bygning
 --
 -- Holder både bygg og utendørs anlegg. Aktiv kommune har bare ett stedsbegrep:
 -- "Paradis kunstgressbane" er registrert som et bygg der, på linje med ekte
@@ -198,6 +174,37 @@ CREATE INDEX IF NOT EXISTS ix_bygning_kommune ON bygning (kommune_id);
 CREATE INDEX IF NOT EXISTS ix_bygning_posisjon ON bygning USING GIST (posisjon);
 
 -- =============================================================================
+-- 3. Matrikkelinfo
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS matrikkelinfo
+(
+    id             BIGSERIAL PRIMARY KEY,
+	bygning_id     BIGINT NOT NULL REFERENCES bygning(id) ON DELETE CASCADE,
+    kommunenr      CHAR(4) NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
+    gardsnr        INTEGER NOT NULL,
+    bruksnr        INTEGER NOT NULL,
+    festenr        INTEGER,
+    seksjonsnr     INTEGER,
+    sist_oppdatert TIMESTAMPTZ,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Ett bygg kan ha flere matrikkelinfo (en-til-mange). bygning_id er med i den
+-- unike indeksen, så samme gnr/bnr lagres én gang per bygg: en hall og en bane
+-- på samme eiendom får hver sin rad.
+-- COALESCE fordi festenr og seksjonsnr er NULL for vanlige grunneiendommer, og
+-- NULL regnes ikke som lik NULL i en unik indeks. Uten dette ville samme
+-- eiendom kunne lagres mange ganger for samme bygg.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelinfo
+    ON matrikkelinfo (bygning_id,kommunenr, gardsnr, bruksnr,
+                       COALESCE(festenr, 0), COALESCE(seksjonsnr, 0));
+-- Oppslag på eiendommen på tvers av bygg ("hvilket bygg står på gnr/bnr?").
+CREATE INDEX IF NOT EXISTS ix_matrikkelinfo_eiendom
+ON matrikkelinfo(kommunenr,gardsnr,bruksnr);
+
+-- =============================================================================
 -- 4. Gate har mange adresser (adresse.gate_id). Identiteten er
 -- (kommune, adressekode) fra matrikkelen, ikke navnet: samme gatenavn kan
 -- finnes flere ganger i en kommune, og samme adressekode brukes i flere
@@ -218,18 +225,6 @@ CREATE TABLE IF NOT EXISTS gate
 
 CREATE INDEX IF NOT EXISTS ix_gate_navn
 ON gate (kommune_id, lower(gatenavn));
--- Et bygg kan stå på flere eiendommer, og en eiendom kan ha flere bygg.
-CREATE TABLE IF NOT EXISTS bygning_matrikkelinfo
-(
-    bygning_id       BIGINT NOT NULL REFERENCES bygning(id) ON DELETE CASCADE,
-    matrikkelinfo_id BIGINT NOT NULL REFERENCES matrikkelinfo(id) ON DELETE CASCADE,
-    rolle            TEXT,
-    PRIMARY KEY (bygning_id, matrikkelinfo_id)
-);
-
-CREATE INDEX IF NOT EXISTS ix_bygning_matrikkelinfo_enhet
-    ON bygning_matrikkelinfo (matrikkelinfo_id);
-
 
 -- =============================================================================
 -- 5. Adresse

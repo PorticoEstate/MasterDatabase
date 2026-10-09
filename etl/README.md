@@ -125,8 +125,8 @@ innlastingen - det løser begge feiltypene over, siden det åpne API-et bare
 søker fritekst nasjonalt. Se modulens docstring for hele kjeden av SOAP-kall.
 
 Fyller, i tillegg til `adresse.posisjon`: `gate` (adressekode+gatenavn),
-`matrikkelinfo`+`bygning_matrikkelinfo` (gnr/bnr/fnr/snr) og
-`bygning.matrikkel_match='adresse'`. Status settes til `geokoding='matrikkel'`
+`matrikkelinfo` (gnr/bnr/fnr/snr, knyttet til adressens bygg via `bygning_id`)
+og `bygning.matrikkel_match='adresse'`. Status settes til `geokoding='matrikkel'`
 - den autoritative kilden, se `db/schema_kjerne_dokumentasjon.md`.
 
 ```bash

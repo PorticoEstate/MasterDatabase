@@ -23,9 +23,9 @@ Kjeden per adresse (alt via MatrikkelAPI, SOAP):
     StoreService.getObject(vegId)          -> Veg (adressekode, adressenavn)
     StoreService.getObject(matrikkelenhetId) -> Matrikkelenhet (gnr/bnr/fnr/snr)
 
-Skriver tre ting ved treff: gate (upsert), matrikkelinfo+bygning_matrikkelinfo
-(upsert/link) og adresse (gate_id, husnr, bokstav, posisjon, geokoding=
-'matrikkel' - den autoritative statusen, se schema_kjerne_dokumentasjon.md).
+Skriver tre ting ved treff: gate (upsert), matrikkelinfo (upsert, knyttet til
+adressens bygg via bygning_id) og adresse (gate_id, husnr, bokstav, posisjon,
+geokoding='matrikkel' - den autoritative statusen, se schema_kjerne_dokumentasjon.md).
 
 Bruker bare Pythons innebygde bibliotek. Leser brukernavn/passord fra
 miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se matrikkel/test_auth.py)
@@ -392,11 +392,13 @@ def main():
             f"ON CONFLICT (kommune_id, adressekode) DO UPDATE SET gatenavn = EXCLUDED.gatenavn;\n"
         )
         if matrikkelenhet is not None:
+            # Hører til adressens bygg: samme gnr/bnr lagres én gang per bygg.
             sql += (
-                f"INSERT INTO matrikkelinfo (kommunenr, gardsnr, bruksnr, festenr, seksjonsnr) "
-                f"VALUES ({q(kommunenummer)},{matrikkelenhet['gardsnr']},{matrikkelenhet['bruksnr']},"
-                f"{matrikkelenhet['festenr'] or 'NULL'},{matrikkelenhet['seksjonsnr'] or 'NULL'}) "
-                f"ON CONFLICT (kommunenr, gardsnr, bruksnr, COALESCE(festenr,0), COALESCE(seksjonsnr,0)) "
+                f"INSERT INTO matrikkelinfo (bygning_id, kommunenr, gardsnr, bruksnr, festenr, seksjonsnr) "
+                f"SELECT a.bygning_id,{q(kommunenummer)},{matrikkelenhet['gardsnr']},{matrikkelenhet['bruksnr']},"
+                f"{matrikkelenhet['festenr'] or 'NULL'},{matrikkelenhet['seksjonsnr'] or 'NULL'} "
+                f"FROM adresse a WHERE a.id = {int(adresse_id)} "
+                f"ON CONFLICT (bygning_id, kommunenr, gardsnr, bruksnr, COALESCE(festenr,0), COALESCE(seksjonsnr,0)) "
                 f"DO NOTHING;\n"
             )
         sql += (
@@ -412,16 +414,6 @@ def main():
             f"posisjon = COALESCE(posisjon, ST_SetSRID(ST_MakePoint({lon},{lat}),4326)::geography) "
             f"WHERE id = (SELECT bygning_id FROM adresse WHERE id = {int(adresse_id)});\n"
         )
-        if matrikkelenhet is not None:
-            sql += (
-                f"INSERT INTO bygning_matrikkelinfo (bygning_id, matrikkelinfo_id) "
-                f"SELECT a.bygning_id, m.id FROM adresse a, matrikkelinfo m "
-                f"WHERE a.id = {int(adresse_id)} AND m.kommunenr = {q(kommunenummer)} "
-                f"AND m.gardsnr = {matrikkelenhet['gardsnr']} AND m.bruksnr = {matrikkelenhet['bruksnr']} "
-                f"AND COALESCE(m.festenr,0) = COALESCE({matrikkelenhet['festenr'] or 'NULL'},0) "
-                f"AND COALESCE(m.seksjonsnr,0) = COALESCE({matrikkelenhet['seksjonsnr'] or 'NULL'},0) "
-                f"ON CONFLICT DO NOTHING;\n"
-            )
 
         out.write(i_blokk(adresse_id, sql, spor))
         antall_ok += 1

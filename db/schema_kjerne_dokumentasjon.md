@@ -1,6 +1,6 @@
 # Kjernemodell for masterdatabasen
 
-Dokumentasjon for `db/schema_kjerne.sql`. 18 egne tabeller, 2 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data.
+Dokumentasjon for `db/schema_kjerne.sql`. 18 egne tabeller, 4 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data.
 
 **Krever PostGIS.** Docker-imaget er `postgis/postgis:18-3.6` (ikke rent `postgres:18`), og skjemaet starter med `CREATE EXTENSION IF NOT EXISTS postgis;`.
 
@@ -63,11 +63,11 @@ For `bygning` er `fagsystem_instans_id` nullbar, og da er regelen ikke i kraft �
 
 ### Matrikkel
 
-**`matrikkelinfo`** — eiendommen, altså gårds- og bruksnummer (med feste- og seksjonsnummer). Tabellen holder bare identiteten `(kommunenr, gardsnr, bruksnr, festenr, seksjonsnr)` og tidsstempler. Enhetstype, areal og geometri er ikke med.
+**`matrikkelinfo`** — eiendommen, altså gårds- og bruksnummer (med feste- og seksjonsnummer), knyttet til ett bygg via `bygning_id` (`NOT NULL`, `REFERENCES bygning(id) ON DELETE CASCADE`). Tabellen holder identiteten `(bygning_id, kommunenr, gardsnr, bruksnr, festenr, seksjonsnr)` og tidsstempler. Enhetstype, areal og geometri er ikke med.
 
-Den unike indeksen `ux_matrikkelinfo` bruker `COALESCE(festenr, 0)` fordi festenr og seksjonsnr er NULL for vanlige grunneiendommer, og NULL regnes ikke som lik NULL i en unik indeks. Uten dette kunne samme eiendom lagres mange ganger.
+Forholdet til `bygning` er en-til-mange, uten koblingstabell: ett bygg kan ha flere `matrikkelinfo`-rader (flere adresser, eller en eiendom som strekker seg over flere tomter), og hver rad hører til nøyaktig ett bygg. Siden `bygning_id` står først i `ux_matrikkelinfo`, kan samme gnr/bnr også lagres for flere ulike bygg — det er nettopp det som gjør at en hall og en bane på samme eiendom (f.eks. Hetlandshallen og Hetlandshallbanen, begge på gnr 20/bnr 287 i Stavanger) hver får sin egen rad, i stedet for at den ene faller bort. Med dagens kilder (én adresse per bygg i Aktiv kommune) blir resultatet i praksis én rad per bygg, men modellen tillater flere.
 
-**`bygning_matrikkelinfo`** — koblingstabell. Et bygg kan stå på flere eiendommer, og en eiendom ha flere bygg. Hver rad er ett par, med en valgfri `rolle`.
+Den unike indeksen `ux_matrikkelinfo` bruker `COALESCE(festenr, 0)` fordi festenr og seksjonsnr er NULL for vanlige grunneiendommer, og NULL regnes ikke som lik NULL i en unik indeks. Uten dette kunne samme eiendom lagres mange ganger for samme bygg. Indeksen `ix_matrikkelinfo_eiendom` på `(kommunenr, gardsnr, bruksnr)` dekker det motsatte oppslaget: hvilke bygg som står på en gitt eiendom.
 
 **`gate`** — gaten, slik matrikkelen kjenner den. Identiteten er `(kommune_id, adressekode)`, ikke navnet: samme gatenavn kan finnes flere ganger i en kommune, og samme adressekode brukes i flere kommuner. Postnummer ligger på `adresse`, ikke her, siden en gate kan krysse flere postnumre. Én gate har mange adresser (`adresse.gate_id`). Aktiv kommune oppgir ikke adressekode, så tabellen kan ikke fylles av `last_inn.py`; den må fylles av matrikkelsteget.
 
@@ -316,7 +316,7 @@ Gjentatt kjøring oppdaterer i stedet for å duplisere, men ikke alt overskrives
 
 **Kjent forenkling, verdt å lese to ganger:** `kommune_id` settes i steg 2 fra hvilken Aktiv kommune-instans dataene kommer fra (instansens slug slås opp direkte mot en kommune), **ikke** fra geokodingen i steg 3. Det stemmer for alle 12 instansene i dag, siden hver av dem betjener nøyaktig én kommune (se `kommune_fagsystem_instans`). Skulle en instans senere betjene flere kommuner, holder ikke denne forenklingen — da må steg 2 vente på steg 3, og `kommune_id` avgjøres av adressens geokodede `kommunenummer` i stedet.
 
-**Matrikkelen** er den planlagte kilden til bygningsnummer, bygningstype, BRA, antall etasjer, bygningsomriss, gate og adressekode, og eiendomskoblingen (`matrikkelinfo`, `bygning_matrikkelinfo`). Prosjektet går bort fra Kartverkets åpne Adresse-API og over til Matrikkel-API-et. Tilgang krever avtale med Kartverket, og et skript (`etl/matrikkel.py`) er ikke skrevet ennå. Til da forblir `gate`, `gate_id`, `matrikkelinfo`, `bygning_matrikkelinfo` og `bygning.matrikkel_match` (`ikke_forsokt`) tomme etter innlasting.
+**Matrikkelen** er den planlagte kilden til bygningsnummer, bygningstype, BRA, antall etasjer og bygningsomriss. Gate, adressekode og eiendomskoblingen (`matrikkelinfo`, knyttet til bygget via `bygning_id`) fylles allerede av `etl/matrikkel_adresse.py` (se `etl/README.md`, "Matrikkel-geokoding"), som kjøres mot MatrikkelAPI-ets testmiljø (`prodtest.matrikkel.no`) på adresser `geokod.py` ikke klarte. Produksjonstilgang krever avtale med Kartverket. Bygningsnummer og bygningstype hentes ikke av dette skriptet ennå; til det trengs et eget oppslag mot byggene selv, ikke bare adressene. Inntil det er på plass, forblir `bygning.bygningsnr`, `bygningstype` og `matrikkel_match` (`ikke_forsokt`) tomme for bygg som bare er nådd via adresseoppslag.
 
 **Ikke del av pipelinen ennå:** ingen automatisk gjentakelse (ingen cron/planlagt jobb — alt kjøres manuelt) og ingen automatisert kuratering av `v_ukartlagte_kildekoder` — det er fortsatt en manuell jobb å lese visningen og redigere ordbøkene i `last_inn.py`.
 
@@ -389,9 +389,8 @@ ORDER BY fi.kildenokkel, kk.kode;
 
 ## Validering
 
-Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt kjøring, og oppretter 18 egne tabeller og 2 visninger (pluss PostGIS' egen `spatial_ref_sys`).
+Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt kjøring, og oppretter 18 egne tabeller og 4 egne visninger (pluss PostGIS' egen `spatial_ref_sys`, samt geography_columns og geometry_columns i view.).
 
-> **Merk:** Valideringen og tallene under er målt før endringene i endringsloggen (nye tabeller, fjernede kolonner). Den nye modellen er ikke validert mot en database ennå.
 
 Mange-til-mange-relasjonen mellom `kommune` og `fagsystem_instans` er verifisert: én kommune kan knyttes til flere instanser av forskjellig type (booking + fdv samtidig, testet på Bergen), men `UNIQUE (kommune_id, type)` avviser en andre instans av *samme* type for samme kommune. Ruting fungerer ved å filtrere på `fagsystem_instans.type` — bekreftet at et oppslag på Bergens booking-instans og Bergens fdv-instans gir to forskjellige, korrekte `base_url`. Et bygg med en kommune/instans-kombinasjon som ikke finnes i `kommune_fagsystem_instans` avvises fortsatt via `fk_bygning_fagsystem_instans_kommune`, og det samme gjelder `ressurs` via `fk_ressurs_fagsystem_instans_kommune` og `fk_ressurs_bygning`.
 
@@ -465,8 +464,8 @@ Endringer i `schema_kjerne.sql` siden forrige commit (`86847b9`). Modellen har n
 ### Tabeller og navn
 
 - `matrikkelenhet` er omdøpt til `matrikkelinfo`. Det gjelder også den unike indeksen, som heter `ux_matrikkelinfo`.
-- `bygning_matrikkelenhet` er omdøpt til `bygning_matrikkelinfo`. Kolonnen heter nå `matrikkelinfo_id`, og indeksen `ix_bygning_matrikkelinfo_enhet`.
 - Ny tabell `gate` med `kommune_id`, `adressekode` og `gatenavn`. Den har `UNIQUE (kommune_id, adressekode)`, en indeks på `(kommune_id, lower(gatenavn))` og tidsstempler. `gate` er lagt til i trigger-listen for `updated_at`.
+- Koblingstabellen `bygning_matrikkelenhet` (senere omdøpt til `bygning_matrikkelinfo`) er fjernet, sammen med indeksen `ix_bygning_matrikkelinfo_enhet`. `matrikkelinfo` har i stedet fått kolonnen `bygning_id` (`NOT NULL`, `REFERENCES bygning(id) ON DELETE CASCADE`), slik at forholdet mellom bygg og matrikkelinfo er en-til-mange uten egen koblingstabell. Tabellen er flyttet til etter `bygning` i skjemaet, siden den nå peker på den. `ux_matrikkelinfo` har fått `bygning_id` som første kolonne, slik at samme gnr/bnr kan lagres for flere bygg (f.eks. en hall og en bane på samme eiendom). Ny indeks `ix_matrikkelinfo_eiendom` på `(kommunenr, gardsnr, bruksnr)` dekker oppslag fra eiendom til bygg. `etl/matrikkel_adresse.py` er oppdatert til å sette `bygning_id` direkte fra adressen ved innsetting, i stedet for en egen kobling etterpå.
 
 ### Fjernede kolonner
 
