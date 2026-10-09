@@ -357,17 +357,6 @@ def generer_sql(slug: str, ut) -> bool:
     # --- bygg + adresse ---
     bydel_per_bygg = {t["b_id"]: rens(t["name"]) for t in d.get("towns", [])}
     for b in d.get("buildings", []):
-        navn = rens(b["name"]) or f"Bygg {b['id']}"
-        w(f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id) "
- 			f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])} "
-  			f"FROM kommune k, fagsystem_instans fi "
-          f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
-          f"ON CONFLICT DO NOTHING;\n")
-
-        # Aktiv kommune gir ikke gatenavn og husnummer separat, bare hele
-        # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
-        # den; gate_id/husnr/posisjon står tomme til geokoding (et senere,
-        # separat steg) fyller dem fra Kartverkets Adresse-API.
         if b.get("id") is None:
             w(logg(kn, "buildings", "ugyldig_verdi", None, "posten mangler id", "id", rapost=b))
             continue
@@ -388,21 +377,16 @@ def generer_sql(slug: str, ut) -> bool:
 
         # Kildedata gir ikke gatenavn og husnummer separat, bare hele
         # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
-        # den; gatenavn/husnr/posisjon fylles av geokod.py.
+        # den; gate_id/husnr/posisjon fylles av geokod.py/matrikkel_adresse.py.
         sql = (
-            f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id,"
-            f"hjemmeside,epost,telefon,apningstid_tekst) "
-            f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])},"
-            f"{q(rens(b.get('homepage')))},{q(rens(b.get('email')))},{q(rens(b.get('phone')))},"
-            f"{q(rens(b.get('opening_hours')))} "
+            f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id) "
+            f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])} "
             f"FROM kommune k, fagsystem_instans fi "
             f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
             # Aktiv kommune vinner på disse feltene (se "Autoritet" i dokumentasjonen).
             f"ON CONFLICT (fagsystem_instans_id,ekstern_id) "
             f"WHERE fagsystem_instans_id IS NOT NULL AND ekstern_id IS NOT NULL "
-            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn, "
-            f"hjemmeside=EXCLUDED.hjemmeside, epost=EXCLUDED.epost, telefon=EXCLUDED.telefon, "
-            f"apningstid_tekst=EXCLUDED.apningstid_tekst;\n"
+            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn;\n"
         )
         if gate:
             sql += (

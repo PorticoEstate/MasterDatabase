@@ -26,6 +26,12 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Trigram gir substreng-/fuzzy-treff uavhengig av ord-grenser.
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+-- Senket fra standard 0.3: et søk uten æøå ("svomme" for "svømme") endrer
+-- 3 av 7 trigram og lander på ~0.2 - rett under standardterskelen, så treffet
+-- ville ellers blitt filtrert bort tross at det er det brukeren mente.
+-- Satt på databasen, ikke per spørring, så alle `%`-søk får dette automatisk.
+ALTER DATABASE masterdb SET pg_trgm.similarity_threshold = 0.2;
+
 
 CREATE OR REPLACE FUNCTION sett_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
