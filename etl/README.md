@@ -3,6 +3,87 @@
 `last_inn.py` henter data fra Aktiv kommune og skriver SQL som fyller
 masterdatabasen. Se `db/schema_kjerne_dokumentasjon.md` for hva tabellene betyr.
 
+## Oversikt over hele pipelinen
+
+Fra tomt skjema til populert database, i fire steg:
+
+```
+┌───────────────────────────────────────────────────────────────────────┐
+│ STEG 1 — SKJEMA                                                       │
+│ db/schema_kjerne.sql                                                  │
+│                                                                        │
+│ Oppretter alle tabeller i en tom database: kommune, bygning, adresse, │
+│ ressurs, kildekode(_mapping), aktivitet/fasilitet/lokaletype,         │
+│ gate/matrikkelinfo, synk_avvik/kildeuttrekk. Idempotent — trygt å     │
+│ kjøre på nytt.                                                        │
+└───────────────────────────────────────────────────┬───────────────────┘
+                                                      ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│ STEG 2 — INNLASTING                                                   │
+│ etl/last_inn.py          ←  Aktiv kommune API (12 kommuner)           │
+│                                                                        │
+│ Henter kommune, bygg, adresser (uten koordinater), ressurser,         │
+│ kildekoder. Oversetter kildekoder til vårt eget kodeverk ved hjelp    │
+│ av de statiske fasitfilene:                                           │
+│   etl/lokaletype_mapping/mapping.json                                │
+│   etl/fasilitet_mapping/mapping.json                                  │
+│   etl/activity_mapping/mapping.json + activities.json (egen tabell   │
+│   aktivitet_mapping, siden én kildekode kan gi flere aktiviteter)     │
+│ Laster ALDRI `organizations` (persondata).                             │
+└───────────────────────────────────────────────────┬───────────────────┘
+                                                      ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│ STEG 3 — GEOKODING, 1. forsøk                                         │
+│ etl/geokod.py            ←  Kartverkets åpne Adresse-API              │
+│                                                                        │
+│ Fyller adresse.posisjon / bygning.posisjon. Nasjonalt fritekstsøk —   │
+│ finner det meste, men bommer på stavefeil og flertydige adresser.     │
+│ Prinsipp: ett eksakt treff brukes, ellers avvik.                      │
+└───────────────────────────────────────────────────┬───────────────────┘
+                                                      ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│ STEG 4 — GEOKODING, 2. forsøk + BYGNINGSBERIKELSE                     │
+│ etl/matrikkel_adresse.py  ←  MatrikkelAPI (SOAP, krever innlogging)   │
+│                                                                        │
+│ a) Løser resten av adressene — søker *innenfor riktig kommune*       │
+│    (kjent fra steg 2), løser det det åpne API-et ikke klarte.         │
+│ b) Henter bygningsnr/bygningstype/bra_m2/antall_etasjer for ALLE      │
+│    bygg som mangler det (Aktiv kommune har ikke dette feltet i det    │
+│    hele tatt — dette er eneste kilde).                                │
+│ Samme prinsipp: ett eksakt treff, ellers avvik.                       │
+└───────────────────────────────────────────────────┬───────────────────┘
+                                                      ▼
+                                          ╔═══════════════════╗
+                                          ║   FERDIG: masterdb ║
+                                          ╚═══════════════════╝
+```
+
+**Tverrgående, på hvert steg:** alt som feiler (ugyldig verdi, duplikat,
+API-feil, manglende treff) logges i `synk_avvik` sammen med selve posten som
+feilet — én dårlig rad stopper aldri hele kjøringen. Hver kjøring registreres
+i `kildeuttrekk` (metadata, ikke selve svaret). Se "Avvik og kildeuttrekk"
+under.
+
+Alle fire stegene er trygge å kjøre på nytt — de endrer kun det som fortsatt
+mangler/er ukjent, aldri manuelt satte verdier. De eksakte kommandoene for
+hvert steg står i seksjonene under, i samme rekkefølge.
+
+**Filoversikt:**
+
+| Fil | Rolle |
+|---|---|
+| `db/schema_kjerne.sql` | Skjemaet (steg 1) |
+| `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
+| `etl/last_inn.py` | Steg 2 |
+| `etl/lokaletype_mapping/`, `fasilitet_mapping/`, `activity_mapping/` | Fasitfiler `last_inn.py` leser for kodeverk-oversettelse |
+| `etl/geokod.py` | Steg 3 |
+| `etl/matrikkel_adresse.py` | Steg 4 |
+| `matrikkel/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 4 |
+
+**Ikke bygget ennå:** `ressurslenke` (koble samme fysiske bygg/ressurs til
+flere fagsystemer samtidig, f.eks. booking + FDV) — bevisst utsatt til det
+faktisk finnes et andre fagsystem å koble til, se `db/ressurslenke.md`.
+
 ## Forutsetning: HTTPS må virke fra WSL
 
 Skriptet henter data over internett. På en Capgemini-maskin krever det at
@@ -137,7 +218,11 @@ og `geokoding='matrikkel'` - den autoritative statusen, se
 `db/schema_kjerne_dokumentasjon.md`. Fyller ved bygningstreff (alltid forsøkt,
 også for adresser som var løst fra før): `bygning.bygningsnr`, `bygningstype`
 (Matrikkelens rå kodeverdi, ikke oversatt til navn ennå), `bra_m2`,
-`antall_etasjer` og `matrikkel_match='adresse'`.
+`antall_etasjer` og `matrikkel_match='adresse'`. Mislykkes bygningsoppslaget
+(ingen/flere bygg funnet, API-feil, eller bygg uten bygningsnummer), settes
+`matrikkel_match='ikke_funnet'` i stedet - uten dette ville et forsøkt-men-
+mislykket oppslag sett identisk ut som et som aldri ble forsøkt. Overskriver
+aldri en `'adresse'`-match adressesteget nettopp satte for samme bygg.
 
 ```bash
 docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "

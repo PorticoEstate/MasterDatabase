@@ -533,12 +533,20 @@ def main():
 
         # Bygningsoppslag - uavhengig av om adressen ble løst her eller var
         # løst fra før (geokod.py eller en tidligere kjøring av dette skriptet).
+        # Et mislykket forsøk markeres 'ikke_funnet' (men overskriver aldri en
+        # 'adresse'-match som adressesteget over nettopp satte for samme bygg) -
+        # ellers ser et forsøkt-men-mislykket oppslag identisk ut som et som
+        # aldri ble forsøkt, selv om beviset ligger i synk_avvik.
+        ikke_funnet_sql = (f"UPDATE bygning SET matrikkel_match='ikke_funnet' "
+                           f"WHERE id={int(bygning_id)} AND matrikkel_match='ikke_forsokt';\n")
+
         try:
             bygg_ider = finn_bygg_ider_for_adresse(v["id"])
         except MatrikkelFeil as e:
             out.write(logg(bygning_id, "MatrikkelAPI-kall feilet (bygningsoppslag): " + str(e)[:200], spor,
                            kilde="matrikkel-bygning", samling="bygning", avvikstype="annet",
                            nokkelfelt="bygning_id"))
+            out.write(ikke_funnet_sql)
             antall_bygg_feilet += 1
             continue
 
@@ -547,6 +555,7 @@ def main():
             out.write(logg(bygning_id, f"matrikkel: {grunn} for adresse {adressetekst}", spor,
                            kilde="matrikkel-bygning", samling="bygning", avvikstype="annet",
                            nokkelfelt="bygning_id"))
+            out.write(ikke_funnet_sql)
             antall_bygg_feilet += 1
             continue
 
@@ -556,6 +565,7 @@ def main():
             out.write(logg(bygning_id, "MatrikkelAPI-kall feilet (bygningsobjekt): " + str(e)[:200], spor,
                            kilde="matrikkel-bygning", samling="bygning", avvikstype="annet",
                            nokkelfelt="bygning_id"))
+            out.write(ikke_funnet_sql)
             antall_bygg_feilet += 1
             continue
 
@@ -563,6 +573,7 @@ def main():
             out.write(logg(bygning_id, "bygg funnet i Matrikkelen, men uten bygningsnummer", spor,
                            kilde="matrikkel-bygning", samling="bygning", avvikstype="annet",
                            nokkelfelt="bygning_id"))
+            out.write(ikke_funnet_sql)
             antall_bygg_feilet += 1
             continue
 

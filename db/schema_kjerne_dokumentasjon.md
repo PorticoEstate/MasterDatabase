@@ -504,8 +504,6 @@ Endringer i `schema_kjerne.sql` siden forrige commit (`86847b9`). Modellen har n
 
 ## Åpne spørsmål
 
-**Skal booking gjennomføres i master, eller bare søk og videresending?** Modellen forutsetter det siste. Skal booking skje i master, kommer søker-identitet inn, med personvernkonsekvenser.
-
 **Ledighetsendepunktet er ikke identifisert.** `/bookingfrontend/availability`, `/freetime`, `/schedule` og `/bookings` svarer alle 404. `/bookingfrontend/buildings` finnes som ekte JSON med felt `searchdataall` mangler, blant annet `town_id` og `active`. Det tyder på et bredere API som bør etterspørres hos leverandøren.
 
 **Kommunelisten bør bekreftes.** 12 instanser er verifisert å svare: bergen, stavanger, baerum, oygarden, narvik, afjord, averoy, gamvik, inderoy, nordreisa, oksnes, sogndal. Oversikten på aktiv-kommune.no er JavaScript-generert, så listen er utledet fra lenker på siden.
