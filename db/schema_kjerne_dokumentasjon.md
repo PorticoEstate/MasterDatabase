@@ -112,11 +112,15 @@ Gatenavnet ligger ikke lenger på `adresse`, men i `gate` via `gate_id`.
 
 ### Søkefasetter
 
-**`lokaletype`** (78 rader), **`aktivitet`** (28), **`fasilitet`** (32) — masterens eget kodeverk.
+**`lokaletype`** (78 rader), **`aktivitet`** (204), **`fasilitet`** (32) — masterens eget kodeverk.
 
 Skillet er meningsbærende: `lokaletype` er hva stedet **er**, `aktivitet` er hva det kan **brukes til**, `fasilitet` er hva det **har**.
 
-`lokaletype` og `aktivitet` er hierarkiske via `parent_id`, så et søk på `IDRETT` også treffer `GYMSAL` og `IDRETTSHALL`.
+`aktivitet` seedes ikke i skjemaet. Vokabularet eies av `etl/activity_mapping/activities.json` og lastes av `etl/last_inn.py`. Tabellen holder flere fasetter enn rene aktiviteter, og fasetten bæres av prefikset i `kode`: `ACT-` aktivitet, `EVT-` arrangement, `ORG-` organisasjon, `GRP-` målgruppe, `VEN-` lokale, `SRV-` tjeneste. En `CHECK` håndhever formatet. `EXC-`-konseptene lastes ikke inn, men gir `status='ikke_relevant'`. Se `etl/activity_mapping/AktivKommune_activity_normalisation.md`.
+
+`lokaletype` og `aktivitet` er hierarkiske via `parent_id`, så et søk på `IDRETT` også treffer `GYMSAL` og `IDRETTSHALL`. Noen få aktivitetskonsepter har to foreldre i vokabularet (Dans, Curling, E-sport). `parent_id` får den første.
+
+Én aktivitetskode i kilden kan peke på flere konsepter («Barnebursdag 3 - 12 år» gir Barnebursdag og Barn). Aktivitetskartleggingen ligger derfor i en egen tabell, `aktivitet_mapping`, med én rad per konsept. For lokaletype og fasilitet er det høyst én rad per kildekode i `kildekode_mapping`.
 
 **`ressurs_aktivitet`** og **`ressurs_fasilitet`** — koblingstabeller. En gymsal brukes til håndball, turn og dans, og har garderobe, dusj og parkettgulv.
 
@@ -149,6 +153,8 @@ Bergen   "17: Gymsal"  ─┐
 **`kildekode_mapping`** — oversettelsen, modellert som en *påstand* og ikke en beregning: den har `status`, `kartlagt_av` og `merknad`, fordi dette er en menneskelig vurdering.
 
 Tabellen er i praksis en ett-til-én-utvidelse av `kildekode`, men følger likevel navnekonvensjonen fullt ut: den har sin egen `id` som primærnøkkel, og en separat `kildekode_id BIGINT UNIQUE NOT NULL` som fremmednøkkel. Det unngår at én og samme kolonne må være både primærnøkkel og fremmednøkkel samtidig.
+
+**`aktivitet_mapping`** — det samme for aktivitetskoder, med samme `status`, `kartlagt_av` og `merknad`. Den er en egen tabell fordi én aktivitetskode kan gi flere konsepter, og da får koden én rad per konsept. `kildekode_mapping` gjelder dermed bare lokaletype og fasilitet, og har ingen alltid tomme målkolonner. `ikke_relevant` ligger i samme tabell med `aktivitet_id = NULL`.
 
 | Status | Betydning |
 |---|---|
@@ -275,7 +281,7 @@ Ingen av disse fem stegene trigger det neste automatisk — alt er manuelle komm
 | Fil | Kjøres når | Hva den gjør | Hardkodet? |
 |---|---|---|---|
 | `db/schema_kjerne.sql` | Én gang mot en ny database, eller på nytt etter en modellendring | Lager alle tabellene, indeksene, visningene, og seeder kodeverkene | Ja — dette er selve modellen |
-| `etl/last_inn.py` | Hver gang vi vil oppdatere kommunedata | Henter `searchdataall` fra én eller alle 12 kommuner, renser tekst (HTML er escapet to ganger i kilden), oversetter lokale koder via ordbøkene (`LOKALETYPE`/`AKTIVITET`/`FASILITET`/`IKKE_RELEVANT_*`), skriver SQL til standard-ut | Ja — ordbøkene og avvisningslogikken er hardkodet Python |
+| `etl/last_inn.py` | Hver gang vi vil oppdatere kommunedata | Henter `searchdataall` fra én eller alle 12 kommuner, renser tekst (HTML er escapet to ganger i kilden), oversetter lokale koder via ordbøkene i `etl/*_mapping/` (aktivitet: `activity_mapping/mapping.json` + `activities.json`) og `IKKE_RELEVANT_*`, skriver SQL til standard-ut | Ja — avvisningslogikken er hardkodet Python; ordbøkene er JSON-filer |
 | `etl/ut/alle.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av hva kommunene sa akkurat da skriptet kjørte | Nei — forkastbar output, ligger i `.gitignore`, ulik hver dag |
 | `etl/geokod.py` | **Utgående.** Skal erstattes av matrikkelsteget. Kan fortsatt brukes midlertidig, men fyller ikke `gate` eller `gate_id` | Slår opp adresser mot Kartverkets Adresse-API, skriver `UPDATE`-setninger for `posisjon` med `ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography`. Krever ett eksakt treff (bekreftet mot postnummer når det finnes); null eller flere treff logges i `synk_avvik` i stedet for å gjettes | Ja — matchingsregelen er hardkodet |
 | `etl/ut/geokoding.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av geokodingsresultatet | Nei — samme som over |
@@ -306,6 +312,7 @@ Gjentatt kjøring oppdaterer i stedet for å duplisere, men ikke alt overskrives
 - `adresse`: oppdateres bare mens `geokoding` er `ukjent` eller `feilet`. En geokodet eller manuelt satt adresse røres ikke. Konsekvens: endres adressen i kilden etter geokoding, fanges det ikke opp av innlastingen.
 - `ressurs`: alle felt følger kilden, unntatt `kapasitet`, som beholdes når `kapasitet_kilde` er `manuell` eller `utledet`.
 - `kildekode_mapping`: røres aldri etter at raden er opprettet, så en manuell vurdering overskrives ikke.
+- `aktivitet_mapping`: ETL-rader (`kartlagt_av='etl'`) fornyes ved hver kjøring fra `activity_mapping/mapping.json`. Har en kildekode en manuell rad, røres ingen av kodens rader.
 
 **Kjent forenkling, verdt å lese to ganger:** `kommune_id` settes i steg 2 fra hvilken Aktiv kommune-instans dataene kommer fra (instansens slug slås opp direkte mot en kommune), **ikke** fra geokodingen i steg 3. Det stemmer for alle 12 instansene i dag, siden hver av dem betjener nøyaktig én kommune (se `kommune_fagsystem_instans`). Skulle en instans senere betjene flere kommuner, holder ikke denne forenklingen — da må steg 2 vente på steg 3, og `kommune_id` avgjøres av adressens geokodede `kommunenummer` i stedet.
 

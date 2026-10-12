@@ -1,0 +1,4705 @@
+{
+  "source": "AktivKommune_activity_mapping_v0.3.xlsx",
+  "approvedOnly": false,
+  "normalisation": "html-decode x2, trim, collapse spaces, lowercase",
+  "values": {
+    "administrasjonslokale": {
+      "activities": [
+        "VEN-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Administrasjonslokale"
+      ]
+    },
+    "aktivitetshus": {
+      "activities": [
+        "VEN-008"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Aktivitetshus"
+      ]
+    },
+    "alle typer arrangement": {
+      "activities": [
+        "EVT-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Alle typer arrangement"
+      ]
+    },
+    "allidrett": {
+      "activities": [
+        "ACT-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Allidrett"
+      ]
+    },
+    "amerikansk fotball": {
+      "activities": [
+        "ACT-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Amerikansk fotball"
+      ]
+    },
+    "andre": {
+      "activities": [
+        "EXC-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Andre"
+      ]
+    },
+    "andre aktivitetar, konsertar, o.l": {
+      "activities": [
+        "EVT-012",
+        "EXC-004"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Andre aktivitetar, konsertar, o.l"
+      ]
+    },
+    "andre aktivitetar, o.l": {
+      "activities": [
+        "EXC-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Andre aktivitetar, o.l"
+      ]
+    },
+    "andre idretter": {
+      "activities": [
+        "ACT-010"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Andre idretter"
+      ]
+    },
+    "anleggsarbeid": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Anleggsarbeid"
+      ]
+    },
+    "annen idrett": {
+      "activities": [
+        "ACT-010"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Annen idrett"
+      ]
+    },
+    "annet": {
+      "activities": [
+        "EXC-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Annet"
+      ]
+    },
+    "annet - idrett møterom": {
+      "activities": [
+        "VEN-021",
+        "ACT-010"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Annet - Idrett møterom"
+      ]
+    },
+    "annet - internt i kommunen": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Annet - Internt i kommunen"
+      ]
+    },
+    "annet - kultur møterom": {
+      "activities": [
+        "VEN-021",
+        "ACT-092"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Annet - Kultur møterom"
+      ]
+    },
+    "annet - offentlig arrangement": {
+      "activities": [
+        "EVT-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Annet - Offentlig arrangement"
+      ]
+    },
+    "annet - personlig markering": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Annet - Personlig markering"
+      ]
+    },
+    "arena": {
+      "activities": [
+        "VEN-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arena"
+      ]
+    },
+    "arrangement": {
+      "activities": [
+        "EVT-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arrangement"
+      ]
+    },
+    "arrangement og møte": {
+      "activities": [
+        "EVT-001",
+        "EVT-002"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arrangement og møte"
+      ]
+    },
+    "arrangementer": {
+      "activities": [
+        "EVT-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arrangementer"
+      ]
+    },
+    "arrangementlokale": {
+      "activities": [
+        "VEN-007"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arrangementlokale"
+      ]
+    },
+    "babysvømming": {
+      "activities": [
+        "ACT-083",
+        "GRP-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Babysvømming"
+      ]
+    },
+    "bad": {
+      "activities": [
+        "ACT-074"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bad"
+      ]
+    },
+    "bading": {
+      "activities": [
+        "ACT-074"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bading"
+      ]
+    },
+    "badminton": {
+      "activities": [
+        "ACT-058"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Badminton"
+      ]
+    },
+    "ballsport": {
+      "activities": [
+        "ACT-012"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ballsport"
+      ]
+    },
+    "band": {
+      "activities": [
+        "ACT-099"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Band"
+      ]
+    },
+    "bandy": {
+      "activities": [
+        "ACT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bandy"
+      ]
+    },
+    "bandy - inne": {
+      "activities": [
+        "ACT-021"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bandy - inne"
+      ]
+    },
+    "bandøving": {
+      "activities": [
+        "ACT-099"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bandøving"
+      ]
+    },
+    "barnebursdag": {
+      "activities": [
+        "EVT-021"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Barnebursdag"
+      ]
+    },
+    "barnebursdag 3 - 12 år": {
+      "activities": [
+        "EVT-021",
+        "GRP-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "ageMin": 3,
+        "ageMax": 12
+      },
+      "sourceNames": [
+        "Barnebursdag 3 - 12 år"
+      ]
+    },
+    "barnebursdag 3 -16 år": {
+      "activities": [
+        "EVT-021",
+        "GRP-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "ageMin": 3,
+        "ageMax": 16
+      },
+      "sourceNames": [
+        "Barnebursdag 3 -16 år"
+      ]
+    },
+    "barnehage": {
+      "activities": [
+        "GRP-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Barnehage"
+      ]
+    },
+    "barnehager": {
+      "activities": [
+        "GRP-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Barnehager"
+      ]
+    },
+    "barneidrett": {
+      "activities": [
+        "ACT-011",
+        "GRP-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Barneidrett"
+      ]
+    },
+    "barnetilbud": {
+      "activities": [
+        "GRP-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Barnetilbud"
+      ]
+    },
+    "baseball": {
+      "activities": [
+        "ACT-015"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Baseball"
+      ]
+    },
+    "baseball/softball": {
+      "activities": [
+        "ACT-015"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Baseball/softball"
+      ]
+    },
+    "basketball": {
+      "activities": [
+        "ACT-016"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Basketball"
+      ]
+    },
+    "bedrifter o.l": {
+      "activities": [
+        "ORG-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bedrifter o.l"
+      ]
+    },
+    "bedriftsidrett": {
+      "activities": [
+        "ORG-012",
+        "ACT-010"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bedriftsidrett"
+      ]
+    },
+    "bibliotek": {
+      "activities": [
+        "VEN-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bibliotek"
+      ]
+    },
+    "bil/mc klubb": {
+      "activities": [
+        "ORG-014",
+        "ACT-046"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bil/MC klubb"
+      ]
+    },
+    "boccia": {
+      "activities": [
+        "ACT-050"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Boccia"
+      ]
+    },
+    "boksing": {
+      "activities": [
+        "ACT-036"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Boksing"
+      ]
+    },
+    "bordtennis": {
+      "activities": [
+        "ACT-059"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bordtennis"
+      ]
+    },
+    "bowls": {
+      "activities": [
+        "ACT-051"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bowls"
+      ]
+    },
+    "bryllup": {
+      "activities": [
+        "EVT-023"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bryllup"
+      ]
+    },
+    "bryting": {
+      "activities": [
+        "ACT-037"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bryting"
+      ]
+    },
+    "buekorps": {
+      "activities": [
+        "ACT-100"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Buekorps"
+      ]
+    },
+    "bueskyting": {
+      "activities": [
+        "ACT-052"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bueskyting"
+      ]
+    },
+    "bursdagsfeiring": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bursdagsfeiring"
+      ]
+    },
+    "bydelshus": {
+      "activities": [
+        "VEN-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bydelshus"
+      ]
+    },
+    "byrom": {
+      "activities": [
+        "VEN-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Byrom"
+      ]
+    },
+    "båtforeingar": {
+      "activities": [
+        "ORG-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Båtforeingar"
+      ]
+    },
+    "cheerleading": {
+      "activities": [
+        "ACT-029"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Cheerleading"
+      ]
+    },
+    "cricket": {
+      "activities": [
+        "ACT-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Cricket"
+      ]
+    },
+    "curling": {
+      "activities": [
+        "ACT-053"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Curling"
+      ]
+    },
+    "dagsmøte": {
+      "activities": [
+        "EVT-004",
+        "EVT-002"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dagsmøte"
+      ]
+    },
+    "dans": {
+      "activities": [
+        "ACT-093"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dans"
+      ]
+    },
+    "dans/ musikk/ kor/ korps": {
+      "activities": [
+        "ACT-098",
+        "ACT-093"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dans/ Musikk/ Kor/ Korps"
+      ]
+    },
+    "dans/trening": {
+      "activities": [
+        "ACT-093",
+        "ACT-065"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dans/trening"
+      ]
+    },
+    "dansing": {
+      "activities": [
+        "ACT-093"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dansing"
+      ]
+    },
+    "datahjelp": {
+      "activities": [
+        "SRV-006"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Datahjelp"
+      ]
+    },
+    "dataundervisning": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dataundervisning"
+      ]
+    },
+    "demonstrasjon": {
+      "activities": [
+        "EVT-015"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Demonstrasjon"
+      ]
+    },
+    "disko": {
+      "activities": [
+        "EVT-007"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Disko"
+      ]
+    },
+    "diskorom": {
+      "activities": [
+        "EVT-007"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Diskorom"
+      ]
+    },
+    "drill": {
+      "activities": [
+        "ACT-030"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Drill"
+      ]
+    },
+    "drop in": {
+      "activities": [
+        "EVT-027"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Drop in"
+      ]
+    },
+    "drop-in / arbeidsplasser": {
+      "activities": [
+        "VEN-002"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Drop-in / arbeidsplasser"
+      ]
+    },
+    "dykking": {
+      "activities": [
+        "ACT-075"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dykking"
+      ]
+    },
+    "dåp": {
+      "activities": [
+        "EVT-024"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dåp"
+      ]
+    },
+    "dåp/navnedag": {
+      "activities": [
+        "EVT-024"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dåp/navnedag"
+      ]
+    },
+    "e-sport": {
+      "activities": [
+        "ACT-025"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "E-sport"
+      ]
+    },
+    "egenorganisert": {
+      "activities": [
+        "ORG-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Egenorganisert"
+      ]
+    },
+    "ekstra renhold": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Ekstra renhold"
+      ]
+    },
+    "familiefest": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Familiefest"
+      ]
+    },
+    "fekting": {
+      "activities": [
+        "ACT-038"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fekting"
+      ]
+    },
+    "fektting": {
+      "activities": [
+        "ACT-038"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fektting"
+      ]
+    },
+    "ferie": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Ferie"
+      ]
+    },
+    "festival": {
+      "activities": [
+        "EVT-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Festival"
+      ]
+    },
+    "festivaler": {
+      "activities": [
+        "EVT-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Festivaler"
+      ]
+    },
+    "festivaler / mønstringar": {
+      "activities": [
+        "EVT-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Festivaler / Mønstringar"
+      ]
+    },
+    "festivaler / mønstringer": {
+      "activities": [
+        "EVT-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Festivaler / Mønstringer"
+      ]
+    },
+    "festivaler og mønstringer": {
+      "activities": [
+        "EVT-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Festivaler og mønstringer"
+      ]
+    },
+    "film": {
+      "activities": [
+        "EVT-011"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Film"
+      ]
+    },
+    "fisketurer": {
+      "activities": [
+        "ACT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fisketurer"
+      ]
+    },
+    "fleiridrettslag": {
+      "activities": [
+        "ORG-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fleiridrettslag"
+      ]
+    },
+    "fleridrettslag": {
+      "activities": [
+        "ORG-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fleridrettslag"
+      ]
+    },
+    "flykningekontoret": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Flykningekontoret"
+      ]
+    },
+    "foredrag": {
+      "activities": [
+        "EVT-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Foredrag"
+      ]
+    },
+    "foreldreutval": {
+      "activities": [
+        "ORG-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Foreldreutval"
+      ]
+    },
+    "forelesning": {
+      "activities": [
+        "EVT-003",
+        "ACT-109"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Forelesning"
+      ]
+    },
+    "forestilllinger": {
+      "activities": [
+        "EVT-010"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Forestilllinger"
+      ]
+    },
+    "formidlingsarena og forsamlingslokaler": {
+      "activities": [
+        "VEN-007"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Formidlingsarena og forsamlingslokaler"
+      ]
+    },
+    "forslag": {
+      "activities": [
+        "EXC-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "test_or_system_text",
+      "sourceNames": [
+        "Forslag"
+      ]
+    },
+    "fotball": {
+      "activities": [
+        "ACT-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fotball"
+      ]
+    },
+    "fotball (1/3 del av 7'er bane)": {
+      "activities": [
+        "ACT-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fotball &amp;#40;1/3 del av 7&#039;er bane&amp;#41;"
+      ]
+    },
+    "fotball (1/4 av 11'er bane)": {
+      "activities": [
+        "ACT-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fotball &amp;#40;1/4 av 11&#039;er bane&amp;#41;"
+      ]
+    },
+    "fotballbane": {
+      "activities": [
+        "VEN-011",
+        "ACT-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fotballbane"
+      ]
+    },
+    "foto": {
+      "activities": [
+        "ACT-094"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Foto"
+      ]
+    },
+    "friidrett": {
+      "activities": [
+        "ACT-026"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friidrett"
+      ]
+    },
+    "friluft": {
+      "activities": [
+        "ACT-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friluft"
+      ]
+    },
+    "friluftsaktiviteter": {
+      "activities": [
+        "ACT-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friluftsaktiviteter"
+      ]
+    },
+    "friluftsliv": {
+      "activities": [
+        "ACT-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friluftsliv"
+      ]
+    },
+    "friområder": {
+      "activities": [
+        "VEN-023"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friområder"
+      ]
+    },
+    "frisklivsentralen": {
+      "activities": [
+        "ORG-002",
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Frisklivsentralen"
+      ]
+    },
+    "fritidsklubb": {
+      "activities": [
+        "GRP-007",
+        "EVT-026"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fritidsklubb"
+      ]
+    },
+    "fritidstilbud": {
+      "activities": [
+        "ACT-005"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fritidstilbud"
+      ]
+    },
+    "frivillig organisasjon": {
+      "activities": [
+        "ORG-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Frivillig organisasjon"
+      ]
+    },
+    "frivillighet og organisasjonsaktiviteter": {
+      "activities": [
+        "ORG-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Frivillighet og organisasjonsaktiviteter"
+      ]
+    },
+    "frivilligsentral": {
+      "activities": [
+        "ORG-007"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Frivilligsentral"
+      ]
+    },
+    "funksjonhemma": {
+      "activities": [
+        "GRP-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Funksjonhemma"
+      ]
+    },
+    "futsal": {
+      "activities": [
+        "ACT-019"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Futsal"
+      ]
+    },
+    "fysiotimer": {
+      "activities": [
+        "SRV-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fysiotimer"
+      ]
+    },
+    "galleri": {
+      "activities": [
+        "VEN-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Galleri"
+      ]
+    },
+    "gapahuk": {
+      "activities": [
+        "VEN-024"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gapahuk"
+      ]
+    },
+    "generelt": {
+      "activities": [
+        "EXC-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Generelt"
+      ]
+    },
+    "gi bort": {
+      "activities": [
+        "SRV-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gi bort"
+      ]
+    },
+    "golf": {
+      "activities": [
+        "ACT-054"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Golf"
+      ]
+    },
+    "grendalag": {
+      "activities": [
+        "ORG-008"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grendalag"
+      ]
+    },
+    "grendalag/velforening": {
+      "activities": [
+        "ORG-008"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grendalag/Velforening"
+      ]
+    },
+    "grendelag": {
+      "activities": [
+        "ORG-008"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grendelag"
+      ]
+    },
+    "grill/bålpanne": {
+      "activities": [
+        "SRV-005"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grill/bålpanne"
+      ]
+    },
+    "gruppearbeid": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gruppearbeid"
+      ]
+    },
+    "gymnastikk": {
+      "activities": [
+        "ACT-028"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gymnastikk"
+      ]
+    },
+    "gymnastikk og turn": {
+      "activities": [
+        "ACT-028"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gymnastikk og Turn",
+        "Gymnastikk og turn"
+      ]
+    },
+    "gymsal": {
+      "activities": [
+        "VEN-012"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gymsal"
+      ]
+    },
+    "helsebygg": {
+      "activities": [
+        "VEN-010"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Helsebygg"
+      ]
+    },
+    "hestesport": {
+      "activities": [
+        "ACT-033"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hestesport"
+      ]
+    },
+    "hobbygrupper": {
+      "activities": [
+        "ACT-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hobbygrupper"
+      ]
+    },
+    "humanitære organiasjoner": {
+      "activities": [
+        "ORG-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Humanitære organiasjoner"
+      ]
+    },
+    "humanitære organisasjonar": {
+      "activities": [
+        "ORG-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Humanitære organisasjonar"
+      ]
+    },
+    "humanitære organisasjoner": {
+      "activities": [
+        "ORG-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Humanitære organisasjoner"
+      ]
+    },
+    "hund": {
+      "activities": [
+        "ACT-034"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hund"
+      ]
+    },
+    "hundesport": {
+      "activities": [
+        "ACT-034"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hundesport"
+      ]
+    },
+    "hurtigløp": {
+      "activities": [
+        "ACT-090"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hurtigløp"
+      ]
+    },
+    "håndball": {
+      "activities": [
+        "ACT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Håndball"
+      ]
+    },
+    "hårklipp": {
+      "activities": [
+        "SRV-003"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hårklipp"
+      ]
+    },
+    "idrett": {
+      "activities": [
+        "ACT-010"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrett"
+      ]
+    },
+    "idrett møterom": {
+      "activities": [
+        "VEN-021",
+        "ACT-010"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrett møterom"
+      ]
+    },
+    "idrettsaktiviteter": {
+      "activities": [
+        "ACT-010"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrettsaktiviteter"
+      ]
+    },
+    "idrettshall": {
+      "activities": [
+        "VEN-012"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrettshall"
+      ]
+    },
+    "idrettskrets - særforbund": {
+      "activities": [
+        "ORG-010"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrettskrets - særforbund"
+      ]
+    },
+    "informasjons møter": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Informasjons møter"
+      ]
+    },
+    "inkludering": {
+      "activities": [
+        "GRP-002"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Inkludering"
+      ]
+    },
+    "innbyggerbussen": {
+      "activities": [
+        "SRV-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Innbyggerbussen"
+      ]
+    },
+    "innbyggertorg": {
+      "activities": [
+        "VEN-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Innbyggertorg"
+      ]
+    },
+    "innebandy": {
+      "activities": [
+        "ACT-021"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Innebandy"
+      ]
+    },
+    "innefotball": {
+      "activities": [
+        "ACT-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Innefotball"
+      ]
+    },
+    "interesseorganiasjonar": {
+      "activities": [
+        "ORG-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Interesseorganiasjonar"
+      ]
+    },
+    "interesseorganiasjoner": {
+      "activities": [
+        "ORG-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Interesseorganiasjoner"
+      ]
+    },
+    "interesseorganisasjon": {
+      "activities": [
+        "ORG-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Interesseorganisasjon"
+      ]
+    },
+    "interesseorganisasjonar": {
+      "activities": [
+        "ORG-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Interesseorganisasjonar"
+      ]
+    },
+    "interesseorganisasjoner": {
+      "activities": [
+        "ORG-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Interesseorganisasjoner"
+      ]
+    },
+    "intern": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Intern"
+      ]
+    },
+    "intern aktivitet": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Intern aktivitet"
+      ]
+    },
+    "intern avdeling: flyk": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Intern avdeling: FLYK"
+      ]
+    },
+    "intern avdeling: kulturskolen": {
+      "activities": [
+        "ORG-019",
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Intern avdeling: Kulturskolen"
+      ]
+    },
+    "intern avdeling: voks": {
+      "activities": [
+        "ORG-024",
+        "GRP-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Intern avdeling: VOKS"
+      ]
+    },
+    "interne avdelinger": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Interne avdelinger"
+      ]
+    },
+    "internt bergen kommune": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Internt Bergen Kommune",
+        "Internt Bergen kommune"
+      ]
+    },
+    "internt bruk - kommune": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Internt bruk - kommune"
+      ]
+    },
+    "internt i kommunen": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Internt i kommunen"
+      ]
+    },
+    "internt kommune": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Internt kommune"
+      ]
+    },
+    "internt stavanger kommune": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Internt Stavanger kommune"
+      ]
+    },
+    "involvering": {
+      "activities": [
+        "EVT-005"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Involvering"
+      ]
+    },
+    "ishockey": {
+      "activities": [
+        "ACT-087"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ishockey"
+      ]
+    },
+    "jakt": {
+      "activities": [
+        "ACT-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Jakt"
+      ]
+    },
+    "ju jitsu": {
+      "activities": [
+        "ACT-040"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ju Jitsu",
+        "Ju jitsu"
+      ]
+    },
+    "judo": {
+      "activities": [
+        "ACT-039"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Judo"
+      ]
+    },
+    "kafe": {
+      "activities": [
+        "EVT-028"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kafe"
+      ]
+    },
+    "kafè": {
+      "activities": [
+        "EVT-028"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kafè"
+      ]
+    },
+    "kajakk": {
+      "activities": [
+        "ACT-078"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kajakk"
+      ]
+    },
+    "kamera": {
+      "activities": [
+        "SRV-005",
+        "ACT-094"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kamera"
+      ]
+    },
+    "kampsport": {
+      "activities": [
+        "ACT-035"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kampsport"
+      ]
+    },
+    "kano/kajakk": {
+      "activities": [
+        "ACT-079",
+        "ACT-078"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kano/kajakk"
+      ]
+    },
+    "kanopadling": {
+      "activities": [
+        "ACT-079"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kanopadling"
+      ]
+    },
+    "karate": {
+      "activities": [
+        "ACT-041"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Karate"
+      ]
+    },
+    "kickboksing": {
+      "activities": [
+        "ACT-042"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kickboksing"
+      ]
+    },
+    "kino": {
+      "activities": [
+        "EVT-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kino"
+      ]
+    },
+    "kjøkken": {
+      "activities": [
+        "VEN-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kjøkken"
+      ]
+    },
+    "klartring": {
+      "activities": [
+        "ACT-044"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klartring"
+      ]
+    },
+    "klassefest": {
+      "activities": [
+        "EVT-020",
+        "GRP-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klassefest"
+      ]
+    },
+    "klasserom": {
+      "activities": [
+        "VEN-015"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klasserom"
+      ]
+    },
+    "klasseromsundervisning": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klasseromsundervisning"
+      ]
+    },
+    "klatrevegg": {
+      "activities": [
+        "ACT-044"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatrevegg"
+      ]
+    },
+    "klatring": {
+      "activities": [
+        "ACT-044"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatring"
+      ]
+    },
+    "klatring/ buldring": {
+      "activities": [
+        "ACT-044"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatring/ Buldring"
+      ]
+    },
+    "klesinnsamling": {
+      "activities": [
+        "SRV-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klesinnsamling"
+      ]
+    },
+    "klubbmøte": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klubbmøte"
+      ]
+    },
+    "kommersiell utleie": {
+      "activities": [
+        "ORG-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kommersiell utleie"
+      ]
+    },
+    "kommersiell utleige": {
+      "activities": [
+        "ORG-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kommersiell utleige"
+      ]
+    },
+    "kommunal aktivitet": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kommunal aktivitet"
+      ]
+    },
+    "kommunalt": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kommunalt"
+      ]
+    },
+    "kommunalt bruk": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kommunalt bruk"
+      ]
+    },
+    "kommune eige bruk": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kommune eige bruk"
+      ]
+    },
+    "konferanse": {
+      "activities": [
+        "EVT-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Konferanse"
+      ]
+    },
+    "konferanser": {
+      "activities": [
+        "EVT-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Konferanser"
+      ]
+    },
+    "konfirmasjon": {
+      "activities": [
+        "EVT-025"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Konfirmasjon"
+      ]
+    },
+    "konsert": {
+      "activities": [
+        "EVT-012"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Konsert"
+      ]
+    },
+    "kor": {
+      "activities": [
+        "ACT-101"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kor"
+      ]
+    },
+    "korps": {
+      "activities": [
+        "ACT-102"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Korps"
+      ]
+    },
+    "korps og orkester": {
+      "activities": [
+        "ACT-102",
+        "ACT-103"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Korps og orkester"
+      ]
+    },
+    "kreativt verksted": {
+      "activities": [
+        "ACT-096"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kreativt verksted"
+      ]
+    },
+    "kreativt verksted og prosesser": {
+      "activities": [
+        "ACT-096"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kreativt verksted og prosesser"
+      ]
+    },
+    "kultur": {
+      "activities": [
+        "ACT-092"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kultur"
+      ]
+    },
+    "kulturaktiviteter": {
+      "activities": [
+        "ACT-092"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturaktiviteter"
+      ]
+    },
+    "kulturarrangement": {
+      "activities": [
+        "EVT-008"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturarrangement"
+      ]
+    },
+    "kulturbygg": {
+      "activities": [
+        "VEN-016"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturbygg"
+      ]
+    },
+    "kulturhus": {
+      "activities": [
+        "VEN-016"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturhus"
+      ]
+    },
+    "kulturlokalar møterom": {
+      "activities": [
+        "VEN-021",
+        "ACT-092"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturlokalar møterom"
+      ]
+    },
+    "kulturlokale": {
+      "activities": [
+        "VEN-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturlokale"
+      ]
+    },
+    "kulturlokaler": {
+      "activities": [
+        "VEN-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturlokaler"
+      ]
+    },
+    "kulturlokaler formidling og øving": {
+      "activities": [
+        "VEN-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturlokaler formidling og øving"
+      ]
+    },
+    "kulturlokaler øving og verksteder": {
+      "activities": [
+        "VEN-019"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturlokaler øving og verksteder"
+      ]
+    },
+    "kulturlokaler, formidling og øving": {
+      "activities": [
+        "VEN-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturlokaler, formidling og øving"
+      ]
+    },
+    "kulturskolen": {
+      "activities": [
+        "ORG-019"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturskolen"
+      ]
+    },
+    "kulturvern og historie": {
+      "activities": [
+        "ACT-095"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturvern og historie"
+      ]
+    },
+    "kulturvern og historielag": {
+      "activities": [
+        "ACT-095"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturvern og historielag"
+      ]
+    },
+    "kulturvern og sogelag": {
+      "activities": [
+        "ACT-095"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturvern og sogelag"
+      ]
+    },
+    "kunst og håndverk": {
+      "activities": [
+        "ACT-096"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunst og håndverk"
+      ]
+    },
+    "kunst, håndtverk, media": {
+      "activities": [
+        "ACT-096",
+        "ACT-094"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunst, håndtverk, media"
+      ]
+    },
+    "kunst, håndverk og media": {
+      "activities": [
+        "ACT-096",
+        "ACT-094"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunst, håndverk og media"
+      ]
+    },
+    "kunst, håndverk, media": {
+      "activities": [
+        "ACT-096",
+        "ACT-094"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunst, håndverk, media"
+      ]
+    },
+    "kunstløp": {
+      "activities": [
+        "ACT-091"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunstløp"
+      ]
+    },
+    "kurs": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kurs"
+      ]
+    },
+    "kurs og foredrag": {
+      "activities": [
+        "ACT-109",
+        "EVT-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kurs og foredrag"
+      ]
+    },
+    "lacrosse": {
+      "activities": [
+        "ACT-022"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lacrosse"
+      ]
+    },
+    "lag og foreninger": {
+      "activities": [
+        "ORG-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lag og foreninger"
+      ]
+    },
+    "lagt til rette for mmnf": {
+      "activities": [
+        "GRP-004"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lagt til rette for MMNF"
+      ]
+    },
+    "leie av lastesykkel": {
+      "activities": [
+        "SRV-005",
+        "SRV-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leie av lastesykkel"
+      ]
+    },
+    "leie salgsplass": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leie salgsplass"
+      ]
+    },
+    "leie standplass": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leie standplass"
+      ]
+    },
+    "leilighet": {
+      "activities": [
+        "VEN-005"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leilighet"
+      ]
+    },
+    "leirdueskyting": {
+      "activities": [
+        "ACT-056"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leirdueskyting"
+      ]
+    },
+    "leksegruppe": {
+      "activities": [
+        "ACT-109",
+        "GRP-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leksegruppe"
+      ]
+    },
+    "litteratur/litteraturformidling": {
+      "activities": [
+        "ACT-097"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Litteratur/litteraturformidling"
+      ]
+    },
+    "livsnøytral seremonirom": {
+      "activities": [
+        "VEN-026",
+        "EVT-022"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "LIvsnøytral seremonirom"
+      ]
+    },
+    "lokale aktiviteter-idrett-kultur": {
+      "activities": [
+        "ACT-010",
+        "ACT-092"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lokale aktiviteter-idrett-kultur"
+      ]
+    },
+    "lokalmat": {
+      "activities": [
+        "ACT-007"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lokalmat"
+      ]
+    },
+    "luftsport": {
+      "activities": [
+        "ACT-045"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Luftsport"
+      ]
+    },
+    "lyd": {
+      "activities": [
+        "SRV-005"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lyd"
+      ]
+    },
+    "lys": {
+      "activities": [
+        "SRV-005"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lys"
+      ]
+    },
+    "makeup & hundpleie": {
+      "activities": [
+        "SRV-003"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Makeup & Hundpleie"
+      ]
+    },
+    "malegruppe": {
+      "activities": [
+        "ACT-096"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Malegruppe"
+      ]
+    },
+    "maraton": {
+      "activities": [
+        "ACT-027"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Maraton"
+      ]
+    },
+    "marked": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Marked"
+      ]
+    },
+    "markering": {
+      "activities": [
+        "EVT-015"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Markering"
+      ]
+    },
+    "markering/demonstrasjon": {
+      "activities": [
+        "EVT-015"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Markering/demonstrasjon"
+      ]
+    },
+    "matlaging": {
+      "activities": [
+        "ACT-007"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Matlaging"
+      ]
+    },
+    "menighet/ trossamfunn": {
+      "activities": [
+        "ORG-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Menighet/ Trossamfunn"
+      ]
+    },
+    "menigheter og trosamfunn": {
+      "activities": [
+        "ORG-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Menigheter og trosamfunn"
+      ]
+    },
+    "menigheter og trossamfunn": {
+      "activities": [
+        "ORG-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Menigheter og trossamfunn"
+      ]
+    },
+    "meningheter og trossamfunn": {
+      "activities": [
+        "ORG-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Meningheter og trossamfunn"
+      ]
+    },
+    "messe": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Messe"
+      ]
+    },
+    "mini": {
+      "activities": [
+        "EXC-001"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unknown",
+      "sourceNames": [
+        "Mini"
+      ]
+    },
+    "minifotball": {
+      "activities": [
+        "ACT-018",
+        "GRP-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Minifotball"
+      ]
+    },
+    "minihåndball": {
+      "activities": [
+        "ACT-020",
+        "GRP-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Minihåndball"
+      ]
+    },
+    "minivolleyball": {
+      "activities": [
+        "ACT-024",
+        "GRP-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Minivolleyball"
+      ]
+    },
+    "mobilitet": {
+      "activities": [
+        "SRV-004"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Mobilitet"
+      ]
+    },
+    "motorsport": {
+      "activities": [
+        "ACT-046"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Motorsport"
+      ]
+    },
+    "museum": {
+      "activities": [
+        "VEN-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Museum"
+      ]
+    },
+    "musikk": {
+      "activities": [
+        "ACT-098"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Musikk"
+      ]
+    },
+    "musikk / korps": {
+      "activities": [
+        "ACT-098",
+        "ACT-102"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Musikk / Korps"
+      ]
+    },
+    "musikk og dans": {
+      "activities": [
+        "ACT-098",
+        "ACT-093"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Musikk og dans"
+      ]
+    },
+    "møte": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møte"
+      ]
+    },
+    "møte/presentasjon": {
+      "activities": [
+        "EVT-002",
+        "EVT-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møte/presentasjon"
+      ]
+    },
+    "møteaktivitet": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møteaktivitet"
+      ]
+    },
+    "møtelokale": {
+      "activities": [
+        "VEN-021"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møtelokale"
+      ]
+    },
+    "møteplass": {
+      "activities": [
+        "EVT-026"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møteplass"
+      ]
+    },
+    "møter": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møter"
+      ]
+    },
+    "møter og kurs": {
+      "activities": [
+        "EVT-002",
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møter og kurs"
+      ]
+    },
+    "møter, kurs, mindre selskaper": {
+      "activities": [
+        "EVT-002",
+        "ACT-109"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møter, kurs, mindre selskaper"
+      ]
+    },
+    "møterom": {
+      "activities": [
+        "VEN-021"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møterom",
+        "møterom"
+      ]
+    },
+    "møterom i drammen kommune": {
+      "activities": [
+        "VEN-021",
+        "GRP-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møterom i Drammen kommune"
+      ]
+    },
+    "møtevirksomhet": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møtevirksomhet"
+      ]
+    },
+    "naturskole": {
+      "activities": [
+        "ACT-001",
+        "ACT-109"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Naturskole"
+      ]
+    },
+    "nrg": {
+      "activities": [
+        "EXC-001"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unknown",
+      "sourceNames": [
+        "NRG"
+      ]
+    },
+    "ntnu": {
+      "activities": [
+        "GRP-010"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "NTNU"
+      ]
+    },
+    "næring og kommersiell virksomhet": {
+      "activities": [
+        "ORG-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Næring og kommersiell virksomhet"
+      ]
+    },
+    "off.arrangement": {
+      "activities": [
+        "EVT-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Off.arrangement"
+      ]
+    },
+    "offentlig": {
+      "activities": [
+        "ORG-021"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Offentlig"
+      ]
+    },
+    "offentlig arrangement": {
+      "activities": [
+        "EVT-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Offentlig arrangement"
+      ]
+    },
+    "offentlig bading": {
+      "activities": [
+        "ACT-074"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Offentlig bading"
+      ]
+    },
+    "opplæring": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Opplæring"
+      ]
+    },
+    "oppvekst/skule": {
+      "activities": [
+        "GRP-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Oppvekst/skule"
+      ]
+    },
+    "organisasjon": {
+      "activities": [
+        "ORG-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Organisasjon"
+      ]
+    },
+    "organisering av aktivitetar": {
+      "activities": [
+        "EXC-004"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Organisering av aktivitetar"
+      ]
+    },
+    "orientering": {
+      "activities": [
+        "ACT-047"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Orientering"
+      ]
+    },
+    "overnatting": {
+      "activities": [
+        "EVT-019"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Overnatting"
+      ]
+    },
+    "padeltennis": {
+      "activities": [
+        "ACT-060"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Padeltennis"
+      ]
+    },
+    "paintball": {
+      "activities": [
+        "ACT-048"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Paintball"
+      ]
+    },
+    "pensjonistbading": {
+      "activities": [
+        "ACT-074",
+        "GRP-005"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Pensjonistbading"
+      ]
+    },
+    "pensjonistforening": {
+      "activities": [
+        "ORG-015",
+        "GRP-005"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Pensjonistforening"
+      ]
+    },
+    "personlig markering": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Personlig markering"
+      ]
+    },
+    "politikk/valgdag": {
+      "activities": [
+        "EVT-018",
+        "ORG-016"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Politikk/valgdag"
+      ]
+    },
+    "politisk organisasjon": {
+      "activities": [
+        "ORG-016"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Politisk organisasjon"
+      ]
+    },
+    "presentasjoner": {
+      "activities": [
+        "EVT-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Presentasjoner"
+      ]
+    },
+    "privat": {
+      "activities": [
+        "ORG-022"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Privat"
+      ]
+    },
+    "privat arrangement": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Privat arrangement"
+      ]
+    },
+    "privat utleige": {
+      "activities": [
+        "ORG-022"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Privat utleige"
+      ]
+    },
+    "privat/ lukket arrangement": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Privat/ lukket arrangement"
+      ]
+    },
+    "profilering": {
+      "activities": [
+        "EVT-016"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Profilering"
+      ]
+    },
+    "promotering": {
+      "activities": [
+        "EVT-016"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Promotering"
+      ]
+    },
+    "pu/hu": {
+      "activities": [
+        "GRP-004"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "PU/HU"
+      ]
+    },
+    "pub": {
+      "activities": [
+        "EVT-028"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Pub"
+      ]
+    },
+    "renhold og vedlikehold": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Renhold og vedlikehold"
+      ]
+    },
+    "revy og teater": {
+      "activities": [
+        "ACT-106"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Revy og teater"
+      ]
+    },
+    "riding": {
+      "activities": [
+        "ACT-033"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Riding"
+      ]
+    },
+    "roing": {
+      "activities": [
+        "ACT-080"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Roing"
+      ]
+    },
+    "rollerderby": {
+      "activities": [
+        "ACT-064"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Rollerderby"
+      ]
+    },
+    "rugby": {
+      "activities": [
+        "ACT-023"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Rugby"
+      ]
+    },
+    "rytmisk sportsgymnastikk (rg)": {
+      "activities": [
+        "ACT-031"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Rytmisk sportsgymnastikk &amp;#40;RG&amp;#41;"
+      ]
+    },
+    "salg": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Salg"
+      ]
+    },
+    "salgsplass": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Salgsplass"
+      ]
+    },
+    "saltimer": {
+      "activities": [
+        "VEN-007"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Saltimer"
+      ]
+    },
+    "sambruk": {
+      "activities": [
+        "GRP-003"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sambruk"
+      ]
+    },
+    "sameie": {
+      "activities": [
+        "ORG-025"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sameie"
+      ]
+    },
+    "samlinger": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Samlinger"
+      ]
+    },
+    "samlingsplass": {
+      "activities": [
+        "VEN-007"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Samlingsplass"
+      ]
+    },
+    "samtale": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Samtale"
+      ]
+    },
+    "samtale med innbygger": {
+      "activities": [
+        "SRV-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Samtale med innbygger"
+      ]
+    },
+    "samtaler": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Samtaler"
+      ]
+    },
+    "sandhåndball": {
+      "activities": [
+        "ACT-110"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sandhåndball"
+      ]
+    },
+    "sandvolleyball": {
+      "activities": [
+        "ACT-111"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sandvolleyball"
+      ]
+    },
+    "seiling": {
+      "activities": [
+        "ACT-081"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Seiling"
+      ]
+    },
+    "seilsport": {
+      "activities": [
+        "ACT-081"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Seilsport"
+      ]
+    },
+    "selskap": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Selskap"
+      ]
+    },
+    "selskapsarrangement": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Selskapsarrangement"
+      ]
+    },
+    "seremonier": {
+      "activities": [
+        "EVT-022"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Seremonier"
+      ]
+    },
+    "sirkus": {
+      "activities": [
+        "ACT-105"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sirkus"
+      ]
+    },
+    "sjakk": {
+      "activities": [
+        "ACT-009"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sjakk"
+      ]
+    },
+    "sjøsport": {
+      "activities": [
+        "ACT-073"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sjøsport"
+      ]
+    },
+    "skating": {
+      "activities": [
+        "ACT-063"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skating"
+      ]
+    },
+    "ski": {
+      "activities": [
+        "ACT-088"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ski"
+      ]
+    },
+    "ski (langrenn/alpin)": {
+      "activities": [
+        "ACT-088"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ski &amp;#40;Langrenn/Alpin&amp;#41;"
+      ]
+    },
+    "skisport": {
+      "activities": [
+        "ACT-088"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skisport"
+      ]
+    },
+    "skole": {
+      "activities": [
+        "GRP-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skole"
+      ]
+    },
+    "skolekjøkken": {
+      "activities": [
+        "VEN-014",
+        "GRP-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skolekjøkken"
+      ]
+    },
+    "skuespill": {
+      "activities": [
+        "ACT-106"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skuespill"
+      ]
+    },
+    "skular": {
+      "activities": [
+        "GRP-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skular"
+      ]
+    },
+    "skule": {
+      "activities": [
+        "GRP-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skule"
+      ]
+    },
+    "skule - oppvekst": {
+      "activities": [
+        "GRP-011"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skule - oppvekst"
+      ]
+    },
+    "skyting": {
+      "activities": [
+        "ACT-055"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skyting"
+      ]
+    },
+    "skøyter": {
+      "activities": [
+        "ACT-089"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skøyter"
+      ]
+    },
+    "slettet/utgått": {
+      "activities": [
+        "EXC-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "test_or_system_text",
+      "sourceNames": [
+        "Slettet/utgått"
+      ]
+    },
+    "små møter": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Små møter"
+      ]
+    },
+    "sommerleir": {
+      "activities": [
+        "EVT-019",
+        "GRP-001"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sommerleir"
+      ]
+    },
+    "sommerstengt - sommertrening": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Sommerstengt - sommertrening"
+      ]
+    },
+    "sosial møteplass": {
+      "activities": [
+        "EVT-026"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sosial møteplass"
+      ]
+    },
+    "sosiale aktivteter": {
+      "activities": [
+        "EVT-026"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sosiale aktivteter"
+      ]
+    },
+    "sosiale møteplassar": {
+      "activities": [
+        "EVT-026"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sosiale møteplassar"
+      ]
+    },
+    "sosiale møteplasser": {
+      "activities": [
+        "EVT-026"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sosiale møteplasser"
+      ]
+    },
+    "sosiale tilstelninger": {
+      "activities": [
+        "EVT-020"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sosiale tilstelninger"
+      ]
+    },
+    "spedbarnsgruppe": {
+      "activities": [
+        "GRP-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Spedbarnsgruppe"
+      ]
+    },
+    "speidar": {
+      "activities": [
+        "ORG-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Speidar"
+      ]
+    },
+    "speidarar": {
+      "activities": [
+        "ORG-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Speidarar"
+      ]
+    },
+    "speider": {
+      "activities": [
+        "ORG-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Speider"
+      ]
+    },
+    "speider og friluftsliv": {
+      "activities": [
+        "ORG-017",
+        "ACT-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Speider og friluftsliv"
+      ]
+    },
+    "speiding": {
+      "activities": [
+        "ORG-017",
+        "ACT-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Speiding"
+      ]
+    },
+    "spill": {
+      "activities": [
+        "ACT-008"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Spill"
+      ]
+    },
+    "spinning": {
+      "activities": [
+        "ACT-066"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Spinning"
+      ]
+    },
+    "sport og idrett": {
+      "activities": [
+        "ACT-010"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sport og idrett"
+      ]
+    },
+    "sportsdrill": {
+      "activities": [
+        "ACT-030"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sportsdrill"
+      ]
+    },
+    "språkcafé": {
+      "activities": [
+        "ACT-108"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Språkcafé"
+      ]
+    },
+    "squash": {
+      "activities": [
+        "ACT-061"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Squash"
+      ]
+    },
+    "stand": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stand"
+      ]
+    },
+    "stand (2mx3m)": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stand (2mx3m)"
+      ]
+    },
+    "standplass": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Standplass"
+      ]
+    },
+    "stands": {
+      "activities": [
+        "EVT-014"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stands"
+      ]
+    },
+    "stengt": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Stengt"
+      ]
+    },
+    "stengt grunna vedlikehald eller ferie": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Stengt grunna vedlikehald eller ferie"
+      ]
+    },
+    "stengt pga arrangement": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Stengt pga arrangement"
+      ]
+    },
+    "stengt pga ferie eller arrangement": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Stengt pga ferie eller arrangement"
+      ]
+    },
+    "stengt pga vedlikehold/reperasjon av utstyr": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Stengt pga vedlikehold/reperasjon av utstyr"
+      ]
+    },
+    "studiegrupper": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Studiegrupper"
+      ]
+    },
+    "stup": {
+      "activities": [
+        "ACT-082"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stup"
+      ]
+    },
+    "stuping": {
+      "activities": [
+        "ACT-082"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stuping"
+      ]
+    },
+    "styremøter": {
+      "activities": [
+        "EVT-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styremøter"
+      ]
+    },
+    "styrkeløft": {
+      "activities": [
+        "ACT-067"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styrkeløft"
+      ]
+    },
+    "styrkeløfting": {
+      "activities": [
+        "ACT-067"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styrkeløfting"
+      ]
+    },
+    "styrketrening": {
+      "activities": [
+        "ACT-068"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styrketrening"
+      ]
+    },
+    "svømmehall": {
+      "activities": [
+        "VEN-022"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Svømmehall"
+      ]
+    },
+    "svømmekurs": {
+      "activities": [
+        "ACT-083",
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Svømmekurs"
+      ]
+    },
+    "svømming": {
+      "activities": [
+        "ACT-083"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Svømming"
+      ]
+    },
+    "sykehjem": {
+      "activities": [
+        "VEN-010",
+        "GRP-005"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sykehjem"
+      ]
+    },
+    "sykling": {
+      "activities": [
+        "ACT-072"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sykling"
+      ]
+    },
+    "symjehall": {
+      "activities": [
+        "VEN-022"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Symjehall"
+      ]
+    },
+    "synkronsvømming": {
+      "activities": [
+        "ACT-084"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Synkronsvømming"
+      ]
+    },
+    "søndagskafé": {
+      "activities": [
+        "EVT-028"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Søndagskafé"
+      ]
+    },
+    "taekwondo": {
+      "activities": [
+        "ACT-043"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Taekwondo"
+      ]
+    },
+    "team-building": {
+      "activities": [
+        "EVT-001",
+        "ORG-020"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Team-building"
+      ]
+    },
+    "teater": {
+      "activities": [
+        "ACT-106"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teater"
+      ]
+    },
+    "teater og scenekunst": {
+      "activities": [
+        "ACT-106",
+        "ACT-104"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teater og scenekunst"
+      ]
+    },
+    "teaterforestilling": {
+      "activities": [
+        "EVT-010",
+        "ACT-106"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teaterforestilling"
+      ]
+    },
+    "teltplass": {
+      "activities": [
+        "VEN-025"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teltplass"
+      ]
+    },
+    "tennis": {
+      "activities": [
+        "ACT-062"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tennis"
+      ]
+    },
+    "terapi": {
+      "activities": [
+        "SRV-002"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Terapi"
+      ]
+    },
+    "tiden er ledig. sykkelen reserveres fra forrige ledige torsdag.": {
+      "activities": [
+        "EXC-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "test_or_system_text",
+      "sourceNames": [
+        "Tiden er ledig. Sykkelen reserveres fra forrige ledige torsdag."
+      ]
+    },
+    "tivoli": {
+      "activities": [
+        "EVT-017"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tivoli"
+      ]
+    },
+    "torg": {
+      "activities": [
+        "VEN-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Torg"
+      ]
+    },
+    "torgplasser": {
+      "activities": [
+        "VEN-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Torgplasser"
+      ]
+    },
+    "transporthjelp": {
+      "activities": [
+        "SRV-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Transporthjelp"
+      ]
+    },
+    "treklang": {
+      "activities": [
+        "EXC-001"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unknown",
+      "sourceNames": [
+        "Treklang"
+      ]
+    },
+    "trening": {
+      "activities": [
+        "ACT-069"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Trening"
+      ]
+    },
+    "trening senior": {
+      "activities": [
+        "ACT-069",
+        "GRP-005"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Trening senior"
+      ]
+    },
+    "trim": {
+      "activities": [
+        "ACT-069"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Trim"
+      ]
+    },
+    "trimgrupper": {
+      "activities": [
+        "ACT-069"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Trimgrupper"
+      ]
+    },
+    "tur": {
+      "activities": [
+        "ACT-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tur"
+      ]
+    },
+    "turar": {
+      "activities": [
+        "ACT-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Turar"
+      ]
+    },
+    "turgruppe": {
+      "activities": [
+        "ACT-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Turgruppe"
+      ]
+    },
+    "turn": {
+      "activities": [
+        "ACT-032"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Turn"
+      ]
+    },
+    "undervannsrugby": {
+      "activities": [
+        "ACT-076"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Undervannsrugby"
+      ]
+    },
+    "undervisning": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Undervisning"
+      ]
+    },
+    "undervisning/opplæring": {
+      "activities": [
+        "ACT-109"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Undervisning/opplæring"
+      ]
+    },
+    "ungdomsklubb": {
+      "activities": [
+        "GRP-007",
+        "EVT-026"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ungdomsklubb"
+      ]
+    },
+    "uorganisert": {
+      "activities": [
+        "ORG-001"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Uorganisert"
+      ]
+    },
+    "utenlandsk forening": {
+      "activities": [
+        "ORG-005"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utenlandsk forening"
+      ]
+    },
+    "uteområde": {
+      "activities": [
+        "VEN-023"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Uteområde"
+      ]
+    },
+    "utholdenhetstrening": {
+      "activities": [
+        "ACT-069"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utholdenhetstrening"
+      ]
+    },
+    "utlånsordningen er ikke åpen": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Utlånsordningen er ikke åpen"
+      ]
+    },
+    "utstilling": {
+      "activities": [
+        "EVT-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utstilling"
+      ]
+    },
+    "utstillinger": {
+      "activities": [
+        "EVT-013"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utstillinger"
+      ]
+    },
+    "utstyr": {
+      "activities": [
+        "SRV-005"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utstyr"
+      ]
+    },
+    "valg": {
+      "activities": [
+        "EVT-018"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Valg"
+      ]
+    },
+    "vannpolo": {
+      "activities": [
+        "ACT-085"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vannpolo"
+      ]
+    },
+    "vannsport": {
+      "activities": [
+        "ACT-073"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vannsport"
+      ]
+    },
+    "vanntrening": {
+      "activities": [
+        "ACT-069",
+        "ACT-074"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vanntrening"
+      ]
+    },
+    "varmtvannsbasseng": {
+      "activities": [
+        "VEN-022"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Varmtvannsbasseng"
+      ]
+    },
+    "vedlikehold": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Vedlikehold"
+      ]
+    },
+    "veiledningstime byggesak": {
+      "activities": [
+        "SRV-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Veiledningstime Byggesak"
+      ]
+    },
+    "vektløfting": {
+      "activities": [
+        "ACT-070"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vektløfting"
+      ]
+    },
+    "velforeninger": {
+      "activities": [
+        "ORG-008"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Velforeninger"
+      ]
+    },
+    "vennelag/gruppe": {
+      "activities": [
+        "ORG-023"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vennelag/gruppe"
+      ]
+    },
+    "verksted": {
+      "activities": [
+        "ACT-096"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Verksted"
+      ]
+    },
+    "verkstedlokale": {
+      "activities": [
+        "VEN-019"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Verkstedlokale"
+      ]
+    },
+    "vgs": {
+      "activities": [
+        "GRP-012"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "VGS"
+      ]
+    },
+    "vid": {
+      "activities": [
+        "GRP-010"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "VID"
+      ]
+    },
+    "video": {
+      "activities": [
+        "ACT-094"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Video"
+      ]
+    },
+    "vielser": {
+      "activities": [
+        "EVT-023"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vielser"
+      ]
+    },
+    "vigsel": {
+      "activities": [
+        "EVT-023"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vigsel"
+      ]
+    },
+    "voksenbading": {
+      "activities": [
+        "ACT-074"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "ageMin": 18
+      },
+      "sourceNames": [
+        "Voksenbading"
+      ]
+    },
+    "voksenopplæringssenteret": {
+      "activities": [
+        "ORG-024"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Voksenopplæringssenteret"
+      ]
+    },
+    "volleyball": {
+      "activities": [
+        "ACT-024"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Volleyball"
+      ]
+    },
+    "walk and talk - test": {
+      "activities": [
+        "EXC-003"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "test_or_system_text",
+      "sourceNames": [
+        "Walk and talk - test"
+      ]
+    },
+    "workshop": {
+      "activities": [
+        "ACT-109",
+        "ACT-096"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Workshop"
+      ]
+    },
+    "x annet": {
+      "activities": [
+        "EXC-004"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "X Annet"
+      ]
+    },
+    "yoga": {
+      "activities": [
+        "ACT-071"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Yoga"
+      ]
+    },
+    "åpen hall": {
+      "activities": [
+        "EVT-027",
+        "VEN-012"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Åpen hall"
+      ]
+    },
+    "åpne møter": {
+      "activities": [
+        "EVT-002",
+        "EVT-006"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Åpne møter"
+      ]
+    },
+    "åpningstid": {
+      "activities": [
+        "EXC-002"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Åpningstid"
+      ]
+    },
+    "øvingslokaler og verksteder": {
+      "activities": [
+        "VEN-019"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Øvingslokaler og verksteder"
+      ]
+    },
+    "øvingsrom": {
+      "activities": [
+        "VEN-019"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Øvingsrom"
+      ]
+    }
+  }
+}
