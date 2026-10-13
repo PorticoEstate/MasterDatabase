@@ -1,8 +1,9 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
 -- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
--- 18 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
--- matrikkelen. Se db/schema_kjerne_dokumentasjon.md.
+-- 19 tabeller. 18 får data i dag, enten fra Aktiv kommune-endepunktene eller
+-- fra matrikkelen - unntaket er ressurslenke, som forblir tom til et andre
+-- fagsystem (fdv/sensor/...) faktisk kobles på. Se db/schema_kjerne_dokumentasjon.md.
 --
 -- To kilder, to roller:
 --   Aktiv kommune  definerer tilbudet  (hvilke lokaler finnes, hva heter de)
@@ -492,7 +493,54 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 
 
 -- =============================================================================
--- 9. Innlasting og sporbarhet
+-- 9. Ressurslenke: samme fysiske ting, kjent av flere fagsystemer
+--
+-- ressurs.fagsystem_instans_id + ekstern_id er allerede identitet+ruting for
+-- EN instans (se kommentar ved ressurs). Denne tabellen er for når en ANNEN
+-- instans (fdv, sensor, ...) også kjenner samme fysiske bygg/ressurs, under
+-- sin egen ekstern_id - uten at det tvinger frem en duplikatrad i ressurs.
+--
+-- "Exclusive arc": nøyaktig én av bygning_id/ressurs_id er fylt ut per rad -
+-- én tabell dekker begge de fysiske ankrene vi har i dag, uten at bygning/
+-- ressurs selv trenger flere fagsystem-FK-er. Se db/ressurslenke.md.
+--
+-- Bevisst INGEN egen "kontekst"/type-kolonne her: hvilken TYPE fagsystem
+-- (booking/fdv/sensor/annet) en lenke tilhører er allerede
+-- fagsystem_instans.type, hentet via fagsystem_instans_id. Å kopiere den inn
+-- her ville vært ren duplisering (se kommune_fagsystem_instans for det ene
+-- unntaket der en slik kopi faktisk trengs - en UNIQUE som ikke kan krysse
+-- tabellgrenser). Det betyr også at et helt nytt fagsystem (nummer 3, 4, ...)
+-- ikke krever noen endring i DENNE tabellen, bare en ny fagsystem_instans-rad.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS ressurslenke
+(
+    id                   BIGSERIAL PRIMARY KEY,
+    fagsystem_instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(id) ON DELETE CASCADE,
+    bygning_id           BIGINT REFERENCES bygning(id) ON DELETE CASCADE,
+    ressurs_id           BIGINT REFERENCES ressurs(id) ON DELETE CASCADE,
+    ekstern_id           TEXT NOT NULL,
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_ressurslenke_exactly_one CHECK (
+        (bygning_id IS NOT NULL)::int + (ressurs_id IS NOT NULL)::int = 1),
+    CONSTRAINT uniq_ressurslenke_ekstern UNIQUE (fagsystem_instans_id, ekstern_id)
+);
+
+-- Én partiell unik indeks per fysisk type: hindrer at samme instans lenker
+-- samme bygg/ressurs inn to ganger. Kan ikke være én vanlig UNIQUE over begge
+-- kolonnene, siden nøyaktig én av dem alltid er NULL (se CHECK over).
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_bygning
+    ON ressurslenke (fagsystem_instans_id, bygning_id) WHERE bygning_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_ressurs
+    ON ressurslenke (fagsystem_instans_id, ressurs_id) WHERE ressurs_id IS NOT NULL;
+
+-- Omvendt oppslag: "hvilke fagsystemer kjenner dette bygget/denne ressursen".
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_bygning ON ressurslenke (bygning_id) WHERE bygning_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_ressurs ON ressurslenke (ressurs_id) WHERE ressurs_id IS NOT NULL;
+
+
+-- =============================================================================
+-- 10. Innlasting og sporbarhet
 -- =============================================================================
 
 -- Metadata om én henting fra en kilde (kilde, endepunkt, tidspunkt,
@@ -603,7 +651,7 @@ $$;
 
 
 -- =============================================================================
--- 10. Søkevisninger
+-- 11. Søkevisninger
 -- =============================================================================
 
 -- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
@@ -695,7 +743,7 @@ LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 
 
 -- =============================================================================
--- 11. Kanonisk kodeverk (startsett)
+-- 12. Kanonisk kodeverk (startsett)
 --
 -- Utledet fra de 142 distinkte kategorinavnene i de 12 Aktiv kommune-instansene,
 -- slått sammen på tvers av målform, skrivefeil og synonymer. aktivitet seedes
@@ -838,7 +886,7 @@ VALUES
 ON CONFLICT (kode) DO NOTHING;
 
 -- =============================================================================
--- 12. updated_at-triggere
+-- 13. updated_at-triggere
 -- =============================================================================
 
 DO $$

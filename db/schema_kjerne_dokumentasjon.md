@@ -1,6 +1,6 @@
 # Kjernemodell for masterdatabasen
 
-Dokumentasjon for `db/schema_kjerne.sql`. 18 egne tabeller, 2 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data.
+Dokumentasjon for `db/schema_kjerne.sql`. 19 egne tabeller, 2 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data i dag, unntatt `ressurslenke` (se der).
 
 **Krever PostGIS.** Docker-imaget er `postgis/postgis:18-3.6` (ikke rent `postgres:18`), og skjemaet starter med `CREATE EXTENSION IF NOT EXISTS postgis;`.
 
@@ -179,6 +179,16 @@ FOREIGN KEY (bygning_id, kommune_id) REFERENCES bygning (id, kommune_id)
 En vanlig fremmednøkkel på `bygning_id` alene ville bare sjekket at bygget finnes. Denne sjekker *paret*, og hindrer dermed at en ressurs i Bergen havner i et bygg som ligger i Stavanger. Regelen håndheves av databasen, uansett hvem som skriver data. Fremmednøkkelen har ingen `ON DELETE`-regel, så et bygg som en ressurs peker på kan ikke slettes.
 
 `sokevektor` er en generert kolonne: databasen regner den ut selv fra navn og beskrivelse og holder den oppdatert. Gir fritekstsøk med norsk stemming, så «garderobe» også treffer «garderober», uten egen søkemotor.
+
+### Ressurslenke
+
+**`ressurslenke`** — 0 rader i dag. Løser multi-fagsystem-routing: at samme fysiske bygg eller ressurs er kjent under forskjellige eksterne id-er i *flere* fagsystemer samtidig (typisk Aktiv kommune for booking OG et driftssystem (fdv) OG kanskje en sensorkilde). `ressurs.fagsystem_instans_id`/`ekstern_id` gir allerede identitet+ruting for den ENE instansen en ressurs stammer fra (se over) — denne tabellen er for de *andre* instansene som også kjenner samme fysiske ting.
+
+"Exclusive arc": nøyaktig én av `bygning_id`/`ressurs_id` er fylt ut per rad (håndhevet av `chk_ressurslenke_exactly_one`), håndtert av to partielle unike indekser (én per type) siden en vanlig `UNIQUE` over begge kolonnene ikke fungerer når den ene alltid er NULL.
+
+Bevisst **ingen** egen `kontekst`/type-kolonne. Hvilken type fagsystem (booking/fdv/sensor/annet) en lenke tilhører er allerede `fagsystem_instans.type`, nåbart via `fagsystem_instans_id` — å kopiere den inn her ville vært ren duplisering (se `kommune_fagsystem_instans` for det ene unntaket der en slik kopi faktisk trengs, fordi en `UNIQUE` der må krysse tabellgrenser). Konsekvensen er at et helt nytt fagsystem ikke krever noen endring i denne tabellen, bare en ny `fagsystem_instans`-rad.
+
+Forblir tom til et konkret andre fagsystem faktisk kobles på — se `db/ressurslenke.md` for bakgrunnen.
 
 ### Innlasting og sporbarhet
 
