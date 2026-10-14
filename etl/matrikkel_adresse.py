@@ -1,29 +1,32 @@
 #!/usr/bin/env python3
 """
-Andrepass-geokoding + bygningsberikelse: finner adresser via Matrikkelen
-(MatrikkelAPI) for de adressene Kartverkets åpne Adresse-API (etl/geokod.py)
-ikke klarte å slå opp - enten fordi det ikke var noe treff der (stavemåte/
-format), eller fordi det var flere treff og ingen kunne velges automatisk
-(ofte fordi husnummer manglet helt i kildedata). I tillegg - for enhver
-bygning som fortsatt mangler bygningsnummer, uansett om adressen over ble
-løst her eller av geokod.py - hentes selve bygningsobjektet fra Matrikkelen.
+Geokoding + bygningsberikelse: finner adresser via Matrikkelen (MatrikkelAPI)
+for alt last_inn.py har lastet inn - ingen av Aktiv kommune sine 12 instanser
+leverer koordinater selv. I tillegg - for enhver bygning som fortsatt mangler
+bygningsnummer - hentes selve bygningsobjektet fra Matrikkelen.
 
-Matrikkelen gir oss noe det åpne API-et ikke gjør: vi kjenner allerede
-kommunen hver bygning tilhører (satt av last_inn.py), så søket kan gjøres
-*innenfor riktig kommune* i stedet for fritekst nasjonalt - det er nettopp
-det som løser begge feiltypene over. Se db/schema_kjerne_dokumentasjon.md,
-avsnittet om "gate", for hvorfor denne tabellen "må fylles av matrikkelsteget".
+Eneste geokodingssteg i pipelinen. Et tidligere forsteg mot Kartverkets åpne
+Adresse-API (etl/geokod.py) er bevisst fjernet til fordel for denne ene
+kilden: enklere å forstå og vedlikeholde, mot en målt kostnad på ca. 3
+prosentpoeng lavere automatisk treffrate (69,7 % mot 73,1 % i en nasjonal
+test av alle 12 kommunene) - et bevisst valg, ikke en forglemmelse. De
+adressene det gjelder havner i synk_avvik som før og rettes manuelt.
+
+Vi kjenner allerede kommunen hver bygning tilhører (satt av last_inn.py), så
+søket gjøres *innenfor riktig kommune* i stedet for fritekst nasjonalt. Se
+db/schema_kjerne_dokumentasjon.md, avsnittet om "gate", for hvorfor denne
+tabellen "må fylles av matrikkelsteget".
 
 Kjeden per adresse (alt via MatrikkelAPI, SOAP):
     KommuneService.findKommuneIdForIdent   kommunenummer -> intern KommuneId
-    Har vi fra før en kjent adressekode (gate.adressekode, satt av et
+    Har vi fra før en kjent adressekode (gate.adressekode, satt av en
     tidligere kjøring av dette skriptet)?
       ja:  AdresseService.findVegadresse       (KommuneId, adressekode, nummer,
                                                  bokstav) -> VegadresseId direkte
       nei: AdresseService.findVegerMedNavn     (KommuneId, gatenavn) -> VegId-er
            AdresseService.findAdresserForVeg   VegId -> VegadresseId-er
            - filtrer lokalt på husnummer+bokstav fra kildeteksten; ett treff
-             kreves, akkurat som i geokod.py.
+             kreves.
     StoreService.getObject(-s)             VegadresseId(-er) -> Vegadresse-
                                             objekt(er) (nummer, bokstav, punkt)
     StoreService.getObject(vegId)          -> Veg (adressekode, adressenavn)
@@ -33,17 +36,19 @@ Kjeden per adresse (alt via MatrikkelAPI, SOAP):
     StoreService.getObject(byggId)         -> Bygning (bygningsnummer,
                                                bygningstype, bruksareal, etasjer)
 
-Skriver ved adresse-treff: gate (upsert), matrikkelinfo+bygning_matrikkelinfo
-(upsert/link) og adresse (gate_id, husnr, bokstav, posisjon, geokoding=
-'matrikkel' - den autoritative statusen, se schema_kjerne_dokumentasjon.md).
-Skriver ved bygningstreff (uavhengig av om adressen var løst fra før):
-bygning.bygningsnr/bygningstype/bra_m2/antall_etasjer/posisjon.
+Skriver matrikkelinfo+bygning_matrikkelinfo (upsert/link, gnr/bnr/fnr/snr)
+uansett geokodingsstatus - billig og idempotent, så det forsøkes for enhver
+adresse vi klarer å slå opp. Skriver ved adresse-treff som fortsatt mangler
+geokoding: i tillegg gate (upsert) og adresse (gate_id, husnr, bokstav,
+posisjon, geokoding='matrikkel'). Skriver ved bygningstreff (uavhengig av om
+adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
+antall_etasjer/posisjon.
 
 Bruker bare Pythons innebygde bibliotek. Leser brukernavn/passord fra
 miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se matrikkel/test_auth.py)
 - ALDRI skriv disse verdiene til skjerm, logg eller fil.
 
-Bruk (kjøres etter geokod.py):
+Bruk (kjøres etter last_inn.py):
 
     docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
         SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr,
@@ -53,18 +58,21 @@ Bruk (kjøres etter geokod.py):
         JOIN kommune k ON k.id = b.kommune_id
         LEFT JOIN gate g ON g.id = a.gate_id
         WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
-          AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL);
+          AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
+               OR NOT EXISTS (SELECT 1 FROM bygning_matrikkelinfo bm WHERE bm.bygning_id = b.id));
     " > etl/ut/adresser_a_matrikkelsoke.txt
 
     python3 etl/matrikkel_adresse.py < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
 
     docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/matrikkel.sql
 
-`WHERE ... OR b.bygningsnr IS NULL` gjør skriptet trygt å kjøre på nytt: bygg
-som allerede har bygningsnummer og adresser som allerede er løst, hentes ikke
-på nytt. Prinsipp, som i geokod.py: ett eksakt treff brukes - på husnummer for
-adresse, og på bygg-id for bygning. Null treff, flere treff, eller manglende
-husnummer i kildedata logges som avvik og gjettes ikke på.
+De tre OR-leddene gjør skriptet trygt å kjøre på nytt: et bygg som allerede
+har bygningsnummer, en adresse som allerede er løst, og et bygg som allerede
+har en matrikkelinfo-lenke, hentes ikke på nytt for akkurat den grunnen - men
+raden kan likevel dukke opp igjen så lenge én av de andre tingene fortsatt
+mangler. Prinsipp: ett eksakt treff brukes - på husnummer for adresse, og på
+bygg-id for bygning. Null treff, flere treff, eller manglende husnummer i
+kildedata logges som avvik og gjettes ikke på.
 """
 import base64
 import json
@@ -344,7 +352,7 @@ def _xml_escape(s: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Resten: adressetekst-parsing og SQL-generering, som i geokod.py
+# Resten: adressetekst-parsing og SQL-generering
 # ---------------------------------------------------------------------------
 
 _HUSNR_RE = re.compile(r"^(.*?)\s*(\d+)\s*([A-Za-z]?)\s*$")
@@ -394,7 +402,7 @@ def main():
     veg_cache: dict[int, dict] = {}
     adresser_for_veg_cache: dict[int, list[dict]] = {}
 
-    antall_ok = antall_feilet = antall_bygg_ok = antall_bygg_feilet = 0
+    antall_ok = antall_feilet = antall_bygg_ok = antall_bygg_feilet = antall_matrikkelinfo_ok = 0
 
     for rad in sys.stdin:
         rad = rad.rstrip("\n")
@@ -414,7 +422,9 @@ def main():
         gatenavn, nummer, bokstav = del_opp_adressetekst(adressetekst)
         if geokoding in ("geokodet", "matrikkel") and husnr_db:
             # Adressen er allerede posisjonert fra før - de lagrede feltene er
-            # sikrere enn å tolke adressetekst-strengen på nytt.
+            # sikrere enn å tolke adressetekst-strengen på nytt. 'geokodet'
+            # finnes bare på databaser som ble lastet før etl/geokod.py ble
+            # fjernet; nye kjøringer produserer ikke denne statusen lenger.
             nummer = int(husnr_db)
             bokstav = (bokstav_db or "").strip().upper() or None
 
@@ -471,15 +481,47 @@ def main():
             antall_feilet += 1
             continue
 
-        # Full adresse-berikelse (gate/matrikkelinfo/posisjon) gjøres bare om
-        # adressen ikke allerede er løst - ellers er dette allerede gjort.
+        # Matrikkelinfo (gnr/bnr/fnr/snr) hentes og lenkes uansett
+        # geokodingsstatus - billig (ett kall) og idempotent (ON CONFLICT DO
+        # NOTHING), så det er ikke verdt å holde styr på om lenken allerede
+        # finnes fra før av. Dekker både adresser som løses her og adresser
+        # som var løst fra før (en tidligere kjøring) men mangler matrikkelinfo-lenken.
+        matrikkelenhet = None
+        if v["matrikkelenhet_id"]:
+            try:
+                matrikkelenhet = hent_matrikkelenhet(v["matrikkelenhet_id"])
+            except MatrikkelFeil as e:
+                spor["feil"] = str(e)
+                out.write(logg(bygning_id, "MatrikkelAPI-kall feilet (matrikkelenhet): " + str(e)[:200], spor,
+                               avvikstype="annet", nokkelfelt="bygning_id"))
+
+        if matrikkelenhet is not None:
+            spor["matrikkelenhet"] = matrikkelenhet
+            mi_sql = (
+                f"INSERT INTO matrikkelinfo (kommunenr, gardsnr, bruksnr, festenr, seksjonsnr) "
+                f"VALUES ({q(kommunenummer)},{matrikkelenhet['gardsnr']},{matrikkelenhet['bruksnr']},"
+                f"{matrikkelenhet['festenr'] or 'NULL'},{matrikkelenhet['seksjonsnr'] or 'NULL'}) "
+                f"ON CONFLICT (kommunenr, gardsnr, bruksnr, COALESCE(festenr,0), COALESCE(seksjonsnr,0)) "
+                f"DO NOTHING;\n"
+                f"INSERT INTO bygning_matrikkelinfo (bygning_id, matrikkelinfo_id) "
+                f"SELECT {int(bygning_id)}, m.id FROM matrikkelinfo m "
+                f"WHERE m.kommunenr = {q(kommunenummer)} "
+                f"AND m.gardsnr = {matrikkelenhet['gardsnr']} AND m.bruksnr = {matrikkelenhet['bruksnr']} "
+                f"AND COALESCE(m.festenr,0) = COALESCE({matrikkelenhet['festenr'] or 'NULL'},0) "
+                f"AND COALESCE(m.seksjonsnr,0) = COALESCE({matrikkelenhet['seksjonsnr'] or 'NULL'},0) "
+                f"ON CONFLICT DO NOTHING;\n"
+            )
+            out.write(i_blokk(bygning_id, mi_sql, spor, nokkelfelt="bygning_id"))
+            antall_matrikkelinfo_ok += 1
+
+        # Full adresse-berikelse (gate/posisjon/geokodingsstatus) gjøres bare
+        # om adressen ikke allerede er løst - ellers er dette allerede gjort.
         if geokoding in ("ukjent", "feilet"):
             try:
                 veg = veg_cache.get(v["veg_id"])
                 if veg is None:
                     veg = hent_veg(v["veg_id"])
                     veg_cache[v["veg_id"]] = veg
-                matrikkelenhet = hent_matrikkelenhet(v["matrikkelenhet_id"]) if v["matrikkelenhet_id"] else None
             except MatrikkelFeil as e:
                 spor["feil"] = str(e)
                 out.write(logg(adresse_id, "MatrikkelAPI-kall feilet (berikelse): " + str(e)[:200], spor))
@@ -487,7 +529,6 @@ def main():
                 continue
 
             spor["veg"] = veg
-            spor["matrikkelenhet"] = matrikkelenhet
             lon, lat = v["lon"], v["lat"]
 
             sql = (
@@ -495,16 +536,6 @@ def main():
                 f"SELECT k.id, {veg['adressekode']}, {q(veg['adressenavn'])} "
                 f"FROM kommune k WHERE k.kommunenr = {q(kommunenummer)} "
                 f"ON CONFLICT (kommune_id, adressekode) DO UPDATE SET gatenavn = EXCLUDED.gatenavn;\n"
-            )
-            if matrikkelenhet is not None:
-                sql += (
-                    f"INSERT INTO matrikkelinfo (kommunenr, gardsnr, bruksnr, festenr, seksjonsnr) "
-                    f"VALUES ({q(kommunenummer)},{matrikkelenhet['gardsnr']},{matrikkelenhet['bruksnr']},"
-                    f"{matrikkelenhet['festenr'] or 'NULL'},{matrikkelenhet['seksjonsnr'] or 'NULL'}) "
-                    f"ON CONFLICT (kommunenr, gardsnr, bruksnr, COALESCE(festenr,0), COALESCE(seksjonsnr,0)) "
-                    f"DO NOTHING;\n"
-                )
-            sql += (
                 f"UPDATE adresse SET "
                 f"gate_id = (SELECT g.id FROM gate g JOIN kommune k ON k.id = g.kommune_id "
                 f"            WHERE k.kommunenr = {q(kommunenummer)} AND g.adressekode = {veg['adressekode']}), "
@@ -517,22 +548,12 @@ def main():
                 f"posisjon = COALESCE(posisjon, ST_SetSRID(ST_MakePoint({lon},{lat}),4326)::geography) "
                 f"WHERE id = {int(bygning_id)};\n"
             )
-            if matrikkelenhet is not None:
-                sql += (
-                    f"INSERT INTO bygning_matrikkelinfo (bygning_id, matrikkelinfo_id) "
-                    f"SELECT {int(bygning_id)}, m.id FROM matrikkelinfo m "
-                    f"WHERE m.kommunenr = {q(kommunenummer)} "
-                    f"AND m.gardsnr = {matrikkelenhet['gardsnr']} AND m.bruksnr = {matrikkelenhet['bruksnr']} "
-                    f"AND COALESCE(m.festenr,0) = COALESCE({matrikkelenhet['festenr'] or 'NULL'},0) "
-                    f"AND COALESCE(m.seksjonsnr,0) = COALESCE({matrikkelenhet['seksjonsnr'] or 'NULL'},0) "
-                    f"ON CONFLICT DO NOTHING;\n"
-                )
 
             out.write(i_blokk(adresse_id, sql, spor))
             antall_ok += 1
 
         # Bygningsoppslag - uavhengig av om adressen ble løst her eller var
-        # løst fra før (geokod.py eller en tidligere kjøring av dette skriptet).
+        # løst fra før (en tidligere kjøring av dette skriptet).
         # Et mislykket forsøk markeres 'ikke_funnet' (men overskriver aldri en
         # 'adresse'-match som adressesteget over nettopp satte for samme bygg) -
         # ellers ser et forsøkt-men-mislykket oppslag identisk ut som et som
@@ -601,6 +622,7 @@ def main():
     out.write("COMMIT;\n")
     print(f"\nadresse - matrikkel-geokodet: {antall_ok}, feilet: {antall_feilet}", file=sys.stderr)
     print(f"bygning - bygningsnr funnet: {antall_bygg_ok}, feilet: {antall_bygg_feilet}", file=sys.stderr)
+    print(f"bygning - matrikkelinfo (gnr/bnr) lenket: {antall_matrikkelinfo_ok}", file=sys.stderr)
 
 
 if __name__ == "__main__":

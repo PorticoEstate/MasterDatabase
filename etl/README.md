@@ -5,7 +5,7 @@ masterdatabasen. Se `db/schema_kjerne_dokumentasjon.md` for hva tabellene betyr.
 
 ## Oversikt over hele pipelinen
 
-Fra tomt skjema til populert database, i fire steg:
+Fra tomt skjema til populert database, i tre steg:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
@@ -33,24 +33,17 @@ Fra tomt skjema til populert database, i fire steg:
 └───────────────────────────────────────────────────┬───────────────────┘
                                                       ▼
 ┌───────────────────────────────────────────────────────────────────────┐
-│ STEG 3 — GEOKODING, 1. forsøk                                         │
-│ etl/geokod.py            ←  Kartverkets åpne Adresse-API              │
-│                                                                        │
-│ Fyller adresse.posisjon / bygning.posisjon. Nasjonalt fritekstsøk —   │
-│ finner det meste, men bommer på stavefeil og flertydige adresser.     │
-│ Prinsipp: ett eksakt treff brukes, ellers avvik.                      │
-└───────────────────────────────────────────────────┬───────────────────┘
-                                                      ▼
-┌───────────────────────────────────────────────────────────────────────┐
-│ STEG 4 — GEOKODING, 2. forsøk + BYGNINGSBERIKELSE                     │
+│ STEG 3 — GEOKODING + BYGNINGSBERIKELSE                                │
 │ etl/matrikkel_adresse.py  ←  MatrikkelAPI (SOAP, krever innlogging)   │
 │                                                                        │
-│ a) Løser resten av adressene — søker *innenfor riktig kommune*       │
-│    (kjent fra steg 2), løser det det åpne API-et ikke klarte.         │
+│ a) Løser adressene — søker *innenfor riktig kommune* (kjent fra      │
+│    steg 2) i Matrikkelen. Eneste geokodingskilde; se begrunnelsen i   │
+│    seksjonen under for hvorfor Kartverkets åpne Adresse-API ikke      │
+│    lenger brukes som et eget forsteg.                                 │
 │ b) Henter bygningsnr/bygningstype/bra_m2/antall_etasjer for ALLE      │
 │    bygg som mangler det (Aktiv kommune har ikke dette feltet i det    │
 │    hele tatt — dette er eneste kilde).                                │
-│ Samme prinsipp: ett eksakt treff, ellers avvik.                       │
+│ Prinsipp: ett eksakt treff, ellers avvik.                             │
 └───────────────────────────────────────────────────┬───────────────────┘
                                                       ▼
                                           ╔═══════════════════╗
@@ -64,7 +57,7 @@ feilet — én dårlig rad stopper aldri hele kjøringen. Hver kjøring registre
 i `kildeuttrekk` (metadata, ikke selve svaret). Se "Avvik og kildeuttrekk"
 under.
 
-Alle fire stegene er trygge å kjøre på nytt — de endrer kun det som fortsatt
+Alle tre stegene er trygge å kjøre på nytt — de endrer kun det som fortsatt
 mangler/er ukjent, aldri manuelt satte verdier. De eksakte kommandoene for
 hvert steg står i seksjonene under, i samme rekkefølge.
 
@@ -76,9 +69,8 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
 | `etl/last_inn.py` | Steg 2 |
 | `etl/lokaletype_mapping/`, `fasilitet_mapping/`, `activity_mapping/` | Fasitfiler `last_inn.py` leser for kodeverk-oversettelse |
-| `etl/geokod.py` | Steg 3 |
-| `etl/matrikkel_adresse.py` | Steg 4 |
-| `matrikkel/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 4 |
+| `etl/matrikkel_adresse.py` | Steg 3 |
+| `matrikkel/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
 **Ikke bygget ennå:** `ressurslenke` (koble samme fysiske bygg/ressurs til
 flere fagsystemer samtidig, f.eks. booking + FDV) — bevisst utsatt til det
@@ -138,10 +130,10 @@ og -mappingen leses fra `activity_mapping/` og skrives til tabellen `aktivitet_m
 ETL-mappinger fornyes ved hver kjøring,
 men en manuell mapping (`kartlagt_av` ulik `etl`) overskrives aldri.
 
-Laster **ikke**: koordinater (krever et eget geokodingssteg mot Kartverkets
-Adresse-API, ikke skrevet ennå), matrikkeldata (krever avtale med Kartverket),
-og **ikke** `organizations`-samlingen fra kilden, som inneholder
-personopplysninger om søkere - se prosjektets minne om dette.
+Laster **ikke**: koordinater og matrikkeldata (eget steg, se
+"Geokoding og bygningsberikelse" under), og **ikke** `organizations`-samlingen
+fra kilden, som inneholder personopplysninger om søkere - se prosjektets
+minne om dette.
 
 Kjøres skriptet på nytt for en kommune som allerede er lastet inn, oppdateres
 radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
@@ -170,51 +162,38 @@ docker exec portico_masterdb psql -U postgres -d masterdb -c "
 nyeste uttrekkene per kilde beholdes, uforbeholdent - bevis for et avvik ligger
 på avviket selv, ikke i uttrekket, så gammel metadata kan ryddes trygt bort.
 
-## Geokoding
+## Geokoding og bygningsberikelse (MatrikkelAPI)
 
-`geokod.py` fyller `adresse.posisjon` og `bygning.posisjon` fra Kartverkets åpne Adresse-API. Hvert geokodingsavvik lagrer oppslaget og Kartverkets svar direkte på avviket (`rapost`). Leser en enkel liste fra standard-inn, skriver SQL til standard-ut - samme mønster som `last_inn.py`, ingen ekstra Python-pakker.
+`matrikkel_adresse.py` er eneste geokodingssteg i pipelinen, og gjør to ting:
 
-```bash
-docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
-    SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr
-    FROM adresse a
-    JOIN bygning b ON b.id = a.bygning_id
-    JOIN kommune k ON k.id = b.kommune_id
-    WHERE a.posisjon IS NULL AND a.adressetekst IS NOT NULL;
-" > etl/ut/adresser_a_geokode.txt
-
-python3 etl/geokod.py < etl/ut/adresser_a_geokode.txt > etl/ut/geokoding.sql
-
-docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/geokoding.sql
-```
-
-Kjøres trygt på nytt: `WHERE a.posisjon IS NULL` i dumpen sørger for at bare det som fortsatt mangler blir sendt til API-et igjen.
-
-**Prinsipp: ett eksakt treff brukes, ellers logges det som avvik.** Ingen fuzzy-gjetning - et geokodet punkt som er feil er verre enn intet punkt. Er `postnummer` kjent, kreves nøyaktig ett treff *med det postnummeret*; finnes ingen slike, regnes søket som mislykket selv om et ufiltrert søk ga andre treff et annet sted i landet. Dette ble funnet nødvendig i praksis: et fritekstsøk på «Festplassen» (Bergen) matchet først den eneste «Festplassen» i hele adresseregisteret med husnummer - som ligger i Lørenskog.
-
-Reelt resultat ved full kjøring (423 bygg, 419 adresser å geokode): 234 geokodet, 185 feilet og loggført i `synk_avvik` (stavefeil/formatforskjeller mellom Aktiv kommune og det offisielle registeret, f.eks. «Wolfsgate 12x» mot det offisielle «Wolffs gate»), og 4 tilfeller der geokodingen fant et annet kommunenummer enn det innlastingen antok - loggført, ikke overskrevet, siden `kommune_id` er identitetsdata som ikke skal endres stille av et geokodingsoppslag.
-
-## Matrikkel-geokoding og bygningsberikelse (andre pass)
-
-`matrikkel_adresse.py` kjøres etter `geokod.py`, og gjør to ting:
-
-1. **Andre forsøk på geokoding** for det `geokod.py` ikke klarte - enten fordi
-   Kartverkets åpne Adresse-API ikke fant noe treff (stavemåte/format), eller
-   fordi det fant flere treff og ingen kunne velges automatisk (ofte fordi
-   husnummer manglet i kildedata). MatrikkelAPI (SOAP, krever
-   `MATRIKKEL_BRUKER`/`MATRIKKEL_PASSORD` - se `matrikkel/test_auth.py`) lar
-   oss søke *innenfor riktig kommune*, som vi allerede kjenner fra
-   innlastingen - det løser begge feiltypene over, siden det åpne API-et bare
-   søker fritekst nasjonalt.
+1. **Geokoding** av enhver hovedadresse som ennå ikke er løst. MatrikkelAPI
+   (SOAP, krever `MATRIKKEL_BRUKER`/`MATRIKKEL_PASSORD` - se
+   `matrikkel/test_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
+   allerede kjenner fra innlastingen.
 2. **Bygningsnummer og bygningsfakta** for enhver bygning som mangler det,
-   uansett hvilken av de to metodene som løste adressen. Aktiv kommune oppgir
-   ikke bygningsnummer i det hele tatt - dette er den eneste kilden til det.
+   uansett om adressen ble løst i denne kjøringen eller en tidligere. Aktiv
+   kommune oppgir ikke bygningsnummer i det hele tatt - dette er den eneste
+   kilden til det.
 
 Se modulens docstring for hele kjeden av SOAP-kall.
 
-Fyller ved adressetreff: `gate` (adressekode+gatenavn), `matrikkelinfo`+
-`bygning_matrikkelinfo` (gnr/bnr/fnr/snr), `adresse.posisjon/husnr/bokstav`
-og `geokoding='matrikkel'` - den autoritative statusen, se
+**Hvorfor ikke Kartverkets åpne Adresse-API i tillegg?** Det ble det tidligere
+(`etl/geokod.py`, fjernet), som et raskere, uautentisert forsteg - Matrikkelen
+ble bare brukt som fallback for det det åpne API-et bommet på. Prosjektet har
+bevisst gått bort fra det: siden denne pipelinen bare kjøres ved populering og
+innimellom, er den ekstra tiden MatrikkelAPI-kjeden tar ikke noe problem, og
+ett system med én kilde er enklere å forstå og vedlikeholde enn to. Kostnaden er
+målt: en nasjonal test av alle 12 kommunene viste 69,7 % automatisk treffrate
+med Matrikkelen alene, mot 73,1 % med det todelte oppsettet - et bevisst valg
+om noen få prosentpoengs lavere automatikk, ikke et ukjent tap. De adressene
+det gjelder havner i `synk_avvik` og rettes manuelt, akkurat som før.
+
+Fyller `matrikkelinfo`+`bygning_matrikkelinfo` (gnr/bnr/fnr/snr) uansett
+geokodingsstatus - billig og idempotent (`ON CONFLICT DO NOTHING`), så det
+forsøkes for enhver adresse vi klarer å slå opp i Matrikkelen, ikke bare de
+som fortsatt mangler geokoding. Fyller ved adressetreff som *fortsatt* mangler
+geokoding: i tillegg `gate` (adressekode+gatenavn), `adresse.posisjon/husnr/
+bokstav` og `geokoding='matrikkel'` - den autoritative statusen, se
 `db/schema_kjerne_dokumentasjon.md`. Fyller ved bygningstreff (alltid forsøkt,
 også for adresser som var løst fra før): `bygning.bygningsnr`, `bygningstype`
 (Matrikkelens rå kodeverdi, ikke oversatt til navn ennå), `bra_m2`,
@@ -233,7 +212,8 @@ docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
     JOIN kommune k ON k.id = b.kommune_id
     LEFT JOIN gate g ON g.id = a.gate_id
     WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
-      AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL);
+      AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
+           OR NOT EXISTS (SELECT 1 FROM bygning_matrikkelinfo bm WHERE bm.bygning_id = b.id));
 " > etl/ut/adresser_a_matrikkelsoke.txt
 
 python3 etl/matrikkel_adresse.py < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
@@ -241,13 +221,12 @@ python3 etl/matrikkel_adresse.py < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/matrikkel.sql
 ```
 
-Reelt resultat ved testkjøring på Bergen (173 adresser å geokode): `geokod.py`
-løste 94, sto igjen med 79. Av disse løste `matrikkel_adresse.py` 33 til -
-kombinert 127 av 173 (73 %), opp fra 54 % med bare det åpne API-et. De
-resterende 46 er enten ekte stave-/formatfeil Matrikkelen heller ikke kan
-matche (f.eks. «Wolfsgate 12x»), eller mangler husnummer helt i kildedata
-(f.eks. «Festplassen», «Nygårdsparken») - et datakvalitetsproblem i kilden,
-ikke noe et adresseoppslag kan løse.
+Reelt resultat ved nasjonal testkjøring (alle 12 kommuner, 399 adresser):
+278 geokodet (70 %), 121 feilet og loggført i `synk_avvik`. Feilårsakene er
+enten ekte stave-/formatfeil Matrikkelen heller ikke kan matche (f.eks.
+«Wolfsgate 12x» mot det offisielle «Wolffs gate»), eller mangler husnummer
+helt i kildedata (f.eks. «Festplassen», «Nygårdsparken») - et
+datakvalitetsproblem i kilden, ikke noe et adresseoppslag kan løse.
 
 ## Kjent forenkling
 

@@ -192,7 +192,7 @@ Forblir tom til et konkret andre fagsystem faktisk kobles på — se `db/ressurs
 
 ### Innlasting og sporbarhet
 
-**`kildeuttrekk`** — metadata om én henting fra en kilde: `kilde`, `endepunkt`, `hentet_at`, `http_status`. Ett per kommune per kjøring av `last_inn.py` og ett per kjøring av `geokod.py`. Registreres som første setning i hver SQL-fil, før noe er tolket. `payload` lagrer **ikke** hele kildens retur — se begrunnelsen under `synk_avvik`.
+**`kildeuttrekk`** — metadata om én henting fra en kilde: `kilde`, `endepunkt`, `hentet_at`, `http_status`. Ett per kommune per kjøring av `last_inn.py` og ett per kjøring av `matrikkel_adresse.py`. Registreres som første setning i hver SQL-fil, før noe er tolket. `payload` lagrer **ikke** hele kildens retur — se begrunnelsen under `synk_avvik`.
 
 Beholdning: de to nyeste uttrekkene per kilde, uforbeholdent. `rydd_kildeuttrekk(kilde, antall)` kalles automatisk på slutten av hver last.
 
@@ -274,27 +274,25 @@ Dette er den faktiske pipelinen, ikke en plan — alle filnavn og kommandoer und
                     KILDER                          FILER/SKRIPT                    DATABASE
                     ───────                          ────────────                    ────────
 
-  12 × Aktiv kommune   ──HTTPS──▶  etl/last_inn.py  ──skriver──▶  etl/ut/alle.sql  ──psql──▶  masterdb
-  (searchdataall)                 (hardkodet logikk)              (forkastbar output)
+  12 × Aktiv kommune   ──HTTPS──▶  etl/last_inn.py       ──skriver──▶  etl/ut/alle.sql     ──psql──▶  masterdb
+  (searchdataall)                 (hardkodet logikk)                   (forkastbar output)
 
-  Kartverkets          ──HTTPS──▶  etl/geokod.py    ──skriver──▶  etl/ut/geokoding.sql ──psql──▶  masterdb
-  Adresse-API (utgående)          (skal erstattes)                (forkastbar output)
-
-  Matrikkel-API        ──(planlagt)▶ etl/matrikkel.py (ikke skrevet ennå)
+  Matrikkel-API        ──SOAP───▶  etl/matrikkel_adresse.py ──skriver──▶ etl/ut/matrikkel.sql ──psql──▶  masterdb
+  (geokoding+bygning)              (eneste geokodingssteg)              (forkastbar output)
 
   db/schema_kjerne.sql ────────────────────────────────────────────────psql────────────▶  masterdb
   (strukturen, kjøres først, én gang eller ved endring)
 ```
 
-Ingen av disse fem stegene trigger det neste automatisk — alt er manuelle kommandoer i rekkefølge, bevisst, gitt hvor lite data det er tale om (under 6 MB, 419 adresser).
+Ingen av disse tre stegene trigger det neste automatisk — alt er manuelle kommandoer i rekkefølge, bevisst, gitt hvor lite data det er tale om (noen få MB, et par hundre adresser). Kartverkets åpne Adresse-API ble tidligere brukt som et raskere forsteg (`etl/geokod.py`), men er fjernet til fordel for ett system med én geokodingskilde å forstå og vedlikeholde - se `etl/README.md` for den målte kostnaden ved det valget.
 
 | Fil | Kjøres når | Hva den gjør | Hardkodet? |
 |---|---|---|---|
 | `db/schema_kjerne.sql` | Én gang mot en ny database, eller på nytt etter en modellendring | Lager alle tabellene, indeksene, visningene, og seeder kodeverkene | Ja — dette er selve modellen |
 | `etl/last_inn.py` | Hver gang vi vil oppdatere kommunedata | Henter `searchdataall` fra én eller alle 12 kommuner, renser tekst (HTML er escapet to ganger i kilden), oversetter lokale koder via ordbøkene i `etl/*_mapping/` (aktivitet: `activity_mapping/mapping.json` + `activities.json`) og `IKKE_RELEVANT_*`, skriver SQL til standard-ut | Ja — avvisningslogikken er hardkodet Python; ordbøkene er JSON-filer |
 | `etl/ut/alle.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av hva kommunene sa akkurat da skriptet kjørte | Nei — forkastbar output, ligger i `.gitignore`, ulik hver dag |
-| `etl/geokod.py` | **Utgående.** Skal erstattes av matrikkelsteget. Kan fortsatt brukes midlertidig, men fyller ikke `gate` eller `gate_id` | Slår opp adresser mot Kartverkets Adresse-API, skriver `UPDATE`-setninger for `posisjon` med `ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography`. Krever ett eksakt treff (bekreftet mot postnummer når det finnes); null eller flere treff logges i `synk_avvik` i stedet for å gjettes | Ja — matchingsregelen er hardkodet |
-| `etl/ut/geokoding.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av geokodingsresultatet | Nei — samme som over |
+| `etl/matrikkel_adresse.py` | Etter hver `last_inn.py`-kjøring, for det som fortsatt mangler geokoding/bygningsnr/matrikkelinfo | Slår opp adresser mot MatrikkelAPI *innenfor riktig kommune*, og bygningsobjektet for enhver bygning som mangler bygningsnummer. Krever ett eksakt treff; null eller flere treff logges i `synk_avvik` i stedet for å gjettes | Ja — matchingsregelen er hardkodet |
+| `etl/ut/matrikkel.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av geokodings- og bygningsresultatet | Nei — samme som over |
 
 Kommandorekkefølgen i praksis:
 
@@ -306,21 +304,24 @@ docker exec -i portico_masterdb psql -U postgres -d masterdb < db/schema_kjerne.
 python3 etl/last_inn.py alle > etl/ut/alle.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 
-# 3. Geokoding
+# 3. Geokoding + bygningsberikelse
 docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
-    SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr
+    SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr,
+           a.bygning_id, a.geokoding, a.gate_id, a.husnr, a.bokstav, g.adressekode
     FROM adresse a JOIN bygning b ON b.id=a.bygning_id JOIN kommune k ON k.id=b.kommune_id
-    WHERE a.posisjon IS NULL AND a.adressetekst IS NOT NULL;
-" > etl/ut/adresser_a_geokode.txt
-python3 etl/geokod.py < etl/ut/adresser_a_geokode.txt > etl/ut/geokoding.sql
-docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/geokoding.sql
+    LEFT JOIN gate g ON g.id = a.gate_id
+    WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
+      AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
+           OR NOT EXISTS (SELECT 1 FROM bygning_matrikkelinfo bm WHERE bm.bygning_id = b.id));
+" > etl/ut/adresser_a_matrikkelsoke.txt
+python3 etl/matrikkel_adresse.py < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
+docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/matrikkel.sql
 ```
 
 Gjentatt kjøring oppdaterer i stedet for å duplisere, men ikke alt overskrives:
 
-- `bygning`: navn, bydel, hjemmeside, e-post, telefon og åpningstid følger kilden (Aktiv kommune vinner på disse feltene).
+- `bygning`: navn og bydel følger kilden (Aktiv kommune vinner på disse feltene).
 - `adresse`: oppdateres bare mens `geokoding` er `ukjent` eller `feilet`. En geokodet eller manuelt satt adresse røres ikke. Konsekvens: endres adressen i kilden etter geokoding, fanges det ikke opp av innlastingen.
-- `ressurs`: alle felt følger kilden, unntatt `kapasitet`, som beholdes når `kapasitet_kilde` er `manuell` eller `utledet`.
 - `kildekode_mapping`: røres aldri etter at raden er opprettet, så en manuell vurdering overskrives ikke.
 - `aktivitet_mapping`: ETL-rader (`kartlagt_av='etl'`) fornyes ved hver kjøring fra `activity_mapping/mapping.json`. Har en kildekode en manuell rad, røres ingen av kodens rader.
 
@@ -405,7 +406,7 @@ Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt
 
 Mange-til-mange-relasjonen mellom `kommune` og `fagsystem_instans` er verifisert: én kommune kan knyttes til flere instanser av forskjellig type (booking + fdv samtidig, testet på Bergen), men `UNIQUE (kommune_id, type)` avviser en andre instans av *samme* type for samme kommune. Ruting fungerer ved å filtrere på `fagsystem_instans.type` — bekreftet at et oppslag på Bergens booking-instans og Bergens fdv-instans gir to forskjellige, korrekte `base_url`. Et bygg med en kommune/instans-kombinasjon som ikke finnes i `kommune_fagsystem_instans` avvises fortsatt via `fk_bygning_fagsystem_instans_kommune`, og det samme gjelder `ressurs` via `fk_ressurs_fagsystem_instans_kommune` og `fk_ressurs_bygning`.
 
-**PostGIS-nærhetssøk er verifisert med reelle avstander**, først med midlertidige testkoordinater (7 662 meter mellom to Bergen-bygg, riktig størrelsesorden, `EXPLAIN` bekreftet `Index Scan using ix_bygning_posisjon`), deretter med ekte geokodede koordinater etter at `etl/geokod.py` ble kjørt (se `etl/README.md`). 234 av 419 adresser ble geokodet mot Kartverkets Adresse-API; de resterende 185 er loggført i `synk_avvik` fordi Aktiv kommunes adressetekst ikke alltid stemmer med det offisielle registeret (stavefeil, mellomrom, feil postnummer). Et nærhetssøk på gymsaler innenfor 5 km av Bergen sentrum gir nå 13 reelle treff, sortert etter faktisk avstand.
+**PostGIS-nærhetssøk er verifisert med reelle avstander**, først med midlertidige testkoordinater (7 662 meter mellom to Bergen-bygg, riktig størrelsesorden, `EXPLAIN` bekreftet `Index Scan using ix_bygning_posisjon`), deretter med ekte geokodede koordinater fra en kjøring av daværende geokodingssteg (se `etl/README.md` for dagens steg, `etl/matrikkel_adresse.py`). 234 av 419 adresser ble geokodet mot Kartverkets åpne Adresse-API den gang (steget er siden fjernet, se `etl/README.md`); de resterende 185 er loggført i `synk_avvik` fordi Aktiv kommunes adressetekst ikke alltid stemmer med det offisielle registeret (stavefeil, mellomrom, feil postnummer). Et nærhetssøk på gymsaler innenfor 5 km av Bergen sentrum gir nå 13 reelle treff, sortert etter faktisk avstand.
 
 Geokodingen fanget også et eget bugfunn: et fritekstsøk uten streng postnummer-håndtering matchet «Festplassen» (Bergen) mot den eneste «Festplassen» i hele adresseregisteret med husnummer — i Lørenskog. Rettet til at postnummer-filteret må gi et faktisk treff for at et resultat skal godtas; ellers regnes søket som mislykket. 4 adresser fikk et annet kommunenummer fra geokodingen enn det innlastingen antok (trolig postnummer som strekker seg over en kommunegrense) — loggført i `synk_avvik`, ikke overskrevet, siden `kommune_id` er identitetsdata.
 
@@ -431,7 +432,7 @@ Radtallene svinger litt fra kjøring til kjøring (kommunene endrer sine egne da
 
 Verdt å kjenne før noe loves som søkefunksjon.
 
-**Ingen koordinater i kilden.** Ingen av de 12 instansene har geodata. Geokoding var derfor et obligatorisk steg, ikke en forbedring — se `etl/geokod.py`. Resultat: 56 % av adressene (234 av 419) lot seg geokode automatisk; resten krever manuell retting av adressetekst eller postnummer, siden Aktiv kommunes fritekst ikke alltid stemmer med det offisielle registeret.
+**Ingen koordinater i kilden.** Ingen av de 12 instansene har geodata. Geokoding var derfor et obligatorisk steg, ikke en forbedring — se `etl/matrikkel_adresse.py`. En nasjonal test av alle 12 kommunene ga 70 % automatisk treffrate (278 av 399); resten krever manuell retting av adressetekst eller postnummer, siden Aktiv kommunes fritekst ikke alltid stemmer med det offisielle registeret.
 
 **Kapasitet er nesten ikke utfylt i kilden.** 2 av 590 ressurser i Bergen, 3 av 371 i Stavanger. Kolonnen er derfor tatt ut av modellen.
 
