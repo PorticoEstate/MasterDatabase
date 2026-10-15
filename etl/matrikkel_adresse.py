@@ -36,12 +36,13 @@ Kjeden per adresse (alt via MatrikkelAPI, SOAP):
     StoreService.getObject(byggId)         -> Bygning (bygningsnummer,
                                                bygningstype, bruksareal, etasjer)
 
-Skriver matrikkelinfo+bygning_matrikkelinfo (upsert/link, gnr/bnr/fnr/snr)
-uansett geokodingsstatus - billig og idempotent, så det forsøkes for enhver
-adresse vi klarer å slå opp. Skriver ved adresse-treff som fortsatt mangler
-geokoding: i tillegg gate (upsert) og adresse (gate_id, husnr, bokstav,
-posisjon, geokoding='matrikkel'). Skriver ved bygningstreff (uavhengig av om
-adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
+Skriver matrikkelinfo (upsert, knyttet til adressens bygg via bygning_id,
+gnr/bnr/fnr/snr) uansett geokodingsstatus - billig og idempotent, så det
+forsøkes for enhver adresse vi klarer å slå opp. Skriver ved adresse-treff
+som fortsatt mangler geokoding: i tillegg gate (upsert) og adresse (gate_id,
+husnr, bokstav, posisjon, geokoding='matrikkel' - den autoritative statusen,
+se schema_kjerne_dokumentasjon.md). Skriver ved bygningstreff (uavhengig av
+om adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
 antall_etasjer/posisjon.
 
 Bruker bare Pythons innebygde bibliotek. Leser brukernavn/passord fra
@@ -59,7 +60,7 @@ Bruk (kjøres etter last_inn.py):
         LEFT JOIN gate g ON g.id = a.gate_id
         WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
           AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
-               OR NOT EXISTS (SELECT 1 FROM bygning_matrikkelinfo bm WHERE bm.bygning_id = b.id));
+               OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id));
     " > etl/ut/adresser_a_matrikkelsoke.txt
 
     python3 etl/matrikkel_adresse.py < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
@@ -496,20 +497,15 @@ def main():
                                avvikstype="annet", nokkelfelt="bygning_id"))
 
         if matrikkelenhet is not None:
+            # Hører til adressens bygg: samme gnr/bnr lagres én gang per bygg
+            # (bygning_id er med i UNIQUE-indeksen på matrikkelinfo).
             spor["matrikkelenhet"] = matrikkelenhet
             mi_sql = (
-                f"INSERT INTO matrikkelinfo (kommunenr, gardsnr, bruksnr, festenr, seksjonsnr) "
-                f"VALUES ({q(kommunenummer)},{matrikkelenhet['gardsnr']},{matrikkelenhet['bruksnr']},"
+                f"INSERT INTO matrikkelinfo (bygning_id, kommunenr, gardsnr, bruksnr, festenr, seksjonsnr) "
+                f"VALUES ({int(bygning_id)},{q(kommunenummer)},{matrikkelenhet['gardsnr']},{matrikkelenhet['bruksnr']},"
                 f"{matrikkelenhet['festenr'] or 'NULL'},{matrikkelenhet['seksjonsnr'] or 'NULL'}) "
-                f"ON CONFLICT (kommunenr, gardsnr, bruksnr, COALESCE(festenr,0), COALESCE(seksjonsnr,0)) "
+                f"ON CONFLICT (bygning_id, kommunenr, gardsnr, bruksnr, COALESCE(festenr,0), COALESCE(seksjonsnr,0)) "
                 f"DO NOTHING;\n"
-                f"INSERT INTO bygning_matrikkelinfo (bygning_id, matrikkelinfo_id) "
-                f"SELECT {int(bygning_id)}, m.id FROM matrikkelinfo m "
-                f"WHERE m.kommunenr = {q(kommunenummer)} "
-                f"AND m.gardsnr = {matrikkelenhet['gardsnr']} AND m.bruksnr = {matrikkelenhet['bruksnr']} "
-                f"AND COALESCE(m.festenr,0) = COALESCE({matrikkelenhet['festenr'] or 'NULL'},0) "
-                f"AND COALESCE(m.seksjonsnr,0) = COALESCE({matrikkelenhet['seksjonsnr'] or 'NULL'},0) "
-                f"ON CONFLICT DO NOTHING;\n"
             )
             out.write(i_blokk(bygning_id, mi_sql, spor, nokkelfelt="bygning_id"))
             antall_matrikkelinfo_ok += 1

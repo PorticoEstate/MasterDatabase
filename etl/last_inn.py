@@ -201,8 +201,8 @@ def i_blokk(kn, samling, ekstern_id, sql, rapost=None) -> str:
 
 
 def som_heltall(v):
-    """(verdi, feilmelding). Tom/0 gir (None, None); ugyldig gir (None, melding)."""
-    if v in (None, "", 0):
+    """(verdi, feilmelding). Tom verdi gir (None, None); ugyldig gir (None, melding)."""
+    if v is None or v == "":
         return None, None
     try:
         n = int(v)
@@ -423,6 +423,9 @@ def generer_sql(slug: str, ut) -> bool:
         except (ValueError, TypeError, AttributeError):
             pass
         bid = bygg_for_ressurs.get(r["id"])
+        kap, kap_feil = som_heltall(r.get("capacity"))
+        if kap_feil:
+            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "capacity " + kap_feil, "capacity", rapost=r))
         bookbar = "FALSE" if r.get("deactivate_application") else "TRUE"
         aktiv = "TRUE" if r.get("active") else "FALSE"
 
@@ -435,12 +438,13 @@ def generer_sql(slug: str, ut) -> bool:
                   f"AND kk.kode={q(r.get('rescategory_id'))})")
 
         w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
-          f"beskrivelse,aktiv,bookbar) "
+          f"kapasitet,beskrivelse,aktiv,bookbar) "
           f"SELECT fi.id,{q(r['id'])},k.id,{bygg_sel},{q(navn)},{lt_sel},"
+          f"{kap if kap is not None else 'NULL'},"
           f"{q(beskr)},{aktiv},{bookbar} "
           f"FROM kommune k, fagsystem_instans fi "
           f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
-          f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn;\n")
+          f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn, kapasitet=EXCLUDED.kapasitet;\n")
     w("\n")
 
     # --- koblinger, med avviksloggføring for brutte referanser ---

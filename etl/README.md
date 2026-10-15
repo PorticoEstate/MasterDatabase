@@ -188,10 +188,10 @@ med Matrikkelen alene, mot 73,1 % med det todelte oppsettet - et bevisst valg
 om noen få prosentpoengs lavere automatikk, ikke et ukjent tap. De adressene
 det gjelder havner i `synk_avvik` og rettes manuelt, akkurat som før.
 
-Fyller `matrikkelinfo`+`bygning_matrikkelinfo` (gnr/bnr/fnr/snr) uansett
-geokodingsstatus - billig og idempotent (`ON CONFLICT DO NOTHING`), så det
-forsøkes for enhver adresse vi klarer å slå opp i Matrikkelen, ikke bare de
-som fortsatt mangler geokoding. Fyller ved adressetreff som *fortsatt* mangler
+Fyller `matrikkelinfo` (gnr/bnr/fnr/snr, knyttet til adressens bygg via
+`bygning_id`) uansett geokodingsstatus - billig og idempotent (`ON CONFLICT
+DO NOTHING`), så det forsøkes for enhver adresse vi klarer å slå opp i
+Matrikkelen, ikke bare de som fortsatt mangler geokoding. Fyller ved adressetreff som *fortsatt* mangler
 geokoding: i tillegg `gate` (adressekode+gatenavn), `adresse.posisjon/husnr/
 bokstav` og `geokoding='matrikkel'` - den autoritative statusen, se
 `db/schema_kjerne_dokumentasjon.md`. Fyller ved bygningstreff (alltid forsøkt,
@@ -213,7 +213,7 @@ docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
     LEFT JOIN gate g ON g.id = a.gate_id
     WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
       AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
-           OR NOT EXISTS (SELECT 1 FROM bygning_matrikkelinfo bm WHERE bm.bygning_id = b.id));
+           OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id));
 " > etl/ut/adresser_a_matrikkelsoke.txt
 
 python3 etl/matrikkel_adresse.py < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
