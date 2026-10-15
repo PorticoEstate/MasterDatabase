@@ -428,6 +428,8 @@ CREATE TABLE IF NOT EXISTS ressurs
     navn                 TEXT NOT NULL,
     lokaletype_id        BIGINT REFERENCES lokaletype(id) ON DELETE SET NULL,
 
+    -- Kapasitet er utfylt på under 1 % av ressursene i kilden.
+    kapasitet       INTEGER CHECK (kapasitet IS NULL OR kapasitet >= 0),
     areal_m2        NUMERIC(10,2) CHECK (areal_m2 IS NULL OR areal_m2 >= 0),
     beskrivelse     TEXT,
 
@@ -602,6 +604,7 @@ CREATE OR REPLACE VIEW v_ressurs_sok AS
 SELECT
     r.id                           AS ressurs_id,
     r.navn,
+	r.kapasitet,
     r.beskrivelse,
     k.id                           AS kommune_id,
     k.kommunenr,

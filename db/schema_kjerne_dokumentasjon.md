@@ -168,7 +168,7 @@ Tabellen er i praksis en ett-til-én-utvidelse av `kildekode`, men følger likev
 
 `fagsystem_instans_id` og `ekstern_id` gir **både identitet og ruting**: `base_url` fra instansen pluss `ekstern_id` gir bookinglenken. Ingen egen rutingtabell trengs så lenge det finnes én bookingleverandør og én kontekst.
 
-`kapasitet`, `kapasitet_kilde` og `apningstid_tekst` er tatt ut av modellen. Kapasitet var utfylt på under 1 % av ressursene i kilden. Åpningstider og kapasitet som står i kildens fritekst, ligger fortsatt i `beskrivelse`.
+`apningstid_tekst` er tatt ut av modellen. 
 
 Den sammensatte fremmednøkkelen er verdt å forstå:
 
@@ -310,7 +310,7 @@ Gjentatt kjøring oppdaterer i stedet for å duplisere, men ikke alt overskrives
 
 - `bygning`: navn, bydel, hjemmeside, e-post, telefon og åpningstid følger kilden (Aktiv kommune vinner på disse feltene).
 - `adresse`: oppdateres bare mens `geokoding` er `ukjent` eller `feilet`. En geokodet eller manuelt satt adresse røres ikke. Konsekvens: endres adressen i kilden etter geokoding, fanges det ikke opp av innlastingen.
-- `ressurs`: alle felt følger kilden, unntatt `kapasitet`, som beholdes når `kapasitet_kilde` er `manuell` eller `utledet`.
+- `ressurs`: navn og `kapasitet` følger kilden.
 - `kildekode_mapping`: røres aldri etter at raden er opprettet, så en manuell vurdering overskrives ikke.
 - `aktivitet_mapping`: ETL-rader (`kartlagt_av='etl'`) fornyes ved hver kjøring fra `activity_mapping/mapping.json`. Har en kildekode en manuell rad, røres ingen av kodens rader.
 
@@ -422,7 +422,12 @@ Verdt å kjenne før noe loves som søkefunksjon.
 
 **Ingen koordinater i kilden.** Ingen av de 12 instansene har geodata. Geokoding var derfor et obligatorisk steg, ikke en forbedring — se `etl/geokod.py`. Resultat: 56 % av adressene (234 av 419) lot seg geokode automatisk; resten krever manuell retting av adressetekst eller postnummer, siden Aktiv kommunes fritekst ikke alltid stemmer med det offisielle registeret.
 
-**Kapasitet er nesten ikke utfylt i kilden.** 2 av 590 ressurser i Bergen, 3 av 371 i Stavanger. Kolonnen er derfor tatt ut av modellen.
+**Kapasitet er nesten ikke utfylt i kilden.** 2 av 590 ressurser i Bergen, 3 av 371 i Stavanger. Det er planlagt å legge inn kapasitetsdata, derfor beholdes dette feltet i modellen. Kilden leverer i dag ofte capacity = 0 som standardverdi når kapasitet ikke er registrert. Innlastingen i last_inn.py lagrer verdien uendret fra kilden (0 lagres som 0, null som NULL). Negative verdier og ikke-tall loggføres som avvik og lagres som NULL. Eksempel:
+capacity = null  -> NULL i databasen
+capacity = 0     -> 0 i databasen
+capacity = 25    -> 25 i databasen
+capacity = -5    -> NULL + avvik i synk_avvik
+capacity = "abc" -> NULL + avvik i synk_avvik
 
 **566 av 1 805 ressurser havner i «Generelt lokale».** De små kommunene har bare to kategorier, `Lokale` og `Utstyr`, så en tredjedel av tilbudet har ingen informativ type i kilden. Kartleggingen kan ikke gjøre det bedre enn kilden er; her må kommunene selv kategorisere.
 
@@ -473,11 +478,9 @@ Endringer i `schema_kjerne.sql` siden forrige commit (`86847b9`). Modellen har n
 |---|---|
 | `matrikkelinfo` | `enhetstype`, `areal_m2`, `geom_wkt`, `ekstern_id` |
 | `bygning` | `hjemmeside`, `epost`, `telefon`, `apningstid_tekst`, `byggeaar` |
-| `ressurs` | `kapasitet`, `kapasitet_kilde`, `apningstid_tekst` |
+| `ressurs` | `apningstid_tekst` |
 | `adresse` | `gatenavn` (erstattet av `gate_id`) |
 | `lokaletype`, `aktivitet`, `fasilitet` | `sortering`, også fra alle seed-data |
-
-`kapasitet` er også fjernet fra viewet `v_ressurs_sok`.
 
 ### Endrede og nye kolonner
 
