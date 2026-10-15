@@ -373,7 +373,7 @@ def generer_sql(slug: str, ut) -> bool:
 
         # Kildedata gir ikke gatenavn og husnummer separat, bare hele
         # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
-        # den; gate_id/husnr/posisjon fylles av geokod.py/matrikkel_adresse.py.
+        # den; gate_id/husnr/posisjon fylles av matrikkel_adresse.py.
         sql = (
             f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id) "
             f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])} "
