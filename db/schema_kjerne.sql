@@ -1,8 +1,9 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
 -- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
--- 18 tabeller. Alle får data, enten fra Aktiv kommune-endepunktene eller fra
--- matrikkelen. Se db/schema_kjerne_dokumentasjon.md.
+-- 19 tabeller. 18 får data i dag, enten fra Aktiv kommune-endepunktene eller
+-- fra matrikkelen - unntaket er ressurslenke, som forblir tom til et andre
+-- fagsystem (fdv/sensor/...) faktisk kobles på. Se db/schema_kjerne_dokumentasjon.md.
 --
 -- To kilder, to roller:
 --   Aktiv kommune  definerer tilbudet  (hvilke lokaler finnes, hva heter de)
@@ -25,6 +26,12 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- splitter dem - "svømme" stammer ikke til samme rot som "svømmebasseng".
 -- Trigram gir substreng-/fuzzy-treff uavhengig av ord-grenser.
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- Senket fra standard 0.3: et søk uten æøå ("svomme" for "svømme") endrer
+-- 3 av 7 trigram og lander på ~0.2 - rett under standardterskelen, så treffet
+-- ville ellers blitt filtrert bort tross at det er det brukeren mente.
+-- Satt på databasen, ikke per spørring, så alle `%`-søk får dette automatisk.
+ALTER DATABASE masterdb SET pg_trgm.similarity_threshold = 0.2;
 
 
 CREATE OR REPLACE FUNCTION sett_updated_at()
@@ -95,31 +102,7 @@ CREATE INDEX IF NOT EXISTS ix_kommune_fagsystem_instans_instans
     ON kommune_fagsystem_instans (fagsystem_instans_id);
 
 -- =============================================================================
--- 2. Matrikkel
--- =============================================================================
-
-CREATE TABLE IF NOT EXISTS matrikkelinfo
-(
-    id             BIGSERIAL PRIMARY KEY,
-    kommunenr      CHAR(4) NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
-    gardsnr        INTEGER NOT NULL,
-    bruksnr        INTEGER NOT NULL,
-    festenr        INTEGER,
-    seksjonsnr     INTEGER,
-    sist_oppdatert TIMESTAMPTZ,
-    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- COALESCE fordi festenr og seksjonsnr er NULL for vanlige grunneiendommer, og
--- NULL regnes ikke som lik NULL i en unik indeks. Uten dette ville samme
--- eiendom kunne lagres mange ganger.
-CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelinfo
-    ON matrikkelinfo (kommunenr, gardsnr, bruksnr,
-                       COALESCE(festenr, 0), COALESCE(seksjonsnr, 0));
-
--- =============================================================================
--- 3. Bygning
+-- 2. Bygning
 --
 -- Holder både bygg og utendørs anlegg. Aktiv kommune har bare ett stedsbegrep:
 -- "Paradis kunstgressbane" er registrert som et bygg der, på linje med ekte
@@ -198,6 +181,37 @@ CREATE INDEX IF NOT EXISTS ix_bygning_kommune ON bygning (kommune_id);
 CREATE INDEX IF NOT EXISTS ix_bygning_posisjon ON bygning USING GIST (posisjon);
 
 -- =============================================================================
+-- 3. Matrikkelinfo
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS matrikkelinfo
+(
+    id             BIGSERIAL PRIMARY KEY,
+	bygning_id     BIGINT NOT NULL REFERENCES bygning(id) ON DELETE CASCADE,
+    kommunenr      CHAR(4) NOT NULL CHECK (kommunenr ~ '^[0-9]{4}$'),
+    gardsnr        INTEGER NOT NULL,
+    bruksnr        INTEGER NOT NULL,
+    festenr        INTEGER,
+    seksjonsnr     INTEGER,
+    sist_oppdatert TIMESTAMPTZ,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Ett bygg kan ha flere matrikkelinfo (en-til-mange). bygning_id er med i den
+-- unike indeksen, så samme gnr/bnr lagres én gang per bygg: en hall og en bane
+-- på samme eiendom får hver sin rad.
+-- COALESCE fordi festenr og seksjonsnr er NULL for vanlige grunneiendommer, og
+-- NULL regnes ikke som lik NULL i en unik indeks. Uten dette ville samme
+-- eiendom kunne lagres mange ganger for samme bygg.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_matrikkelinfo
+    ON matrikkelinfo (bygning_id,kommunenr, gardsnr, bruksnr,
+                       COALESCE(festenr, 0), COALESCE(seksjonsnr, 0));
+-- Oppslag på eiendommen på tvers av bygg ("hvilket bygg står på gnr/bnr?").
+CREATE INDEX IF NOT EXISTS ix_matrikkelinfo_eiendom
+ON matrikkelinfo(kommunenr,gardsnr,bruksnr);
+
+-- =============================================================================
 -- 4. Gate har mange adresser (adresse.gate_id). Identiteten er
 -- (kommune, adressekode) fra matrikkelen, ikke navnet: samme gatenavn kan
 -- finnes flere ganger i en kommune, og samme adressekode brukes i flere
@@ -218,18 +232,6 @@ CREATE TABLE IF NOT EXISTS gate
 
 CREATE INDEX IF NOT EXISTS ix_gate_navn
 ON gate (kommune_id, lower(gatenavn));
--- Et bygg kan stå på flere eiendommer, og en eiendom kan ha flere bygg.
-CREATE TABLE IF NOT EXISTS bygning_matrikkelinfo
-(
-    bygning_id       BIGINT NOT NULL REFERENCES bygning(id) ON DELETE CASCADE,
-    matrikkelinfo_id BIGINT NOT NULL REFERENCES matrikkelinfo(id) ON DELETE CASCADE,
-    rolle            TEXT,
-    PRIMARY KEY (bygning_id, matrikkelinfo_id)
-);
-
-CREATE INDEX IF NOT EXISTS ix_bygning_matrikkelinfo_enhet
-    ON bygning_matrikkelinfo (matrikkelinfo_id);
-
 
 -- =============================================================================
 -- 5. Adresse
@@ -433,6 +435,8 @@ CREATE TABLE IF NOT EXISTS ressurs
     navn                 TEXT NOT NULL,
     lokaletype_id        BIGINT REFERENCES lokaletype(id) ON DELETE SET NULL,
 
+    -- Kapasitet er utfylt på under 1 % av ressursene i kilden.
+    kapasitet       INTEGER CHECK (kapasitet IS NULL OR kapasitet >= 0),
     areal_m2        NUMERIC(10,2) CHECK (areal_m2 IS NULL OR areal_m2 >= 0),
     beskrivelse     TEXT,
 
@@ -486,7 +490,54 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 
 
 -- =============================================================================
--- 9. Innlasting og sporbarhet
+-- 9. Ressurslenke: samme fysiske ting, kjent av flere fagsystemer
+--
+-- ressurs.fagsystem_instans_id + ekstern_id er allerede identitet+ruting for
+-- EN instans (se kommentar ved ressurs). Denne tabellen er for når en ANNEN
+-- instans (fdv, sensor, ...) også kjenner samme fysiske bygg/ressurs, under
+-- sin egen ekstern_id - uten at det tvinger frem en duplikatrad i ressurs.
+--
+-- "Exclusive arc": nøyaktig én av bygning_id/ressurs_id er fylt ut per rad -
+-- én tabell dekker begge de fysiske ankrene vi har i dag, uten at bygning/
+-- ressurs selv trenger flere fagsystem-FK-er. Se db/ressurslenke.md.
+--
+-- Bevisst INGEN egen "kontekst"/type-kolonne her: hvilken TYPE fagsystem
+-- (booking/fdv/sensor/annet) en lenke tilhører er allerede
+-- fagsystem_instans.type, hentet via fagsystem_instans_id. Å kopiere den inn
+-- her ville vært ren duplisering (se kommune_fagsystem_instans for det ene
+-- unntaket der en slik kopi faktisk trengs - en UNIQUE som ikke kan krysse
+-- tabellgrenser). Det betyr også at et helt nytt fagsystem (nummer 3, 4, ...)
+-- ikke krever noen endring i DENNE tabellen, bare en ny fagsystem_instans-rad.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS ressurslenke
+(
+    id                   BIGSERIAL PRIMARY KEY,
+    fagsystem_instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(id) ON DELETE CASCADE,
+    bygning_id           BIGINT REFERENCES bygning(id) ON DELETE CASCADE,
+    ressurs_id           BIGINT REFERENCES ressurs(id) ON DELETE CASCADE,
+    ekstern_id           TEXT NOT NULL,
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_ressurslenke_exactly_one CHECK (
+        (bygning_id IS NOT NULL)::int + (ressurs_id IS NOT NULL)::int = 1),
+    CONSTRAINT uniq_ressurslenke_ekstern UNIQUE (fagsystem_instans_id, ekstern_id)
+);
+
+-- Én partiell unik indeks per fysisk type: hindrer at samme instans lenker
+-- samme bygg/ressurs inn to ganger. Kan ikke være én vanlig UNIQUE over begge
+-- kolonnene, siden nøyaktig én av dem alltid er NULL (se CHECK over).
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_bygning
+    ON ressurslenke (fagsystem_instans_id, bygning_id) WHERE bygning_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_ressurs
+    ON ressurslenke (fagsystem_instans_id, ressurs_id) WHERE ressurs_id IS NOT NULL;
+
+-- Omvendt oppslag: "hvilke fagsystemer kjenner dette bygget/denne ressursen".
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_bygning ON ressurslenke (bygning_id) WHERE bygning_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_ressurs ON ressurslenke (ressurs_id) WHERE ressurs_id IS NOT NULL;
+
+
+-- =============================================================================
+-- 10. Innlasting og sporbarhet
 -- =============================================================================
 
 -- Metadata om én henting fra en kilde (kilde, endepunkt, tidspunkt,
@@ -597,7 +648,7 @@ $$;
 
 
 -- =============================================================================
--- 10. Søkevisninger
+-- 11. Søkevisninger
 -- =============================================================================
 
 -- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
@@ -607,6 +658,7 @@ CREATE OR REPLACE VIEW v_ressurs_sok AS
 SELECT
     r.id                           AS ressurs_id,
     r.navn,
+	r.kapasitet,
     r.beskrivelse,
     k.id                           AS kommune_id,
     k.kommunenr,
@@ -689,7 +741,7 @@ LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 
 
 -- =============================================================================
--- 11. Kanonisk kodeverk (startsett)
+-- 12. Kanonisk kodeverk (startsett)
 --
 -- Utledet fra de 142 distinkte kategorinavnene i de 12 Aktiv kommune-instansene,
 -- slått sammen på tvers av målform, skrivefeil og synonymer. aktivitet seedes
@@ -832,7 +884,7 @@ VALUES
 ON CONFLICT (kode) DO NOTHING;
 
 -- =============================================================================
--- 12. updated_at-triggere
+-- 13. updated_at-triggere
 -- =============================================================================
 
 DO $$
