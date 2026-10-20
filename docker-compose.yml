@@ -10,12 +10,16 @@ services:
            http_proxy: ${http_proxy}
            https_proxy: ${https_proxy}
     ports:
-      - "8083:80"
+      - "8083:8080"
     volumes:
-      - .:/var/www/html
+      # Hele repoet - gir containeren tilgang til etl/ (for admin-trigget
+      # last_inn.py) og etl/*_mapping/mapping.json, ikke bare backend/-koden.
+      - .:/workspace
     environment:
-      - APACHE_RUN_USER=www-data
-      - APACHE_RUN_GROUP=www-data
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/masterdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - ETL_WORKDIR=/workspace
     env_file:
       - .env.compose
     depends_on:

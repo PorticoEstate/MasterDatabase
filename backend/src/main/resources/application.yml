@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: masterdb-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/masterdb}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+# Egne innstillinger for ETL-triggeren (ikke en Spring-standardnøkkel).
+etl:
+  # Repoets rot, slik at "etl/last_inn.py" løses riktig - se docker-compose.yml
+  # for hvor dette er mountet i containeren.
+  workdir: ${ETL_WORKDIR:.}
+  python-bin: ${ETL_PYTHON_BIN:python3}
+  # Minste tid uten nye filendringer før en kjøring faktisk trigges, slik at
+  # flere raske lagringer (t.eks. fra en editor) slås sammen til én kjøring.
+  debounce-seconds: ${ETL_DEBOUNCE_SECONDS:3}
+
+security:
+  jwt:
+    # KUN for lokal utvikling. I en reell driftssetting erstattes denne med en
+    # ekte nøkkel fra en identitetsleverandør (se backend/README.md).
+    secret: ${JWT_SECRET:dev-only-change-me-dev-only-change-me}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

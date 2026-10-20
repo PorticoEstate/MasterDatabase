@@ -1,57 +1,48 @@
-# Use official PHP image with Apache
-FROM php:8.4-apache
+# Multi-stage build: kompilerer backend/ med Maven, kjører på en slank JRE.
+# Python 3 legges til i runtime-steget (stdlib only, se etl/README.md) slik at
+# samme container kan kjøre etl/last_inn.py for admin-trigger-funksjonen
+# (se backend/service/EtlTriggerService.java).
 
+FROM maven:3.9-eclipse-temurin-21 AS build
 
 ARG http_proxy
 ARG https_proxy
-
 ENV http_proxy=${http_proxy}
 ENV https_proxy=${https_proxy}
 
+WORKDIR /build
 
-# Download and install the install-php-extensions script
-# https://github.com/mlocati/docker-php-extension-installer
+# Henter avhengigheter i et eget lag først, slik at "mvn package" ikke må
+# laste ned alt på nytt for hver kodeendring.
+COPY backend/pom.xml .
+RUN mvn -q -B dependency:go-offline
 
-COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+COPY backend/src ./src
+RUN mvn -q -B package -DskipTests
 
-# Configure PEAR
-RUN if [ -n "${http_proxy}" ]; then pear config-set http_proxy ${http_proxy}; fi && \
-    pear config-set php_ini $PHP_INI_DIR/php.ini
+# ---------------------------------------------------------------------------
 
+FROM eclipse-temurin:21-jre
 
-# Install system dependencies for PostgreSQL, Xdebug, and cron
+ARG http_proxy
+ARG https_proxy
+ENV http_proxy=${http_proxy}
+ENV https_proxy=${https_proxy}
+
 RUN apt-get update \
-    && apt-get install -y libpq-dev cron curl \
-    && pecl install xdebug \
-    && docker-php-ext-enable xdebug \
-    && docker-php-ext-install pdo pdo_pgsql
+    && apt-get install -y --no-install-recommends python3 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Xdebug configuration
-COPY ./build_config/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+# Capgemini/Zscaler bryter opp og signerer om all utgående HTTPS-trafikk på
+# nett med sitt eget rotsertifikat (se memory "wsl-ca-sertifikat-lost").
+# Containeren har sitt eget, separate tillitslager - uten dette feiler
+# etl/last_inn.py sine kall mot Aktiv kommune med
+# "self-signed certificate in certificate chain".
+COPY build_config/capgemini-ca/*.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
 
-# Enable Apache modules for .htaccess functionality
-RUN a2enmod rewrite headers expires deflate
+WORKDIR /app
+COPY --from=build /build/target/masterdb-api.jar app.jar
 
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy project files
-COPY . /var/www/html
-
-# Apache vhost for serving docs and OpenAPI spec
-COPY ./build_config/apache-masterdb.conf /etc/apache2/sites-available/masterdb.conf
-RUN a2dissite 000-default.conf \
-    && a2ensite masterdb.conf
-
-# Copy and make the entrypoint script executable
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Set permissions (optional, for dev)
-RUN chown -R www-data:www-data /var/www/html
-
-# Expose port 80 (Apache default)
-EXPOSE 80
-
-# Use our custom entrypoint script
-CMD ["/usr/local/bin/docker-entrypoint.sh"]
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

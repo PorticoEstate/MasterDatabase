@@ -7,7 +7,8 @@ Kontrakten er "single source of truth" for endepunkter og datamodeller.
 
 - `openapi.yaml` – OpenAPI 3.1 spesifikasjonen.
 
-## Neste steg
+## Implementasjon
 
-- Tjen opp `openapi.yaml` via Swagger UI / Redoc i Docker-konteiner.
-- Generer server-stubber fra kontrakten og koble til valgt runtime.
+Ligger i `../backend` (Spring Boot/Java) - se `backend/README.md`. Den
+levende Swagger UI-en (generert fra koden, ikke denne filen direkte) serveres
+av appen selv på `/swagger-ui.html` når den kjører.

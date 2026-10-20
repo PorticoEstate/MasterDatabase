@@ -1,14 +1,16 @@
 openapi: 3.1.0
 info:
   title: MasterDatabase API
-  version: 0.1.0
+  version: 0.2.0
   description: >-
-    Contract-first spec for the MasterDatabase. This is the single source of truth
-    for endpoints, schemas, errors and security. Generated server stubs SHOULD
-    be wired into Slim 4 + PHP-DI (or your chosen stack).
+    Contract-first spec for MasterDatabase. Implementasjonen ligger i
+    ../backend (Spring Boot/Java) - se backend/README.md. Denne filen er
+    kontrakten; den levende Swagger UI-en genereres av appen selv på
+    /swagger-ui.html, og speiler denne (eventuelt med avvik hvis koden har
+    gått foran kontrakten).
 servers:
   - url: http://localhost:8083
-    description: Local Docker (Apache)
+    description: Lokal Docker (Spring Boot)
 paths:
   /health:
     get:
@@ -27,49 +29,138 @@ paths:
                     example: ok
   /buildings:
     get:
-      summary: List buildings
+      summary: List bygg (read-only)
       operationId: listBuildings
       parameters:
-        - name: bydelId
+        - name: bydelNavn
           in: query
-          schema: { type: integer }
+          description: Fritekst - bydel er ikke et eget kodeverk i databasen i dag.
+          schema: { type: string }
         - name: limit
           in: query
           schema: { type: integer, default: 50, minimum: 1, maximum: 500 }
         - name: cursor
           in: query
-          schema: { type: string }
+          description: Forrige sides siste bygg_id (keyset-paginering).
+          schema: { type: integer }
       responses:
         '200':
-          description: List of buildings
+          description: Liste med bygg
           headers:
             X-Next-Cursor:
-              description: Cursor for next page
-              schema: { type: string }
+              description: Cursor for neste side, fraværende hvis det ikke er flere rader.
+              schema: { type: integer }
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Building'
+  /admin/mapping/{type}:
+    parameters:
+      - name: type
+        in: path
+        required: true
+        schema: { type: string, enum: [lokaletype, fasilitet, aktivitet] }
+    get:
+      summary: Hent gjeldende mapping.json-innhold
+      operationId: getMapping
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Innholdet i fasitfilen
+          content:
+            application/json:
+              schema: { type: object }
+        '404':
+          description: Ukjent mapping-type
+    put:
+      summary: >-
+        Oppdater mapping.json. Trigger IKKE en ny ETL-kjøring direkte - det
+        gjør filovervåkingen (MappingFileWatcherService) automatisk, kort tid
+        etter at filen er skrevet. Se backend/README.md.
+      operationId: putMapping
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '202':
+          description: Lagret - ny kjøring kommer automatisk
+        '400':
+          description: Ugyldig struktur (mangler "values"-objekt, eller ikke gyldig JSON)
+  /admin/etl-jobs:
+    get:
+      summary: Historikk over nylige last_inn.py-kjøringer
+      operationId: listEtlJobs
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Liste, nyeste først
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EtlJobStatus' }
+    post:
+      summary: Trigg en kjøring manuelt (uten å vente på filovervåkingens debounce)
+      operationId: triggerEtlJob
+      security: [{ bearerAuth: [] }]
+      responses:
+        '202':
+          description: Lagt i kø
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EtlJobStatus' }
+  /admin/etl-jobs/latest:
+    get:
+      summary: Status for siste/pågående kjøring
+      operationId: getLatestEtlJob
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EtlJobStatus' }
+        '204':
+          description: Ingen kjøring har skjedd ennå
 components:
   schemas:
     Building:
       type: object
+      description: Speiler kolonner i tabellen "bygning" (db/schema_kjerne.sql).
       properties:
         bygg_id:
           type: integer
         bygningsnr:
           type: integer
+          nullable: true
         navn:
           type: string
-        bydel_id:
-          type: integer
+        bydel_navn:
+          type: string
+          nullable: true
         geom_wkt:
           type: string
-      required: [bygg_id]
+          nullable: true
+      required: [bygg_id, navn]
+    EtlJobStatus:
+      type: object
+      properties:
+        id: { type: string }
+        triggeredBy: { type: string }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time, nullable: true }
+        state: { type: string, enum: [RUNNING, SUCCESS, FAILED] }
+        message: { type: string }
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: >-
+        JWT med claimet "scope: admin". Se backend/README.md for hvordan man
+        genererer et testtoken lokalt - det finnes ingen ekte
+        identitetsleverandør ennå.

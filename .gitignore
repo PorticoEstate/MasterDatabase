@@ -1,3 +1,7 @@
 etl/ut/
 matrikkel/ut/
 etl/__pycache__/
+backend/target/
+
+*.gz*
+*.json
