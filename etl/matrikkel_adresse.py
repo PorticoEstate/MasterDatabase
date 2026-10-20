@@ -76,6 +76,7 @@ bygg-id for bygning. Null treff, flere treff, eller manglende husnummer i
 kildedata logges som avvik og gjettes ikke på.
 """
 import base64
+import http.client
 import json
 import os
 import re
@@ -131,14 +132,19 @@ def _kall(service: str, body_xml: str) -> ET.Element:
             svar = resp.read().decode("utf-8")
     except urllib.error.HTTPError as e:
         svar = e.read().decode("utf-8", errors="replace")
-    except urllib.error.URLError as e:
-        # Tilkoblingsfeil (timeout, reset, DNS) - ikke et SOAP-svar å tolke.
-        # Skal logges som avvik for nettopp denne raden, ikke stoppe hele
-        # kjøringen - se "en enkelt dårlig post stopper aldri hele lasten".
+    except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
+        # Tilkoblingsfeil (timeout, reset, avbrutt lesing, DNS) - ikke et
+        # SOAP-svar å tolke. Skal logges som avvik for nettopp denne raden,
+        # ikke stoppe hele kjøringen - se "en enkelt dårlig post stopper
+        # aldri hele lasten". OSError dekker TimeoutError/ConnectionResetError
+        # som kastes under resp.read() (URLError wrapper bare feil under connect).
         raise MatrikkelFeil(f"Tilkoblingsfeil mot {service}: {e}") from e
     time.sleep(0.15)
 
-    root = ET.fromstring(svar)
+    try:
+        root = ET.fromstring(svar)
+    except ET.ParseError as e:
+        raise MatrikkelFeil(f"Ugyldig XML fra {service}: {svar[:100]!r}") from e
     kropp = next(iter(root), None)
     if kropp is None:
         raise MatrikkelFeil("Tomt SOAP-svar")
