@@ -33,12 +33,39 @@ services:
     environment:
        POSTGRES_USER: postgres
        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+       POSTGRES_DB: masterdb
        PGDATA: /data/postgres
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/data/postgres
  #     - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d masterdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - portico_masterbase
+
+  backend:
+    container_name: portico_masterdb_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      network: host  # corporate proxy allow-lists by source IP; bridge NAT gets dropped
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/masterdb
+      DB_USER: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - portico_masterbase
 
