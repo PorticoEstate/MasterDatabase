@@ -19,16 +19,14 @@ public class Bygning {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    // Kun kolonneverdier: den sammensatte fremmednøkkelen (kommune+instans) håndheves
+    // av databasen. fagsystem_instans_id er NULL for bygg som bare kommer fra matrikkelen.
     @NotNull
-    @JoinColumns({
-            @JoinColumn(name = "kommune_id",
-                    referencedColumnName = "kommune_id",
-                    nullable = false),
-            @JoinColumn(name = "fagsystem_instans_id",
-                    referencedColumnName = "fagsystem_instans_id",
-                    nullable = false)})
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private KommuneFagsystemInstan kommuneFagsystemInstans;
+    @Column(name = "kommune_id", nullable = false)
+    private Long kommuneId;
+
+    @Column(name = "fagsystem_instans_id")
+    private Long fagsystemInstansId;
 
     @NotNull
     @Column(name = "navn", nullable = false, length = Integer.MAX_VALUE)

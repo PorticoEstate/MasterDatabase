@@ -21,29 +21,22 @@ public class Ressurs {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    // Kun kolonneverdier, ingen assosiasjoner: kolonnene inngår i flere sammensatte
+    // fremmednøkler (kommune+instans, bygning+kommune) som databasen håndhever selv.
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "fagsystem_instans_id", nullable = false)
-    private FagsystemInstans fagsystemInstans;
+    @Column(name = "fagsystem_instans_id", nullable = false)
+    private Long fagsystemInstansId;
 
     @NotNull
     @Column(name = "ekstern_id", nullable = false, length = Integer.MAX_VALUE)
     private String eksternId;
 
     @NotNull
-    @JoinColumns({
-            @JoinColumn(name = "kommune_id",
-                    referencedColumnName = "kommune_id",
-                    nullable = false),
-            @JoinColumn(name = "fagsystem_instans_id",
-                    referencedColumnName = "fagsystem_instans_id",
-                    nullable = false)})
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private KommuneFagsystemInstan kommuneFagsystemInstans;
+    @Column(name = "kommune_id", nullable = false)
+    private Long kommuneId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Bygning bygning;
+    @Column(name = "bygning_id")
+    private Long bygningId;
 
     @NotNull
     @Column(name = "navn", nullable = false, length = Integer.MAX_VALUE)

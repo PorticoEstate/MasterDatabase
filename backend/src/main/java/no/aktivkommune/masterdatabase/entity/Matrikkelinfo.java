@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -29,6 +31,7 @@ public class Matrikkelinfo {
 
     @Size(max = 4)
     @NotNull
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "kommunenr", nullable = false, length = 4)
     private String kommunenr;
 

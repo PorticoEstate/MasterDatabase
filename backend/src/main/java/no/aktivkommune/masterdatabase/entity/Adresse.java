@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -38,10 +40,12 @@ public class Adresse {
     @Column(name = "husnr")
     private Integer husnr;
 
-    @Column(name = "bokstav", length = Integer.MAX_VALUE)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "bokstav", length = 1)
     private String bokstav;
 
     @Size(max = 4)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "postnummer", length = 4)
     private String postnummer;
 
