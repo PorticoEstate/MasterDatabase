@@ -1,0 +1,27 @@
+meta {
+  name: Hent ressurs
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/ressurser/{{ressursId}}
+  body: none
+  auth: none
+}
+
+docs {
+  Henter én ressurs med id. Krever at databasen er lastet (se etl/README.md),
+  ellers svarer API-et 404. Sett ressursId i miljøet "lokal".
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("har id og navn", function() {
+    expect(res.getBody().id).to.equal(Number(bru.getEnvVar("ressursId")));
+    expect(res.getBody().navn).to.be.a("string");
+  });
+}
