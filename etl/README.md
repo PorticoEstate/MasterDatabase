@@ -129,6 +129,7 @@ til vårt eget kodeverk (`lokaletype`/`aktivitet`/`fasilitet`). Aktivitetsvokabu
 og -mappingen leses fra `activity_mapping/` og skrives til tabellen `aktivitet_mapping`.
 ETL-mappinger fornyes ved hver kjøring,
 men en manuell mapping (`kartlagt_av` ulik `etl`) overskrives aldri.
+Se "Endre en mapping" under.
 
 Laster **ikke**: koordinater og matrikkeldata (eget steg, se
 "Geokoding og bygningsberikelse" under), og **ikke** `organizations`-samlingen
@@ -139,6 +140,38 @@ Kjøres skriptet på nytt for en kommune som allerede er lastet inn, oppdateres
 radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
 er geokodet eller satt manuelt, og en kapasitet som er satt manuelt, overskrives
 ikke. Se db/schema_kjerne_dokumentasjon.md for detaljene.
+
+## Endre en mapping
+
+`mapping.json`-filene i `lokaletype_mapping/`, `fasilitet_mapping/` og
+`activity_mapping/` er fasiten for alle mappinger med `kartlagt_av = 'etl'`.
+Databasen følger fasiten, og trenger ikke bygges på nytt:
+
+1. Rediger `mapping.json` (nytt navn, endret mål, eller fjernet navn) og
+   commit endringen.
+2. Kjør `last_inn.py` på nytt (`alle`, eller én kommune), se "Hvordan kjøre
+   det". Det finnes ingen automatisk kjøring - ingenting skjer før noen
+   kjører skriptet.
+
+Ved hver kjøring, for hver kildekode:
+
+- Den gamle `etl`-mappingen slettes og settes inn på nytt fra gjeldende
+  `mapping.json`. Gjelder lokaletype, fasilitet og aktivitet.
+- **Fjernes et navn fra `mapping.json`, slettes mappingen**, og kildekoden
+  dukker opp i `v_ukartlagte_kildekoder` til den kartlegges på nytt.
+- En manuell mapping (`kartlagt_av` ulik `etl`) berøres aldri. Vil du
+  overstyre fasiten for én kode, sett en manuell mapping.
+- `ressurs.lokaletype_id`, `ressurs_aktivitet` og `ressurs_fasilitet`
+  beregnes på nytt fra kilden og den gjeldende mappingen, så ressursene følger
+  med. Er kildekoden ikke lenger kartlagt, blir `lokaletype_id` `NULL`.
+
+Nye navn fra en kommune (en ny aktivitet, eller et omdøpt navn) lastes
+uendret inn i `kildekode` og vises i `v_ukartlagte_kildekoder`. Legg dem til i
+`mapping.json` og kjør på nytt, eller sett en manuell mapping.
+
+**Begrensning:** mappingen kan foreløpig bare brukes på nytt ved å hente
+kilden på nytt, fordi databasen ikke lagrer hvilke kildekoder hver ressurs
+har.
 
 ## Avvik og kildeuttrekk
 

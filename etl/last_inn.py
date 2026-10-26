@@ -285,6 +285,39 @@ def aktivitet_mapping_sql(kn, kode, navn) -> str:
         f"ON CONFLICT (kildekode_id) WHERE aktivitet_id IS NULL DO NOTHING;\n")
 
 
+def kildekode_mapping_sql(kn, kodetype, kode, navn) -> str:
+    """Kartlegging av én lokaletype- eller fasilitetskode via mapping.json, til
+    kildekode_mapping. Tidligere ETL-rader for koden fjernes først, slik at
+    endringer i mapping.json slår igjennom, også når et navn er fjernet (da
+    blir koden stående i v_ukartlagte_kildekoder). Manuelle rader
+    (kartlagt_av <> 'etl') overskrives aldri: de blir liggende, og insert
+    nedenfor treffer da UNIQUE (kildekode_id) og gjør ingenting."""
+    kk = (f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
+          f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(kode)} ")
+    sql = (f"DELETE FROM kildekode_mapping m USING kildekode kk "
+           f"JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
+           f"WHERE m.kildekode_id=kk.id AND m.kartlagt_av='etl' AND fi.kildenokkel={q(kn)} "
+           f"AND kk.kodetype={q(kodetype)} AND kk.kode={q(kode)};\n")
+
+    n = norm(navn)
+    if er_ikke_relevant(kodetype, n):
+        return sql + (
+            f"INSERT INTO kildekode_mapping (kildekode_id,status,merknad,kartlagt_av) "
+            f"SELECT kk.id,'ikke_relevant',{q(f'Ikke en gyldig {kodetype}')},'etl' {kk}"
+            f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
+    tabell = {"lokaletype": LOKALETYPE, "fasilitet": FASILITET}[kodetype]
+    if n in tabell:
+        maalkol = {"lokaletype": "lokaletype_id", "fasilitet": "fasilitet_id"}[kodetype]
+        return sql + (
+            f"INSERT INTO kildekode_mapping (kildekode_id,{maalkol},status,kartlagt_av) "
+            f"SELECT kk.id,t.id,'godkjent','etl' "
+            f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, {kodetype} t "
+            f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} "
+            f"AND kk.kode={q(kode)} AND t.kode={q(tabell[n])} "
+            f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
+    return sql  # ukartlagt - dukker opp i v_ukartlagte_kildekoder
+
+
 def generer_sql(slug: str, ut) -> bool:
     """Skriver SQL for én kommune. Returnerer False hvis henting feilet."""
     knr, knavn, fylke = KOMMUNER[slug]
@@ -328,10 +361,10 @@ def generer_sql(slug: str, ut) -> bool:
       f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
     # --- kildekoder + automatisk forslag til kartlegging ---
-    for kodetype, samling, tabell in [
-        ("lokaletype", "resource_categories", LOKALETYPE),
-        ("aktivitet", "activities", AKTIVITET),
-        ("fasilitet", "facilities", FASILITET),
+    for kodetype, samling in [
+        ("lokaletype", "resource_categories"),
+        ("aktivitet", "activities"),
+        ("fasilitet", "facilities"),
     ]:
         for rad in d.get(samling, []):
             if rad.get("id") is None:
@@ -346,22 +379,8 @@ def generer_sql(slug: str, ut) -> bool:
               f"ON CONFLICT (fagsystem_instans_id,kodetype,kode) DO UPDATE SET navn=EXCLUDED.navn, sist_sett=now();\n")
             if kodetype == "aktivitet":
                 w(aktivitet_mapping_sql(kn, rad["id"], navn))
-                continue
-            n = norm(navn)
-            if er_ikke_relevant(kodetype, n):
-                w(f"INSERT INTO kildekode_mapping (kildekode_id,status,merknad,kartlagt_av) "
-                  f"SELECT kk.id,'ikke_relevant',{q(f'Ikke en gyldig {kodetype}')},'etl' "
-                  f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-                  f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(rad['id'])} "
-                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
-            elif n in tabell:
-                maalkol = {"lokaletype": "lokaletype_id", "fasilitet": "fasilitet_id"}[kodetype]
-                w(f"INSERT INTO kildekode_mapping (kildekode_id,{maalkol},status,kartlagt_av) "
-                  f"SELECT kk.id,t.id,'godkjent','etl' "
-                  f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, {kodetype} t "
-                  f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} "
-                  f"AND kk.kode={q(rad['id'])} AND t.kode={q(tabell[n])} "
-                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
+            else:
+                w(kildekode_mapping_sql(kn, kodetype, rad["id"], navn))
     w("\n")
 
     # --- bygg + adresse ---
@@ -458,7 +477,8 @@ def generer_sql(slug: str, ut) -> bool:
           f"{q(beskr)},{aktiv},{bookbar} "
           f"FROM kommune k, fagsystem_instans fi "
           f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
-          f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn, kapasitet=EXCLUDED.kapasitet;\n")
+          f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn, kapasitet=EXCLUDED.kapasitet, "
+          f"lokaletype_id=EXCLUDED.lokaletype_id;\n")
     w("\n")
 
     # --- koblinger, med avviksloggføring for brutte referanser ---
@@ -467,11 +487,12 @@ def generer_sql(slug: str, ut) -> bool:
     # noe utenfor uttrekket kan ikke lastes, og loggføres i stedet for å
     # forkastes stille.
     kjente_ressurser = {r["id"] for r in d.get("resources", [])}
-    # ressurs_aktivitet er helt avledet av kilden og mappingen, så den bygges
-    # på nytt hver gang - ellers ville koblinger fra en tidligere versjon av
-    # activity_mapping/mapping.json bli liggende.
-    w(f"DELETE FROM ressurs_aktivitet ra USING ressurs r JOIN fagsystem_instans fi "
-      f"ON fi.id=r.fagsystem_instans_id WHERE ra.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
+    # ressurs_aktivitet og ressurs_fasilitet er helt avledet av kilden og
+    # mappingen, så de bygges på nytt hver gang - ellers ville koblinger fra en
+    # tidligere versjon av mapping.json bli liggende.
+    for koblingstabell in ("ressurs_aktivitet", "ressurs_fasilitet"):
+        w(f"DELETE FROM {koblingstabell} k USING ressurs r JOIN fagsystem_instans fi "
+          f"ON fi.id=r.fagsystem_instans_id WHERE k.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
     for samling, kodetype, koblingstabell, mappingtabell, maalkol, idfelt in [
         ("resource_activities", "aktivitet", "ressurs_aktivitet", "aktivitet_mapping", "aktivitet_id", "activity_id"),
         ("resource_facilities", "fasilitet", "ressurs_fasilitet", "kildekode_mapping", "fasilitet_id", "facility_id"),
