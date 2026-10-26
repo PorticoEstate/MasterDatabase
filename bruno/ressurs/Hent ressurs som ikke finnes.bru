@@ -1,0 +1,21 @@
+meta {
+  name: Hent ressurs som ikke finnes
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/ressurser/999999999
+  body: none
+  auth: none
+}
+
+docs {
+  Id som ikke finnes skal gi 404, ikke 500.
+}
+
+tests {
+  test("svarer 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}
