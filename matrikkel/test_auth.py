@@ -2,7 +2,7 @@
 """Minimalt sjekk-skript: bekrefter at Basic Auth mot MatrikkelAPI virker.
 Kaller KodelisteService.getKodelisterEnkel - den enkleste tjenesten som finnes,
 krever ingen søkeparametre. Leser brukernavn/passord fra miljøvariablene
-MATRIKKEL_BRUKER / MATRIKKEL_PASSORD - se etl/README.md-tilsvarende for Matrikkel.
+MATRIKKELAPI_LOGIN / MATRIKKELAPI_PASSWORD - se etl/README.md-tilsvarende for Matrikkel.
 """
 import base64
 import os
@@ -33,8 +33,8 @@ ENVELOPE = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/e
 
 
 def main():
-    bruker = os.environ["MATRIKKEL_BRUKER"]
-    passord = os.environ["MATRIKKEL_PASSORD"]
+    bruker = os.environ["MATRIKKELAPI_LOGIN"]
+    passord = os.environ["MATRIKKELAPI_PASSWORD"]
     auth = base64.b64encode(f"{bruker}:{passord}".encode()).decode()
 
     req = urllib.request.Request(

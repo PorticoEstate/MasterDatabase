@@ -46,7 +46,7 @@ om adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
 antall_etasjer/posisjon.
 
 Bruker bare Pythons innebygde bibliotek. Leser brukernavn/passord fra
-miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se matrikkel/test_auth.py)
+miljøvariablene MATRIKKELAPI_LOGIN / MATRIKKELAPI_PASSWORD (se matrikkel/test_auth.py)
 - ALDRI skriv disse verdiene til skjerm, logg eller fil.
 
 Bruk (kjøres etter last_inn.py):
@@ -108,8 +108,8 @@ class MatrikkelFeil(Exception):
 
 
 def _auth_header() -> str:
-    bruker = os.environ["MATRIKKEL_BRUKER"]
-    passord = os.environ["MATRIKKEL_PASSORD"]
+    bruker = os.environ["MATRIKKELAPI_LOGIN"]
+    passord = os.environ["MATRIKKELAPI_PASSWORD"]
     return "Basic " + base64.b64encode(f"{bruker}:{passord}".encode()).decode()
 
 

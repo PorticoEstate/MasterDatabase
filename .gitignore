@@ -1,5 +1,6 @@
 etl/ut/
 matrikkel/ut/
 etl/__pycache__/
+etl/.env
 .claude/
 .idea/
