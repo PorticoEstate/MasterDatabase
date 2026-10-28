@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.JoinFormula;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -42,9 +41,12 @@ public class Ressurs {
     @Column(name = "navn", nullable = false, length = Integer.MAX_VALUE)
     private String navn;
 
+    // Utledet, ikke en kolonne: ressurs_lokaletype er en visning som regnes ut fra
+    // ressurs_kildekode og godkjent mapping. Skrivebeskyttet.
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "lokaletype_id")
+    @JoinFormula(
+        value = "(SELECT rl.lokaletype_id FROM ressurs_lokaletype rl WHERE rl.ressurs_id = id)",
+        referencedColumnName = "id")
     private Lokaletype lokaletype;
 
     @Column(name = "kapasitet")

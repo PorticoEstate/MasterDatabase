@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 Tolker det kilden sa: laster vokabularet og mappingen fra filene i
-etl/*_mapping/ til databasen, og bygger koblingene mellom ressurs og kodeverk fra
-ressurs_kildekode og mappingen. Henter ingenting fra kommunene, så skriptet kan
-kjøres alene når en mappingfil er endret. Kjør etl/last_inn.py først.
+etl/*_mapping/ til databasen. Koblingene mellom ressurs og kodeverk følger av
+seg selv (se under). Henter ingenting fra kommunene, så skriptet kan kjøres
+alene når en mappingfil er endret. Kjør etl/last_inn.py først.
 
 Bruker bare Pythons innebygde bibliotek. Som last_inn.py gjør skriptet
 ingenting mot databasen selv; det leser kildekodene fra standard-inn og skriver
@@ -35,18 +35,12 @@ Hva SQL-en gjør, i én transaksjon:
   fasilitet_mapping   fasilitetskoder kartlagt via fasilitet_mapping/mapping.json
                       I alle tre fornyes ETL-radene hver kjøring, mens rader med
                       kartlagt_av <> 'etl' (manuelle) overskrives aldri.
-  ressurs_aktivitet   alle (ressurs, aktivitet) der ressursen har en kildekode som er
-                      godkjent mappet til aktiviteten (aktivitet_mapping)
-  ressurs_fasilitet   det samme for fasilitet (fasilitet_mapping)
-  ressurs.lokaletype_id  ressursens lokaletype fra dens lokaletype-kildekode
-                      (lokaletype_mapping); NULL uten godkjent mapping
 
-Koblingene synkroniseres som diff: bare det som endres, skrives. Til slutt skrives
-en rapport over hva som ble lagt til og fjernet per konsept.
-
-Omfang for koblingene: bare instanser som har rader i ressurs_kildekode (for
-lokaletype: av kodetypen lokaletype). Uten det ville en tabell som ikke er fylt
-ennå, tømt koblingene til alle ressurser.
+Koblingene mellom ressurs og kodeverk (ressurs_aktivitet, ressurs_fasilitet og
+ressurs_lokaletype) er visninger som regnes ut fra ressurs_kildekode og godkjent
+mapping, så de følger mappingen av seg selv. Skriptet skriver derfor ikke til dem,
+men tar et øyeblikksbilde før mappingen endres og skriver til slutt en rapport over
+hva som ble lagt til og fjernet per konsept.
 """
 import argparse
 import json
@@ -231,66 +225,18 @@ def les_kildekoder(inn) -> list:
     return rader
 
 
-# Koblingene bygges etter at mappingradene er skrevet, i samme transaksjon.
-KOBLINGER = r"""
-CREATE TEMP TABLE _omfang ON COMMIT DROP AS
-SELECT DISTINCT r.fagsystem_instans_id AS instans_id, kk.kodetype
-FROM ressurs_kildekode rk
-JOIN ressurs r ON r.id = rk.ressurs_id
-JOIN kildekode kk ON kk.id = rk.kildekode_id;
-
--- Øyeblikksbilde av tilstanden før endringene, til rapporten.
+# Koblingene (ressurs_aktivitet, ressurs_fasilitet, ressurs_lokaletype) er visninger
+# som regnes ut fra ressurs_kildekode og godkjent mapping, så de følger mappingen
+# av seg selv. Øyeblikksbildet tas før mappingen endres, slik at rapporten kan
+# vise hva endringen gjorde.
+FOR_ENDRING = r"""
 CREATE TEMP TABLE _for_ra ON COMMIT DROP AS SELECT ressurs_id, aktivitet_id FROM ressurs_aktivitet;
 CREATE TEMP TABLE _for_rf ON COMMIT DROP AS SELECT ressurs_id, fasilitet_id FROM ressurs_fasilitet;
-CREATE TEMP TABLE _for_lt ON COMMIT DROP AS SELECT id AS ressurs_id, lokaletype_id FROM ressurs;
+CREATE TEMP TABLE _for_lt ON COMMIT DROP AS SELECT ressurs_id, lokaletype_id FROM ressurs_lokaletype;
 
--- Ønsket tilstand: godkjent mapping fra kildekodene ressursen har.
-CREATE TEMP TABLE _ra ON COMMIT DROP AS
-SELECT DISTINCT rk.ressurs_id, m.aktivitet_id
-FROM ressurs_kildekode rk
-JOIN kildekode kk ON kk.id = rk.kildekode_id AND kk.kodetype = 'aktivitet'
-JOIN aktivitet_mapping m ON m.kildekode_id = kk.id AND m.status = 'godkjent' AND m.aktivitet_id IS NOT NULL;
+"""
 
-CREATE TEMP TABLE _rf ON COMMIT DROP AS
-SELECT DISTINCT rk.ressurs_id, m.fasilitet_id
-FROM ressurs_kildekode rk
-JOIN kildekode kk ON kk.id = rk.kildekode_id AND kk.kodetype = 'fasilitet'
-JOIN fasilitet_mapping m ON m.kildekode_id = kk.id AND m.status = 'godkjent' AND m.fasilitet_id IS NOT NULL;
-
-\echo -- ressurs_aktivitet: slettet
-DELETE FROM ressurs_aktivitet ra USING ressurs r
-WHERE ra.ressurs_id = r.id
-  AND EXISTS (SELECT 1 FROM _omfang o WHERE o.instans_id = r.fagsystem_instans_id AND o.kodetype = 'aktivitet')
-  AND NOT EXISTS (SELECT 1 FROM _ra x WHERE x.ressurs_id = ra.ressurs_id AND x.aktivitet_id = ra.aktivitet_id);
-\echo -- ressurs_aktivitet: satt inn
-INSERT INTO ressurs_aktivitet (ressurs_id, aktivitet_id)
-SELECT ressurs_id, aktivitet_id FROM _ra ON CONFLICT DO NOTHING;
-
-\echo -- ressurs_fasilitet: slettet
-DELETE FROM ressurs_fasilitet rf USING ressurs r
-WHERE rf.ressurs_id = r.id
-  AND EXISTS (SELECT 1 FROM _omfang o WHERE o.instans_id = r.fagsystem_instans_id AND o.kodetype = 'fasilitet')
-  AND NOT EXISTS (SELECT 1 FROM _rf x WHERE x.ressurs_id = rf.ressurs_id AND x.fasilitet_id = rf.fasilitet_id);
-\echo -- ressurs_fasilitet: satt inn
-INSERT INTO ressurs_fasilitet (ressurs_id, fasilitet_id)
-SELECT ressurs_id, fasilitet_id FROM _rf ON CONFLICT DO NOTHING;
-
--- Ressursen har én lokaletype (rescategory_id). Uten godkjent mapping blir den NULL.
-CREATE TEMP TABLE _lt ON COMMIT DROP AS
-SELECT r.id AS ressurs_id,
-       (SELECT m.lokaletype_id
-          FROM ressurs_kildekode rk
-          JOIN kildekode kk ON kk.id = rk.kildekode_id AND kk.kodetype = 'lokaletype'
-          JOIN lokaletype_mapping m ON m.kildekode_id = kk.id AND m.status = 'godkjent' AND m.lokaletype_id IS NOT NULL
-         WHERE rk.ressurs_id = r.id
-         ORDER BY kk.id LIMIT 1) AS lokaletype_id
-FROM ressurs r
-WHERE EXISTS (SELECT 1 FROM _omfang o WHERE o.instans_id = r.fagsystem_instans_id AND o.kodetype = 'lokaletype');
-
-\echo -- ressurs.lokaletype_id: oppdatert
-UPDATE ressurs r SET lokaletype_id = t.lokaletype_id
-FROM _lt t WHERE t.ressurs_id = r.id AND r.lokaletype_id IS DISTINCT FROM t.lokaletype_id;
-
+RAPPORT = r"""
 \echo
 \echo == Endring i ressurs_aktivitet per aktivitet ==
 SELECT a.kode, a.navn, coalesce(n.antall, 0) AS lagt_til, coalesce(b.antall, 0) AS fjernet
@@ -316,13 +262,13 @@ LEFT JOIN (SELECT fasilitet_id, count(*) AS antall FROM
 WHERE n.antall IS NOT NULL OR b.antall IS NOT NULL
 ORDER BY f.kode;
 
-\echo == Endring i ressurs.lokaletype_id (fra, til, antall ressurser) ==
+\echo == Endring i lokaletype per ressurs (fra, til, antall ressurser) ==
 SELECT o.kode AS fra, n.kode AS til, count(*) AS antall
 FROM _for_lt s
-JOIN ressurs r ON r.id = s.ressurs_id
+FULL JOIN ressurs_lokaletype rl ON rl.ressurs_id = s.ressurs_id
 LEFT JOIN lokaletype o ON o.id = s.lokaletype_id
-LEFT JOIN lokaletype n ON n.id = r.lokaletype_id
-WHERE s.lokaletype_id IS DISTINCT FROM r.lokaletype_id
+LEFT JOIN lokaletype n ON n.id = rl.lokaletype_id
+WHERE s.lokaletype_id IS DISTINCT FROM rl.lokaletype_id
 GROUP BY 1, 2
 ORDER BY 1, 2;
 
@@ -349,13 +295,15 @@ def main():
     print(f"  {len(kildekoder)} kildekoder", file=sys.stderr)
 
     ut = sys.stdout
-    ut.write("\\set ON_ERROR_STOP on\nBEGIN;\n\n")
+    ut.write("\\set ON_ERROR_STOP on\nBEGIN;\n")
+    # Øyeblikksbildet av koblingene må tas før noe endres.
+    ut.write(FOR_ENDRING)
     # Vokabularet først: mappingradene peker på det.
     ut.write(vokabular_sql())
     for kn, kodetype, kode, navn in kildekoder:
         ut.write(mapping_sql(kn, kodetype, kode, navn))
     ut.write("\n")
-    ut.write(KOBLINGER)
+    ut.write(RAPPORT)
     ut.write("\\echo TØRRKJØRING: alt rulles tilbake\nROLLBACK;\n" if args.dry_run else "COMMIT;\n")
 
 

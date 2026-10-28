@@ -3,9 +3,13 @@ package no.aktivkommune.masterdatabase.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+// ressurs_aktivitet er en visning (avledet fra ressurs_kildekode og godkjent
+// mapping), så den kan bare leses.
+@Immutable
 @Getter
 @Setter
 @Entity
