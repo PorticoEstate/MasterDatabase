@@ -31,14 +31,15 @@ rapporten og eventuelle feil vises fortsatt. Utelat -q for å se hver setning.
 Hva SQL-en gjør, i én transaksjon:
   aktivitet           vokabularet fra activity_mapping/activities.json
   aktivitet_mapping   aktivitetskoder kartlagt via activity_mapping/mapping.json
-  kildekode_mapping   lokaletype- og fasilitetskoder kartlagt via
-                      lokaletype_mapping/ og fasilitet_mapping/. Rader med
+  lokaletype_mapping  lokaletypekoder kartlagt via lokaletype_mapping/mapping.json
+  fasilitet_mapping   fasilitetskoder kartlagt via fasilitet_mapping/mapping.json
+                      I alle tre fornyes ETL-radene hver kjøring, mens rader med
                       kartlagt_av <> 'etl' (manuelle) overskrives aldri.
   ressurs_aktivitet   alle (ressurs, aktivitet) der ressursen har en kildekode som er
                       godkjent mappet til aktiviteten (aktivitet_mapping)
-  ressurs_fasilitet   det samme for fasilitet (kildekode_mapping)
+  ressurs_fasilitet   det samme for fasilitet (fasilitet_mapping)
   ressurs.lokaletype_id  ressursens lokaletype fra dens lokaletype-kildekode
-                      (kildekode_mapping); NULL uten godkjent mapping
+                      (lokaletype_mapping); NULL uten godkjent mapping
 
 Koblingene synkroniseres som diff: bare det som endres, skrives. Til slutt skrives
 en rapport over hva som ble lagt til og fjernet per konsept.
@@ -78,7 +79,8 @@ TABELL = {"lokaletype": LOKALETYPE, "fasilitet": FASILITET}
 # fasett. Øvrige felt (confidence, status, attributes, reason, sourceNames)
 # brukes ikke foreløpig. Alle fasetter unntatt "exclude" lastes inn i tabellen
 # aktivitet; EXC-konsepter gir status 'ikke_relevant'. Kartleggingen skrives
-# til tabellen aktivitet_mapping, ikke kildekode_mapping.
+# til aktivitet_mapping, som lokaletype og fasilitet har sine egne tabeller ved
+# siden av.
 with open(Path(__file__).parent / "activity_mapping" / "mapping.json", encoding="utf-8") as f:
     _aktivitet_mapping = json.load(f)
 AKTIVITET = {navn: v["activities"] for navn, v in _aktivitet_mapping["values"].items()}
@@ -147,64 +149,70 @@ def vokabular_sql() -> str:
             f"UPDATE aktivitet SET parent_id=NULL WHERE kode IN ({rotter}) AND parent_id IS NOT NULL;\n\n")
 
 
-def aktivitet_mapping_sql(kn, kode, navn) -> str:
-    """Kartlegging av én aktivitetskode via activity_mapping/mapping.json, til
-    tabellen aktivitet_mapping. Ett navn kan gi flere konsepter, og da én rad
-    per konsept. Tidligere
-    ETL-rader for koden fjernes først, slik at endringer i mapping.json slår
-    igjennom - men bare når koden ikke har noen manuell mapping, som aldri
-    overskrives."""
-    kk = (f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-          f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} ")
-    uten_manuell = ("AND NOT EXISTS (SELECT 1 FROM aktivitet_mapping m2 WHERE m2.kildekode_id=kk.id "
-                    "AND m2.kartlagt_av IS DISTINCT FROM 'etl')")
-    sql = (f"DELETE FROM aktivitet_mapping m USING kildekode kk "
-           f"JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-           f"WHERE m.kildekode_id=kk.id AND m.kartlagt_av='etl' AND fi.kildenokkel={q(kn)} "
-           f"AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} {uten_manuell};\n")
+# Mappingtabell, målkolonne og kodeverkstabell per kodetype. Alle tre tabellene har
+# samme oppbygning.
+MAPPINGTABELL = {
+    "aktivitet": ("aktivitet_mapping", "aktivitet_id", "aktivitet"),
+    "lokaletype": ("lokaletype_mapping", "lokaletype_id", "lokaletype"),
+    "fasilitet": ("fasilitet_mapping", "fasilitet_id", "fasilitet"),
+}
 
-    konsepter = AKTIVITET.get(norm_aktivitet(navn))
-    if konsepter is None:
-        if not er_ikke_relevant("aktivitet", norm(navn)):
-            return sql  # ukartlagt - dukker opp i v_ukartlagte_kildekoder
-        merknad = "Ikke en gyldig aktivitet"
-    else:
+
+def onsket(kodetype, navn):
+    """Ønsket mapping for én kildekode: (status, målkoder, merknad), eller None
+    hvis koden er ukartlagt (den dukker da opp i v_ukartlagte_kildekoder).
+    status er 'godkjent' (med én eller flere målkoder) eller 'ikke_relevant'."""
+    if kodetype == "aktivitet":
+        konsepter = AKTIVITET.get(norm_aktivitet(navn))
+        if konsepter is None:
+            if not er_ikke_relevant("aktivitet", norm(navn)):
+                return None
+            return ("ikke_relevant", [], "Ikke en gyldig aktivitet")
         ekte = [c for c in konsepter if c not in EKSKLUDER]
         if ekte:
-            return sql + (
-                f"INSERT INTO aktivitet_mapping (kildekode_id,aktivitet_id,status,merknad,kartlagt_av) "
-                f"SELECT kk.id,t.id,'godkjent',{q(AKTIVITET_MERKNAD)},'etl' "
-                f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, aktivitet t "
-                f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} "
-                f"AND t.kode IN ({','.join(q(c) for c in ekte)}) {uten_manuell} "
-                f"ON CONFLICT (kildekode_id,aktivitet_id) WHERE aktivitet_id IS NOT NULL DO NOTHING;\n")
-        merknad = f"{EKSKLUDER[konsepter[0]]} ({AKTIVITET_MERKNAD})"
-    return sql + (
-        f"INSERT INTO aktivitet_mapping (kildekode_id,status,merknad,kartlagt_av) "
-        f"SELECT kk.id,'ikke_relevant',{q(merknad)},'etl' {kk}{uten_manuell} "
-        f"ON CONFLICT (kildekode_id) WHERE aktivitet_id IS NULL DO NOTHING;\n")
+            return ("godkjent", ekte, AKTIVITET_MERKNAD)
+        return ("ikke_relevant", [], f"{EKSKLUDER[konsepter[0]]} ({AKTIVITET_MERKNAD})")
 
-
-def kildekode_mapping_sql(kn, kodetype, kode, navn) -> str:
-    """Kartlegging av én lokaletype- eller fasilitetskode til kildekode_mapping.
-    Raden settes bare inn hvis koden ikke har en fra før (ON CONFLICT DO
-    NOTHING), så en eksisterende mapping, også en manuell, røres aldri."""
     n = norm(navn)
     if er_ikke_relevant(kodetype, n):
-        return (f"INSERT INTO kildekode_mapping (kildekode_id,status,merknad,kartlagt_av) "
-                f"SELECT kk.id,'ikke_relevant',{q(f'Ikke en gyldig {kodetype}')},'etl' "
-                f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-                f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(kode)} "
-                f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
+        return ("ikke_relevant", [], f"Ikke en gyldig {kodetype}")
     if n in TABELL[kodetype]:
-        maalkol = {"lokaletype": "lokaletype_id", "fasilitet": "fasilitet_id"}[kodetype]
-        return (f"INSERT INTO kildekode_mapping (kildekode_id,{maalkol},status,kartlagt_av) "
-                f"SELECT kk.id,t.id,'godkjent','etl' "
-                f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, {kodetype} t "
-                f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} "
-                f"AND kk.kode={q(kode)} AND t.kode={q(TABELL[kodetype][n])} "
-                f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
-    return ""  # ukartlagt - dukker opp i v_ukartlagte_kildekoder
+        return ("godkjent", [TABELL[kodetype][n]], None)
+    return None
+
+
+def mapping_sql(kn, kodetype, kode, navn) -> str:
+    """Kartlegging av én kildekode til mappingtabellen for kodetypen. Ett navn
+    kan gi flere konsepter, og da én rad per konsept. Tidligere ETL-rader for
+    koden fjernes først, slik at endringer i mappingfilene slår igjennom - men
+    bare når koden ikke har noen manuell mapping (kartlagt_av <> 'etl'), som
+    aldri overskrives."""
+    tabell, maalkol, maal = MAPPINGTABELL[kodetype]
+    kk = (f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
+          f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(kode)} ")
+    uten_manuell = (f"AND NOT EXISTS (SELECT 1 FROM {tabell} m2 WHERE m2.kildekode_id=kk.id "
+                    f"AND m2.kartlagt_av IS DISTINCT FROM 'etl')")
+    sql = (f"DELETE FROM {tabell} m USING kildekode kk "
+           f"JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
+           f"WHERE m.kildekode_id=kk.id AND m.kartlagt_av='etl' AND fi.kildenokkel={q(kn)} "
+           f"AND kk.kodetype={q(kodetype)} AND kk.kode={q(kode)} {uten_manuell};\n")
+
+    mal = onsket(kodetype, navn)
+    if mal is None:
+        return sql
+    status, koder, merknad = mal
+    if status == "godkjent":
+        return sql + (
+            f"INSERT INTO {tabell} (kildekode_id,{maalkol},status,merknad,kartlagt_av) "
+            f"SELECT kk.id,t.id,'godkjent',{q(merknad)},'etl' "
+            f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, {maal} t "
+            f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(kode)} "
+            f"AND t.kode IN ({','.join(q(c) for c in koder)}) {uten_manuell} "
+            f"ON CONFLICT DO NOTHING;\n")
+    return sql + (
+        f"INSERT INTO {tabell} (kildekode_id,status,merknad,kartlagt_av) "
+        f"SELECT kk.id,'ikke_relevant',{q(merknad)},'etl' {kk}{uten_manuell} "
+        f"ON CONFLICT DO NOTHING;\n")
 
 
 def les_kildekoder(inn) -> list:
@@ -247,7 +255,7 @@ CREATE TEMP TABLE _rf ON COMMIT DROP AS
 SELECT DISTINCT rk.ressurs_id, m.fasilitet_id
 FROM ressurs_kildekode rk
 JOIN kildekode kk ON kk.id = rk.kildekode_id AND kk.kodetype = 'fasilitet'
-JOIN kildekode_mapping m ON m.kildekode_id = kk.id AND m.status = 'godkjent' AND m.fasilitet_id IS NOT NULL;
+JOIN fasilitet_mapping m ON m.kildekode_id = kk.id AND m.status = 'godkjent' AND m.fasilitet_id IS NOT NULL;
 
 \echo -- ressurs_aktivitet: slettet
 DELETE FROM ressurs_aktivitet ra USING ressurs r
@@ -273,7 +281,7 @@ SELECT r.id AS ressurs_id,
        (SELECT m.lokaletype_id
           FROM ressurs_kildekode rk
           JOIN kildekode kk ON kk.id = rk.kildekode_id AND kk.kodetype = 'lokaletype'
-          JOIN kildekode_mapping m ON m.kildekode_id = kk.id AND m.status = 'godkjent' AND m.lokaletype_id IS NOT NULL
+          JOIN lokaletype_mapping m ON m.kildekode_id = kk.id AND m.status = 'godkjent' AND m.lokaletype_id IS NOT NULL
          WHERE rk.ressurs_id = r.id
          ORDER BY kk.id LIMIT 1) AS lokaletype_id
 FROM ressurs r
@@ -345,10 +353,7 @@ def main():
     # Vokabularet først: mappingradene peker på det.
     ut.write(vokabular_sql())
     for kn, kodetype, kode, navn in kildekoder:
-        if kodetype == "aktivitet":
-            ut.write(aktivitet_mapping_sql(kn, kode, navn))
-        else:
-            ut.write(kildekode_mapping_sql(kn, kodetype, kode, navn))
+        ut.write(mapping_sql(kn, kodetype, kode, navn))
     ut.write("\n")
     ut.write(KOBLINGER)
     ut.write("\\echo TØRRKJØRING: alt rulles tilbake\nROLLBACK;\n" if args.dry_run else "COMMIT;\n")
