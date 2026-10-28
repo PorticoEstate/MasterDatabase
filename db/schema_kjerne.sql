@@ -309,7 +309,7 @@ CREATE TABLE IF NOT EXISTS lokaletype
 -- activities.json unntatt "exclude" (aktivitet, arrangement, organisasjon,
 -- målgruppe, lokale, tjeneste). Fasetten bæres av prefikset i kode (ACT-,
 -- EVT-, ORG-, GRP-, VEN-, SRV-), ikke av en egen kolonne. Vokabularet eies av
--- JSON-filen og lastes av etl/last_inn.py - det seedes ikke her.
+-- JSON-filen og lastes av etl/last_mapping.py - det seedes ikke her.
 --
 -- Noen få konsepter har to foreldre i vokabularet (Dans under både Kultur og
 -- Idrett); parent_id får den første.
@@ -790,7 +790,7 @@ LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 --
 -- Utledet fra de 142 distinkte kategorinavnene i de 12 Aktiv kommune-instansene,
 -- slått sammen på tvers av målform, skrivefeil og synonymer. aktivitet seedes
--- ikke her - vokabularet lastes av etl/last_inn.py fra activities.json.
+-- ikke her - vokabularet lastes av etl/last_mapping.py fra activities.json.
 -- =============================================================================
 
 INSERT INTO lokaletype (kode, navn)
