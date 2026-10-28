@@ -9,10 +9,13 @@ nøyaktig hva som skal skje før noe faktisk endres.
 
 Bruk:
     python3 etl/last_inn.py bergen > etl/ut/bergen.sql
-    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/bergen.sql
+    docker exec -i portico_masterdb psql -q -U postgres -d masterdb < etl/ut/bergen.sql
 
     python3 etl/last_inn.py alle > etl/ut/alle.sql
-    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
+    docker exec -i portico_masterdb psql -q -U postgres -d masterdb < etl/ut/alle.sql
+
+-q gjør psql stille (ingen "INSERT 0 1" per setning); feil og advarsler vises
+fortsatt. Utelat -q for å se hver setning.
 
 Se etl/README.md for full forklaring.
 
@@ -445,15 +448,12 @@ def generer_sql(slug: str, ut) -> bool:
 
         bygg_sel = (f"(SELECT b.id FROM bygning b JOIN fagsystem_instans f2 ON f2.id=b.fagsystem_instans_id "
                     f"WHERE f2.kildenokkel={q(kn)} AND b.ekstern_id={q(bid)})") if bid else "NULL"
-        lt_sel = (f"(SELECT m.lokaletype_id FROM kildekode kk "
-                  f"JOIN fagsystem_instans f3 ON f3.id=kk.fagsystem_instans_id "
-                  f"JOIN kildekode_mapping m ON m.kildekode_id=kk.id AND m.status='godkjent' "
-                  f"WHERE f3.kildenokkel={q(kn)} AND kk.kodetype='lokaletype' "
-                  f"AND kk.kode={q(r.get('rescategory_id'))})")
 
-        w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
+        # lokaletype_id settes ikke her: last_mapping.py avleder den fra
+        # ressurs_kildekode og mappingen.
+        w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,"
           f"kapasitet,beskrivelse,aktiv,bookbar) "
-          f"SELECT fi.id,{q(r['id'])},k.id,{bygg_sel},{q(navn)},{lt_sel},"
+          f"SELECT fi.id,{q(r['id'])},k.id,{bygg_sel},{q(navn)},"
           f"{kap if kap is not None else 'NULL'},"
           f"{q(beskr)},{aktiv},{bookbar} "
           f"FROM kommune k, fagsystem_instans fi "
@@ -467,14 +467,10 @@ def generer_sql(slug: str, ut) -> bool:
     # noe utenfor uttrekket kan ikke lastes, og loggføres i stedet for å
     # forkastes stille.
     kjente_ressurser = {r["id"] for r in d.get("resources", [])}
-    # ressurs_aktivitet er helt avledet av kilden og mappingen, så den bygges
-    # på nytt hver gang - ellers ville koblinger fra en tidligere versjon av
-    # activity_mapping/mapping.json bli liggende.
-    w(f"DELETE FROM ressurs_aktivitet ra USING ressurs r JOIN fagsystem_instans fi "
-      f"ON fi.id=r.fagsystem_instans_id WHERE ra.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
     # ressurs_kildekode er det kilden faktisk sa om ressursen, uten tolkning. Den
-    # bygges også på nytt hver gang, så en kode kilden har fjernet fra en ressurs
-    # ikke blir liggende. Ingenting leser den ennå.
+    # bygges på nytt hver gang, så en kode kilden har fjernet fra en ressurs ikke
+    # blir liggende. ressurs_aktivitet, ressurs_fasilitet og ressurs.lokaletype_id
+    # avledes herfra og fra mappingen av etl/last_mapping.py.
     w(f"DELETE FROM ressurs_kildekode rk USING ressurs r JOIN fagsystem_instans fi "
       f"ON fi.id=r.fagsystem_instans_id WHERE rk.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
     # Lokaletype er ett felt på ressursen (rescategory_id), ikke en koblingstabell.
@@ -488,9 +484,9 @@ def generer_sql(slug: str, ut) -> bool:
           f"AND kk.kode={q(r['rescategory_id'])} "
           f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(r['id'])} "
           f"ON CONFLICT DO NOTHING;\n")
-    for samling, kodetype, koblingstabell, mappingtabell, maalkol, idfelt in [
-        ("resource_activities", "aktivitet", "ressurs_aktivitet", "aktivitet_mapping", "aktivitet_id", "activity_id"),
-        ("resource_facilities", "fasilitet", "ressurs_fasilitet", "kildekode_mapping", "fasilitet_id", "facility_id"),
+    for samling, kodetype, idfelt in [
+        ("resource_activities", "aktivitet", "activity_id"),
+        ("resource_facilities", "fasilitet", "facility_id"),
     ]:
         for rad in d.get(samling, []):
             if rad["resource_id"] not in kjente_ressurser:
@@ -502,15 +498,6 @@ def generer_sql(slug: str, ut) -> bool:
               f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id "
               f"JOIN kildekode kk ON kk.fagsystem_instans_id=fi.id AND kk.kodetype={q(kodetype)} "
               f"AND kk.kode={q(rad[idfelt])} "
-              f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(rad['resource_id'])} "
-              f"ON CONFLICT DO NOTHING;\n")
-            w(f"INSERT INTO {koblingstabell} (ressurs_id,{maalkol}) "
-              f"SELECT r.id,m.{maalkol} "
-              f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id "
-              f"JOIN kildekode kk ON kk.fagsystem_instans_id=fi.id AND kk.kodetype={q(kodetype)} "
-              f"AND kk.kode={q(rad[idfelt])} "
-              f"JOIN {mappingtabell} m ON m.kildekode_id=kk.id "
-              f"AND m.status='godkjent' AND m.{maalkol} IS NOT NULL "
               f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(rad['resource_id'])} "
               f"ON CONFLICT DO NOTHING;\n")
 
