@@ -111,8 +111,8 @@ docker compose up -d --build backend
 `--build` trengs hver gang det har kommet en ny migrasjonsfil, siden
 migrasjonene bygges inn i backendens JAR. `kjor_alt.sh` sjekker at databasen er
 på samme Flyway-versjon som repoet, og stopper med en melding om den ikke er
-det. (`db/schema_kjerne.sql` er en foreldet kopi av første migrasjon og skal
-ikke brukes.)
+det. `db/schema_kjerne.sql` er en lesbar, samlet kopi av skjemaet etter siste
+migrasjon, til oversikt. Den skal ikke kjøres mot en database Flyway styrer.
 
 ## Hvordan kjøre det
 
