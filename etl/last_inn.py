@@ -17,6 +17,11 @@ Bruk:
 -q gjør psql stille (ingen "INSERT 0 1" per setning); feil og advarsler vises
 fortsatt. Utelat -q for å se hver setning.
 
+Dette skriptet lagrer bare det kilden sa: bygg, ressurser, kildekoder og hvilke
+kildekoder hver ressurs har (ressurs_kildekode). Oversettelsen til vårt eget
+kodeverk (aktivitet, lokaletype, fasilitet) gjøres av etl/last_mapping.py, som
+kjøres etterpå og kan kjøres på nytt alene når mappingfilene er endret.
+
 Se etl/README.md for full forklaring.
 
 Hver kjøring registrerer et kildeuttrekk (metadata: kilde, endepunkt,
@@ -36,15 +41,9 @@ import html
 import json
 import re
 import sys
-import unicodedata
 import urllib.error
 import urllib.request
-from pathlib import Path
 from datetime import datetime, timezone
-
-def last_mapping(mappe: str) -> dict:
-    with open(Path(__file__).parent / mappe / "mapping.json", encoding="utf-8") as f:
-        return json.load(f)["values"]
 
 
 KOMMUNER = {
@@ -76,51 +75,9 @@ KOMMUNER = {
 # "drammen": ("3301", "Drammen", "Buskerud"),
 # "suldal": ("1134", "Suldal", "Rogaland"),
 
-# Normalisert kildenavn -> kode i vårt eget kodeverk (lokaletype/fasilitet,
-# seedet i schema_kjerne.sql; aktivitet, se under). Navn som ikke finnes her, lastes inn
-# i kildekode uendret, men får ingen kartlegging - de dukker opp i
-# v_ukartlagte_kildekoder og må kobles manuelt.
-LOKALETYPE = last_mapping("lokaletype_mapping")
-FASILITET = last_mapping("fasilitet_mapping")
-
-# Aktivitet har et eget, rikere format (se activity_mapping/
-# AktivKommune_activity_normalisation.md): mapping.json har under "values"
-# ett oppslag per normalisert kildenavn (norm_aktivitet), med konsept-ID-ene
-# i "activities", og activities.json er vokabularet de peker på, gruppert per
-# fasett. Øvrige felt (confidence, status, attributes, reason, sourceNames)
-# brukes ikke foreløpig. Alle fasetter unntatt "exclude" lastes inn i tabellen
-# aktivitet; EXC-konsepter gir status 'ikke_relevant'. Kartleggingen skrives
-# til tabellen aktivitet_mapping, ikke kildekode_mapping.
-with open(Path(__file__).parent / "activity_mapping" / "mapping.json", encoding="utf-8") as f:
-    _aktivitet_mapping = json.load(f)
-AKTIVITET = {navn: v["activities"] for navn, v in _aktivitet_mapping["values"].items()}
-with open(Path(__file__).parent / "activity_mapping" / "activities.json", encoding="utf-8") as f:
-    VOKABULAR = json.load(f)["facets"]
-EKSKLUDER = {kode: k["label"]["nb"] for kode, k in VOKABULAR["exclude"].items()}
-# F.eks. "AktivKommune_activity_mapping_v0.3" - følger versjonen i mapping.json.
-AKTIVITET_MERKNAD = Path(_aktivitet_mapping.get("source", "activity_mapping")).stem
-
-# Junk uansett kodetype: adresser, stedsnavn og driftsstatus som aldri kan
-# være en ekte lokaletype, aktivitet eller fasilitet.
-IKKE_RELEVANT_UNIVERSELT = {
-    "stengt", "fiktivt rom", "kantinebidrag",
-    "kvitsoygata 3", "judaberg innbyggertorg", "mostun natursenter",
-}
-
-# Junk KUN i én kodetype-kontekst - kan være en ekte verdi i en annen. F.eks.
-# er "Inkludering" ikke en stedstype, men er en fullt plausibel aktivitet
-# (inkluderingstiltak er en vanlig kommunal kategori). For aktivitet avgjør
-# mapping.json selv hva som er junk (EXC-konsepter); IKKE_RELEVANT_UNIVERSELT
-# brukes der bare som reserve for navn som mangler i mapping.json.
-IKKE_RELEVANT_PER_TYPE = {
-    "lokaletype": {"inkludering", "sosial aktivitet", "wc toalett"},
-    "fasilitet": set(),
-}
-
-
-def er_ikke_relevant(kodetype: str, navn_normalisert: str) -> bool:
-    return (navn_normalisert in IKKE_RELEVANT_UNIVERSELT
-            or navn_normalisert in IKKE_RELEVANT_PER_TYPE.get(kodetype, set()))
+# Mappingen fra lokale koder til vårt eget kodeverk (lokaletype, aktivitet,
+# fasilitet) ligger i etl/last_mapping.py, ikke her. Dette skriptet lagrer bare
+# det kilden sa (kildekode, ressurs_kildekode); last_mapping.py tolker det.
 
 
 def er_persondatafelt(felt: str) -> bool:
@@ -162,24 +119,6 @@ def rens(s):
     s = re.sub(r"<[^>]+>", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
     return s or None
-
-
-def norm(s):
-    """Normaliserer et navn for oppslag i kartleggingstabellene ovenfor:
-    små bokstaver, norske bokstaver til ascii, tegnsetting bort."""
-    s = rens(s) or ""
-    s = s.lower().replace("ø", "o").replace("æ", "a").replace("å", "a")
-    s = unicodedata.normalize("NFKD", s)
-    s = "".join(c for c in s if not unicodedata.combining(c))
-    return re.sub(r"[^a-z0-9]+", " ", s).strip()
-
-
-def norm_aktivitet(s):
-    """Normaliserer et aktivitetsnavn for oppslag i activity_mapping/
-    mapping.json. Mildere enn norm(): beholder æ/ø/å og tegnsetting, og må
-    være identisk med reglene i AktivKommune_activity_normalisation.md §4.4
-    (dobbel HTML-avkoding, trim, sammenslåtte mellomrom, små bokstaver)."""
-    return (rens(s) or "").lower()
 
 
 def q(v):
@@ -230,64 +169,6 @@ def som_heltall(v):
     return n, None
 
 
-def vokabular_sql() -> str:
-    """Upsert av aktivitetsvokabularet fra activities.json - alle fasetter
-    unntatt "exclude". Foreldre settes i et eget steg, siden rekkefølgen i
-    filen ikke garanterer at forelderen kommer før barnet. Konsepter med to
-    foreldre (f.eks. Dans) får den første, se aktivitet i schema_kjerne.sql."""
-    konsepter = [(kode, k) for fasett, ks in VOKABULAR.items() if fasett != "exclude"
-                 for kode, k in ks.items()]
-    verdier = ",\n".join(f"({q(kode)},{q(k['label']['nb'])})" for kode, k in konsepter)
-    foreldre = ",\n".join(f"({q(kode)},{q(k['broader'][0])})" for kode, k in konsepter if k.get("broader"))
-    rotter = ",".join(q(kode) for kode, k in konsepter if not k.get("broader"))
-    return ("BEGIN;\n"
-            f"INSERT INTO aktivitet (kode,navn) VALUES\n{verdier}\n"
-            f"ON CONFLICT (kode) DO UPDATE SET navn=EXCLUDED.navn;\n"
-            f"UPDATE aktivitet a SET parent_id=p.id FROM (VALUES\n{foreldre}\n) AS v(kode,forelder) "
-            f"JOIN aktivitet p ON p.kode=v.forelder "
-            f"WHERE a.kode=v.kode AND a.parent_id IS DISTINCT FROM p.id;\n"
-            f"UPDATE aktivitet SET parent_id=NULL WHERE kode IN ({rotter}) AND parent_id IS NOT NULL;\n"
-            "COMMIT;\n\n")
-
-
-def aktivitet_mapping_sql(kn, kode, navn) -> str:
-    """Kartlegging av én aktivitetskode via activity_mapping/mapping.json, til
-    tabellen aktivitet_mapping. Ett navn kan gi flere konsepter, og da én rad
-    per konsept. Tidligere
-    ETL-rader for koden fjernes først, slik at endringer i mapping.json slår
-    igjennom - men bare når koden ikke har noen manuell mapping, som aldri
-    overskrives."""
-    kk = (f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-          f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} ")
-    uten_manuell = ("AND NOT EXISTS (SELECT 1 FROM aktivitet_mapping m2 WHERE m2.kildekode_id=kk.id "
-                    "AND m2.kartlagt_av IS DISTINCT FROM 'etl')")
-    sql = (f"DELETE FROM aktivitet_mapping m USING kildekode kk "
-           f"JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-           f"WHERE m.kildekode_id=kk.id AND m.kartlagt_av='etl' AND fi.kildenokkel={q(kn)} "
-           f"AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} {uten_manuell};\n")
-
-    konsepter = AKTIVITET.get(norm_aktivitet(navn))
-    if konsepter is None:
-        if not er_ikke_relevant("aktivitet", norm(navn)):
-            return sql  # ukartlagt - dukker opp i v_ukartlagte_kildekoder
-        merknad = "Ikke en gyldig aktivitet"
-    else:
-        ekte = [c for c in konsepter if c not in EKSKLUDER]
-        if ekte:
-            return sql + (
-                f"INSERT INTO aktivitet_mapping (kildekode_id,aktivitet_id,status,merknad,kartlagt_av) "
-                f"SELECT kk.id,t.id,'godkjent',{q(AKTIVITET_MERKNAD)},'etl' "
-                f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, aktivitet t "
-                f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} "
-                f"AND t.kode IN ({','.join(q(c) for c in ekte)}) {uten_manuell} "
-                f"ON CONFLICT (kildekode_id,aktivitet_id) WHERE aktivitet_id IS NOT NULL DO NOTHING;\n")
-        merknad = f"{EKSKLUDER[konsepter[0]]} ({AKTIVITET_MERKNAD})"
-    return sql + (
-        f"INSERT INTO aktivitet_mapping (kildekode_id,status,merknad,kartlagt_av) "
-        f"SELECT kk.id,'ikke_relevant',{q(merknad)},'etl' {kk}{uten_manuell} "
-        f"ON CONFLICT (kildekode_id) WHERE aktivitet_id IS NULL DO NOTHING;\n")
-
-
 def generer_sql(slug: str, ut) -> bool:
     """Skriver SQL for én kommune. Returnerer False hvis henting feilet."""
     knr, knavn, fylke = KOMMUNER[slug]
@@ -330,11 +211,11 @@ def generer_sql(slug: str, ut) -> bool:
       f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
       f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
-    # --- kildekoder + automatisk forslag til kartlegging ---
-    for kodetype, samling, tabell in [
-        ("lokaletype", "resource_categories", LOKALETYPE),
-        ("aktivitet", "activities", AKTIVITET),
-        ("fasilitet", "facilities", FASILITET),
+    # --- kildekoder (kartleggingen gjøres av last_mapping.py) ---
+    for kodetype, samling in [
+        ("lokaletype", "resource_categories"),
+        ("aktivitet", "activities"),
+        ("fasilitet", "facilities"),
     ]:
         for rad in d.get(samling, []):
             if rad.get("id") is None:
@@ -347,24 +228,6 @@ def generer_sql(slug: str, ut) -> bool:
               f"SELECT id,{q(kodetype)},{q(rad['id'])},{q(navn)} "
               f"FROM fagsystem_instans WHERE kildenokkel={q(kn)} "
               f"ON CONFLICT (fagsystem_instans_id,kodetype,kode) DO UPDATE SET navn=EXCLUDED.navn, sist_sett=now();\n")
-            if kodetype == "aktivitet":
-                w(aktivitet_mapping_sql(kn, rad["id"], navn))
-                continue
-            n = norm(navn)
-            if er_ikke_relevant(kodetype, n):
-                w(f"INSERT INTO kildekode_mapping (kildekode_id,status,merknad,kartlagt_av) "
-                  f"SELECT kk.id,'ikke_relevant',{q(f'Ikke en gyldig {kodetype}')},'etl' "
-                  f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-                  f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(rad['id'])} "
-                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
-            elif n in tabell:
-                maalkol = {"lokaletype": "lokaletype_id", "fasilitet": "fasilitet_id"}[kodetype]
-                w(f"INSERT INTO kildekode_mapping (kildekode_id,{maalkol},status,kartlagt_av) "
-                  f"SELECT kk.id,t.id,'godkjent','etl' "
-                  f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, {kodetype} t "
-                  f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} "
-                  f"AND kk.kode={q(rad['id'])} AND t.kode={q(tabell[n])} "
-                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
     w("\n")
 
     # --- bygg + adresse ---
@@ -523,7 +386,6 @@ def main():
         sys.exit(1)
 
     valg = list(KOMMUNER) if sys.argv[1] == "alle" else [sys.argv[1]]
-    sys.stdout.write(vokabular_sql())
     feilet = [slug for slug in valg if not generer_sql(slug, sys.stdout)]
     if feilet:
         print(f"\nHenting feilet for: {', '.join(feilet)} (loggført i synk_avvik)", file=sys.stderr)
