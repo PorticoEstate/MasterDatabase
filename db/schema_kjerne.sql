@@ -4,7 +4,7 @@
 -- LESBAR KOPI. Skjemaet eies av Flyway-migrasjonene i
 -- backend/src/main/resources/db/migration, som backenden kjører når den
 -- starter. Denne filen viser hele skjemaet samlet slik det er etter siste
--- migrasjon (nå V4), og oppdateres sammen med hver ny migrasjon. Ikke kjør den
+-- migrasjon (nå V5), og oppdateres sammen med hver ny migrasjon. Ikke kjør den
 -- mot en database som Flyway styrer.
 --
 -- 19 tabeller og 7 visninger. 18 får data i dag, enten fra Aktiv kommune-endepunktene eller
@@ -115,8 +115,8 @@ CREATE INDEX IF NOT EXISTS ix_kommune_fagsystem_instans_instans
 -- bygninger. Vi skiller dem ikke på bygningsnivå - kildedata har ingen felt
 -- som sier "dette er utendørs", og et bygg kan i praksis romme både en hall
 -- og en utendørs kunstgressbane under samme adresse. Innendørs/utendørs
--- avgjøres derfor per ressurs, via ressurs_lokaletype (se UTEAREAL-gruppen
--- og de utendørs-spesifikke kodene i lokaletype).
+-- avgjøres derfor per ressurs, via ressurs_lokaletype (se fasettene sportsOutdoor
+-- og outdoor i lokaletype).
 --
 -- Identitet: (fagsystem_instans_id, ekstern_id) fra bookingsystemet.
 -- bygningsnr er en referanse til matrikkelen, ikke en identitet: flere
@@ -297,12 +297,17 @@ CREATE TABLE IF NOT EXISTS lokaletype
     id         BIGSERIAL PRIMARY KEY,
     kode       TEXT UNIQUE NOT NULL,
     navn       TEXT NOT NULL,
-    -- Selvreferanse for hierarki (IDRETT -> GYMSAL). Heter "parent_id", ikke
-    -- "lokaletype_id", for å skille den tydelig fra en referanse til en annen
-    -- tabell.
+    -- Selvreferanse for hierarki (Idrettshall -> Gymsal, "broader" i
+    -- vokabularfilen). Heter "parent_id", ikke "lokaletype_id", for å skille den
+    -- tydelig fra en referanse til en annen tabell.
     parent_id  BIGINT REFERENCES lokaletype(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    -- Fasetten fra venue_types.json (sportsIndoor, culture ...), brukt som
+    -- lokaletype_hovedgruppe i søket. Ikke begrenset i databasen: en ny fasett i
+    -- filen skal ikke kreve en migrasjon. Sist i tabellen fordi kolonnen kom med V5.
+    fasett     TEXT NOT NULL,
+    CONSTRAINT chk_lokaletype_kode CHECK (kode ~ '^LOK-[A-Z]{2}-[0-9]{3}$')
 );
 
 -- Holder mer enn rene aktiviteter: alle fasettene i etl/activity_mapping/
@@ -324,15 +329,17 @@ CREATE TABLE IF NOT EXISTS aktivitet
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Gruppen er fasetten fra facilities.json (av, sanitary, kitchen ...), ikke
+-- begrenset i databasen av samme grunn som lokaletype.fasett.
 CREATE TABLE IF NOT EXISTS fasilitet
 (
     id         BIGSERIAL PRIMARY KEY,
     kode       TEXT UNIQUE NOT NULL,
     navn       TEXT NOT NULL,
-    gruppe     TEXT NOT NULL CHECK (gruppe IN
-                   ('tilgjengelighet','sanitaer','teknisk','kjokken','sport','moblering','uteareal','annet')),
+    gruppe     TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT chk_fasilitet_kode CHECK (kode ~ '^FAC-[A-Z]{2}-[0-9]{3}$')
 );
 
 
@@ -708,7 +715,7 @@ SELECT
     k.navn                         AS kommune_navn,
     lt.kode                        AS lokaletype_kode,
     lt.navn                        AS lokaletype_navn,
-    p.kode                         AS lokaletype_hovedgruppe,
+    lt.fasett                      AS lokaletype_hovedgruppe,
     b.id                           AS bygg_id,
     b.navn                         AS bygg_navn,
     b.bydel_navn,
@@ -736,7 +743,6 @@ JOIN kommune k             ON k.id = r.kommune_id
 JOIN fagsystem_instans fi  ON fi.id = r.fagsystem_instans_id
 LEFT JOIN ressurs_lokaletype rl ON rl.ressurs_id = r.id
 LEFT JOIN lokaletype lt    ON lt.id = rl.lokaletype_id
-LEFT JOIN lokaletype p     ON p.id = lt.parent_id
 LEFT JOIN bygning b        ON b.id = r.bygning_id
 LEFT JOIN adresse a        ON a.bygning_id = b.id AND a.er_hovedadresse
 WHERE r.aktiv AND r.bookbar;
@@ -786,147 +792,13 @@ LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 
 
 -- =============================================================================
--- 12. Kanonisk kodeverk (startsett)
+-- 12. Kodeverk
 --
--- Utledet fra de 142 distinkte kategorinavnene i de 12 Aktiv kommune-instansene,
--- slått sammen på tvers av målform, skrivefeil og synonymer. aktivitet seedes
--- ikke her - vokabularet lastes av etl/last_mapping.py fra activities.json.
+-- Ingen seed-data her. Vokabularet for aktivitet, lokaletype og fasilitet eies av
+-- JSON-filene i etl/*_mapping/ (activities.json, venue_types.json,
+-- facilities.json) og lastes av etl/last_mapping.py. Tabellene er tomme til det
+-- skriptet er kjørt.
 -- =============================================================================
-
-INSERT INTO lokaletype (kode, navn)
-VALUES
-    ('IDRETT','Idrett og fysisk aktivitet'),
-    ('KULTUR','Kultur og scene'),
-    ('UNDERVISNING','Undervisning og møte'),
-    ('VERKSTED','Verksted og produksjon'),
-    ('ARRANGEMENT','Selskap og arrangement'),
-    ('BEVERTNING','Mat og bevertning'),
-    ('NAERMILJO','Aktivitets- og nærmiljøhus'),
-    ('UTEAREAL','Utendørs areal'),
-    ('OVERNATTING','Overnatting og bolig'),
-    ('ANNET_LOKALE','Kontor og andre lokaler'),
-    ('UTSTYR','Utstyr')
-ON CONFLICT (kode) DO NOTHING;
-
-INSERT INTO lokaletype (kode, navn, parent_id)
-SELECT v.kode, v.navn, p.id
-FROM (VALUES
-    ('IDRETTSHALL','Idrettshall','IDRETT'),
-    ('GYMSAL','Gymsal','IDRETT'),
-    ('SVOMMEANLEGG','Svømmeanlegg','IDRETT'),
-    ('ISHALL','Ishall og isbane','IDRETT'),
-    ('FRIIDRETTSANLEGG','Friidrettsanlegg','IDRETT'),
-    ('FOTBALLBANE','Fotballbane','IDRETT'),
-    ('BALLBANE','Ballbane og ballbinge','IDRETT'),
-    ('TENNISANLEGG','Tennisanlegg','IDRETT'),
-    ('STYRKEROM','Styrke- og treningsrom','IDRETT'),
-    ('KAMPSPORTROM','Kampsportrom','IDRETT'),
-    ('KLATREANLEGG','Klatreanlegg','IDRETT'),
-    ('TURNANLEGG','Turnanlegg','IDRETT'),
-    ('SKATEANLEGG','Skateanlegg','IDRETT'),
-    ('SKYTEBANE','Skytebane','IDRETT'),
-    ('SJOSPORTANLEGG','Sjøsportanlegg','IDRETT'),
-    ('GARDEROBE','Garderobe','IDRETT'),
-
-    ('KONSERTSAL','Konsertsal og kultursal','KULTUR'),
-    ('SCENE','Scene','KULTUR'),
-    ('AUDITORIUM','Auditorium og foredragssal','KULTUR'),
-    ('OVINGSROM','Øvingsrom og musikkrom','KULTUR'),
-    ('DANSESAL','Dansesal','KULTUR'),
-    ('LYDSTUDIO','Lydstudio','KULTUR'),
-    ('UTSTILLINGSLOKALE','Utstillingslokale og atelier','KULTUR'),
-    ('BIBLIOTEK','Bibliotek','KULTUR'),
-    ('FOAJE','Foajé','KULTUR'),
-
-('KLASSEROM','Klasserom og undervisningsrom','UNDERVISNING'),
-('GRUPPEROM','Grupperom og prosjektrom','UNDERVISNING'),
-('MOTEROM','Møterom og konferanserom','UNDERVISNING'),
-('DATAROM','Datarom','UNDERVISNING'),
-('AULA','Aula','UNDERVISNING'),
-
-('SLOYDSAL','Sløydsal','VERKSTED'),
-('KUNSTVERKSTED','Kunst- og håndverksverksted','VERKSTED'),
-('SYSTUE','Systue','VERKSTED'),
-('MEDIEVERKSTED','Multimedia- og streamingverksted','VERKSTED'),
-('FRISORSALONG','Frisørsalong','VERKSTED'),
-
-('SELSKAPSLOKALE','Selskapslokale','ARRANGEMENT'),
-('FORSAMLINGSLOKALE','Forsamlingslokale','ARRANGEMENT'),
-('SEREMONIROM','Seremonirom','ARRANGEMENT'),
-('BURSDAGSLOKALE','Bursdagslokale','ARRANGEMENT'),
-('ARRANGEMENTSARENA','Arrangementsarena','ARRANGEMENT'),
-('TORGPLASS','Torg og møteplass','ARRANGEMENT'),
-
-('KJOKKEN','Kjøkken','BEVERTNING'),
-('KANTINE','Kantine','BEVERTNING'),
-('KAFE','Kafé og kiosk','BEVERTNING'),
-
-('ALLAKTIVITETSHUS','Allaktivitetshus','NAERMILJO'),
-('AKTIVITETSROM','Aktivitetsrom og flerbruksrom','NAERMILJO'),
-('UNGDOMSLOKALE','Ungdomslokale','NAERMILJO'),
-('DAGSENTER','Dagsenter og miljøstue','NAERMILJO'),
-('INNBYGGERTORG','Innbyggertorg','NAERMILJO'),
-
-('FRILUFTSOMRAADE','Friluftsområde','UTEAREAL'),
-('UTEOMRAADE','Uteområde','UTEAREAL'),
-('TURVEI','Turvei og løype','UTEAREAL'),
-('GAPAHUK','Gapahuk og bålplass','UTEAREAL'),
-('UTESCENE','Utendørsscene','UTEAREAL'),
-
-('OVERNATTINGSROM','Overnattingsrom','OVERNATTING'),
-('BEBOERROM','Beboerrom','OVERNATTING'),
-('OVINGSLEILIGHET','Øvingsleilighet','OVERNATTING'),
-
-('KONTOR','Kontor og arbeidsplass','ANNET_LOKALE'),
-('BUTIKKLOKALE','Butikklokale','ANNET_LOKALE'),
-('LAGER','Lager','ANNET_LOKALE'),
-('GENERELT_LOKALE','Generelt lokale','ANNET_LOKALE'),
-
-('SYKKEL','Sykkel og el-sykkel','UTSTYR'),
-('KANO_KAJAKK','Kano og kajakk','UTSTYR'),
-('FISKEUTSTYR','Fiskeutstyr','UTSTYR'),
-('REDNINGSVEST','Redningsvest','UTSTYR'),
-('LYDANLEGG','Lyd- og lysanlegg','UTSTYR'),
-('ANNET_UTSTYR','Annet utstyr','UTSTYR')
-) AS v(kode, navn, parent_kode)
-JOIN lokaletype p ON p.kode = v.parent_kode
-ON CONFLICT (kode) DO NOTHING;
-
-INSERT INTO fasilitet (kode, navn, gruppe)
-VALUES
-    ('HC_TILGANG','Rullestoltilgang','tilgjengelighet'),
-    ('HC_TOALETT','HC-toalett','tilgjengelighet'),
-    ('TELESLYNGE','Teleslynge','tilgjengelighet'),
-    ('HEIS','Heis','tilgjengelighet'),
-    ('GARDEROBE','Garderobe','sanitaer'),
-    ('DUSJ','Dusj','sanitaer'),
-    ('TOALETT','Toalett','sanitaer'),
-    ('PROSJEKTOR','Prosjektor','teknisk'),
-    ('SKJERM','Skjerm','teknisk'),
-    ('LYDANLEGG','Lydanlegg','teknisk'),
-    ('MIKROFON','Mikrofon','teknisk'),
-    ('WIFI','Trådløst nett','teknisk'),
-    ('STREAMING','Streamingutstyr','teknisk'),
-    ('FLYGEL','Flygel eller piano','teknisk'),
-    ('SCENELYS','Scenelys','teknisk'),
-    ('KJOKKEN','Kjøkken','kjokken'),
-    ('KJOLESKAP','Kjøleskap','kjokken'),
-    ('OPPVASKMASKIN','Oppvaskmaskin','kjokken'),
-    ('KIOSK','Kiosk','kjokken'),
-    ('TRIBUNE','Tribune','sport'),
-    ('MAALBUR','Målbur','sport'),
-    ('TIDTAKING','Tidtakingsanlegg','sport'),
-    ('BANEDELING','Delbar bane','sport'),
-    ('BORD_STOLER','Bord og stoler','moblering'),
-    ('WHITEBOARD','Whiteboard','moblering'),
-    ('PARKETTGULV','Parkettgulv','moblering'),
-    ('PARKERING','Parkering','uteareal'),
-    ('HC_PARKERING','HC-parkering','uteareal'),
-    ('SYKKELPARKERING','Sykkelparkering','uteareal'),
-    ('BAALPLASS','Bålplass','uteareal'),
-    ('FLOMLYS','Flomlys','uteareal'),
-    ('ELEKTRONISK_LAS','Elektronisk låssystem','annet')
-ON CONFLICT (kode) DO NOTHING;
 
 -- =============================================================================
 -- 13. updated_at-triggere

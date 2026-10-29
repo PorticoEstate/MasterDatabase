@@ -33,6 +33,11 @@ public class Lokaletype {
     @JoinColumn(name = "parent_id")
     private Lokaletype parent;
 
+    // Fasetten fra venue_types.json (sportsIndoor, culture ...).
+    @NotNull
+    @Column(name = "fasett", nullable = false, length = Integer.MAX_VALUE)
+    private String fasett;
+
     @NotNull
     @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)

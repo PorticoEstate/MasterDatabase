@@ -181,8 +181,10 @@ nytt. Å angre er `git revert` og en ny kjøring.
 
 `last_mapping.py` skriver mappingen til én tabell per kodetype:
 `aktivitet_mapping` (én kildekode kan gi flere aktiviteter),
-`lokaletype_mapping` og `fasilitet_mapping`. Aktivitetsvokabularet lastes fra
-`activity_mapping/activities.json`. Rader laget av skriptet (`kartlagt_av =
+`lokaletype_mapping` og `fasilitet_mapping`. Vokabularet de peker på lastes fra
+vokabularfilen ved siden av hver mappingfil (`activity_mapping/activities.json`,
+`lokaletype_mapping/venue_types.json`, `fasilitet_mapping/facilities.json`).
+Konsepter i fasetten `exclude` gir `ikke_relevant`. Rader laget av skriptet (`kartlagt_av =
 'etl'`) fornyes ved hver kjøring. En manuell rad (`kartlagt_av` ulik `etl`)
 overskrives aldri, og så lenge den finnes, lar skriptet den koden være i fred.
 

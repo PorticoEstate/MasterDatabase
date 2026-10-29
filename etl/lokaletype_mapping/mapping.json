@@ -1,138 +1,1769 @@
 {
-  "normalisation": "html-decode x2, trim, collapse spaces, lowercase, ø/æ/å til ascii, tegnsetting til mellomrom",
+  "source": "AktivKommune_venue_type_mapping_v0.2.xlsx",
+  "approvedOnly": false,
+  "normalisation": "html-decode x2, unicode NFC, trim, collapse spaces, lowercase",
   "values": {
-    "gymsal": "GYMSAL",
-    "idrettshall": "IDRETTSHALL",
-    "idrettshall privateid": "IDRETTSHALL",
-    "idrettsanlegg": "IDRETTSHALL",
-    "idrettsanlegg privateid": "IDRETTSHALL",
-    "svommehall": "SVOMMEANLEGG",
-    "svommeanlegg": "SVOMMEANLEGG",
-    "basseng": "SVOMMEANLEGG",
-    "basseng symjehall": "SVOMMEANLEGG",
-    "ishall": "ISHALL",
-    "utendors isbane": "ISHALL",
-    "kunstisbane": "ISHALL",
-    "friidrettsanlegg": "FRIIDRETTSANLEGG",
-    "friidrettsbane": "FRIIDRETTSANLEGG",
-    "friidrettshall": "FRIIDRETTSANLEGG",
-    "kastfelt grus": "FRIIDRETTSANLEGG",
-    "kastfelt gress": "FRIIDRETTSANLEGG",
-    "sprintstripe": "FRIIDRETTSANLEGG",
-    "kunstgressbane": "FOTBALLBANE",
-    "kunstgrasbane": "FOTBALLBANE",
-    "gressbane": "FOTBALLBANE",
-    "grasbane": "FOTBALLBANE",
-    "grusbane": "FOTBALLBANE",
-    "ballbinger": "BALLBANE",
-    "sandvolleyballbane": "BALLBANE",
-    "bordtennis": "BALLBANE",
-    "tennisbane": "TENNISANLEGG",
-    "tennishall": "TENNISANLEGG",
-    "styrkerom": "STYRKEROM",
-    "vektlofterlokale": "STYRKEROM",
-    "styrkeloftlokale": "STYRKEROM",
-    "apparatsal": "STYRKEROM",
-    "oppvarmingsrom": "STYRKEROM",
-    "kampsportrom": "KAMPSPORTROM",
-    "kampsportmatte": "KAMPSPORTROM",
-    "klatrevegg": "KLATREANLEGG",
-    "turnomrade": "TURNANLEGG",
-    "skateanlegg": "SKATEANLEGG",
-    "skatepark": "SKATEANLEGG",
-    "skytebane skytehall": "SKYTEBANE",
-    "standplass": "SKYTEBANE",
-    "sjosportsanlegg": "SJOSPORTANLEGG",
-    "garderobe": "GARDEROBE",
-    "konsertsal": "KONSERTSAL",
-    "kultursal": "KONSERTSAL",
-    "scene": "SCENE",
-    "utendorsscene": "UTESCENE",
-    "auditorium": "AUDITORIUM",
-    "foredragssal": "AUDITORIUM",
-    "ovingsrom": "OVINGSROM",
-    "ovingslokale": "OVINGSROM",
-    "musikkrom": "OVINGSROM",
-    "musikk og danserom": "OVINGSROM",
-    "dansesal": "DANSESAL",
-    "lydstudio": "LYDSTUDIO",
-    "utstillingslokale": "UTSTILLINGSLOKALE",
-    "ateliet": "UTSTILLINGSLOKALE",
-    "bibliotek": "BIBLIOTEK",
-    "foaje": "FOAJE",
-    "klasserom": "KLASSEROM",
-    "lite undervisningsrom": "KLASSEROM",
-    "stort undervisningsrom": "KLASSEROM",
-    "kursrom": "KLASSEROM",
-    "grupperom": "GRUPPEROM",
-    "prosjektrom": "GRUPPEROM",
-    "moterom": "MOTEROM",
-    "motelokale": "MOTEROM",
-    "konferanserom": "MOTEROM",
-    "samhandlingslab": "MOTEROM",
-    "datarom": "DATAROM",
-    "aula": "AULA",
-    "sloydsal": "SLOYDSAL",
-    "kunst og designverksted": "KUNSTVERKSTED",
-    "kunst og handverk": "KUNSTVERKSTED",
-    "kreativt verksted": "KUNSTVERKSTED",
-    "systue": "SYSTUE",
-    "multimediaverksted": "MEDIEVERKSTED",
-    "streaming": "MEDIEVERKSTED",
-    "frisorsalong": "FRISORSALONG",
-    "selskapslokale": "SELSKAPSLOKALE",
-    "selskapslokale storsal": "SELSKAPSLOKALE",
-    "forsamlingslokale": "FORSAMLINGSLOKALE",
-    "forsamlingslokale privateid": "FORSAMLINGSLOKALE",
-    "seremonirom": "SEREMONIROM",
-    "sermonirom": "SEREMONIROM",
-    "bursdagslokale": "BURSDAGSLOKALE",
-    "barnebursdag": "BURSDAGSLOKALE",
-    "arrangementsarena": "ARRANGEMENTSARENA",
-    "arrangementslokale": "ARRANGEMENTSARENA",
-    "torgplass": "TORGPLASS",
-    "moteplass": "TORGPLASS",
-    "kjokken": "KJOKKEN",
-    "kantine": "KANTINE",
-    "kantine kunnskapshjornet": "KANTINE",
-    "kantine kunnskapshjorne": "KANTINE",
-    "kafe": "KAFE",
-    "kiosk minkjokken": "KAFE",
-    "sondagskafe": "KAFE",
-    "bevertning": "KAFE",
-    "allaktivitetshus": "ALLAKTIVITETSHUS",
-    "aktivitetshus": "ALLAKTIVITETSHUS",
-    "aktivitetsrom": "AKTIVITETSROM",
-    "aktivitetssal": "AKTIVITETSROM",
-    "flerbruksrom": "AKTIVITETSROM",
-    "fellesrom": "AKTIVITETSROM",
-    "ungdomslokale": "UNGDOMSLOKALE",
-    "dagsenter": "DAGSENTER",
-    "miljostue": "DAGSENTER",
-    "friluftsomrade": "FRILUFTSOMRAADE",
-    "utendorsomrade": "UTEOMRAADE",
-    "uterom uteomrade": "UTEOMRAADE",
-    "turveier": "TURVEI",
-    "gapahuk": "GAPAHUK",
-    "balpanne": "GAPAHUK",
-    "overnatting": "OVERNATTINGSROM",
-    "beboerrom": "BEBOERROM",
-    "ovingsleilighet": "OVINGSLEILIGHET",
-    "kontor": "KONTOR",
-    "arbeidsplasser": "KONTOR",
-    "butikklokale": "BUTIKKLOKALE",
-    "frilager": "LAGER",
-    "lokale": "GENERELT_LOKALE",
-    "ovrige lokalar": "GENERELT_LOKALE",
-    "anlegg": "GENERELT_LOKALE",
-    "sykler": "SYKKEL",
-    "el sykler": "SYKKEL",
-    "kano kajakk": "KANO_KAJAKK",
-    "kano": "KANO_KAJAKK",
-    "kajakk": "KANO_KAJAKK",
-    "fiskestengar": "FISKEUTSTYR",
-    "redningsvestar": "REDNINGSVEST",
-    "lydanlegg": "LYDANLEGG",
-    "utstyr": "ANNET_UTSTYR"
+    "aktivitetessal": {
+      "venueType": "LOK-SI-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Aktivitetessal"
+      ]
+    },
+    "aktivitetshus": {
+      "venueType": "LOK-AS-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Aktivitetshus"
+      ]
+    },
+    "aktivitetsrom": {
+      "venueType": "LOK-AS-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Aktivitetsrom"
+      ]
+    },
+    "aktivitetssal": {
+      "venueType": "LOK-SI-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Aktivitetssal"
+      ]
+    },
+    "allaktivitetshus": {
+      "venueType": "LOK-AS-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Allaktivitetshus"
+      ]
+    },
+    "amfi": {
+      "venueType": "LOK-CU-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Amfi"
+      ]
+    },
+    "andre uteanlegg": {
+      "venueType": "LOK-SO-015",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Andre uteanlegg"
+      ]
+    },
+    "anlegg": {
+      "venueType": "LOK-SO-009",
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Anlegg"
+      ]
+    },
+    "apparatsal": {
+      "venueType": "LOK-SI-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Apparatsal"
+      ]
+    },
+    "arbeidsplasser": {
+      "venueType": "LOK-ME-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arbeidsplasser"
+      ]
+    },
+    "arrangement": {
+      "venueType": "LOK-EX-005",
+      "confidence": "M",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Arrangement"
+      ]
+    },
+    "arrangementlokale": {
+      "venueType": "LOK-AS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arrangementlokale"
+      ]
+    },
+    "arrangementsarena": {
+      "venueType": "LOK-AS-007",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arrangementsarena"
+      ]
+    },
+    "arrangementslokale": {
+      "venueType": "LOK-AS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Arrangementslokale",
+        "arrangementslokale"
+      ]
+    },
+    "ateliet": {
+      "venueType": "LOK-WS-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ateliet"
+      ]
+    },
+    "atletsal": {
+      "venueType": "LOK-SI-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Atletsal"
+      ]
+    },
+    "auditorium": {
+      "venueType": "LOK-ME-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Auditorium"
+      ]
+    },
+    "aula": {
+      "venueType": "LOK-ME-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Aula"
+      ]
+    },
+    "ballbinger": {
+      "venueType": "LOK-SO-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ballbinger"
+      ]
+    },
+    "barnebursdag": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Barnebursdag"
+      ]
+    },
+    "basseng": {
+      "venueType": "LOK-PO-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Basseng"
+      ]
+    },
+    "basseng - symjehall": {
+      "venueType": "LOK-PO-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Basseng - symjehall"
+      ]
+    },
+    "beboerrom": {
+      "venueType": "LOK-AS-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Beboerrom"
+      ]
+    },
+    "bevertning": {
+      "venueType": "LOK-FO-001",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bevertning"
+      ]
+    },
+    "bibliotek": {
+      "venueType": "LOK-AS-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bibliotek"
+      ]
+    },
+    "bordtennis": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Bordtennis"
+      ]
+    },
+    "bursdagslokale": {
+      "venueType": "LOK-AS-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bursdagslokale"
+      ]
+    },
+    "butikklokale": {
+      "venueType": "LOK-SE-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Butikklokale"
+      ]
+    },
+    "byrom": {
+      "venueType": "LOK-OU-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Byrom"
+      ]
+    },
+    "bålpanne": {
+      "venueType": "LOK-OU-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bålpanne"
+      ]
+    },
+    "curlinghall": {
+      "venueType": "LOK-SI-008",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Curlinghall"
+      ]
+    },
+    "dagsenter": {
+      "venueType": "LOK-AS-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dagsenter"
+      ]
+    },
+    "dans/treningsrom": {
+      "venueType": "LOK-SI-012",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dans/treningsrom"
+      ]
+    },
+    "dansesal": {
+      "venueType": "LOK-SI-012",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dansesal"
+      ]
+    },
+    "datarom": {
+      "venueType": "LOK-WS-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Datarom"
+      ]
+    },
+    "el-sykler": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "EL-sykler"
+      ]
+    },
+    "fellesrom": {
+      "venueType": "LOK-AS-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fellesrom"
+      ]
+    },
+    "festsal": {
+      "venueType": "LOK-AS-008",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Festsal"
+      ]
+    },
+    "fiktivt rom": {
+      "venueType": "LOK-EX-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "test_or_system_text",
+      "sourceNames": [
+        "Fiktivt rom"
+      ]
+    },
+    "filmrom": {
+      "venueType": "LOK-CU-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Filmrom"
+      ]
+    },
+    "filmverksted": {
+      "venueType": "LOK-WS-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Filmverksted"
+      ]
+    },
+    "fiskestengar": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Fiskestengar"
+      ]
+    },
+    "flerbrukshall": {
+      "venueType": "LOK-SI-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Flerbrukshall"
+      ]
+    },
+    "flerbruksrom": {
+      "venueType": "LOK-AS-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Flerbruksrom"
+      ]
+    },
+    "foaje": {
+      "venueType": "LOK-AS-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Foaje"
+      ]
+    },
+    "foajé": {
+      "venueType": "LOK-AS-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Foajé"
+      ]
+    },
+    "folkeverkstad": {
+      "venueType": "LOK-WS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Folkeverkstad"
+      ]
+    },
+    "foredragssal": {
+      "venueType": "LOK-ME-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Foredragssal"
+      ]
+    },
+    "forsamlingslokale": {
+      "venueType": "LOK-AS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Forsamlingslokale"
+      ]
+    },
+    "forsamlingslokale - privateid": {
+      "venueType": "LOK-AS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "ownership": "private"
+      },
+      "sourceNames": [
+        "Forsamlingslokale - privateid"
+      ]
+    },
+    "fotballbane": {
+      "venueType": "LOK-SO-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fotballbane"
+      ]
+    },
+    "fotostudio": {
+      "venueType": "LOK-WS-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fotostudio"
+      ]
+    },
+    "friidrett stadion": {
+      "venueType": "LOK-SO-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friidrett stadion"
+      ]
+    },
+    "friidrettsanlegg": {
+      "venueType": "LOK-SO-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friidrettsanlegg"
+      ]
+    },
+    "friidrettsbane": {
+      "venueType": "LOK-SO-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friidrettsbane"
+      ]
+    },
+    "friidrettshall": {
+      "venueType": "LOK-SI-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friidrettshall"
+      ]
+    },
+    "frilager": {
+      "venueType": "LOK-SE-004",
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Frilager"
+      ]
+    },
+    "friluftsanlegg": {
+      "venueType": "LOK-OU-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friluftsanlegg"
+      ]
+    },
+    "friluftsområde": {
+      "venueType": "LOK-OU-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friluftsområde"
+      ]
+    },
+    "friområder": {
+      "venueType": "LOK-OU-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friområder"
+      ]
+    },
+    "frisørsalong": {
+      "venueType": "LOK-SE-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Frisørsalong"
+      ]
+    },
+    "fritidstilbud": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Fritidstilbud"
+      ]
+    },
+    "gaming": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Gaming"
+      ]
+    },
+    "gapahuk": {
+      "venueType": "LOK-OU-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gapahuk"
+      ]
+    },
+    "garderobe": {
+      "venueType": "LOK-SE-003",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Garderobe"
+      ]
+    },
+    "grasbane": {
+      "venueType": "LOK-SO-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grasbane"
+      ]
+    },
+    "gressbane": {
+      "venueType": "LOK-SO-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gressbane"
+      ]
+    },
+    "grillplass": {
+      "venueType": "LOK-OU-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grillplass"
+      ]
+    },
+    "grupperom": {
+      "venueType": "LOK-ME-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grupperom"
+      ]
+    },
+    "grusbane": {
+      "venueType": "LOK-SO-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grusbane"
+      ]
+    },
+    "gymsal": {
+      "venueType": "LOK-SI-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gymsal"
+      ]
+    },
+    "idrettsanlegg": {
+      "venueType": "LOK-SO-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrettsanlegg"
+      ]
+    },
+    "idrettsanlegg - privateid": {
+      "venueType": "LOK-SO-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "ownership": "private"
+      },
+      "sourceNames": [
+        "Idrettsanlegg - privateid"
+      ]
+    },
+    "idrettshall": {
+      "venueType": "LOK-SI-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrettshall"
+      ]
+    },
+    "idrettshall - privateid": {
+      "venueType": "LOK-SI-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "ownership": "private"
+      },
+      "sourceNames": [
+        "Idrettshall - privateid"
+      ]
+    },
+    "inkludering": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Inkludering"
+      ]
+    },
+    "ishall": {
+      "venueType": "LOK-SI-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ishall"
+      ]
+    },
+    "judaberg innbyggertorg": {
+      "venueType": "LOK-AS-010",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Judaberg innbyggertorg"
+      ]
+    },
+    "kafè": {
+      "venueType": "LOK-FO-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kafè"
+      ]
+    },
+    "kafé og kjøkken": {
+      "venueType": "LOK-FO-001",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kafé og kjøkken"
+      ]
+    },
+    "kajakk": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Kajakk"
+      ]
+    },
+    "kampsportmatte": {
+      "venueType": "LOK-SI-013",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kampsportmatte"
+      ]
+    },
+    "kampsportrom": {
+      "venueType": "LOK-SI-013",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kampsportrom"
+      ]
+    },
+    "kamsport": {
+      "venueType": "LOK-SI-013",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kamsport"
+      ]
+    },
+    "kano": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Kano"
+      ]
+    },
+    "kano / kajakk": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Kano / Kajakk"
+      ]
+    },
+    "kano/kajakk": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Kano/kajakk"
+      ]
+    },
+    "kantine": {
+      "venueType": "LOK-FO-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kantine"
+      ]
+    },
+    "kantine - kunnskapshjørne": {
+      "venueType": "LOK-FO-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kantine - kunnskapshjørne"
+      ]
+    },
+    "kantinebidrag": {
+      "venueType": "LOK-FO-002",
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kantinebidrag"
+      ]
+    },
+    "kastfelt - gress": {
+      "venueType": "LOK-SO-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kastfelt - gress"
+      ]
+    },
+    "kastfelt - grus": {
+      "venueType": "LOK-SO-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kastfelt - grus"
+      ]
+    },
+    "kino": {
+      "venueType": "LOK-CU-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kino"
+      ]
+    },
+    "kiosk": {
+      "venueType": "LOK-FO-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kiosk"
+      ]
+    },
+    "kiosk - minkjøkken": {
+      "venueType": "LOK-FO-003",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kiosk - minkjøkken"
+      ]
+    },
+    "kiosk/kafeteria": {
+      "venueType": "LOK-FO-001",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kiosk/Kafeteria"
+      ]
+    },
+    "kjøkken": {
+      "venueType": "LOK-FO-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kjøkken"
+      ]
+    },
+    "klasserom": {
+      "venueType": "LOK-ME-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klasserom"
+      ]
+    },
+    "klatrevegg": {
+      "venueType": "LOK-SI-009",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatrevegg"
+      ]
+    },
+    "klatring": {
+      "venueType": "LOK-SI-009",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatring"
+      ]
+    },
+    "klatring/buldring": {
+      "venueType": "LOK-SI-009",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatring/Buldring"
+      ]
+    },
+    "konferanserom": {
+      "venueType": "LOK-ME-008",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Konferanserom"
+      ]
+    },
+    "konsertsal": {
+      "venueType": "LOK-CU-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Konsertsal"
+      ]
+    },
+    "kontor": {
+      "venueType": "LOK-ME-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kontor"
+      ]
+    },
+    "kreativt verksted": {
+      "venueType": "LOK-WS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kreativt verksted"
+      ]
+    },
+    "kulturhus": {
+      "venueType": "LOK-CU-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturhus"
+      ]
+    },
+    "kulturlokale": {
+      "venueType": "LOK-CU-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kulturlokale"
+      ]
+    },
+    "kultursal": {
+      "venueType": "LOK-CU-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kultursal"
+      ]
+    },
+    "kunst og designverksted": {
+      "venueType": "LOK-WS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunst og designverksted"
+      ]
+    },
+    "kunst og håndverk": {
+      "venueType": "LOK-WS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunst og håndverk"
+      ]
+    },
+    "kunstgrasbane": {
+      "venueType": "LOK-SO-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunstgrasbane"
+      ]
+    },
+    "kunstgressbane": {
+      "venueType": "LOK-SO-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunstgressbane"
+      ]
+    },
+    "kunstisbane": {
+      "venueType": "LOK-SO-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunstisbane"
+      ]
+    },
+    "kursrom": {
+      "venueType": "LOK-ME-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kursrom"
+      ]
+    },
+    "kvitsøygata 3": {
+      "venueType": "LOK-EX-001",
+      "confidence": "L",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unknown",
+      "sourceNames": [
+        "Kvitsøygata 3"
+      ]
+    },
+    "leilighet": {
+      "venueType": "LOK-AC-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leilighet"
+      ]
+    },
+    "lerret": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Lerret"
+      ]
+    },
+    "lite undervisningsrom": {
+      "venueType": "LOK-ME-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "size": "small"
+      },
+      "sourceNames": [
+        "Lite undervisningsrom"
+      ]
+    },
+    "lokale": {
+      "venueType": "LOK-EX-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Lokale"
+      ]
+    },
+    "lokale for kultur": {
+      "venueType": "LOK-CU-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lokale for kultur"
+      ]
+    },
+    "lydanlegg": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Lydanlegg"
+      ]
+    },
+    "lydisolert rom for musikk": {
+      "venueType": "LOK-CU-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lydisolert rom for musikk"
+      ]
+    },
+    "lydstudio": {
+      "venueType": "LOK-WS-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lydstudio"
+      ]
+    },
+    "miljøstue": {
+      "venueType": "LOK-AS-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Miljøstue"
+      ]
+    },
+    "mostun natursenter": {
+      "venueType": "LOK-OU-008",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Mostun Natursenter"
+      ]
+    },
+    "multimediaverksted": {
+      "venueType": "LOK-WS-004",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Multimediaverksted"
+      ]
+    },
+    "musikk og danserom": {
+      "venueType": "LOK-CU-010",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Musikk og danserom"
+      ]
+    },
+    "musikkrom": {
+      "venueType": "LOK-CU-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Musikkrom"
+      ]
+    },
+    "møtelokale": {
+      "venueType": "LOK-ME-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møtelokale"
+      ]
+    },
+    "møteplass": {
+      "venueType": "LOK-EX-002",
+      "confidence": "M",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Møteplass"
+      ]
+    },
+    "møter, møterom, kurs, selskap": {
+      "venueType": "LOK-ME-006",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møter, møterom, kurs, selskap"
+      ]
+    },
+    "møterom": {
+      "venueType": "LOK-ME-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Møterom"
+      ]
+    },
+    "naturgressbane": {
+      "venueType": "LOK-SO-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Naturgressbane"
+      ]
+    },
+    "oppvarmingsrom": {
+      "venueType": "LOK-SI-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Oppvarmingsrom"
+      ]
+    },
+    "overnatting": {
+      "venueType": "LOK-AC-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Overnatting"
+      ]
+    },
+    "padeltennis": {
+      "venueType": "LOK-SO-011",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Padeltennis"
+      ]
+    },
+    "park": {
+      "venueType": "LOK-OU-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Park"
+      ]
+    },
+    "prosjektrom": {
+      "venueType": "LOK-ME-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Prosjektrom"
+      ]
+    },
+    "redningsvestar": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Redningsvestar"
+      ]
+    },
+    "salgsplass": {
+      "venueType": "LOK-SE-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Salgsplass"
+      ]
+    },
+    "samhandlingslab": {
+      "venueType": "LOK-WS-003",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Samhandlingslab"
+      ]
+    },
+    "sandvolleyballbane": {
+      "venueType": "LOK-SO-012",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sandvolleyballbane"
+      ]
+    },
+    "scene": {
+      "venueType": "LOK-CU-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Scene"
+      ]
+    },
+    "scene, konferanse, konsert, møte": {
+      "venueType": "LOK-CU-006",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Scene, konferanse, konsert, møte"
+      ]
+    },
+    "selskapslokale": {
+      "venueType": "LOK-AS-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Selskapslokale"
+      ]
+    },
+    "selskapslokale/flerbruksrom": {
+      "venueType": "LOK-AS-009",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Selskapslokale/Flerbruksrom"
+      ]
+    },
+    "selskapslokale/storsal": {
+      "venueType": "LOK-AS-009",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Selskapslokale/Storsal"
+      ]
+    },
+    "seremonirom": {
+      "venueType": "LOK-AS-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Seremonirom"
+      ]
+    },
+    "sermonirom": {
+      "venueType": "LOK-AS-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sermonirom"
+      ]
+    },
+    "sitteplasser": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Sitteplasser"
+      ]
+    },
+    "sjakk": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Sjakk"
+      ]
+    },
+    "sjøsportsanlegg": {
+      "venueType": "LOK-OU-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sjøsportsanlegg"
+      ]
+    },
+    "skateanlegg": {
+      "venueType": "LOK-SO-013",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skateanlegg"
+      ]
+    },
+    "skatepark": {
+      "venueType": "LOK-SO-013",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skatepark"
+      ]
+    },
+    "skolekjøkken": {
+      "venueType": "LOK-FO-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skolekjøkken"
+      ]
+    },
+    "skulekjøkken": {
+      "venueType": "LOK-FO-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skulekjøkken"
+      ]
+    },
+    "skytebane - skytehall": {
+      "venueType": "LOK-SI-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skytebane - skytehall"
+      ]
+    },
+    "skytehall": {
+      "venueType": "LOK-SI-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skytehall"
+      ]
+    },
+    "sløydsal": {
+      "venueType": "LOK-WS-008",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sløydsal"
+      ]
+    },
+    "sosial aktivitet": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Sosial aktivitet"
+      ]
+    },
+    "sosial møteplass": {
+      "venueType": "LOK-EX-002",
+      "confidence": "M",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Sosial møteplass"
+      ]
+    },
+    "spinningsal": {
+      "venueType": "LOK-SI-014",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Spinningsal"
+      ]
+    },
+    "sprintstripe": {
+      "venueType": "LOK-SO-008",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sprintstripe"
+      ]
+    },
+    "standplass": {
+      "venueType": "LOK-SE-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Standplass"
+      ]
+    },
+    "stengt": {
+      "venueType": "LOK-EX-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "status",
+      "sourceNames": [
+        "Stengt"
+      ]
+    },
+    "stort undervisningsrom": {
+      "venueType": "LOK-ME-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "size": "large"
+      },
+      "sourceNames": [
+        "Stort undervisningsrom"
+      ]
+    },
+    "streaming": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Streaming"
+      ]
+    },
+    "styrkeløftlokale": {
+      "venueType": "LOK-SI-015",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styrkeløftlokale"
+      ]
+    },
+    "styrkerom": {
+      "venueType": "LOK-SI-015",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styrkerom"
+      ]
+    },
+    "styrketrening": {
+      "venueType": "LOK-SI-015",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styrketrening"
+      ]
+    },
+    "svømmeanlegg": {
+      "venueType": "LOK-PO-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Svømmeanlegg"
+      ]
+    },
+    "svømmebasseng": {
+      "venueType": "LOK-PO-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Svømmebasseng"
+      ]
+    },
+    "svømmehall": {
+      "venueType": "LOK-PO-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Svømmehall"
+      ]
+    },
+    "sykler": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Sykler"
+      ]
+    },
+    "symjebasseng": {
+      "venueType": "LOK-PO-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Symjebasseng"
+      ]
+    },
+    "systue": {
+      "venueType": "LOK-WS-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Systue"
+      ]
+    },
+    "søndagskafé": {
+      "venueType": "LOK-FO-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Søndagskafé"
+      ]
+    },
+    "teaterskole": {
+      "venueType": "LOK-CU-008",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teaterskole"
+      ]
+    },
+    "teltplass": {
+      "venueType": "LOK-OU-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teltplass"
+      ]
+    },
+    "tennisbane": {
+      "venueType": "LOK-SO-014",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tennisbane"
+      ]
+    },
+    "tennishall": {
+      "venueType": "LOK-SI-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tennishall"
+      ]
+    },
+    "terapibasseng": {
+      "venueType": "LOK-PO-003",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Terapibasseng"
+      ]
+    },
+    "torgplass": {
+      "venueType": "LOK-OU-001",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Torgplass"
+      ]
+    },
+    "turn-/friidretts areal": {
+      "venueType": "LOK-SI-006",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Turn-/Friidretts areal"
+      ]
+    },
+    "turnhall": {
+      "venueType": "LOK-SI-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Turnhall"
+      ]
+    },
+    "turnområde": {
+      "venueType": "LOK-SI-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Turnområde"
+      ]
+    },
+    "turveier": {
+      "venueType": "LOK-OU-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Turveier"
+      ]
+    },
+    "ungdomslokale": {
+      "venueType": "LOK-AS-012",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ungdomslokale"
+      ]
+    },
+    "uteanlegg": {
+      "venueType": "LOK-SO-015",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Uteanlegg"
+      ]
+    },
+    "utendørs isbane": {
+      "venueType": "LOK-SO-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utendørs isbane"
+      ]
+    },
+    "utendørsområde": {
+      "venueType": "LOK-OU-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utendørsområde"
+      ]
+    },
+    "utendørsscene": {
+      "venueType": "LOK-CU-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utendørsscene"
+      ]
+    },
+    "uterom/uteområde": {
+      "venueType": "LOK-OU-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Uterom/uteområde"
+      ]
+    },
+    "utescene": {
+      "venueType": "LOK-CU-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utescene"
+      ]
+    },
+    "utholdenhetsrom": {
+      "venueType": "LOK-SI-011",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utholdenhetsrom"
+      ]
+    },
+    "utleigelokale": {
+      "venueType": "LOK-AS-007",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utleigelokale"
+      ]
+    },
+    "utstilling/kunst": {
+      "venueType": "LOK-CU-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utstilling/kunst"
+      ]
+    },
+    "utstillingslokale": {
+      "venueType": "LOK-CU-009",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utstillingslokale"
+      ]
+    },
+    "utstyr": {
+      "venueType": "LOK-EX-002",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_venue_type",
+      "sourceNames": [
+        "Utstyr"
+      ]
+    },
+    "varmtvannsbasseng": {
+      "venueType": "LOK-PO-003",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Varmtvannsbasseng"
+      ]
+    },
+    "veiledning/rådgivningstime": {
+      "venueType": "LOK-SE-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Veiledning/rådgivningstime"
+      ]
+    },
+    "veiledningstime byggesak": {
+      "venueType": "LOK-SE-006",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Veiledningstime Byggesak"
+      ]
+    },
+    "vektløfterlokale": {
+      "venueType": "LOK-SI-015",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vektløfterlokale"
+      ]
+    },
+    "verkstedlokale": {
+      "venueType": "LOK-WS-007",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Verkstedlokale"
+      ]
+    },
+    "wc/toalett": {
+      "venueType": "LOK-SE-003",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "WC/toalett"
+      ]
+    },
+    "øvingsleilighet": {
+      "venueType": "LOK-CU-010",
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Øvingsleilighet"
+      ]
+    },
+    "øvingslokale": {
+      "venueType": "LOK-CU-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Øvingslokale"
+      ]
+    },
+    "øvingsrom": {
+      "venueType": "LOK-CU-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Øvingsrom"
+      ]
+    },
+    "øvingsrom, musikkrom, musikk": {
+      "venueType": "LOK-CU-010",
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Øvingsrom, musikkrom, musikk"
+      ]
+    },
+    "øvrige lokalar": {
+      "venueType": "LOK-EX-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Øvrige lokalar"
+      ]
+    },
+    "øvrige lokaler": {
+      "venueType": "LOK-EX-005",
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "unspecified",
+      "sourceNames": [
+        "Øvrige lokaler"
+      ]
+    }
   }
 }

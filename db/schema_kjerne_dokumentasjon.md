@@ -1,6 +1,6 @@
 # Kjernemodell for masterdatabasen
 
-Dokumentasjon for skjemaet. Skjemaet eies av Flyway-migrasjonene i `backend/src/main/resources/db/migration`, som backenden kjører når den starter. `db/schema_kjerne.sql` er en lesbar, samlet kopi av skjemaet etter siste migrasjon (nå V4), og oppdateres sammen med hver ny migrasjon. 19 egne tabeller, 7 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data i dag, unntatt `ressurslenke` (se der).
+Dokumentasjon for skjemaet. Skjemaet eies av Flyway-migrasjonene i `backend/src/main/resources/db/migration`, som backenden kjører når den starter. `db/schema_kjerne.sql` er en lesbar, samlet kopi av skjemaet etter siste migrasjon (nå V5), og oppdateres sammen med hver ny migrasjon. 19 egne tabeller, 7 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data i dag, unntatt `ressurslenke` (se der).
 
 **Krever PostGIS.** Docker-imaget er `postgis/postgis:18-3.6` (ikke rent `postgres:18`), og skjemaet starter med `CREATE EXTENSION IF NOT EXISTS postgis;`.
 
@@ -79,7 +79,7 @@ Den unike indeksen `ux_matrikkelinfo` bruker `COALESCE(festenr, 0)` fordi festen
 
 Tabellen holder både bygg og utendørs anlegg, fordi Aktiv kommune bare har ett stedsbegrep: «Paradis kunstgressbane» er registrert som et bygg der, på linje med ekte bygninger.
 
-**Innendørs/utendørs avgjøres ikke på bygningsnivå.** Vi prøvde først en `er_uteanlegg`-kolonne på `bygning`, men den ble aldri fylt riktig: Aktiv kommune har ingen strukturert markering for dette i kildedataen (kun navnet, f.eks. «Møhlenpris kunstgress», gir et hint — og det er fritekst, ikke et felt å stole på). Verre: et bygg kan i praksis romme *begge* — en idrettspark kan ha en innendørshall og en utendørs kunstgressbane under samme adresse — så «er dette bygget utendørs» har ikke ett riktig svar per bygg. Kolonnen er derfor fjernet. Innendørs/utendørs filtreres i stedet på **ressursnivå**, via ressursens lokaletype (`ressurs_lokaletype`) — `lokaletype` har allerede en `UTEAREAL`-hovedgruppe (`FRILUFTSOMRAADE`, `UTEOMRAADE`, `TURVEI` m.fl.) og enkelte utendørs-spesifikke koder under `IDRETT` (`FOTBALLBANE`, `SKATEANLEGG`). Det er den riktige granulariteten: to ressurser i samme bygg kan ha ulik status, selv om bygget ikke kan.
+**Innendørs/utendørs avgjøres ikke på bygningsnivå.** Vi prøvde først en `er_uteanlegg`-kolonne på `bygning`, men den ble aldri fylt riktig: Aktiv kommune har ingen strukturert markering for dette i kildedataen (kun navnet, f.eks. «Møhlenpris kunstgress», gir et hint — og det er fritekst, ikke et felt å stole på). Verre: et bygg kan i praksis romme *begge* — en idrettspark kan ha en innendørshall og en utendørs kunstgressbane under samme adresse — så «er dette bygget utendørs» har ikke ett riktig svar per bygg. Kolonnen er derfor fjernet. Innendørs/utendørs filtreres i stedet på **ressursnivå**, via ressursens lokaletype (`ressurs_lokaletype`) — `lokaletype` har allerede utendørsfasettene `sportsOutdoor` (idrettsanlegg ute, f.eks. fotballbane og skateanlegg) og `outdoor` (friluftsområder, turveier m.fl.). Det er den riktige granulariteten: to ressurser i samme bygg kan ha ulik status, selv om bygget ikke kan.
 
 Raden har **én identitet og én referanse**:
 
@@ -112,13 +112,13 @@ Gatenavnet ligger ikke lenger på `adresse`, men i `gate` via `gate_id`.
 
 ### Søkefasetter
 
-**`lokaletype`** (78 rader), **`aktivitet`** (204), **`fasilitet`** (32) — masterens eget kodeverk.
+**`lokaletype`** (94 konsepter), **`aktivitet`** (204), **`fasilitet`** (153) — masterens eget kodeverk.
 
 Skillet er meningsbærende: `lokaletype` er hva stedet **er**, `aktivitet` er hva det kan **brukes til**, `fasilitet` er hva det **har**.
 
-`aktivitet` seedes ikke i skjemaet. Vokabularet eies av `etl/activity_mapping/activities.json` og lastes av `etl/last_mapping.py`. Tabellen holder flere fasetter enn rene aktiviteter, og fasetten bæres av prefikset i `kode`: `ACT-` aktivitet, `EVT-` arrangement, `ORG-` organisasjon, `GRP-` målgruppe, `VEN-` lokale, `SRV-` tjeneste. En `CHECK` håndhever formatet. `EXC-`-konseptene lastes ikke inn, men gir `status='ikke_relevant'`. Se `etl/activity_mapping/AktivKommune_activity_normalisation.md`.
+Ingen av de tre seedes i skjemaet. Vokabularet eies av JSON-filene `etl/activity_mapping/activities.json`, `etl/lokaletype_mapping/venue_types.json` og `etl/fasilitet_mapping/facilities.json`, og lastes av `etl/last_mapping.py`. Alle tre er gruppert i fasetter i filene, og `exclude`-fasetten lastes ikke inn (kodene i den gir `status='ikke_relevant'` i mappingen). `lokaletype` bærer fasetten (`sportsIndoor`, `culture` ...) i kolonnen `fasett`, som brukes som `lokaletype_hovedgruppe` i søket, og `fasilitet` i kolonnen `gruppe`. Verdiene er ikke begrenset i databasen: en ny fasett i filen skal ikke kreve en migrasjon. Kodene har formatene `LOK-SI-004` og `FAC-SN-002`, som en `CHECK` håndhever. Tabellen `aktivitet` holder flere fasetter enn rene aktiviteter, og fasetten bæres av prefikset i `kode`: `ACT-` aktivitet, `EVT-` arrangement, `ORG-` organisasjon, `GRP-` målgruppe, `VEN-` lokale, `SRV-` tjeneste. En `CHECK` håndhever formatet. `EXC-`-konseptene lastes ikke inn, men gir `status='ikke_relevant'`. Se `etl/activity_mapping/AktivKommune_activity_normalisation.md`.
 
-`lokaletype` og `aktivitet` er hierarkiske via `parent_id`, så et søk på `IDRETT` også treffer `GYMSAL` og `IDRETTSHALL`. Noen få aktivitetskonsepter har to foreldre i vokabularet (Dans, Curling, E-sport). `parent_id` får den første.
+`lokaletype` og `aktivitet` er hierarkiske via `parent_id` (`broader` i vokabularfilen), så et søk på Idrettshall (`LOK-SI-001`) også treffer Gymsal (`LOK-SI-004`). Noen få aktivitetskonsepter har to foreldre i vokabularet (Dans, Curling, E-sport). `parent_id` får den første. `fasilitet` har ingen `parent_id`: `broader` i `facilities.json` brukes ikke ennå.
 
 **`ressurs_aktivitet`**, **`ressurs_fasilitet`** og **`ressurs_lokaletype`** — koblingene mellom ressurs og kodeverk. En gymsal brukes til håndball, turn og dans, og har garderobe, dusj og parkettgulv. Koblingene er visninger, ikke lagrede rader: de regnes ut fra hva kilden sa (`ressurs_kildekode`) og godkjent mapping, se neste avsnitt. En ressurs har høyst én lokaletype.
 
@@ -144,7 +144,7 @@ kildekode                  lokaletype_mapping /         lokaletype /
                            (kuratert oversettelse)      (vårt kodeverk)
 
 Bergen   "17: Gymsal"  ─┐
-                         ├──→   godkjent   ──→   GYMSAL
+                         ├──→   godkjent   ──→   Gymsal (LOK-SI-004)
 Øygarden  "4: Gymsal"  ─┘
 
 ressurs_kildekode: hvilke kildekoder kilden ga hver ressurs (uten tolkning)
@@ -302,10 +302,10 @@ Dette er den faktiske pipelinen, ikke en plan — alle filnavn og kommandoer und
 
 | Fil | Kjøres når | Hva den gjør | Hardkodet? |
 |---|---|---|---|
-| Flyway-migrasjonene (`V*__*.sql`) | Automatisk når backenden starter; en ny fil krever `docker compose up -d --build backend` | Lager og endrer tabellene, indeksene og visningene, og seeder kodeverkene | Ja — dette er selve modellen |
+| Flyway-migrasjonene (`V*__*.sql`) | Automatisk når backenden starter; en ny fil krever `docker compose up -d --build backend` | Lager og endrer tabellene, indeksene og visningene. Kodeverkene er tomme til `last_mapping.py` er kjørt | Ja — dette er selve modellen |
 | `db/schema_kjerne.sql` | Aldri mot en Flyway-database | Lesbar, samlet kopi av skjemaet etter siste migrasjon | Ja — oppdateres for hånd med hver migrasjon |
 | `etl/last_inn.py` | Hver gang vi vil oppdatere kommunedata | Henter `searchdataall` fra én eller alle 12 kommuner, renser tekst (HTML er escapet to ganger i kilden), lagrer kildekodene og hvilke koder hver ressurs har (`ressurs_kildekode`), skriver SQL til standard-ut | Ja — avvisningslogikken er hardkodet Python |
-| `etl/last_mapping.py` | Etter `last_inn.py`, og alene når en fasitfil er endret | Laster aktivitetsvokabularet og mappingen fra `etl/*_mapping/` inn i de tre mappingtabellene, og rapporterer hvilke koblinger som endres. Henter ingenting fra kommunene | Nei — fasiten er JSON-filene; `IKKE_RELEVANT_*` er hardkodet |
+| `etl/last_mapping.py` | Etter `last_inn.py`, og alene når en fasitfil er endret | Laster vokabularet (aktivitet, lokaletype, fasilitet) og mappingen fra `etl/*_mapping/` inn i kodeverkstabellene og de tre mappingtabellene, og rapporterer hvilke koblinger som endres. Henter ingenting fra kommunene | Nei — fasiten er JSON-filene; `IKKE_RELEVANT_*` er hardkodet |
 | `etl/ut/alle.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av hva kommunene sa akkurat da skriptet kjørte | Nei — forkastbar output, ligger i `.gitignore`, ulik hver dag |
 | `etl/matrikkel_adresse.py` | Etter hver `last_inn.py`-kjøring, for det som fortsatt mangler geokoding/bygningsnr/matrikkelinfo | Slår opp adresser mot MatrikkelAPI *innenfor riktig kommune*, og bygningsobjektet for enhver bygning som mangler bygningsnummer. Krever ett eksakt treff; null eller flere treff logges i `synk_avvik` i stedet for å gjettes | Ja — matchingsregelen er hardkodet |
 | `etl/ut/matrikkel.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av geokodings- og bygningsresultatet | Nei — samme som over |
@@ -347,14 +347,14 @@ Finn gymsal med garderobe, uansett kommune:
 ```sql
 SELECT navn, kommune_navn, bygg_navn, adressetekst, booking_url
 FROM v_ressurs_sok
-WHERE lokaletype_kode = 'GYMSAL' AND 'GARDEROBE' = ANY(fasilitet_koder);
+WHERE lokaletype_kode = 'LOK-SI-004' AND 'FAC-SN-002' = ANY(fasilitet_koder);  -- Gymsal med garderobe
 ```
 
 Søk på hovedgruppe, slik at undertyper treffer:
 
 ```sql
 WITH RECURSIVE gren AS (
-    SELECT id, kode FROM lokaletype WHERE kode = 'IDRETT'
+    SELECT id, kode FROM lokaletype WHERE kode = 'LOK-SI-001'  -- Idrettshall
     UNION ALL
     SELECT lt.id, lt.kode FROM lokaletype lt JOIN gren g ON lt.parent_id = g.id
 )
@@ -430,7 +430,7 @@ Alle 12 instanser er lastet inn med reelle data:
 | `ressurs_aktivitet` / `ressurs_fasilitet` | 672 / 1 221 |
 | `synk_avvik` (siste kjøring) | 2 829 |
 
-Radtallene svinger litt fra kjøring til kjøring (kommunene endrer sine egne data daglig); det er `GYMSAL`/`IDRETTSHALL`-mønsteret som er det stabile beviset. Tverrkommunalt søk er verifisert: ett søk på `GYMSAL` finner gymsaler i 3 kommuner, `IDRETTSHALL` i 4 kommuner — alt gjennom én kanonisk kode, til tross for at de lokale ID-ene er uforenlige.
+Radtallene svinger litt fra kjøring til kjøring (kommunene endrer sine egne data daglig); det er Gymsal/Idrettshall-mønsteret som er det stabile beviset (målt med det opprinnelige kodeverket fra V1, før vokabularet kom fra JSON). Tverrkommunalt søk er verifisert: ett søk på gymsal fant gymsaler i 3 kommuner, idrettshall i 4 kommuner — alt gjennom én kanonisk kode, til tross for at de lokale ID-ene er uforenlige.
 
 ---
 
@@ -489,6 +489,7 @@ Hver endring av skjemaet er nå en Flyway-migrasjon; filene i `backend/src/main/
 - **V2** — ny tabell `ressurs_kildekode`: hvilke kildekoder kilden ga hver ressurs, uten tolkning.
 - **V3** — `kildekode_mapping` er erstattet av `lokaletype_mapping` og `fasilitet_mapping`, med samme oppbygning som `aktivitet_mapping`. Eksisterende rader ble flyttet over. Fremmednøklene fra alle tre mappingtabellene til kodeverket er nå `ON DELETE RESTRICT`. `v_ukartlagte_kildekoder` leser de tre tabellene.
 - **V4** — `ressurs_aktivitet` og `ressurs_fasilitet` er gjort om fra tabeller til visninger, og `ressurs.lokaletype_id` er erstattet av visningen `ressurs_lokaletype`. Alle tre regnes ut fra `ressurs_kildekode` og godkjent mapping. `ix_ressurs_sok` er nå på `(kommune_id)`, og `v_ressurs_sok` henter lokaletypen fra `ressurs_lokaletype` (kolonnene er uendret).
+- **V5** — vokabularet for lokaletype og fasilitet kommer fra JSON (`venue_types.json`, `facilities.json`) i stedet for seed-data i V1, med nye koder (`LOK-SI-004`, `FAC-SN-002`). De gamle radene og ETL-mappingene som pekte på dem er fjernet. `lokaletype` har fått kolonnen `fasett`, begge tabellene har en `CHECK` på kodeformatet, og `fasilitet.gruppe` er ikke lenger begrenset til en fast liste. `v_ressurs_sok.lokaletype_hovedgruppe` er nå fasetten i stedet for forelderens kode. Kodeverkene er tomme til `etl/last_mapping.py` er kjørt.
 
 ### Før Flyway
 
