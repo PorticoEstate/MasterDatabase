@@ -39,11 +39,6 @@ import urllib.request
 from pathlib import Path
 from datetime import datetime, timezone
 
-def last_mapping(mappe: str) -> dict:
-    with open(Path(__file__).parent / mappe / "mapping.json", encoding="utf-8") as f:
-        return json.load(f)["values"]
-
-
 KOMMUNER = {
     "afjord": ("5058", "Åfjord", "Trøndelag"),
     "alesund": ("1508", "Ålesund", "Møre og Romsdal"),
@@ -73,26 +68,35 @@ KOMMUNER = {
 # "drammen": ("3301", "Drammen", "Buskerud"),
 # "suldal": ("1134", "Suldal", "Rogaland"),
 
-# Normalisert kildenavn -> kode i vårt eget kodeverk (lokaletype/fasilitet,
-# seedet i schema_kjerne.sql; aktivitet, se under). Mappingen finnes bare her i
-# ETL, ikke i databasen. Navn som ikke finnes her, lastes inn i kildekode
-# uendret og loggføres som 'ikke_kartlagt' - de dukker opp i
-# v_ukartlagte_kildekoder og må legges inn i mapping-filene.
-LOKALETYPE = last_mapping("lokaletype_mapping")
-FASILITET = last_mapping("fasilitet_mapping")
-
-# Aktivitet har et eget, rikere format (se activity_mapping/
-# AktivKommune_activity_normalisation.md): mapping.json har under "values"
-# ett oppslag per normalisert kildenavn (norm_aktivitet), med konsept-ID-ene
-# i "activities", og activities.json er vokabularet de peker på, gruppert per
-# fasett. Øvrige felt (confidence, status, attributes, reason, sourceNames)
-# brukes ikke foreløpig. Alle fasetter unntatt "exclude" lastes inn i tabellen
-# aktivitet; EXC-konsepter betyr at kildekoden ikke er relevant.
-with open(Path(__file__).parent / "activity_mapping" / "mapping.json", encoding="utf-8") as f:
-    AKTIVITET = {navn: v["activities"] for navn, v in json.load(f)["values"].items()}
-with open(Path(__file__).parent / "activity_mapping" / "activities.json", encoding="utf-8") as f:
-    VOKABULAR = json.load(f)["facets"]
-EKSKLUDER = set(VOKABULAR["exclude"])
+# Mapping og vokabular per kodetype, i samme format for alle tre (se
+# activity_mapping/AktivKommune_activity_normalisation.md): mapping.json har
+# under "values" ett oppslag per normalisert kildenavn (norm_navn) med
+# konsept-ID-ene i målfeltet, og vokabularfilen har konseptene gruppert per
+# fasett, med "broader" som forelder. Øvrige felt (confidence, status,
+# attributes, reason, sourceNames) brukes ikke foreløpig. Alle fasetter
+# unntatt "exclude" lastes inn i kodeverkstabellen; exclude-konsepter betyr
+# at kildekoden ikke er relevant.
+#
+# Mappingen finnes bare her i ETL, ikke i databasen. Navn som ikke finnes i
+# mapping.json, lastes inn i kildekode uendret og loggføres som
+# 'ikke_kartlagt' - de dukker opp i v_ukartlagte_kildekoder og må legges inn
+# i mapping-filene.
+#
+# kodetype: (mappe, vokabularfil, målfelt i mapping.json)
+KODEVERK = {
+    "lokaletype": ("lokaletype_mapping", "venue_types.json", "venueType"),
+    "aktivitet": ("activity_mapping", "activities.json", "activities"),
+    "fasilitet": ("fasilitet_mapping", "facilities.json", "facilities"),
+}
+MAPPING, VOKABULAR = {}, {}
+for _kodetype, (_mappe, _vokabularfil, _malfelt) in KODEVERK.items():
+    with open(Path(__file__).parent / _mappe / "mapping.json", encoding="utf-8") as f:
+        # Lokaletype er én-til-én og har én kode som streng; de andre en liste.
+        MAPPING[_kodetype] = {navn: [v[_malfelt]] if isinstance(v[_malfelt], str) else v[_malfelt]
+                              for navn, v in json.load(f)["values"].items()}
+    with open(Path(__file__).parent / _mappe / _vokabularfil, encoding="utf-8") as f:
+        VOKABULAR[_kodetype] = json.load(f)["facets"]
+EKSKLUDER = {kode for v in VOKABULAR.values() for kode in v.get("exclude", {})}
 
 # Junk uansett kodetype: adresser, stedsnavn og driftsstatus som aldri kan
 # være en ekte lokaletype, aktivitet eller fasilitet.
@@ -103,9 +107,9 @@ IKKE_RELEVANT_UNIVERSELT = {
 
 # Junk KUN i én kodetype-kontekst - kan være en ekte verdi i en annen. F.eks.
 # er "Inkludering" ikke en stedstype, men er en fullt plausibel aktivitet
-# (inkluderingstiltak er en vanlig kommunal kategori). For aktivitet avgjør
-# mapping.json selv hva som er junk (EXC-konsepter); IKKE_RELEVANT_UNIVERSELT
-# brukes der bare som reserve for navn som mangler i mapping.json.
+# (inkluderingstiltak er en vanlig kommunal kategori). mapping.json avgjør
+# selv hva som er junk (exclude-konsepter); disse listene brukes bare som
+# reserve for navn som mangler i mapping.json.
 IKKE_RELEVANT_PER_TYPE = {
     "lokaletype": {"inkludering", "sosial aktivitet", "wc toalett"},
     "fasilitet": set(),
@@ -168,12 +172,12 @@ def norm(s):
     return re.sub(r"[^a-z0-9]+", " ", s).strip()
 
 
-def norm_aktivitet(s):
-    """Normaliserer et aktivitetsnavn for oppslag i activity_mapping/
-    mapping.json. Mildere enn norm(): beholder æ/ø/å og tegnsetting, og må
-    være identisk med reglene i AktivKommune_activity_normalisation.md §4.4
-    (dobbel HTML-avkoding, trim, sammenslåtte mellomrom, små bokstaver)."""
-    return (rens(s) or "").lower()
+def norm_navn(s):
+    """Normaliserer et kildenavn for oppslag i mapping.json (alle tre
+    kodetyper). Mildere enn norm(): beholder æ/ø/å og tegnsetting, og må være
+    identisk med "normalisation" i mapping-filene (dobbel HTML-avkoding,
+    unicode NFC, trim, sammenslåtte mellomrom, små bokstaver)."""
+    return unicodedata.normalize("NFC", rens(s) or "").lower()
 
 
 def q(v):
@@ -225,40 +229,38 @@ def som_heltall(v):
 
 
 def vokabular_sql() -> str:
-    """Upsert av aktivitetsvokabularet fra activities.json - alle fasetter
-    unntatt "exclude". Foreldre settes i et eget steg, siden rekkefølgen i
-    filen ikke garanterer at forelderen kommer før barnet. Konsepter med to
-    foreldre (f.eks. Dans) får den første, se aktivitet i schema_kjerne.sql."""
-    konsepter = [(kode, k) for fasett, ks in VOKABULAR.items() if fasett != "exclude"
-                 for kode, k in ks.items()]
-    verdier = ",\n".join(f"({q(kode)},{q(k['label']['nb'])})" for kode, k in konsepter)
-    foreldre = ",\n".join(f"({q(kode)},{q(k['broader'][0])})" for kode, k in konsepter if k.get("broader"))
-    rotter = ",".join(q(kode) for kode, k in konsepter if not k.get("broader"))
-    return ("BEGIN;\n"
-            f"INSERT INTO aktivitet (kode,navn) VALUES\n{verdier}\n"
-            f"ON CONFLICT (kode) DO UPDATE SET navn=EXCLUDED.navn;\n"
-            f"UPDATE aktivitet a SET parent_id=p.id FROM (VALUES\n{foreldre}\n) AS v(kode,forelder) "
-            f"JOIN aktivitet p ON p.kode=v.forelder "
-            f"WHERE a.kode=v.kode AND a.parent_id IS DISTINCT FROM p.id;\n"
-            f"UPDATE aktivitet SET parent_id=NULL WHERE kode IN ({rotter}) AND parent_id IS NOT NULL;\n"
-            "COMMIT;\n\n")
+    """Upsert av vokabularet for alle tre kodetyper fra vokabularfilene - alle
+    fasetter unntatt "exclude". Foreldre settes i et eget steg, siden
+    rekkefølgen i filen ikke garanterer at forelderen kommer før barnet.
+    Konsepter med to foreldre (f.eks. Dans) får den første, se aktivitet i
+    schema_kjerne.sql."""
+    sql = "BEGIN;\n"
+    for tabell, vokabular in VOKABULAR.items():
+        konsepter = [(kode, k) for fasett, ks in vokabular.items() if fasett != "exclude"
+                     for kode, k in ks.items()]
+        verdier = ",\n".join(f"({q(kode)},{q(k['label']['nb'])})" for kode, k in konsepter)
+        foreldre = ",\n".join(f"({q(kode)},{q(k['broader'][0])})" for kode, k in konsepter if k.get("broader"))
+        rotter = ",".join(q(kode) for kode, k in konsepter if not k.get("broader"))
+        sql += (f"INSERT INTO {tabell} (kode,navn) VALUES\n{verdier}\n"
+                f"ON CONFLICT (kode) DO UPDATE SET navn=EXCLUDED.navn;\n"
+                f"UPDATE {tabell} a SET parent_id=p.id FROM (VALUES\n{foreldre}\n) AS v(kode,forelder) "
+                f"JOIN {tabell} p ON p.kode=v.forelder "
+                f"WHERE a.kode=v.kode AND a.parent_id IS DISTINCT FROM p.id;\n"
+                f"UPDATE {tabell} SET parent_id=NULL WHERE kode IN ({rotter}) AND parent_id IS NOT NULL;\n")
+    return sql + "COMMIT;\n\n"
 
 
 def oversett(kodetype: str, navn: str):
     """Kildenavn -> liste med koder i masterens kodeverk, via mapping-filene.
     Tom liste betyr ikke relevant (bevisst uten mål, f.eks. "Stengt" eller et
-    EXC-konsept); None betyr ukartlagt. Ett aktivitetsnavn kan gi flere
-    konsepter ("Barnebursdag 3 - 12 år" -> Barnebursdag + Barn)."""
-    if kodetype == "aktivitet":
-        konsepter = AKTIVITET.get(norm_aktivitet(navn))
-        if konsepter is None:
-            return [] if er_ikke_relevant(kodetype, norm(navn)) else None
-        return [c for c in konsepter if c not in EKSKLUDER]
-    n = norm(navn)
-    if er_ikke_relevant(kodetype, n):
-        return []
-    tabell = LOKALETYPE if kodetype == "lokaletype" else FASILITET
-    return [tabell[n]] if n in tabell else None
+    exclude-konsept); None betyr ukartlagt. Lokaletype gir høyst én kode, mens
+    ett aktivitets- eller fasilitetsnavn kan gi flere ("Barnebursdag 3 - 12 år"
+    -> Barnebursdag + Barn)."""
+    konsepter = MAPPING[kodetype].get(norm_navn(navn))
+    if konsepter is None:
+        # Reserve for navn som mangler i mapping.json.
+        return [] if er_ikke_relevant(kodetype, norm(navn)) else None
+    return [c for c in konsepter if c not in EKSKLUDER]
 
 
 def generer_sql(slug: str, ut) -> bool:
