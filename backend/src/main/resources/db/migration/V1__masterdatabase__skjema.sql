@@ -1,7 +1,7 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
 -- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
--- 19 tabeller. 18 får data i dag, enten fra Aktiv kommune-endepunktene eller
+-- 18 tabeller. 17 får data i dag, enten fra Aktiv kommune-endepunktene eller
 -- fra matrikkelen - unntaket er ressurslenke, som forblir tom til et andre
 -- fagsystem (fdv/sensor/...) faktisk kobles på. Se db/schema_kjerne_dokumentasjon.md.
 --
@@ -331,7 +331,7 @@ CREATE TABLE IF NOT EXISTS fasilitet
 
 
 -- =============================================================================
--- 7. Lokale kildekoder og oversettelse
+-- 7. Lokale kildekoder
 -- =============================================================================
 
 -- Kommunens egen kode, lagret uendret for sporbarhet. Instansen er med i
@@ -351,68 +351,12 @@ CREATE TABLE IF NOT EXISTS kildekode
 
 CREATE INDEX IF NOT EXISTS ix_kildekode_navn ON kildekode (lower(navn));
 
--- Oversettelsen er en menneskelig vurdering, ikke en beregning. Derfor bærer
--- den status og hvem som bestemte den.
--- 'ikke_relevant' finnes fordi kategorilistene inneholder verdier som ikke er
--- lokaletyper: "Stengt", "Fiktivt rom", "Streaming", og stedsnavn som
--- "Judaberg innbyggertorg".
---
--- Gjelder lokaletype og fasilitet, der hver kildekode har høyst ett mål.
--- Aktivitet har sin egen tabell, aktivitet_mapping (under).
---
--- Egen "id" pluss en UNIQUE "kildekode_id", i stedet for å la kildekode_id
--- være primærnøkkel direkte: det holder mønsteret "PK heter id, FK heter
--- <tabell>_id" konsekvent, selv om denne tabellen i praksis er en ett-til-én
--- utvidelse av kildekode.
-CREATE TABLE IF NOT EXISTS kildekode_mapping
-(
-    id            BIGSERIAL PRIMARY KEY,
-    kildekode_id  BIGINT UNIQUE NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
-    lokaletype_id BIGINT REFERENCES lokaletype(id) ON DELETE CASCADE,
-    fasilitet_id  BIGINT REFERENCES fasilitet(id) ON DELETE CASCADE,
-    status        TEXT NOT NULL DEFAULT 'foreslatt'
-                      CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
-    kartlagt_av   TEXT,
-    merknad       TEXT,
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_mapping_ett_mal
-        CHECK (
-            (CASE WHEN lokaletype_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN fasilitet_id IS NOT NULL THEN 1 ELSE 0 END)
-          = CASE WHEN status = 'ikke_relevant' THEN 0 ELSE 1 END
-        )
-);
-
-CREATE INDEX IF NOT EXISTS ix_mapping_lokaletype ON kildekode_mapping (lokaletype_id);
-CREATE INDEX IF NOT EXISTS ix_mapping_status ON kildekode_mapping (status);
-
--- Oversettelse av aktivitetskoder. Egen tabell fordi ett kildenavn kan bære
--- flere konsepter ("Barnebursdag 3 - 12 år" -> Barnebursdag + Barn), og da får
--- kildekoden én rad per konsept - noe kildekode_mapping (én rad per kode) ikke
--- tillater, og som ellers ville gitt rader med to alltid tomme målkolonner.
--- 'ikke_relevant' (EXC-konsepter i activity_mapping) ligger her med
--- aktivitet_id = NULL, slik at all aktivitetskartlegging finnes på ett sted.
-CREATE TABLE IF NOT EXISTS aktivitet_mapping
-(
-    id           BIGSERIAL PRIMARY KEY,
-    kildekode_id BIGINT NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
-    aktivitet_id BIGINT REFERENCES aktivitet(id) ON DELETE CASCADE,
-    status       TEXT NOT NULL DEFAULT 'foreslatt'
-                     CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
-    kartlagt_av  TEXT,
-    merknad      TEXT,
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_aktivitet_mapping_mal
-        CHECK ((aktivitet_id IS NULL) = (status = 'ikke_relevant'))
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping
-    ON aktivitet_mapping (kildekode_id, aktivitet_id) WHERE aktivitet_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping_ikke_relevant
-    ON aktivitet_mapping (kildekode_id) WHERE aktivitet_id IS NULL;
-CREATE INDEX IF NOT EXISTS ix_aktivitet_mapping_aktivitet ON aktivitet_mapping (aktivitet_id);
+-- Kildekoden er den ikke-normaliserte formen: kommunens eget kodeverk slik det
+-- står i kilden. Hvordan en kode oversettes til masterens kodeverk er ikke en
+-- del av modellen - det eier etl/*_mapping/ (JSON) og påføres ved innlasting.
+-- Koder uten oversettelse logges i synk_avvik som 'ikke_kartlagt' og vises i
+-- v_ukartlagte_kildekoder. Når kildene er normalisert, kan kildekode og
+-- ressurs_kildekode fjernes uten at resten av modellen berøres.
 
 
 -- =============================================================================
@@ -487,6 +431,19 @@ CREATE TABLE IF NOT EXISTS ressurs_fasilitet
 );
 
 CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasilitet_id);
+
+-- Ressursens kodeverdier slik kilden har dem, uten oversettelse: én
+-- lokaletype-kode og null eller flere aktivitets- og fasilitetskoder. Står ved
+-- siden av de normaliserte koblingene (lokaletype_id, ressurs_aktivitet,
+-- ressurs_fasilitet) slik at begge formene kan sammenlignes.
+CREATE TABLE IF NOT EXISTS ressurs_kildekode
+(
+    ressurs_id   BIGINT NOT NULL REFERENCES ressurs(id) ON DELETE CASCADE,
+    kildekode_id BIGINT NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
+    PRIMARY KEY (ressurs_id, kildekode_id)
+);
+
+CREATE INDEX IF NOT EXISTS ix_ressurs_kildekode_kode ON ressurs_kildekode (kildekode_id);
 
 
 -- =============================================================================
@@ -697,27 +654,6 @@ LEFT JOIN bygning b        ON b.id = r.bygning_id
 LEFT JOIN adresse a        ON a.bygning_id = b.id AND a.er_hovedadresse
 WHERE r.aktiv AND r.bookbar;
 
--- Arbeidslisten for kuratering. Hver rad er en lokal kode som ennå ikke kan
--- søkes på tvers av kommuner. Kildekoden hører til instansen, ikke til én
--- kommune, siden en instans kan betjene flere - kommunene listes derfor
--- sammenslått via oppslag i kommune_fagsystem_instans.
-CREATE OR REPLACE VIEW v_ukartlagte_kildekoder AS
-SELECT kk.id AS kildekode_id, fi.kildenokkel,
-       (SELECT string_agg(k.navn, ', ' ORDER BY k.navn)
-          FROM kommune_fagsystem_instans kfi
-          JOIN kommune k ON k.id = kfi.kommune_id
-         WHERE kfi.fagsystem_instans_id = fi.id) AS kommuner,
-       kk.kodetype, kk.kode, kk.navn, kk.sist_sett
-FROM kildekode kk
-JOIN fagsystem_instans fi ON fi.id = kk.fagsystem_instans_id
--- Aktivitet kartlegges i aktivitet_mapping, alt annet i kildekode_mapping.
-WHERE CASE WHEN kk.kodetype = 'aktivitet'
-           THEN NOT EXISTS (SELECT 1 FROM aktivitet_mapping m
-                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
-           ELSE NOT EXISTS (SELECT 1 FROM kildekode_mapping m
-                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
-      END;
-
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
 -- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
 -- finnes, er den logget på nytt i den nyeste kjøringen.
@@ -728,6 +664,30 @@ WHERE a.kildeuttrekk_id IN (
     SELECT DISTINCT ON (kilde) id
     FROM kildeuttrekk
     ORDER BY kilde, hentet_at DESC, id DESC);
+
+-- Arbeidslisten for kuratering. Hver rad er en lokal kode som ETL ikke fant en
+-- oversettelse for i siste kjøring (avvikstype 'ikke_kartlagt', se
+-- v_synk_avvik_gjeldende), og som dermed ikke kan søkes på tvers av kommuner.
+-- Kildekoden hører til instansen, ikke til én kommune, siden en instans kan
+-- betjene flere - kommunene listes derfor sammenslått via oppslag i
+-- kommune_fagsystem_instans.
+CREATE OR REPLACE VIEW v_ukartlagte_kildekoder AS
+SELECT kk.id AS kildekode_id, fi.kildenokkel,
+       (SELECT string_agg(k.navn, ', ' ORDER BY k.navn)
+          FROM kommune_fagsystem_instans kfi
+          JOIN kommune k ON k.id = kfi.kommune_id
+         WHERE kfi.fagsystem_instans_id = fi.id) AS kommuner,
+       kk.kodetype, kk.kode, kk.navn, kk.sist_sett
+FROM v_synk_avvik_gjeldende av
+JOIN fagsystem_instans fi ON fi.kildenokkel = av.kilde
+JOIN kildekode kk ON kk.fagsystem_instans_id = fi.id
+                 AND kk.kode = av.ekstern_id
+                 AND kk.kodetype = CASE av.samling
+                                       WHEN 'resource_categories' THEN 'lokaletype'
+                                       WHEN 'activities'          THEN 'aktivitet'
+                                       WHEN 'facilities'          THEN 'fasilitet'
+                                   END
+WHERE av.avvikstype = 'ikke_kartlagt';
 
 -- Arbeidslisten for den som går gjennom avvik: avviket sammen med posten som
 -- utløste det. "post" er rapost, lagret direkte på avviket idet det oppstod -
@@ -893,8 +853,7 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'kommune','fagsystem_instans', 'matrikkelinfo','bygning','gate','adresse',
-        'lokaletype','aktivitet','fasilitet','kildekode','kildekode_mapping',
-        'aktivitet_mapping','ressurs'
+        'lokaletype','aktivitet','fasilitet','kildekode','ressurs'
     ]
     LOOP
         EXECUTE format('DROP TRIGGER IF EXISTS trg_%1$s_updated_at ON %1$I', t);
