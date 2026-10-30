@@ -79,7 +79,7 @@ Den unike indeksen `ux_matrikkelinfo` bruker `COALESCE(festenr, 0)` fordi festen
 
 Tabellen holder både bygg og utendørs anlegg, fordi Aktiv kommune bare har ett stedsbegrep: «Paradis kunstgressbane» er registrert som et bygg der, på linje med ekte bygninger.
 
-**Innendørs/utendørs avgjøres ikke på bygningsnivå.** Vi prøvde først en `er_uteanlegg`-kolonne på `bygning`, men den ble aldri fylt riktig: Aktiv kommune har ingen strukturert markering for dette i kildedataen (kun navnet, f.eks. «Møhlenpris kunstgress», gir et hint — og det er fritekst, ikke et felt å stole på). Verre: et bygg kan i praksis romme *begge* — en idrettspark kan ha en innendørshall og en utendørs kunstgressbane under samme adresse — så «er dette bygget utendørs» har ikke ett riktig svar per bygg. Kolonnen er derfor fjernet. Innendørs/utendørs filtreres i stedet på **ressursnivå**, via `ressurs.lokaletype_id` — `lokaletype` har allerede en `UTEAREAL`-hovedgruppe (`FRILUFTSOMRAADE`, `UTEOMRAADE`, `TURVEI` m.fl.) og enkelte utendørs-spesifikke koder under `IDRETT` (`FOTBALLBANE`, `SKATEANLEGG`). Det er den riktige granulariteten: to ressurser i samme bygg kan ha ulik status, selv om bygget ikke kan.
+**Innendørs/utendørs avgjøres ikke på bygningsnivå.** Vi prøvde først en `er_uteanlegg`-kolonne på `bygning`, men den ble aldri fylt riktig: Aktiv kommune har ingen strukturert markering for dette i kildedataen (kun navnet, f.eks. «Møhlenpris kunstgress», gir et hint — og det er fritekst, ikke et felt å stole på). Verre: et bygg kan i praksis romme *begge* — en idrettspark kan ha en innendørshall og en utendørs kunstgressbane under samme adresse — så «er dette bygget utendørs» har ikke ett riktig svar per bygg. Kolonnen er derfor fjernet. Innendørs/utendørs filtreres i stedet på **ressursnivå**, via `ressurs.lokaletype_id` — `lokaletype` har egne utendørsfasetter (`LOK-SO-` utendørs idrett og `LOK-OU-` friluft og uteområder). Det er den riktige granulariteten: to ressurser i samme bygg kan ha ulik status, selv om bygget ikke kan.
 
 Raden har **én identitet og én referanse**:
 
@@ -112,15 +112,13 @@ Gatenavnet ligger ikke lenger på `adresse`, men i `gate` via `gate_id`.
 
 ### Søkefasetter
 
-**`lokaletype`** (78 rader), **`aktivitet`** (204), **`fasilitet`** (32) — masterens eget kodeverk.
+**`lokaletype`** (94 konsepter), **`aktivitet`** (208), **`fasilitet`** (153) — masterens eget kodeverk.
 
 Skillet er meningsbærende: `lokaletype` er hva stedet **er**, `aktivitet` er hva det kan **brukes til**, `fasilitet` er hva det **har**.
 
-`aktivitet` seedes ikke i skjemaet. Vokabularet eies av `etl/activity_mapping/activities.json` og lastes av `etl/last_inn.py`. Tabellen holder flere fasetter enn rene aktiviteter, og fasetten bæres av prefikset i `kode`: `ACT-` aktivitet, `EVT-` arrangement, `ORG-` organisasjon, `GRP-` målgruppe, `VEN-` lokale, `SRV-` tjeneste. En `CHECK` håndhever formatet. `EXC-`-konseptene lastes ikke inn, men gir `status='ikke_relevant'`. Se `etl/activity_mapping/AktivKommune_activity_normalisation.md`.
+Ingen av kodeverkene seedes i skjemaet. Vokabularet eies av JSON-filer og lastes av `etl/last_inn.py`: `lokaletype_mapping/venue_types.json`, `activity_mapping/activities.json` og `fasilitet_mapping/facilities.json`. Fasetten bæres av prefikset i `kode`, ikke av en egen kolonne: `LOK-SI-` innendørs idrett, `LOK-CU-` kultur og så videre for lokaletype, `FAC-AV-` lyd og bilde, `FAC-SN-` sanitær og så videre for fasilitet, og `ACT-` aktivitet, `EVT-` arrangement, `ORG-` organisasjon, `GRP-` målgruppe, `VEN-` lokale, `SRV-` tjeneste for aktivitet (en `CHECK` håndhever aktivitetsformatet). `exclude`-konseptene lastes ikke inn. Se `etl/activity_mapping/AktivKommune_activity_normalisation.md`.
 
-`lokaletype` og `aktivitet` er hierarkiske via `parent_id`, så et søk på `IDRETT` også treffer `GYMSAL` og `IDRETTSHALL`. Noen få aktivitetskonsepter har to foreldre i vokabularet (Dans, Curling, E-sport). `parent_id` får den første.
-
-Én aktivitetskode i kilden kan peke på flere konsepter («Barnebursdag 3 - 12 år» gir Barnebursdag og Barn). Aktivitetskartleggingen ligger derfor i en egen tabell, `aktivitet_mapping`, med én rad per konsept. For lokaletype og fasilitet er det høyst én rad per kildekode i `kildekode_mapping`.
+Alle tre er hierarkiske via `parent_id`, satt fra `broader` i vokabularet, så et søk på Idrettshall (`LOK-SI-001`) også treffer Gymsal (`LOK-SI-004`). Noen få aktivitetskonsepter har to foreldre i vokabularet (Dans, Curling, E-sport). `parent_id` får den første. Fordi kodeverkene ikke seedes, er de tomme i en ny database til `last_inn.py` er kjørt.
 
 **`ressurs_aktivitet`** og **`ressurs_fasilitet`** — koblingstabeller. En gymsal brukes til håndball, turn og dans, og har garderobe, dusj og parkettgulv.
 
@@ -137,30 +135,28 @@ Kategori-ID  4  →  "Friidrettsanlegg" / "Gressbane" / "Gymsal"
 
 Men du kan heller ikke søke på navn. Blant de 142 kategorinavnene finnes `Gressbane` og `Grasbane`, `Sermonirom` og `Seremonirom`, `Foaje` og `Foajé` — pluss verdier som ikke er lokaletyper i det hele tatt: `Stengt`, `Fiktivt rom`, `Streaming`, og stedsnavn som `Judaberg innbyggertorg`.
 
-Løsningen er to tabeller:
+Løsningen er at kildens kode lagres uendret, og at ETL oversetter den til masterens kodeverk ved innlasting:
 
 ```
-kildekode                    kildekode_mapping              lokaletype
-(kommunens kode, uendret)    (kuratert oversettelse)        (vårt kodeverk)
+kildekode                    etl/*_mapping/ (JSON)          lokaletype
+(kommunens kode, uendret)    (oversettelse, kun i ETL)      (vårt kodeverk)
 
 Bergen   "17: Gymsal"  ─┐
-                         ├──→   godkjent   ──→   GYMSAL
+                         ├──→   "gymsal" → LOK-SI-004   ──→   Gymsal
 Øygarden  "4: Gymsal"  ─┘
 ```
 
-**`kildekode`** — 1 566 rader. Kommunens egen kode, lagret uendret. Nøkkelen `(fagsystem_instans_id, kodetype, kode)` gjør at Bergens 13 og Stavangers 13 kan ligge side om side. Tabellen rettes aldri; den er kildens sannhet. `sist_sett` gjør at nye koder oppdages ved neste innlasting.
+**`kildekode`** — kommunens egen kode, lagret uendret. Nøkkelen `(fagsystem_instans_id, kodetype, kode)` gjør at Bergens 13 og Stavangers 13 kan ligge side om side. Tabellen rettes aldri; den er kildens sannhet. `sist_sett` gjør at nye koder oppdages ved neste innlasting.
 
-**`kildekode_mapping`** — oversettelsen, modellert som en *påstand* og ikke en beregning: den har `status`, `kartlagt_av` og `merknad`, fordi dette er en menneskelig vurdering.
+**`ressurs_kildekode`** — ressursens koder slik kilden har dem: én lokaletype-kode (`rescategory_id`) og null eller flere aktivitets- og fasilitetskoder. Den står ved siden av de normaliserte koblingene (`ressurs.lokaletype_id`, `ressurs_aktivitet`, `ressurs_fasilitet`), slik at begge formene kan sammenlignes.
 
-Tabellen er i praksis en ett-til-én-utvidelse av `kildekode`, men følger likevel navnekonvensjonen fullt ut: den har sin egen `id` som primærnøkkel, og en separat `kildekode_id BIGINT UNIQUE NOT NULL` som fremmednøkkel. Det unngår at én og samme kolonne må være både primærnøkkel og fremmednøkkel samtidig.
+**Mappingen er ikke en del av modellen.** Oversettelsen fra kildekode til masterkode finnes bare i JSON-filene i `etl/*_mapping/` og påføres av `etl/last_inn.py` ved hver innlasting. Bakgrunnen er at Aktiv kommune-instansene skal normaliseres, slik at de selv bruker et felles kodeverk; da blir mappingen overflødig, og `kildekode` og `ressurs_kildekode` kan fjernes uten at resten av modellen berøres. Til da gjelder:
 
-**`aktivitet_mapping`** — det samme for aktivitetskoder, med samme `status`, `kartlagt_av` og `merknad`. Den er en egen tabell fordi én aktivitetskode kan gi flere konsepter, og da får koden én rad per konsept. `kildekode_mapping` gjelder dermed bare lokaletype og fasilitet, og har ingen alltid tomme målkolonner. `ikke_relevant` ligger i samme tabell med `aktivitet_id = NULL`.
-
-| Status | Betydning |
+| Utfall i ETL | Resultat |
 |---|---|
-| `foreslatt` | Maskinelt forslag, ikke godkjent. Brukes ikke i søk. |
-| `godkjent` | Kvalitetssikret. Brukes i søk. |
-| `ikke_relevant` | Koden er ikke en lokaletype. Her havner `Stengt` og stedsnavnene. |
+| Navnet finnes i `mapping.json` | Ressursen kobles til masterkoden(e). Lokaletype er én-til-én; ett aktivitets- eller fasilitetsnavn kan gi flere konsepter («Barnebursdag 3 - 12 år» gir Barnebursdag og Barn). |
+| Navnet peker på et `exclude`-konsept, eller står i `IKKE_RELEVANT_*` | Koden er ikke relevant (`Stengt`, stedsnavn). Ingen kobling, ingen avvik. |
+| Navnet finnes ikke | Avvik `ikke_kartlagt` i `synk_avvik`; koden vises i `v_ukartlagte_kildekoder` og må legges inn i `mapping.json`. |
 
 ### Ressurs
 
@@ -205,7 +201,7 @@ Beholdning: de to nyeste uttrekkene per kilde, uforbeholdent. `rydd_kildeuttrekk
 | `geokoding_feilet` | Ingen eller flere treff hos Kartverket, eller API-kallet feilet. |
 | `db_feil` | Databasen avviste posten av en grunn vi ikke har forutsett (f.eks. et CHECK-brudd). Bare den posten rulles tilbake; feilteksten og SQLSTATE står i `detalj`, og resten av lasten fortsetter. |
 | `annet` | Bl.a. at henting fra kilden feilet, eller at geokodet kommunenummer avviker fra antatt. |
-| `ikke_kartlagt` | Reservert; ukartlagte koder vises i dag i `v_ukartlagte_kildekoder`. |
+| `ikke_kartlagt` | En kildekode har ikke noe navn i `mapping.json`. Ett avvik per kode per instans, med koden i `ekstern_id` og kildens samling (`resource_categories`, `activities`, `facilities`) i `samling`. Leses via `v_ukartlagte_kildekoder`. |
 
 Mekanikken: skriptene skriver bare SQL og kjenner ikke id-en til uttrekket de oppretter. Første setning, `CALL registrer_kildeuttrekk(...)`, setter derfor id-en i en transaksjonslokal innstilling (`masterdb.kildeuttrekk_id`), og `CALL logg_avvik(...)` henter den derfra. Hver bygning/adresse, hver ressurs og hver geokodet adresse kjøres i sin egen `DO`-blokk med `EXCEPTION`-håndtering, som er det som gjør at én dårlig post ikke stopper hele transaksjonen. Python-skriptet har posten i minnet akkurat når avviket oppdages, og sender den rett med i `logg_avvik`-kallet som `rapost` — databasen trenger aldri grave den ut igjen av et lagret svar.
 
@@ -223,7 +219,7 @@ En **view** er en lagret spørring som oppfører seg som en tabell. Den lagrer i
 
 **`v_ressurs_sok`** — alt et søk trenger i én flat rad: ressurs, kommune, bygg, adresse, koordinat, kanonisk type, aktiviteter og fasiliteter som lister, og ferdig `booking_url`. Søkegrensesnittet slipper å kjenne tabellene bak.
 
-**`v_ukartlagte_kildekoder`** — arbeidslisten for kuratering. Hver rad er en lokal kode som ennå ikke kan søkes på tvers.
+**`v_ukartlagte_kildekoder`** — arbeidslisten for kuratering. Hver rad er en lokal kode som ETL ikke fant en oversettelse for i siste kjøring, og som dermed ikke kan søkes på tvers. Bygger på `ikke_kartlagt`-avvikene i `v_synk_avvik_gjeldende`, koblet mot `kildekode`: samlingen oversettes til kodetype (`resource_categories` → `lokaletype`, `activities` → `aktivitet`, `facilities` → `fasilitet`). Blir koden lagt inn i `mapping.json`, forsvinner den ved neste kjøring.
 
 **`v_synk_avvik_gjeldende`** — avvikene fra den siste kjøringen per kilde. Eldre avvik ligger i `synk_avvik` som historikk, men regnes ikke som åpne: finnes feilen fortsatt, er den logget på nytt i nyeste kjøring.
 
@@ -288,8 +284,8 @@ Ingen av disse tre stegene trigger det neste automatisk — alt er manuelle komm
 
 | Fil | Kjøres når | Hva den gjør | Hardkodet? |
 |---|---|---|---|
-| `db/schema_kjerne.sql` | Én gang mot en ny database, eller på nytt etter en modellendring | Lager alle tabellene, indeksene, visningene, og seeder kodeverkene | Ja — dette er selve modellen |
-| `etl/last_inn.py` | Hver gang vi vil oppdatere kommunedata | Henter `searchdataall` fra én eller alle 12 kommuner, renser tekst (HTML er escapet to ganger i kilden), oversetter lokale koder via ordbøkene i `etl/*_mapping/` (aktivitet: `activity_mapping/mapping.json` + `activities.json`) og `IKKE_RELEVANT_*`, skriver SQL til standard-ut | Ja — avvisningslogikken er hardkodet Python; ordbøkene er JSON-filer |
+| `db/schema_kjerne.sql` | Én gang mot en ny database, eller på nytt etter en modellendring | Lager alle tabellene, indeksene og visningene. Kodeverkene fylles av `last_inn.py` | Ja — dette er selve modellen |
+| `etl/last_inn.py` | Hver gang vi vil oppdatere kommunedata | Henter `searchdataall` fra én eller alle 12 kommuner, renser tekst (HTML er escapet to ganger i kilden), laster kodeverkene fra vokabularfilene og oversetter lokale koder via `mapping.json` i `etl/*_mapping/` (reserve: `IKKE_RELEVANT_*`), skriver SQL til standard-ut | Ja — avvisningslogikken er hardkodet Python; ordbøkene er JSON-filer |
 | `etl/ut/alle.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av hva kommunene sa akkurat da skriptet kjørte | Nei — forkastbar output, ligger i `.gitignore`, ulik hver dag |
 | `etl/matrikkel_adresse.py` | Etter hver `last_inn.py`-kjøring, for det som fortsatt mangler geokoding/bygningsnr/matrikkelinfo | Slår opp adresser mot MatrikkelAPI *innenfor riktig kommune*, og bygningsobjektet for enhver bygning som mangler bygningsnummer. Krever ett eksakt treff; null eller flere treff logges i `synk_avvik` i stedet for å gjettes | Ja — matchingsregelen er hardkodet |
 | `etl/ut/matrikkel.sql` | Aldri «kjørt» — bare skrevet | Ferskt SQL-øyeblikksbilde av geokodings- og bygningsresultatet | Nei — samme som over |
@@ -322,15 +318,15 @@ Gjentatt kjøring oppdaterer i stedet for å duplisere, men ikke alt overskrives
 
 - `bygning`: navn og bydel følger kilden (Aktiv kommune vinner på disse feltene).
 - `adresse`: oppdateres bare mens `geokoding` er `ukjent` eller `feilet`. En geokodet eller manuelt satt adresse røres ikke. Konsekvens: endres adressen i kilden etter geokoding, fanges det ikke opp av innlastingen.
-- `ressurs`: navn og `kapasitet` følger kilden.
-- `kildekode_mapping`: røres aldri etter at raden er opprettet, så en manuell vurdering overskrives ikke.
-- `aktivitet_mapping`: ETL-rader (`kartlagt_av='etl'`) fornyes ved hver kjøring fra `activity_mapping/mapping.json`. Har en kildekode en manuell rad, røres ingen av kodens rader.
+- `ressurs`: navn, `kapasitet` og `lokaletype_id` følger kilden og mappingen.
+- `lokaletype`, `aktivitet`, `fasilitet`: navn og `parent_id` følger vokabularfilene.
+- `ressurs_kildekode`, `ressurs_aktivitet`, `ressurs_fasilitet`: bygges på nytt for instansen ved hver kjøring, så endringer i kilden eller mapping-filene slår alltid igjennom. Det finnes ingen manuelle mappinger i databasen; rettinger gjøres i `mapping.json`.
 
 **Kjent forenkling, verdt å lese to ganger:** `kommune_id` settes i steg 2 fra hvilken Aktiv kommune-instans dataene kommer fra (instansens slug slås opp direkte mot en kommune), **ikke** fra geokodingen i steg 3. Det stemmer for alle 12 instansene i dag, siden hver av dem betjener nøyaktig én kommune (se `kommune_fagsystem_instans`). Skulle en instans senere betjene flere kommuner, holder ikke denne forenklingen — da må steg 2 vente på steg 3, og `kommune_id` avgjøres av adressens geokodede `kommunenummer` i stedet.
 
 **Matrikkelen** er kilden til bygningsnummer, bygningstype, BRA, antall etasjer, gate, adressekode og eiendomskoblingen (`matrikkelinfo`, knyttet til bygget via `bygning_id`) - alt fylt av `etl/matrikkel_adresse.py` (se `etl/README.md`, "Geokoding og bygningsberikelse"), som kjører mot MatrikkelAPI-ets testmiljø (`prodtest.matrikkel.no`). Produksjonstilgang krever avtale med Kartverket - `BASE_URL` må oppdateres den dagen den er på plass. Bygg og adresser det ikke lykkes å finne noe for, forblir `bygning.matrikkel_match='ikke_forsokt'`/`'ikke_funnet'` og er loggført i `synk_avvik`, ikke gjettet på.
 
-**Ikke del av pipelinen ennå:** ingen automatisk gjentakelse (ingen cron/planlagt jobb — alt kjøres manuelt) og ingen automatisert kuratering av `v_ukartlagte_kildekoder` — det er fortsatt en manuell jobb å lese visningen og redigere ordbøkene i `last_inn.py`.
+**Ikke del av pipelinen ennå:** ingen automatisk gjentakelse (ingen cron/planlagt jobb — alt kjøres manuelt) og ingen automatisert kuratering av `v_ukartlagte_kildekoder` — det er fortsatt en manuell jobb å lese visningen og redigere `mapping.json` i `etl/*_mapping/`.
 
 ---
 
@@ -341,14 +337,15 @@ Finn gymsal med garderobe, uansett kommune:
 ```sql
 SELECT navn, kommune_navn, bygg_navn, adressetekst, booking_url
 FROM v_ressurs_sok
-WHERE lokaletype_kode = 'GYMSAL' AND 'GARDEROBE' = ANY(fasilitet_koder);
+WHERE lokaletype_kode = 'LOK-SI-004'            -- Gymsal
+  AND 'FAC-SN-002' = ANY(fasilitet_koder);     -- Garderobe
 ```
 
 Søk på hovedgruppe, slik at undertyper treffer:
 
 ```sql
 WITH RECURSIVE gren AS (
-    SELECT id, kode FROM lokaletype WHERE kode = 'IDRETT'
+    SELECT id, kode FROM lokaletype WHERE kode = 'LOK-SI-001'   -- Idrettshall
     UNION ALL
     SELECT lt.id, lt.kode FROM lokaletype lt JOIN gren g ON lt.parent_id = g.id
 )
@@ -384,16 +381,16 @@ JOIN v_synk_avvik_detalj d ON d.avvik_id = g.id
 WHERE g.avvikstype IN ('ugyldig_verdi', 'db_feil');
 ```
 
-Hvordan en lokal kode ble tolket:
+Ikke-normalisert og normalisert lokaletype side om side:
 
 ```sql
-SELECT fi.kildenokkel, kk.kode, kk.navn AS lokalt_navn,
-       lt.kode AS kanonisk, m.status, m.kartlagt_av
-FROM kildekode kk
-JOIN fagsystem_instans fi     ON fi.id = kk.fagsystem_instans_id
-LEFT JOIN kildekode_mapping m ON m.kildekode_id = kk.id
-LEFT JOIN lokaletype lt       ON lt.id = m.lokaletype_id
-WHERE kk.kodetype = 'lokaletype'
+SELECT fi.kildenokkel, r.navn, kk.kode, kk.navn AS lokalt_navn,
+       lt.kode AS kanonisk, lt.navn AS kanonisk_navn
+FROM ressurs r
+JOIN fagsystem_instans fi ON fi.id = r.fagsystem_instans_id
+JOIN ressurs_kildekode rk ON rk.ressurs_id = r.id
+JOIN kildekode kk         ON kk.id = rk.kildekode_id AND kk.kodetype = 'lokaletype'
+LEFT JOIN lokaletype lt   ON lt.id = r.lokaletype_id
 ORDER BY fi.kildenokkel, kk.kode;
 ```
 
@@ -449,7 +446,7 @@ capacity = "abc" -> NULL + avvik i synk_avvik
 
 **To Bergen-bygg har søppel i postnummerfeltet:** `Totlandsvegen 53` og `5221 Nesttun`. Skjemaet avviser dem, og innlastingen loggfører dem som `ugyldig_verdi` i stedet for å trunkere stille.
 
-**810 aktivitetskoder og 292 fasilitetskoder er ennå ukartlagte.** Lokaletypene er ferdig kartlagt for alle 12 kommuner. Aktivitet og fasilitet er større og mer rotete lister — Stavanger bruker fasilitetslisten til fritekst som «Samsung 75'' 4K skjerm» og «9 seter» — og trenger en runde manuelt arbeid.
+**Ukartlagte koder.** Med mapping-filene for lokaletype (v0.2), aktivitet (v0.3) og fasilitet (v0.1) står Bergen igjen med 2 ukartlagte fasilitetskoder. Fasilitetslistene er de mest rotete — Stavanger bruker dem til fritekst som «Samsung 75'' 4K skjerm» og «9 seter»; se `v_ukartlagte_kildekoder` etter en kjøring av alle kommunene.
 
 ---
 
@@ -476,7 +473,19 @@ Disse fantes i `schema_perfect.sql` og er tatt ut, fordi ingen data fyller dem e
 
 ## Endringslogg
 
-Endringer i `schema_kjerne.sql` siden forrige commit (`86847b9`). Modellen har nå 18 tabeller.
+### Mapping ut av modellen (feat/db_forenkling)
+
+Aktiv kommune-instansene skal normaliseres, så mappingen er tatt ut av databasemodellen og påføres bare i ETL. Endret direkte i V1 (`schema_kjerne.sql` er lik); eksisterende databaser må bygges på nytt.
+
+- Fjernet `kildekode_mapping` og `aktivitet_mapping`. `kildekode` er beholdt.
+- Ny tabell `ressurs_kildekode` med ressursens koder slik kilden har dem.
+- `v_ukartlagte_kildekoder` bygger nå på `ikke_kartlagt`-avvik i `v_synk_avvik_gjeldende`.
+- Seed-dataene for `lokaletype` og `fasilitet` er fjernet; alle tre kodeverkene lastes fra vokabularfilene i `etl/*_mapping/` med nye koder (`LOK-xx-nnn`, `FAC-xx-nnn`).
+- `fasilitet.gruppe` er erstattet av `parent_id`, slik at fasilitet er hierarkisk som de to andre.
+
+### Tidligere endringer
+
+Endringer i `schema_kjerne.sql` siden commit `86847b9`.
 
 ### Tabeller og navn
 

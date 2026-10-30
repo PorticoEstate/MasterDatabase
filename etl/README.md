@@ -13,7 +13,7 @@ Fra tomt skjema til populert database, i tre steg:
 │ db/schema_kjerne.sql                                                  │
 │                                                                        │
 │ Oppretter alle tabeller i en tom database: kommune, bygning, adresse, │
-│ ressurs, kildekode(_mapping), aktivitet/fasilitet/lokaletype,         │
+│ ressurs, kildekode, aktivitet/fasilitet/lokaletype,                   │
 │ gate/matrikkelinfo, synk_avvik/kildeuttrekk. Idempotent — trygt å     │
 │ kjøre på nytt.                                                        │
 └───────────────────────────────────────────────────┬───────────────────┘
@@ -23,12 +23,11 @@ Fra tomt skjema til populert database, i tre steg:
 │ etl/last_inn.py          ←  Aktiv kommune API (12 kommuner)           │
 │                                                                        │
 │ Henter kommune, bygg, adresser (uten koordinater), ressurser,         │
-│ kildekoder. Oversetter kildekoder til vårt eget kodeverk ved hjelp    │
-│ av de statiske fasitfilene:                                           │
-│   etl/lokaletype_mapping/mapping.json                                │
-│   etl/fasilitet_mapping/mapping.json                                  │
-│   etl/activity_mapping/mapping.json + activities.json (egen tabell   │
-│   aktivitet_mapping, siden én kildekode kan gi flere aktiviteter)     │
+│ kildekoder. Laster kodeverket fra vokabularfilene og oversetter       │
+│ kildekodene til det med mapping.json (mappingen lagres ikke i basen): │
+│   etl/lokaletype_mapping/venue_types.json + mapping.json             │
+│   etl/fasilitet_mapping/facilities.json + mapping.json               │
+│   etl/activity_mapping/activities.json + mapping.json                │
 │ Laster ALDRI `organizations` (persondata).                             │
 └───────────────────────────────────────────────────┬───────────────────┘
                                                       ▼
@@ -68,7 +67,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `db/schema_kjerne.sql` | Skjemaet (steg 1) |
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
 | `etl/last_inn.py` | Steg 2 |
-| `etl/lokaletype_mapping/`, `fasilitet_mapping/`, `activity_mapping/` | Fasitfiler `last_inn.py` leser for kodeverk-oversettelse |
+| `etl/lokaletype_mapping/`, `fasilitet_mapping/`, `activity_mapping/` | Vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `last_inn.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3 |
 | `matrikkel/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
@@ -124,11 +123,18 @@ Skjemaet er idempotent - du kan kjøre den kommandoen på nytt uten å ødelegge
 ## Hva skriptet gjør og ikke gjør
 
 Laster: kommune, bygg, adresser (som de står i kilden, uten koordinater),
-ressurser, kildekoder, og en automatisk kartlegging av de vanligste kildekodene
-til vårt eget kodeverk (`lokaletype`/`aktivitet`/`fasilitet`). Aktivitetsvokabularet
-og -mappingen leses fra `activity_mapping/` og skrives til tabellen `aktivitet_mapping`.
-ETL-mappinger fornyes ved hver kjøring,
-men en manuell mapping (`kartlagt_av` ulik `etl`) overskrives aldri.
+ressurser, kildekoder, og vårt eget kodeverk (`lokaletype`/`aktivitet`/`fasilitet`)
+fra vokabularfilene i `etl/*_mapping/`. Kildekodene oversettes til kodeverket via
+`mapping.json` i samme mappe, og ressursene kobles direkte til resultatet
+(`ressurs.lokaletype_id`, `ressurs_aktivitet`, `ressurs_fasilitet`). Kildens egne
+koder lagres i `kildekode` og `ressurs_kildekode`, slik at den ikke-normaliserte
+formen kan sammenlignes med den normaliserte.
+
+Mappingen lagres ikke i databasen; den finnes bare i JSON-filene og påføres ved
+hver kjøring, så en endring i `mapping.json` slår igjennom neste gang skriptet
+kjøres. Koder uten oversettelse loggføres som `ikke_kartlagt` og vises i
+`v_ukartlagte_kildekoder`. Etter at databasen er bygget på nytt, er kodeverkene
+tomme til skriptet er kjørt.
 
 Laster **ikke**: koordinater og matrikkeldata (eget steg, se
 "Geokoding og bygningsberikelse" under), og **ikke** `organizations`-samlingen
