@@ -3,42 +3,26 @@
   "approvedOnly": false,
   "facets": {
     "av": {
-      "FAC-AV-001": {
-        "label": {
-          "nb": "Digital tavle"
-        },
+      "Digital tavle": {
         "altLabels": [
           "smartboard",
           "whiteboard (interaktiv tavla)"
         ],
         "note": "Smartboard / interaktiv tavle"
       },
-      "FAC-AV-002": {
-        "label": {
-          "nb": "Flipover"
-        }
-      },
-      "FAC-AV-003": {
-        "label": {
-          "nb": "HDMI-overganger"
-        },
+      "Flipover": {},
+      "HDMI-overganger": {
         "altLabels": [
           "hdmi-overganger (display port, apple lightning, usb-c, mini dp, micro hdmi)"
         ]
       },
-      "FAC-AV-004": {
-        "label": {
-          "nb": "Kamera og videoutstyr"
-        },
+      "Kamera og videoutstyr": {
         "altLabels": [
           "grønn skjerm (videoredigering)",
           "video-og filmutstyr"
         ]
       },
-      "FAC-AV-005": {
-        "label": {
-          "nb": "Lydanlegg"
-        },
+      "Lydanlegg": {
         "altLabels": [
           "lyd- og speakeranlegg",
           "musikkanlegg",
@@ -48,26 +32,16 @@
         ],
         "note": "Sound system"
       },
-      "FAC-AV-006": {
-        "label": {
-          "nb": "Diskoanlegg"
-        },
-        "broader": [
-          "FAC-AV-005"
-        ],
+      "Diskoanlegg": {
+        "broader": "Lydanlegg",
         "altLabels": [
           "disko-anlegg",
           "diskotek",
           "diskotek med dj"
         ]
       },
-      "FAC-AV-007": {
-        "label": {
-          "nb": "Høyttaler"
-        },
-        "broader": [
-          "FAC-AV-005"
-        ],
+      "Høyttaler": {
+        "broader": "Lydanlegg",
         "altLabels": [
           "bluetooth høytaler",
           "høytaler",
@@ -77,56 +51,32 @@
           "yamaha lyd på hver side av skjerm"
         ]
       },
-      "FAC-AV-008": {
-        "label": {
-          "nb": "Mikrofon"
-        },
-        "broader": [
-          "FAC-AV-005"
-        ]
+      "Mikrofon": {
+        "broader": "Lydanlegg"
       },
-      "FAC-AV-009": {
-        "label": {
-          "nb": "Trådløs mikrofon"
-        },
-        "broader": [
-          "FAC-AV-008"
-        ],
+      "Trådløs mikrofon": {
+        "broader": "Mikrofon",
         "altLabels": [
           "hodebøylemik"
         ],
         "note": "Incl. \"mygg\" and headset"
       },
-      "FAC-AV-010": {
-        "label": {
-          "nb": "PC"
-        },
+      "PC": {
         "altLabels": [
           "studiepc",
           "tastatur"
         ]
       },
-      "FAC-AV-011": {
-        "label": {
-          "nb": "Projektor"
-        },
+      "Projektor": {
         "altLabels": [
           "lerret og projektor i himling, appletv, mikrofon/høyttaler og nødvendige kabler",
           "prosjektor"
         ]
       },
-      "FAC-AV-012": {
-        "label": {
-          "nb": "Lerret"
-        },
-        "broader": [
-          "FAC-AV-011"
-        ]
+      "Lerret": {
+        "broader": "Projektor"
       },
-      "FAC-AV-013": {
-        "label": {
-          "nb": "Skjerm/TV"
-        },
+      "Skjerm/TV": {
         "altLabels": [
           "skjerm",
           "skjerm m/hdmi",
@@ -136,27 +86,16 @@
           "tv-skjerm"
         ]
       },
-      "FAC-AV-014": {
-        "label": {
-          "nb": "Skjermpakke"
-        },
-        "broader": [
-          "FAC-AV-013"
-        ],
+      "Skjermpakke": {
+        "broader": "Skjerm/TV",
         "note": "Skjerm + lydplanke + Apple TV (+ mikrofon/høyttaler)"
       },
-      "FAC-AV-015": {
-        "label": {
-          "nb": "Streaming"
-        },
+      "Streaming": {
         "altLabels": [
           "streaming (egne priser gjelder)"
         ]
       },
-      "FAC-AV-016": {
-        "label": {
-          "nb": "Studio og opptak"
-        },
+      "Studio og opptak": {
         "altLabels": [
           "innspilling lyd",
           "klipperom (da vinci-software)",
@@ -164,10 +103,7 @@
         ],
         "note": "Podcast, lydopptak, klipperom"
       },
-      "FAC-AV-017": {
-        "label": {
-          "nb": "Trådløs skjermdeling"
-        },
+      "Trådløs skjermdeling": {
         "altLabels": [
           "apple-tv",
           "click share",
@@ -175,19 +111,13 @@
         ],
         "note": "Apple TV, ClickShare"
       },
-      "FAC-AV-018": {
-        "label": {
-          "nb": "Videokonferanse"
-        },
+      "Videokonferanse": {
         "altLabels": [
           "videosamtaler",
           "webkamera"
         ]
       },
-      "FAC-AV-019": {
-        "label": {
-          "nb": "Whiteboard"
-        },
+      "Whiteboard": {
         "altLabels": [
           "tavle",
           "whiteboard-stativ"
@@ -195,253 +125,117 @@
       }
     },
     "stage": {
-      "FAC-ST-001": {
-        "label": {
-          "nb": "Amfi"
-        },
+      "Amfi": {
         "altLabels": [
           "amfi, fast plassbygd",
           "amfi, uttrekkbart",
           "skyve-amfi"
         ]
       },
-      "FAC-ST-002": {
-        "label": {
-          "nb": "Backline og bandutstyr"
-        },
+      "Backline og bandutstyr": {
         "altLabels": [
           "backline",
           "band utstyr"
         ]
       },
-      "FAC-ST-003": {
-        "label": {
-          "nb": "Ballettbarre"
-        },
+      "Ballettbarre": {
         "altLabels": [
           "ballettbarrer"
         ]
       },
-      "FAC-ST-004": {
-        "label": {
-          "nb": "Lysanlegg"
-        },
+      "Lysanlegg": {
         "altLabels": [
           "lysrigg for scenebruk",
           "scenelys",
           "skinner i tak med utstillingsbelysning"
         ]
       },
-      "FAC-ST-005": {
-        "label": {
-          "nb": "Musikkinstrument"
-        }
-      },
-      "FAC-ST-006": {
-        "label": {
-          "nb": "El-piano"
-        },
-        "broader": [
-          "FAC-ST-005"
-        ],
+      "Musikkinstrument": {},
+      "El-piano": {
+        "broader": "Musikkinstrument",
         "altLabels": [
           "el- piano"
         ]
       },
-      "FAC-ST-007": {
-        "label": {
-          "nb": "Flygel"
-        },
-        "broader": [
-          "FAC-ST-005"
-        ]
+      "Flygel": {
+        "broader": "Musikkinstrument"
       },
-      "FAC-ST-008": {
-        "label": {
-          "nb": "Orgel"
-        },
-        "broader": [
-          "FAC-ST-005"
-        ]
+      "Orgel": {
+        "broader": "Musikkinstrument"
       },
-      "FAC-ST-009": {
-        "label": {
-          "nb": "Piano"
-        },
-        "broader": [
-          "FAC-ST-005"
-        ],
+      "Piano": {
+        "broader": "Musikkinstrument",
         "altLabels": [
           "piano/flygel"
         ]
       },
-      "FAC-ST-010": {
-        "label": {
-          "nb": "Scene"
-        }
+      "Scene": {},
+      "Sceneelementer": {
+        "broader": "Scene"
       },
-      "FAC-ST-011": {
-        "label": {
-          "nb": "Sceneelementer"
-        },
-        "broader": [
-          "FAC-ST-010"
-        ]
+      "Utendørsscene": {
+        "broader": "Scene"
       },
-      "FAC-ST-012": {
-        "label": {
-          "nb": "Utendørsscene"
-        },
-        "broader": [
-          "FAC-ST-010"
-        ]
-      },
-      "FAC-ST-013": {
-        "label": {
-          "nb": "Speilvegg"
-        },
+      "Speilvegg": {
         "note": "Dance/ballet room"
       }
     },
     "sportsArea": {
-      "FAC-SA-001": {
-        "label": {
-          "nb": "Basketballbane"
-        },
+      "Basketballbane": {
         "altLabels": [
           "basket-bane"
         ]
       },
-      "FAC-SA-002": {
-        "label": {
-          "nb": "Flomlys"
-        }
-      },
-      "FAC-SA-003": {
-        "label": {
-          "nb": "Friidrettsbane"
-        }
-      },
-      "FAC-SA-004": {
-        "label": {
-          "nb": "Grusbane"
-        }
-      },
-      "FAC-SA-005": {
-        "label": {
-          "nb": "Klatrevegg"
-        },
+      "Flomlys": {},
+      "Friidrettsbane": {},
+      "Grusbane": {},
+      "Klatrevegg": {
         "altLabels": [
           "klatring"
         ]
       },
-      "FAC-SA-006": {
-        "label": {
-          "nb": "Buldrevegg"
-        },
-        "broader": [
-          "FAC-SA-005"
-        ],
+      "Buldrevegg": {
+        "broader": "Klatrevegg",
         "altLabels": [
           "buldring"
         ]
       },
-      "FAC-SA-007": {
-        "label": {
-          "nb": "Kunstgress"
-        },
+      "Kunstgress": {
         "altLabels": [
           "kunstgras"
         ]
       },
-      "FAC-SA-008": {
-        "label": {
-          "nb": "Padelbane"
-        }
+      "Padelbane": {},
+      "Pumptrack": {},
+      "Resultattavle": {},
+      "Sandvolleyballbane": {},
+      "Skatepark": {},
+      "Sportsgulv": {},
+      "Parkettgulv": {
+        "broader": "Sportsgulv"
       },
-      "FAC-SA-009": {
-        "label": {
-          "nb": "Pumptrack"
-        }
-      },
-      "FAC-SA-010": {
-        "label": {
-          "nb": "Resultattavle"
-        }
-      },
-      "FAC-SA-011": {
-        "label": {
-          "nb": "Sandvolleyballbane"
-        }
-      },
-      "FAC-SA-012": {
-        "label": {
-          "nb": "Skatepark"
-        }
-      },
-      "FAC-SA-013": {
-        "label": {
-          "nb": "Sportsgulv"
-        }
-      },
-      "FAC-SA-014": {
-        "label": {
-          "nb": "Parkettgulv"
-        },
-        "broader": [
-          "FAC-SA-013"
-        ]
-      },
-      "FAC-SA-015": {
-        "label": {
-          "nb": "Tidtakeranlegg"
-        }
-      },
-      "FAC-SA-016": {
-        "label": {
-          "nb": "Tribune"
-        }
-      },
-      "FAC-SA-017": {
-        "label": {
-          "nb": "Trimpark"
-        }
-      }
+      "Tidtakeranlegg": {},
+      "Tribune": {},
+      "Trimpark": {}
     },
     "sportsEquipment": {
-      "FAC-SE-001": {
-        "label": {
-          "nb": "Basketkurv"
-        },
+      "Basketkurv": {
         "altLabels": [
           "basketkurver"
         ]
       },
-      "FAC-SE-002": {
-        "label": {
-          "nb": "Bordtennisbord"
-        },
+      "Bordtennisbord": {
         "altLabels": [
           "bordtennis"
         ]
       },
-      "FAC-SE-003": {
-        "label": {
-          "nb": "Idrettsutstyr (generelt)"
-        },
+      "Idrettsutstyr (generelt)": {
         "altLabels": [
           "idrettsutstyr"
         ]
       },
-      "FAC-SE-004": {
-        "label": {
-          "nb": "Klapphekker"
-        }
-      },
-      "FAC-SE-005": {
-        "label": {
-          "nb": "Klatreutstyr"
-        },
+      "Klapphekker": {},
+      "Klatreutstyr": {
         "altLabels": [
           "klatresele",
           "klatresko",
@@ -449,65 +243,35 @@
           "leie av sko/klatresele"
         ]
       },
-      "FAC-SE-006": {
-        "label": {
-          "nb": "Matter"
-        },
+      "Matter": {
         "altLabels": [
           "matter, turn"
         ]
       },
-      "FAC-SE-007": {
-        "label": {
-          "nb": "Hoppemadrass"
-        },
-        "broader": [
-          "FAC-SE-006"
-        ],
+      "Hoppemadrass": {
+        "broader": "Matter",
         "altLabels": [
           "tjukkasar"
         ]
       },
-      "FAC-SE-008": {
-        "label": {
-          "nb": "Kampsportmatter"
-        },
-        "broader": [
-          "FAC-SE-006"
-        ]
+      "Kampsportmatter": {
+        "broader": "Matter"
       },
-      "FAC-SE-009": {
-        "label": {
-          "nb": "Mål"
-        }
-      },
-      "FAC-SE-010": {
-        "label": {
-          "nb": "Fotball-/innebandymål"
-        },
-        "broader": [
-          "FAC-SE-009"
-        ],
+      "Mål": {},
+      "Fotball-/innebandymål": {
+        "broader": "Mål",
         "altLabels": [
           "fotball/innebandymål",
           "mål for innefotball"
         ]
       },
-      "FAC-SE-011": {
-        "label": {
-          "nb": "Håndballmål"
-        },
-        "broader": [
-          "FAC-SE-009"
-        ],
+      "Håndballmål": {
+        "broader": "Mål",
         "altLabels": [
           "handballmål"
         ]
       },
-      "FAC-SE-012": {
-        "label": {
-          "nb": "Nett og stolper"
-        },
+      "Nett og stolper": {
         "altLabels": [
           "badmington stativ og nett",
           "stolper og nett",
@@ -516,137 +280,70 @@
         ],
         "note": "Volleyball, badminton, tennis"
       },
-      "FAC-SE-013": {
-        "label": {
-          "nb": "Premiepall"
-        }
-      },
-      "FAC-SE-014": {
-        "label": {
-          "nb": "Ribbevegg"
-        },
+      "Premiepall": {},
+      "Ribbevegg": {
         "altLabels": [
           "ribbevegger"
         ]
       },
-      "FAC-SE-015": {
-        "label": {
-          "nb": "Startpall"
-        }
-      },
-      "FAC-SE-016": {
-        "label": {
-          "nb": "Styrketreningsutstyr"
-        },
+      "Startpall": {},
+      "Styrketreningsutstyr": {
         "altLabels": [
           "utholdenhetsutstyr",
           "vekter"
         ]
       },
-      "FAC-SE-017": {
-        "label": {
-          "nb": "Turnapparater"
-        },
+      "Turnapparater": {
         "altLabels": [
           "gym benk",
           "monkeybar"
         ]
       },
-      "FAC-SE-018": {
-        "label": {
-          "nb": "Trampoline"
-        },
-        "broader": [
-          "FAC-SE-017"
-        ]
+      "Trampoline": {
+        "broader": "Turnapparater"
       }
     },
     "pool": {
-      "FAC-PO-001": {
-        "label": {
-          "nb": "Badstue"
-        },
+      "Badstue": {
         "altLabels": [
           "badstu"
         ]
       },
-      "FAC-PO-002": {
-        "label": {
-          "nb": "Basseng"
-        }
-      },
-      "FAC-PO-003": {
-        "label": {
-          "nb": "Barnebasseng"
-        },
-        "broader": [
-          "FAC-PO-002"
-        ],
+      "Basseng": {},
+      "Barnebasseng": {
+        "broader": "Basseng",
         "altLabels": [
           "plaskebasseng",
           "plaskedam for de minste"
         ]
       },
-      "FAC-PO-004": {
-        "label": {
-          "nb": "Stupebasseng"
-        },
-        "broader": [
-          "FAC-PO-002"
-        ]
+      "Stupebasseng": {
+        "broader": "Basseng"
       },
-      "FAC-PO-005": {
-        "label": {
-          "nb": "Svømmebasseng"
-        },
-        "broader": [
-          "FAC-PO-002"
-        ]
+      "Svømmebasseng": {
+        "broader": "Basseng"
       },
-      "FAC-PO-006": {
-        "label": {
-          "nb": "Undervisningsbasseng"
-        },
-        "broader": [
-          "FAC-PO-002"
-        ]
+      "Undervisningsbasseng": {
+        "broader": "Basseng"
       },
-      "FAC-PO-007": {
-        "label": {
-          "nb": "Varmtvannsbasseng"
-        },
-        "broader": [
-          "FAC-PO-002"
-        ],
+      "Varmtvannsbasseng": {
+        "broader": "Basseng",
         "altLabels": [
           "varmtvannsbasseng tilrettelagt for hc"
         ]
       },
-      "FAC-PO-008": {
-        "label": {
-          "nb": "Bassengheis"
-        }
-      },
-      "FAC-PO-009": {
-        "label": {
-          "nb": "Salg av badeartikler"
-        },
+      "Bassengheis": {},
+      "Salg av badeartikler": {
         "altLabels": [
           "salg badeartikler"
         ]
       },
-      "FAC-PO-010": {
-        "label": {
-          "nb": "Stupetårn og sviktbrett"
-        },
+      "Stupetårn og sviktbrett": {
         "altLabels": [
           "stupebrett"
         ]
       },
-      "FAC-PO-011": {
-        "label": {
-          "nb": "Vannrutsjebane"
-        },
+      "Vannrutsjebane": {
         "altLabels": [
           "sklie for de minste",
           "vannsklie"
@@ -654,48 +351,26 @@
       }
     },
     "kitchen": {
-      "FAC-KI-001": {
-        "label": {
-          "nb": "Dekketøy"
-        },
+      "Dekketøy": {
         "altLabels": [
           "barnebestikk"
         ]
       },
-      "FAC-KI-002": {
-        "label": {
-          "nb": "Kafeteria"
-        },
+      "Kafeteria": {
         "altLabels": [
           "kafè"
         ]
       },
-      "FAC-KI-003": {
-        "label": {
-          "nb": "Kaffemaskin"
-        },
+      "Kaffemaskin": {
         "altLabels": [
           "kaffetrakter",
           "mokkamaster"
         ]
       },
-      "FAC-KI-004": {
-        "label": {
-          "nb": "Kiosk"
-        }
-      },
-      "FAC-KI-005": {
-        "label": {
-          "nb": "Kjøkken"
-        }
-      },
-      "FAC-KI-006": {
-        "label": {
-          "nb": "Kjøkkenutstyr"
-        },
-        "broader": [
-          "FAC-KI-005"
-        ],
+      "Kiosk": {},
+      "Kjøkken": {},
+      "Kjøkkenutstyr": {
+        "broader": "Kjøkken",
         "altLabels": [
           "combidamper",
           "isbitmaskin",
@@ -707,244 +382,134 @@
           "varmeskap"
         ]
       },
-      "FAC-KI-007": {
-        "label": {
-          "nb": "Kjøleskap og fryser"
-        },
-        "broader": [
-          "FAC-KI-005"
-        ],
+      "Kjøleskap og fryser": {
+        "broader": "Kjøkken",
         "altLabels": [
           "fryser",
           "kjølekapasitet",
           "kjøleskap"
         ]
       },
-      "FAC-KI-008": {
-        "label": {
-          "nb": "Minikjøkken"
-        },
-        "broader": [
-          "FAC-KI-005"
-        ],
+      "Minikjøkken": {
+        "broader": "Kjøkken",
         "altLabels": [
           "tekjøkken"
         ]
       },
-      "FAC-KI-009": {
-        "label": {
-          "nb": "Oppvaskmaskin"
-        },
-        "broader": [
-          "FAC-KI-005"
-        ],
+      "Oppvaskmaskin": {
+        "broader": "Kjøkken",
         "altLabels": [
           "steamer/oppvasmaskin"
         ]
       },
-      "FAC-KI-010": {
-        "label": {
-          "nb": "Serveringsdisk"
-        }
-      }
+      "Serveringsdisk": {}
     },
     "furniture": {
-      "FAC-FU-001": {
-        "label": {
-          "nb": "Bord og stoler"
-        },
+      "Bord og stoler": {
         "altLabels": [
           "bord og stolar"
         ]
       },
-      "FAC-FU-002": {
-        "label": {
-          "nb": "Bord"
-        },
-        "broader": [
-          "FAC-FU-001"
-        ],
+      "Bord": {
+        "broader": "Bord og stoler",
         "altLabels": [
           "bord sammenleggbare"
         ]
       },
-      "FAC-FU-003": {
-        "label": {
-          "nb": "Hev/senk-skrivebord"
-        },
-        "broader": [
-          "FAC-FU-002"
-        ],
+      "Hev/senk-skrivebord": {
+        "broader": "Bord",
         "altLabels": [
           "hev/senk skrivebord"
         ]
       },
-      "FAC-FU-004": {
-        "label": {
-          "nb": "Spisebord"
-        },
-        "broader": [
-          "FAC-FU-002"
-        ]
+      "Spisebord": {
+        "broader": "Bord"
       },
-      "FAC-FU-005": {
-        "label": {
-          "nb": "Ståbord"
-        },
-        "broader": [
-          "FAC-FU-002"
-        ]
+      "Ståbord": {
+        "broader": "Bord"
       },
-      "FAC-FU-006": {
-        "label": {
-          "nb": "Stoler"
-        },
-        "broader": [
-          "FAC-FU-001"
-        ],
+      "Stoler": {
+        "broader": "Bord og stoler",
         "altLabels": [
           "stolar"
         ]
       },
-      "FAC-FU-007": {
-        "label": {
-          "nb": "Kontorstol"
-        },
-        "broader": [
-          "FAC-FU-006"
-        ]
+      "Kontorstol": {
+        "broader": "Stoler"
       },
-      "FAC-FU-008": {
-        "label": {
-          "nb": "Fleksibel møblering"
-        },
+      "Fleksibel møblering": {
         "altLabels": [
           "fleksibel møblering med gruppeoppsett",
           "fleksibel møblering med kursbord"
         ]
       },
-      "FAC-FU-009": {
-        "label": {
-          "nb": "Formell møblering"
-        },
+      "Formell møblering": {
         "altLabels": [
           "formell møblering med møtebord",
           "formell møblering med rundt møtebord"
         ]
       },
-      "FAC-FU-010": {
-        "label": {
-          "nb": "Kinooppsett"
-        },
+      "Kinooppsett": {
         "altLabels": [
           "kinooppsett med stoler, ingen bord"
         ]
       },
-      "FAC-FU-011": {
-        "label": {
-          "nb": "Publikumsbenker"
-        },
+      "Publikumsbenker": {
         "altLabels": [
           "benk",
           "benker til publikum",
           "benker til publlikum"
         ]
       },
-      "FAC-FU-012": {
-        "label": {
-          "nb": "Sofa og sittegrupper"
-        },
+      "Sofa og sittegrupper": {
         "altLabels": [
           "sittegrupper",
           "sofa"
         ]
       },
-      "FAC-FU-013": {
-        "label": {
-          "nb": "Talarstol"
-        }
-      }
+      "Talarstol": {}
     },
     "sanitary": {
-      "FAC-SN-001": {
-        "label": {
-          "nb": "Dusj"
-        },
+      "Dusj": {
         "altLabels": [
           "dusj/toalett",
           "dusjer"
         ]
       },
-      "FAC-SN-002": {
-        "label": {
-          "nb": "Garderobe"
-        }
-      },
-      "FAC-SN-003": {
-        "label": {
-          "nb": "Toalett"
-        },
+      "Garderobe": {},
+      "Toalett": {
         "altLabels": [
           "toalett tilknyttet friluftsanlegg",
           "toaletter",
           "toalettfasiliteter"
         ]
       },
-      "FAC-SN-004": {
-        "label": {
-          "nb": "HC-toalett"
-        },
-        "broader": [
-          "FAC-SN-003"
-        ],
+      "HC-toalett": {
+        "broader": "Toalett",
         "altLabels": [
           "hc toalett",
           "toalett (hc)"
         ]
       },
-      "FAC-SN-005": {
-        "label": {
-          "nb": "Vask"
-        },
+      "Vask": {
         "note": "Could be kitchen sink"
       }
     },
     "accessibility": {
-      "FAC-AC-001": {
-        "label": {
-          "nb": "Automatisk døråpner"
-        }
-      },
-      "FAC-AC-002": {
-        "label": {
-          "nb": "HC-parkering"
-        },
+      "Automatisk døråpner": {},
+      "HC-parkering": {
         "altLabels": [
           "handikapparkering"
         ]
       },
-      "FAC-AC-003": {
-        "label": {
-          "nb": "Heis"
-        }
-      },
-      "FAC-AC-004": {
-        "label": {
-          "nb": "Rullestolrampe"
-        }
-      },
-      "FAC-AC-005": {
-        "label": {
-          "nb": "Teleslynge"
-        },
+      "Heis": {},
+      "Rullestolrampe": {},
+      "Teleslynge": {
         "altLabels": [
           "taleutjevninganlegg fra phonak"
         ]
       },
-      "FAC-AC-006": {
-        "label": {
-          "nb": "Universell utforming"
-        },
+      "Universell utforming": {
         "altLabels": [
           "tilrettelagt for menneske med nedsatt funksjonsevne",
           "tilrettelegging for bevegelseshemmede"
@@ -952,25 +517,15 @@
       }
     },
     "infrastructure": {
-      "FAC-IN-001": {
-        "label": {
-          "nb": "Brannslukkingsapparat"
-        }
-      },
-      "FAC-IN-002": {
-        "label": {
-          "nb": "Hobby- og verkstedutstyr"
-        },
+      "Brannslukkingsapparat": {},
+      "Hobby- og verkstedutstyr": {
         "altLabels": [
           "symaskiner",
           "verkstedet",
           "verktøy"
         ]
       },
-      "FAC-IN-003": {
-        "label": {
-          "nb": "Internett/WiFi"
-        },
+      "Internett/WiFi": {
         "altLabels": [
           "gratis wifi",
           "internett",
@@ -979,202 +534,98 @@
           "wifi"
         ]
       },
-      "FAC-IN-004": {
-        "label": {
-          "nb": "Parkering"
-        },
+      "Parkering": {
         "altLabels": [
           "gratis parkering"
         ]
       },
-      "FAC-IN-005": {
-        "label": {
-          "nb": "Septik"
-        },
+      "Septik": {
         "note": "Septic emptying (bobil/båt)"
       },
-      "FAC-IN-006": {
-        "label": {
-          "nb": "Strøm"
-        },
+      "Strøm": {
         "altLabels": [
           "strømuttak"
         ]
       },
-      "FAC-IN-007": {
-        "label": {
-          "nb": "Vann"
-        },
+      "Vann": {
         "altLabels": [
           "vannfontene",
           "vanntilgang",
           "vannuttak"
         ]
       },
-      "FAC-IN-008": {
-        "label": {
-          "nb": "Vaskemaskin"
-        }
-      },
-      "FAC-IN-009": {
-        "label": {
-          "nb": "Vedovn"
-        },
+      "Vaskemaskin": {},
+      "Vedovn": {
         "altLabels": [
           "vedfyrt ovn"
         ]
       }
     },
     "play": {
-      "FAC-PL-001": {
-        "label": {
-          "nb": "Airhockey"
-        }
-      },
-      "FAC-PL-002": {
-        "label": {
-          "nb": "Biljard"
-        },
+      "Airhockey": {},
+      "Biljard": {
         "altLabels": [
           "biiljardbord",
           "biljardbord"
         ]
       },
-      "FAC-PL-003": {
-        "label": {
-          "nb": "Brettspill"
-        }
-      },
-      "FAC-PL-004": {
-        "label": {
-          "nb": "Fussball"
-        }
-      },
-      "FAC-PL-005": {
-        "label": {
-          "nb": "Hoppeslott"
-        },
+      "Brettspill": {},
+      "Fussball": {},
+      "Hoppeslott": {
         "altLabels": [
           "hoppemadrass/hoppeslott"
         ]
       },
-      "FAC-PL-006": {
-        "label": {
-          "nb": "Lekeplass"
-        }
-      },
-      "FAC-PL-007": {
-        "label": {
-          "nb": "Lekerom"
-        },
+      "Lekeplass": {},
+      "Lekerom": {
         "altLabels": [
           "lekekrok",
           "leker"
         ]
       },
-      "FAC-PL-008": {
-        "label": {
-          "nb": "Shuffleboard"
-        }
-      },
-      "FAC-PL-009": {
-        "label": {
-          "nb": "Spillkonsoll"
-        },
+      "Shuffleboard": {},
+      "Spillkonsoll": {
         "altLabels": [
           "playstation"
         ]
       }
     },
     "outdoor": {
-      "FAC-OU-001": {
-        "label": {
-          "nb": "Gapahuk"
-        }
-      },
-      "FAC-OU-002": {
-        "label": {
-          "nb": "Grill- og bålplass"
-        },
+      "Gapahuk": {},
+      "Grill- og bålplass": {
         "altLabels": [
           "bålpanne",
           "grill/bålpanne",
           "grillplass"
         ]
       },
-      "FAC-OU-003": {
-        "label": {
-          "nb": "Sandstrand"
-        }
-      },
-      "FAC-OU-004": {
-        "label": {
-          "nb": "Teltplass"
-        }
-      }
+      "Sandstrand": {},
+      "Teltplass": {}
     },
     "rental": {
-      "FAC-RE-001": {
-        "label": {
-          "nb": "Kano og kajakk"
-        },
+      "Kano og kajakk": {
         "altLabels": [
           "kajakk/kano",
           "kano",
           "kano/kajakk"
         ]
       },
-      "FAC-RE-002": {
-        "label": {
-          "nb": "Padleutstyr"
-        },
-        "broader": [
-          "FAC-RE-001"
-        ],
+      "Padleutstyr": {
+        "broader": "Kano og kajakk",
         "altLabels": [
           "padleårer"
         ]
       },
-      "FAC-RE-003": {
-        "label": {
-          "nb": "Kjøretøy"
-        }
+      "Kjøretøy": {},
+      "Tilhenger": {
+        "broader": "Kjøretøy"
       },
-      "FAC-RE-004": {
-        "label": {
-          "nb": "Tilhenger"
-        },
-        "broader": [
-          "FAC-RE-003"
-        ]
-      },
-      "FAC-RE-005": {
-        "label": {
-          "nb": "Redningsvest"
-        }
-      },
-      "FAC-RE-006": {
-        "label": {
-          "nb": "Ski"
-        }
-      },
-      "FAC-RE-007": {
-        "label": {
-          "nb": "Skøyter"
-        }
-      },
-      "FAC-RE-008": {
-        "label": {
-          "nb": "Sykkel"
-        }
-      },
-      "FAC-RE-009": {
-        "label": {
-          "nb": "Sykkeltilbehør"
-        },
-        "broader": [
-          "FAC-RE-008"
-        ],
+      "Redningsvest": {},
+      "Ski": {},
+      "Skøyter": {},
+      "Sykkel": {},
+      "Sykkeltilbehør": {
+        "broader": "Sykkel",
         "altLabels": [
           "ekstra langt bagasjebrett",
           "kasse foran",
@@ -1185,54 +636,29 @@
       }
     },
     "capacity": {
-      "FAC-CA-001": {
-        "label": {
-          "nb": "Kapasitet"
-        },
+      "Kapasitet": {
         "note": "Value in attributes capacityMin / capacityMax"
       },
-      "FAC-CA-002": {
-        "label": {
-          "nb": "Tribunekapasitet"
-        },
-        "broader": [
-          "FAC-CA-001"
-        ],
+      "Tribunekapasitet": {
+        "broader": "Kapasitet",
         "note": "Seats on stand; value in attributes"
       }
     },
     "roomType": {
-      "FAC-RO-001": {
-        "label": {
-          "nb": "Aktivitetsrom"
-        },
+      "Aktivitetsrom": {
         "altLabels": [
           "aktivitetsrom uten møbler",
           "kreativt rom med uformell møblering"
         ]
       },
-      "FAC-RO-002": {
-        "label": {
-          "nb": "Diskorom"
-        }
-      },
-      "FAC-RO-003": {
-        "label": {
-          "nb": "Forsamlingslokale"
-        }
-      },
-      "FAC-RO-004": {
-        "label": {
-          "nb": "Kursrom"
-        },
+      "Diskorom": {},
+      "Forsamlingslokale": {},
+      "Kursrom": {
         "altLabels": [
           "kursrom med kursbord og stoler"
         ]
       },
-      "FAC-RO-005": {
-        "label": {
-          "nb": "Møterom"
-        },
+      "Møterom": {
         "altLabels": [
           "lite møterom audio",
           "medium møterom audio",
@@ -1242,39 +668,23 @@
           "xxl møterom audio"
         ]
       },
-      "FAC-RO-006": {
-        "label": {
-          "nb": "Oppholdsrom"
-        }
-      },
-      "FAC-RO-007": {
-        "label": {
-          "nb": "Seremonirom"
-        },
+      "Oppholdsrom": {},
+      "Seremonirom": {
         "altLabels": [
           "livsnøytral seremonirom"
         ]
       },
-      "FAC-RO-008": {
-        "label": {
-          "nb": "Spiseområde"
-        },
+      "Spiseområde": {
         "altLabels": [
           "åpent spiseområde"
         ]
       }
     },
     "exclude": {
-      "FAC-EX-001": {
-        "label": {
-          "nb": "Avklares"
-        },
+      "Avklares": {
         "note": "Meaning unknown - ask source owner"
       },
-      "FAC-EX-002": {
-        "label": {
-          "nb": "Ikke fasilitet"
-        },
+      "Ikke fasilitet": {
         "altLabels": [
           "foredrag"
         ],

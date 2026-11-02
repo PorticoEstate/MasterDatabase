@@ -71,11 +71,11 @@ KOMMUNER = {
 # Mapping og vokabular per kodetype, i samme format for alle tre (se
 # activity_mapping/AktivKommune_activity_normalisation.md): mapping.json har
 # under "values" ett oppslag per normalisert kildenavn (norm_navn) med
-# konsept-ID-ene i målfeltet, og vokabularfilen har konseptene gruppert per
-# fasett, med "broader" som forelder. Øvrige felt (confidence, status,
-# attributes, reason, sourceNames) brukes ikke foreløpig. Alle fasetter
-# unntatt "exclude" lastes inn i kodeverkstabellen; exclude-konsepter betyr
-# at kildekoden ikke er relevant.
+# konseptnavnene i målfeltet, og vokabularfilen har konseptene gruppert per
+# fasett, nøklet på navn, med "broader" (forelderens navn) som forelder.
+# Øvrige felt (confidence, status, attributes, reason, sourceNames, nif)
+# brukes ikke foreløpig. Alle fasetter unntatt "exclude" lastes inn i
+# kodeverkstabellen; exclude-konsepter betyr at kildekoden ikke er relevant.
 #
 # Mappingen finnes bare her i ETL, ikke i databasen. Navn som ikke finnes i
 # mapping.json, lastes inn i kildekode uendret og loggføres som
@@ -96,7 +96,7 @@ for _kodetype, (_mappe, _vokabularfil, _malfelt) in KODEVERK.items():
                               for navn, v in json.load(f)["values"].items()}
     with open(Path(__file__).parent / _mappe / _vokabularfil, encoding="utf-8") as f:
         VOKABULAR[_kodetype] = json.load(f)["facets"]
-EKSKLUDER = {kode for v in VOKABULAR.values() for kode in v.get("exclude", {})}
+EKSKLUDER = {navn for v in VOKABULAR.values() for navn in v.get("exclude", {})}
 
 # Junk uansett kodetype: adresser, stedsnavn og driftsstatus som aldri kan
 # være en ekte lokaletype, aktivitet eller fasilitet.
@@ -230,30 +230,29 @@ def som_heltall(v):
 
 def vokabular_sql() -> str:
     """Upsert av vokabularet for alle tre kodetyper fra vokabularfilene - alle
-    fasetter unntatt "exclude". Foreldre settes i et eget steg, siden
-    rekkefølgen i filen ikke garanterer at forelderen kommer før barnet.
-    Konsepter med to foreldre (f.eks. Dans) får den første, se aktivitet i
-    schema_kjerne.sql."""
+    fasetter unntatt "exclude". Konseptene nøkles på navn. Foreldre settes i et
+    eget steg, siden rekkefølgen i filen ikke garanterer at forelderen kommer
+    før barnet."""
     sql = "BEGIN;\n"
     for tabell, vokabular in VOKABULAR.items():
-        konsepter = [(kode, k) for fasett, ks in vokabular.items() if fasett != "exclude"
-                     for kode, k in ks.items()]
-        verdier = ",\n".join(f"({q(kode)},{q(k['label']['nb'])})" for kode, k in konsepter)
-        foreldre = ",\n".join(f"({q(kode)},{q(k['broader'][0])})" for kode, k in konsepter if k.get("broader"))
-        rotter = ",".join(q(kode) for kode, k in konsepter if not k.get("broader"))
-        sql += (f"INSERT INTO {tabell} (kode,navn) VALUES\n{verdier}\n"
-                f"ON CONFLICT (kode) DO UPDATE SET navn=EXCLUDED.navn;\n"
-                f"UPDATE {tabell} a SET parent_id=p.id FROM (VALUES\n{foreldre}\n) AS v(kode,forelder) "
-                f"JOIN {tabell} p ON p.kode=v.forelder "
-                f"WHERE a.kode=v.kode AND a.parent_id IS DISTINCT FROM p.id;\n"
-                f"UPDATE {tabell} SET parent_id=NULL WHERE kode IN ({rotter}) AND parent_id IS NOT NULL;\n")
+        konsepter = [(navn, k) for fasett, ks in vokabular.items() if fasett != "exclude"
+                     for navn, k in ks.items()]
+        verdier = ",\n".join(f"({q(navn)})" for navn, k in konsepter)
+        foreldre = ",\n".join(f"({q(navn)},{q(k['broader'])})" for navn, k in konsepter if k.get("broader"))
+        rotter = ",".join(q(navn) for navn, k in konsepter if not k.get("broader"))
+        sql += (f"INSERT INTO {tabell} (navn) VALUES\n{verdier}\n"
+                f"ON CONFLICT (navn) DO NOTHING;\n"
+                f"UPDATE {tabell} a SET parent_id=p.id FROM (VALUES\n{foreldre}\n) AS v(navn,forelder) "
+                f"JOIN {tabell} p ON p.navn=v.forelder "
+                f"WHERE a.navn=v.navn AND a.parent_id IS DISTINCT FROM p.id;\n"
+                f"UPDATE {tabell} SET parent_id=NULL WHERE navn IN ({rotter}) AND parent_id IS NOT NULL;\n")
     return sql + "COMMIT;\n\n"
 
 
 def oversett(kodetype: str, navn: str):
-    """Kildenavn -> liste med koder i masterens kodeverk, via mapping-filene.
+    """Kildenavn -> liste med konseptnavn i masterens kodeverk, via mapping-filene.
     Tom liste betyr ikke relevant (bevisst uten mål, f.eks. "Stengt" eller et
-    exclude-konsept); None betyr ukartlagt. Lokaletype gir høyst én kode, mens
+    exclude-konsept); None betyr ukartlagt. Lokaletype gir høyst ett navn, mens
     ett aktivitets- eller fasilitetsnavn kan gi flere ("Barnebursdag 3 - 12 år"
     -> Barnebursdag + Barn)."""
     konsepter = MAPPING[kodetype].get(norm_navn(navn))
@@ -306,7 +305,7 @@ def generer_sql(slug: str, ut) -> bool:
       f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
     # --- kildekoder + oversettelse til masterens kodeverk ---
-    # kart[kodetype][kildekode] = masterkoder (se oversett). Brukes under når
+    # kart[kodetype][kildekode] = masternavn (se oversett). Brukes under når
     # ressursene og koblingene skrives; selve oversettelsen lagres ikke.
     kart = {"lokaletype": {}, "aktivitet": {}, "fasilitet": {}}
     for kodetype, samling in [
@@ -325,12 +324,12 @@ def generer_sql(slug: str, ut) -> bool:
               f"SELECT id,{q(kodetype)},{q(rad['id'])},{q(navn)} "
               f"FROM fagsystem_instans WHERE kildenokkel={q(kn)} "
               f"ON CONFLICT (fagsystem_instans_id,kodetype,kode) DO UPDATE SET navn=EXCLUDED.navn, sist_sett=now();\n")
-            koder = oversett(kodetype, navn)
-            if koder is None:
+            master_navn = oversett(kodetype, navn)
+            if master_navn is None:
                 # Samling og kode må stemme med koblingen i v_ukartlagte_kildekoder.
                 w(logg(kn, samling, "ikke_kartlagt", rad["id"], navn, "name", rapost=rad))
             else:
-                kart[kodetype][str(rad["id"])] = koder
+                kart[kodetype][str(rad["id"])] = master_navn
     w("\n")
 
     # --- bygg + adresse ---
@@ -415,8 +414,8 @@ def generer_sql(slug: str, ut) -> bool:
         bygg_sel = (f"(SELECT b.id FROM bygning b JOIN fagsystem_instans f2 ON f2.id=b.fagsystem_instans_id "
                     f"WHERE f2.kildenokkel={q(kn)} AND b.ekstern_id={q(bid)})") if bid else "NULL"
         # Én lokaletype per ressurs; NULL når kategorien er ukartlagt eller ikke relevant.
-        lt_koder = kart["lokaletype"].get(str(r.get("rescategory_id"))) or []
-        lt_sel = f"(SELECT id FROM lokaletype WHERE kode={q(lt_koder[0])})" if lt_koder else "NULL"
+        lt_navn = kart["lokaletype"].get(str(r.get("rescategory_id"))) or []
+        lt_sel = f"(SELECT id FROM lokaletype WHERE navn={q(lt_navn[0])})" if lt_navn else "NULL"
 
         w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
           f"kapasitet,beskrivelse,aktiv,bookbar) "
@@ -466,13 +465,13 @@ def generer_sql(slug: str, ut) -> bool:
                        "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=rad))
                 continue
             w(kildekode_kobling(kodetype, rad[idfelt], rad["resource_id"]))
-            koder = kart[kodetype].get(str(rad[idfelt]))
-            if koder:
+            navn_liste = kart[kodetype].get(str(rad[idfelt]))
+            if navn_liste:
                 w(f"INSERT INTO {koblingstabell} (ressurs_id,{maalkol}) "
                   f"SELECT r.id,t.id "
                   f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id, {kodetype} t "
                   f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(rad['resource_id'])} "
-                  f"AND t.kode IN ({','.join(q(c) for c in koder)}) "
+                  f"AND t.navn IN ({','.join(q(n) for n in navn_liste)}) "
                   f"ON CONFLICT DO NOTHING;\n")
 
     for br in d.get("building_resources", []):

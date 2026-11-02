@@ -287,13 +287,13 @@ CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 -- =============================================================================
 
 -- Vokabularet eies av etl/lokaletype_mapping/venue_types.json og lastes av
--- etl/last_inn.py, som for aktivitet. Fasetten (innendørs idrett, kultur,
--- møte, ...) bæres av prefikset i kode (LOK-SI-, LOK-CU-, ...).
+-- etl/last_inn.py, som for aktivitet. Navnet er den naturlige nøkkelen (unikt
+-- per tabell); fasetten (innendørs idrett, kultur, møte, ...) står bare i
+-- vokabularfilen.
 CREATE TABLE IF NOT EXISTS lokaletype
 (
     id         BIGSERIAL PRIMARY KEY,
-    kode       TEXT UNIQUE NOT NULL,
-    navn       TEXT NOT NULL,
+    navn       TEXT UNIQUE NOT NULL,
     -- Selvreferanse for hierarki (Idrettshall -> Gymsal). Heter "parent_id", ikke
     -- "lokaletype_id", for å skille den tydelig fra en referanse til en annen
     -- tabell.
@@ -304,18 +304,16 @@ CREATE TABLE IF NOT EXISTS lokaletype
 
 -- Holder mer enn rene aktiviteter: alle fasettene i etl/activity_mapping/
 -- activities.json unntatt "exclude" (aktivitet, arrangement, organisasjon,
--- målgruppe, lokale, tjeneste). Fasetten bæres av prefikset i kode (ACT-,
--- EVT-, ORG-, GRP-, VEN-, SRV-), ikke av en egen kolonne. Vokabularet eies av
--- JSON-filen og lastes av etl/last_inn.py - det seedes ikke her.
+-- målgruppe, lokale, tjeneste). Fasetten står bare i vokabularfilen, ikke i en
+-- egen kolonne. Navnet er den naturlige nøkkelen (unikt per tabell).
+-- Vokabularet eies av JSON-filen og lastes av etl/last_inn.py - det seedes ikke her.
 --
 -- Noen få konsepter har to foreldre i vokabularet (Dans under både Kultur og
 -- Idrett); parent_id får den første.
 CREATE TABLE IF NOT EXISTS aktivitet
 (
     id         BIGSERIAL PRIMARY KEY,
-    kode       TEXT UNIQUE NOT NULL
-                   CHECK (kode ~ '^(ACT|EVT|ORG|GRP|VEN|SRV)-[0-9]{3}$'),
-    navn       TEXT NOT NULL,
+    navn       TEXT UNIQUE NOT NULL,
     parent_id  BIGINT REFERENCES aktivitet(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -323,12 +321,11 @@ CREATE TABLE IF NOT EXISTS aktivitet
 
 -- Vokabularet eies av etl/fasilitet_mapping/facilities.json og lastes av
 -- etl/last_inn.py, som for aktivitet. Fasetten (lyd/bilde, scene, kjøkken, ...)
--- bæres av prefikset i kode (FAC-AV-, FAC-ST-, ...).
+-- står bare i vokabularfilen.
 CREATE TABLE IF NOT EXISTS fasilitet
 (
     id         BIGSERIAL PRIMARY KEY,
-    kode       TEXT UNIQUE NOT NULL,
-    navn       TEXT NOT NULL,
+    navn       TEXT UNIQUE NOT NULL,
     parent_id  BIGINT REFERENCES fasilitet(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -625,9 +622,8 @@ SELECT
     k.id                           AS kommune_id,
     k.kommunenr,
     k.navn                         AS kommune_navn,
-    lt.kode                        AS lokaletype_kode,
     lt.navn                        AS lokaletype_navn,
-    p.kode                         AS lokaletype_hovedgruppe,
+    p.navn                         AS lokaletype_hovedgruppe,
     b.id                           AS bygg_id,
     b.navn                         AS bygg_navn,
     b.bydel_navn,
@@ -640,14 +636,14 @@ SELECT
     a.postnummer,
     a.poststed,
     fi.base_url || '/bookingfrontend/resource/' || r.ekstern_id AS booking_url,
-    (SELECT array_agg(ak.kode ORDER BY ak.kode)
+    (SELECT array_agg(ak.navn ORDER BY ak.navn)
        FROM ressurs_aktivitet ra
        JOIN aktivitet ak ON ak.id = ra.aktivitet_id
-      WHERE ra.ressurs_id = r.id) AS aktivitet_koder,
-    (SELECT array_agg(f.kode ORDER BY f.kode)
+      WHERE ra.ressurs_id = r.id) AS aktivitet_navn,
+    (SELECT array_agg(f.navn ORDER BY f.navn)
        FROM ressurs_fasilitet rf
        JOIN fasilitet f ON f.id = rf.fasilitet_id
-      WHERE rf.ressurs_id = r.id) AS fasilitet_koder,
+      WHERE rf.ressurs_id = r.id) AS fasilitet_navn,
     r.sokevektor,
     r.sist_oppdatert
 FROM ressurs r
