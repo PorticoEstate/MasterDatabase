@@ -282,14 +282,13 @@ CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 --
 -- Kjernen i tverrkommunalt søk. Hver kommune har sitt eget kodeverk der samme
 -- ID betyr ulike ting: kategori 13 er "Overnatting" i Bergen og "Skateanlegg" i
--- Stavanger, og 58 av 63 ID-er kolliderer slik. Master eier derfor ett kuratert
--- kodeverk, og de lokale kodene oversettes inn mot det i seksjon 6.
+-- Stavanger, og 58 av 63 ID-er kolliderer slik. Master eier derfor ett kodeverk,
+-- og instansene forventes å levere sitt kodeverk normalisert mot det (samme
+-- navn og hierarki). etl/last_inn.py laster det direkte fra kildens samlinger.
 -- =============================================================================
 
--- Vokabularet eies av etl/lokaletype_mapping/venue_types.json og lastes av
--- etl/last_inn.py, som for aktivitet. Navnet er den naturlige nøkkelen (unikt
--- per tabell); fasetten (innendørs idrett, kultur, møte, ...) står bare i
--- vokabularfilen.
+-- Lastes av etl/last_inn.py fra kildens resource_categories, som for aktivitet;
+-- det seedes ikke her. Navnet er den naturlige nøkkelen (unikt per tabell).
 CREATE TABLE IF NOT EXISTS lokaletype
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -302,14 +301,9 @@ CREATE TABLE IF NOT EXISTS lokaletype
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Holder mer enn rene aktiviteter: alle fasettene i etl/activity_mapping/
--- activities.json unntatt "exclude" (aktivitet, arrangement, organisasjon,
--- målgruppe, lokale, tjeneste). Fasetten står bare i vokabularfilen, ikke i en
--- egen kolonne. Navnet er den naturlige nøkkelen (unikt per tabell).
--- Vokabularet eies av JSON-filen og lastes av etl/last_inn.py - det seedes ikke her.
---
--- Noen få konsepter har to foreldre i vokabularet (Dans under både Kultur og
--- Idrett); parent_id får den første.
+-- Lastes av etl/last_inn.py fra kildens activities - det seedes ikke her.
+-- Navnet er den naturlige nøkkelen (unikt per tabell). Et konsept har én
+-- forelder.
 CREATE TABLE IF NOT EXISTS aktivitet
 (
     id         BIGSERIAL PRIMARY KEY,
@@ -319,9 +313,7 @@ CREATE TABLE IF NOT EXISTS aktivitet
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Vokabularet eies av etl/fasilitet_mapping/facilities.json og lastes av
--- etl/last_inn.py, som for aktivitet. Fasetten (lyd/bilde, scene, kjøkken, ...)
--- står bare i vokabularfilen.
+-- Lastes av etl/last_inn.py fra kildens facilities, som for aktivitet.
 CREATE TABLE IF NOT EXISTS fasilitet
 (
     id         BIGSERIAL PRIMARY KEY,
