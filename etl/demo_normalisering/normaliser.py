@@ -34,15 +34,17 @@ from pathlib import Path
 HER = Path(__file__).resolve().parent
 ETL = HER.parent
 sys.path.insert(0, str(ETL))
-from last_inn import KOMMUNER, hent_json, rens  # noqa: E402
+from felles import KOMMUNER, hent_json, rens  # noqa: E402
 
 # Mapping og vokabular per kodetype, i samme format for alle tre (se
 # activity_mapping/AktivKommune_activity_normalisation.md): mapping.json har
 # under "values" ett oppslag per normalisert kildenavn (norm_navn) med
 # konseptnavnene i målfeltet, og vokabularfilen har konseptene gruppert per
-# fasett, nøklet på navn, med "broader" (forelderens navn). Alle fasetter
-# unntatt "exclude" blir med i vokabularet; exclude-konsepter betyr at
-# kildenavnet ikke er relevant.
+# fasett, nøklet på navn, med "broader" (forelderens navn) og et fast "id".
+# Id-en er den delte id-en på tvers av instanser, og skal aldri endres eller
+# gjenbrukes; et nytt konsept får neste ledige tall. Alle fasetter unntatt
+# "exclude" blir med i vokabularet; exclude-konsepter betyr at kildenavnet ikke
+# er relevant.
 #
 # kodetype: (mappe, vokabularfil, målfelt i mapping.json, samling i kilden)
 KODEVERK = {
@@ -58,6 +60,8 @@ for _kodetype, (_mappe, _vokabularfil, _malfelt, _) in KODEVERK.items():
                               for navn, v in json.load(f)["values"].items()}
     with open(HER / _mappe / _vokabularfil, encoding="utf-8") as f:
         VOKABULAR[_kodetype] = json.load(f)["facets"]
+    _ider = [k["id"] for ks in VOKABULAR[_kodetype].values() for k in ks.values()]
+    assert len(set(_ider)) == len(_ider), f"{_vokabularfil}: id-er som går igjen"
 EKSKLUDER = {navn for v in VOKABULAR.values() for navn in v.get("exclude", {})}
 
 # Junk uansett kodetype: adresser, stedsnavn og driftsstatus som aldri kan
@@ -123,7 +127,7 @@ def normaliser(d: dict, ukartlagt: dict) -> dict:
     for kodetype, (_, _, _, samling) in KODEVERK.items():
         konsepter = [(navn, k) for fasett, ks in VOKABULAR[kodetype].items() if fasett != "exclude"
                      for navn, k in ks.items()]
-        ider = {navn: i for i, (navn, _) in enumerate(konsepter, 1)}
+        ider = {navn: k["id"] for navn, k in konsepter}
         ut[samling] = [{"id": ider[navn], "name": navn, "parent_id": ider.get(k.get("broader")), "active": 1}
                        for navn, k in konsepter]
 

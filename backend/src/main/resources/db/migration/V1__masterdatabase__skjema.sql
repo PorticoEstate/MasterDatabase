@@ -288,10 +288,11 @@ CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 -- =============================================================================
 
 -- Lastes av etl/last_inn.py fra kildens resource_categories, som for aktivitet;
--- det seedes ikke her. Navnet er den naturlige nøkkelen (unikt per tabell).
+-- det seedes ikke her. id er den delte id-en på tvers av instansene og settes
+-- av den som eier kodeverket (ikke et løpenummer); navnet er unikt per tabell.
 CREATE TABLE IF NOT EXISTS lokaletype
 (
-    id         BIGSERIAL PRIMARY KEY,
+    id         BIGINT PRIMARY KEY,
     navn       TEXT UNIQUE NOT NULL,
     -- Selvreferanse for hierarki (Idrettshall -> Gymsal). Heter "parent_id", ikke
     -- "lokaletype_id", for å skille den tydelig fra en referanse til en annen
@@ -302,11 +303,11 @@ CREATE TABLE IF NOT EXISTS lokaletype
 );
 
 -- Lastes av etl/last_inn.py fra kildens activities - det seedes ikke her.
--- Navnet er den naturlige nøkkelen (unikt per tabell). Et konsept har én
--- forelder.
+-- id er den delte id-en på tvers av instansene (se lokaletype); navnet er unikt
+-- per tabell. Et konsept har én forelder.
 CREATE TABLE IF NOT EXISTS aktivitet
 (
-    id         BIGSERIAL PRIMARY KEY,
+    id         BIGINT PRIMARY KEY,
     navn       TEXT UNIQUE NOT NULL,
     parent_id  BIGINT REFERENCES aktivitet(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -316,7 +317,7 @@ CREATE TABLE IF NOT EXISTS aktivitet
 -- Lastes av etl/last_inn.py fra kildens facilities, som for aktivitet.
 CREATE TABLE IF NOT EXISTS fasilitet
 (
-    id         BIGSERIAL PRIMARY KEY,
+    id         BIGINT PRIMARY KEY,
     navn       TEXT UNIQUE NOT NULL,
     parent_id  BIGINT REFERENCES fasilitet(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

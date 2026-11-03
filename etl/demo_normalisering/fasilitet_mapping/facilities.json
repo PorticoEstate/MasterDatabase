@@ -4,25 +4,31 @@
   "facets": {
     "av": {
       "Digital tavle": {
+        "id": 1,
         "altLabels": [
           "smartboard",
           "whiteboard (interaktiv tavla)"
         ],
         "note": "Smartboard / interaktiv tavle"
       },
-      "Flipover": {},
+      "Flipover": {
+        "id": 2
+      },
       "HDMI-overganger": {
+        "id": 3,
         "altLabels": [
           "hdmi-overganger (display port, apple lightning, usb-c, mini dp, micro hdmi)"
         ]
       },
       "Kamera og videoutstyr": {
+        "id": 4,
         "altLabels": [
           "grønn skjerm (videoredigering)",
           "video-og filmutstyr"
         ]
       },
       "Lydanlegg": {
+        "id": 5,
         "altLabels": [
           "lyd- og speakeranlegg",
           "musikkanlegg",
@@ -33,6 +39,7 @@
         "note": "Sound system"
       },
       "Diskoanlegg": {
+        "id": 6,
         "broader": "Lydanlegg",
         "altLabels": [
           "disko-anlegg",
@@ -41,6 +48,7 @@
         ]
       },
       "Høyttaler": {
+        "id": 7,
         "broader": "Lydanlegg",
         "altLabels": [
           "bluetooth høytaler",
@@ -52,9 +60,11 @@
         ]
       },
       "Mikrofon": {
+        "id": 8,
         "broader": "Lydanlegg"
       },
       "Trådløs mikrofon": {
+        "id": 9,
         "broader": "Mikrofon",
         "altLabels": [
           "hodebøylemik"
@@ -62,21 +72,25 @@
         "note": "Incl. \"mygg\" and headset"
       },
       "PC": {
+        "id": 10,
         "altLabels": [
           "studiepc",
           "tastatur"
         ]
       },
       "Projektor": {
+        "id": 11,
         "altLabels": [
           "lerret og projektor i himling, appletv, mikrofon/høyttaler og nødvendige kabler",
           "prosjektor"
         ]
       },
       "Lerret": {
+        "id": 12,
         "broader": "Projektor"
       },
       "Skjerm/TV": {
+        "id": 13,
         "altLabels": [
           "skjerm",
           "skjerm m/hdmi",
@@ -87,15 +101,18 @@
         ]
       },
       "Skjermpakke": {
+        "id": 14,
         "broader": "Skjerm/TV",
         "note": "Skjerm + lydplanke + Apple TV (+ mikrofon/høyttaler)"
       },
       "Streaming": {
+        "id": 15,
         "altLabels": [
           "streaming (egne priser gjelder)"
         ]
       },
       "Studio og opptak": {
+        "id": 16,
         "altLabels": [
           "innspilling lyd",
           "klipperom (da vinci-software)",
@@ -104,6 +121,7 @@
         "note": "Podcast, lydopptak, klipperom"
       },
       "Trådløs skjermdeling": {
+        "id": 17,
         "altLabels": [
           "apple-tv",
           "click share",
@@ -112,12 +130,14 @@
         "note": "Apple TV, ClickShare"
       },
       "Videokonferanse": {
+        "id": 18,
         "altLabels": [
           "videosamtaler",
           "webkamera"
         ]
       },
       "Whiteboard": {
+        "id": 19,
         "altLabels": [
           "tavle",
           "whiteboard-stativ"
@@ -126,6 +146,7 @@
     },
     "stage": {
       "Amfi": {
+        "id": 20,
         "altLabels": [
           "amfi, fast plassbygd",
           "amfi, uttrekkbart",
@@ -133,109 +154,158 @@
         ]
       },
       "Backline og bandutstyr": {
+        "id": 21,
         "altLabels": [
           "backline",
           "band utstyr"
         ]
       },
       "Ballettbarre": {
+        "id": 22,
         "altLabels": [
           "ballettbarrer"
         ]
       },
       "Lysanlegg": {
+        "id": 23,
         "altLabels": [
           "lysrigg for scenebruk",
           "scenelys",
           "skinner i tak med utstillingsbelysning"
         ]
       },
-      "Musikkinstrument": {},
+      "Musikkinstrument": {
+        "id": 24
+      },
       "El-piano": {
+        "id": 25,
         "broader": "Musikkinstrument",
         "altLabels": [
           "el- piano"
         ]
       },
       "Flygel": {
+        "id": 26,
         "broader": "Musikkinstrument"
       },
       "Orgel": {
+        "id": 27,
         "broader": "Musikkinstrument"
       },
       "Piano": {
+        "id": 28,
         "broader": "Musikkinstrument",
         "altLabels": [
           "piano/flygel"
         ]
       },
-      "Scene": {},
+      "Scene": {
+        "id": 29
+      },
       "Sceneelementer": {
+        "id": 30,
         "broader": "Scene"
       },
       "Utendørsscene": {
+        "id": 31,
         "broader": "Scene"
       },
       "Speilvegg": {
+        "id": 32,
         "note": "Dance/ballet room"
       }
     },
     "sportsArea": {
       "Basketballbane": {
+        "id": 33,
         "altLabels": [
           "basket-bane"
         ]
       },
-      "Flomlys": {},
-      "Friidrettsbane": {},
-      "Grusbane": {},
+      "Flomlys": {
+        "id": 34
+      },
+      "Friidrettsbane": {
+        "id": 35
+      },
+      "Grusbane": {
+        "id": 36
+      },
       "Klatrevegg": {
+        "id": 37,
         "altLabels": [
           "klatring"
         ]
       },
       "Buldrevegg": {
+        "id": 38,
         "broader": "Klatrevegg",
         "altLabels": [
           "buldring"
         ]
       },
       "Kunstgress": {
+        "id": 39,
         "altLabels": [
           "kunstgras"
         ]
       },
-      "Padelbane": {},
-      "Pumptrack": {},
-      "Resultattavle": {},
-      "Sandvolleyballbane": {},
-      "Skatepark": {},
-      "Sportsgulv": {},
+      "Padelbane": {
+        "id": 40
+      },
+      "Pumptrack": {
+        "id": 41
+      },
+      "Resultattavle": {
+        "id": 42
+      },
+      "Sandvolleyballbane": {
+        "id": 43
+      },
+      "Skatepark": {
+        "id": 44
+      },
+      "Sportsgulv": {
+        "id": 45
+      },
       "Parkettgulv": {
+        "id": 46,
         "broader": "Sportsgulv"
       },
-      "Tidtakeranlegg": {},
-      "Tribune": {},
-      "Trimpark": {}
+      "Tidtakeranlegg": {
+        "id": 47
+      },
+      "Tribune": {
+        "id": 48
+      },
+      "Trimpark": {
+        "id": 49
+      }
     },
     "sportsEquipment": {
       "Basketkurv": {
+        "id": 50,
         "altLabels": [
           "basketkurver"
         ]
       },
       "Bordtennisbord": {
+        "id": 51,
         "altLabels": [
           "bordtennis"
         ]
       },
       "Idrettsutstyr (generelt)": {
+        "id": 52,
         "altLabels": [
           "idrettsutstyr"
         ]
       },
-      "Klapphekker": {},
+      "Klapphekker": {
+        "id": 53
+      },
       "Klatreutstyr": {
+        "id": 54,
         "altLabels": [
           "klatresele",
           "klatresko",
@@ -244,21 +314,27 @@
         ]
       },
       "Matter": {
+        "id": 55,
         "altLabels": [
           "matter, turn"
         ]
       },
       "Hoppemadrass": {
+        "id": 56,
         "broader": "Matter",
         "altLabels": [
           "tjukkasar"
         ]
       },
       "Kampsportmatter": {
+        "id": 57,
         "broader": "Matter"
       },
-      "Mål": {},
+      "Mål": {
+        "id": 58
+      },
       "Fotball-/innebandymål": {
+        "id": 59,
         "broader": "Mål",
         "altLabels": [
           "fotball/innebandymål",
@@ -266,12 +342,14 @@
         ]
       },
       "Håndballmål": {
+        "id": 60,
         "broader": "Mål",
         "altLabels": [
           "handballmål"
         ]
       },
       "Nett og stolper": {
+        "id": 61,
         "altLabels": [
           "badmington stativ og nett",
           "stolper og nett",
@@ -280,37 +358,49 @@
         ],
         "note": "Volleyball, badminton, tennis"
       },
-      "Premiepall": {},
+      "Premiepall": {
+        "id": 62
+      },
       "Ribbevegg": {
+        "id": 63,
         "altLabels": [
           "ribbevegger"
         ]
       },
-      "Startpall": {},
+      "Startpall": {
+        "id": 64
+      },
       "Styrketreningsutstyr": {
+        "id": 65,
         "altLabels": [
           "utholdenhetsutstyr",
           "vekter"
         ]
       },
       "Turnapparater": {
+        "id": 66,
         "altLabels": [
           "gym benk",
           "monkeybar"
         ]
       },
       "Trampoline": {
+        "id": 67,
         "broader": "Turnapparater"
       }
     },
     "pool": {
       "Badstue": {
+        "id": 68,
         "altLabels": [
           "badstu"
         ]
       },
-      "Basseng": {},
+      "Basseng": {
+        "id": 69
+      },
       "Barnebasseng": {
+        "id": 70,
         "broader": "Basseng",
         "altLabels": [
           "plaskebasseng",
@@ -318,32 +408,41 @@
         ]
       },
       "Stupebasseng": {
+        "id": 71,
         "broader": "Basseng"
       },
       "Svømmebasseng": {
+        "id": 72,
         "broader": "Basseng"
       },
       "Undervisningsbasseng": {
+        "id": 73,
         "broader": "Basseng"
       },
       "Varmtvannsbasseng": {
+        "id": 74,
         "broader": "Basseng",
         "altLabels": [
           "varmtvannsbasseng tilrettelagt for hc"
         ]
       },
-      "Bassengheis": {},
+      "Bassengheis": {
+        "id": 75
+      },
       "Salg av badeartikler": {
+        "id": 76,
         "altLabels": [
           "salg badeartikler"
         ]
       },
       "Stupetårn og sviktbrett": {
+        "id": 77,
         "altLabels": [
           "stupebrett"
         ]
       },
       "Vannrutsjebane": {
+        "id": 78,
         "altLabels": [
           "sklie for de minste",
           "vannsklie"
@@ -352,24 +451,32 @@
     },
     "kitchen": {
       "Dekketøy": {
+        "id": 79,
         "altLabels": [
           "barnebestikk"
         ]
       },
       "Kafeteria": {
+        "id": 80,
         "altLabels": [
           "kafè"
         ]
       },
       "Kaffemaskin": {
+        "id": 81,
         "altLabels": [
           "kaffetrakter",
           "mokkamaster"
         ]
       },
-      "Kiosk": {},
-      "Kjøkken": {},
+      "Kiosk": {
+        "id": 82
+      },
+      "Kjøkken": {
+        "id": 83
+      },
       "Kjøkkenutstyr": {
+        "id": 84,
         "broader": "Kjøkken",
         "altLabels": [
           "combidamper",
@@ -383,6 +490,7 @@
         ]
       },
       "Kjøleskap og fryser": {
+        "id": 85,
         "broader": "Kjøkken",
         "altLabels": [
           "fryser",
@@ -391,70 +499,85 @@
         ]
       },
       "Minikjøkken": {
+        "id": 86,
         "broader": "Kjøkken",
         "altLabels": [
           "tekjøkken"
         ]
       },
       "Oppvaskmaskin": {
+        "id": 87,
         "broader": "Kjøkken",
         "altLabels": [
           "steamer/oppvasmaskin"
         ]
       },
-      "Serveringsdisk": {}
+      "Serveringsdisk": {
+        "id": 88
+      }
     },
     "furniture": {
       "Bord og stoler": {
+        "id": 89,
         "altLabels": [
           "bord og stolar"
         ]
       },
       "Bord": {
+        "id": 90,
         "broader": "Bord og stoler",
         "altLabels": [
           "bord sammenleggbare"
         ]
       },
       "Hev/senk-skrivebord": {
+        "id": 91,
         "broader": "Bord",
         "altLabels": [
           "hev/senk skrivebord"
         ]
       },
       "Spisebord": {
+        "id": 92,
         "broader": "Bord"
       },
       "Ståbord": {
+        "id": 93,
         "broader": "Bord"
       },
       "Stoler": {
+        "id": 94,
         "broader": "Bord og stoler",
         "altLabels": [
           "stolar"
         ]
       },
       "Kontorstol": {
+        "id": 95,
         "broader": "Stoler"
       },
       "Fleksibel møblering": {
+        "id": 96,
         "altLabels": [
           "fleksibel møblering med gruppeoppsett",
           "fleksibel møblering med kursbord"
         ]
       },
       "Formell møblering": {
+        "id": 97,
         "altLabels": [
           "formell møblering med møtebord",
           "formell møblering med rundt møtebord"
         ]
       },
       "Kinooppsett": {
+        "id": 98,
         "altLabels": [
           "kinooppsett med stoler, ingen bord"
         ]
       },
       "Publikumsbenker": {
+        "id": 99,
         "altLabels": [
           "benk",
           "benker til publikum",
@@ -462,22 +585,29 @@
         ]
       },
       "Sofa og sittegrupper": {
+        "id": 100,
         "altLabels": [
           "sittegrupper",
           "sofa"
         ]
       },
-      "Talarstol": {}
+      "Talarstol": {
+        "id": 101
+      }
     },
     "sanitary": {
       "Dusj": {
+        "id": 102,
         "altLabels": [
           "dusj/toalett",
           "dusjer"
         ]
       },
-      "Garderobe": {},
+      "Garderobe": {
+        "id": 103
+      },
       "Toalett": {
+        "id": 104,
         "altLabels": [
           "toalett tilknyttet friluftsanlegg",
           "toaletter",
@@ -485,6 +615,7 @@
         ]
       },
       "HC-toalett": {
+        "id": 105,
         "broader": "Toalett",
         "altLabels": [
           "hc toalett",
@@ -492,24 +623,34 @@
         ]
       },
       "Vask": {
+        "id": 106,
         "note": "Could be kitchen sink"
       }
     },
     "accessibility": {
-      "Automatisk døråpner": {},
+      "Automatisk døråpner": {
+        "id": 107
+      },
       "HC-parkering": {
+        "id": 108,
         "altLabels": [
           "handikapparkering"
         ]
       },
-      "Heis": {},
-      "Rullestolrampe": {},
+      "Heis": {
+        "id": 109
+      },
+      "Rullestolrampe": {
+        "id": 110
+      },
       "Teleslynge": {
+        "id": 111,
         "altLabels": [
           "taleutjevninganlegg fra phonak"
         ]
       },
       "Universell utforming": {
+        "id": 112,
         "altLabels": [
           "tilrettelagt for menneske med nedsatt funksjonsevne",
           "tilrettelegging for bevegelseshemmede"
@@ -517,8 +658,11 @@
       }
     },
     "infrastructure": {
-      "Brannslukkingsapparat": {},
+      "Brannslukkingsapparat": {
+        "id": 113
+      },
       "Hobby- og verkstedutstyr": {
+        "id": 114,
         "altLabels": [
           "symaskiner",
           "verkstedet",
@@ -526,6 +670,7 @@
         ]
       },
       "Internett/WiFi": {
+        "id": 115,
         "altLabels": [
           "gratis wifi",
           "internett",
@@ -535,75 +680,104 @@
         ]
       },
       "Parkering": {
+        "id": 116,
         "altLabels": [
           "gratis parkering"
         ]
       },
       "Septik": {
+        "id": 117,
         "note": "Septic emptying (bobil/båt)"
       },
       "Strøm": {
+        "id": 118,
         "altLabels": [
           "strømuttak"
         ]
       },
       "Vann": {
+        "id": 119,
         "altLabels": [
           "vannfontene",
           "vanntilgang",
           "vannuttak"
         ]
       },
-      "Vaskemaskin": {},
+      "Vaskemaskin": {
+        "id": 120
+      },
       "Vedovn": {
+        "id": 121,
         "altLabels": [
           "vedfyrt ovn"
         ]
       }
     },
     "play": {
-      "Airhockey": {},
+      "Airhockey": {
+        "id": 122
+      },
       "Biljard": {
+        "id": 123,
         "altLabels": [
           "biiljardbord",
           "biljardbord"
         ]
       },
-      "Brettspill": {},
-      "Fussball": {},
+      "Brettspill": {
+        "id": 124
+      },
+      "Fussball": {
+        "id": 125
+      },
       "Hoppeslott": {
+        "id": 126,
         "altLabels": [
           "hoppemadrass/hoppeslott"
         ]
       },
-      "Lekeplass": {},
+      "Lekeplass": {
+        "id": 127
+      },
       "Lekerom": {
+        "id": 128,
         "altLabels": [
           "lekekrok",
           "leker"
         ]
       },
-      "Shuffleboard": {},
+      "Shuffleboard": {
+        "id": 129
+      },
       "Spillkonsoll": {
+        "id": 130,
         "altLabels": [
           "playstation"
         ]
       }
     },
     "outdoor": {
-      "Gapahuk": {},
+      "Gapahuk": {
+        "id": 131
+      },
       "Grill- og bålplass": {
+        "id": 132,
         "altLabels": [
           "bålpanne",
           "grill/bålpanne",
           "grillplass"
         ]
       },
-      "Sandstrand": {},
-      "Teltplass": {}
+      "Sandstrand": {
+        "id": 133
+      },
+      "Teltplass": {
+        "id": 134
+      }
     },
     "rental": {
       "Kano og kajakk": {
+        "id": 135,
         "altLabels": [
           "kajakk/kano",
           "kano",
@@ -611,20 +785,33 @@
         ]
       },
       "Padleutstyr": {
+        "id": 136,
         "broader": "Kano og kajakk",
         "altLabels": [
           "padleårer"
         ]
       },
-      "Kjøretøy": {},
+      "Kjøretøy": {
+        "id": 137
+      },
       "Tilhenger": {
+        "id": 138,
         "broader": "Kjøretøy"
       },
-      "Redningsvest": {},
-      "Ski": {},
-      "Skøyter": {},
-      "Sykkel": {},
+      "Redningsvest": {
+        "id": 139
+      },
+      "Ski": {
+        "id": 140
+      },
+      "Skøyter": {
+        "id": 141
+      },
+      "Sykkel": {
+        "id": 142
+      },
       "Sykkeltilbehør": {
+        "id": 143,
         "broader": "Sykkel",
         "altLabels": [
           "ekstra langt bagasjebrett",
@@ -637,28 +824,37 @@
     },
     "capacity": {
       "Kapasitet": {
+        "id": 144,
         "note": "Value in attributes capacityMin / capacityMax"
       },
       "Tribunekapasitet": {
+        "id": 145,
         "broader": "Kapasitet",
         "note": "Seats on stand; value in attributes"
       }
     },
     "roomType": {
       "Aktivitetsrom": {
+        "id": 146,
         "altLabels": [
           "aktivitetsrom uten møbler",
           "kreativt rom med uformell møblering"
         ]
       },
-      "Diskorom": {},
-      "Forsamlingslokale": {},
+      "Diskorom": {
+        "id": 147
+      },
+      "Forsamlingslokale": {
+        "id": 148
+      },
       "Kursrom": {
+        "id": 149,
         "altLabels": [
           "kursrom med kursbord og stoler"
         ]
       },
       "Møterom": {
+        "id": 150,
         "altLabels": [
           "lite møterom audio",
           "medium møterom audio",
@@ -668,13 +864,17 @@
           "xxl møterom audio"
         ]
       },
-      "Oppholdsrom": {},
+      "Oppholdsrom": {
+        "id": 151
+      },
       "Seremonirom": {
+        "id": 152,
         "altLabels": [
           "livsnøytral seremonirom"
         ]
       },
       "Spiseområde": {
+        "id": 153,
         "altLabels": [
           "åpent spiseområde"
         ]
@@ -682,9 +882,11 @@
     },
     "exclude": {
       "Avklares": {
+        "id": 154,
         "note": "Meaning unknown - ask source owner"
       },
       "Ikke fasilitet": {
+        "id": 155,
         "altLabels": [
           "foredrag"
         ],
