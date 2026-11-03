@@ -23,11 +23,9 @@ Fra tomt skjema til populert database, i tre steg:
 │ etl/last_inn.py          ←  Aktiv kommune API (12 kommuner)           │
 │                                                                        │
 │ Henter kommune, bygg, adresser (uten koordinater), ressurser,         │
-│ kildekoder. Laster kodeverket fra vokabularfilene og oversetter       │
-│ kildekodene til det med mapping.json (mappingen lagres ikke i basen): │
-│   etl/lokaletype_mapping/venue_types.json + mapping.json             │
-│   etl/fasilitet_mapping/facilities.json + mapping.json               │
-│   etl/activity_mapping/activities.json + mapping.json                │
+│ kildekoder og kodeverkene (lokaletype, aktivitet, fasilitet) slik     │
+│ instansen leverer dem: id, name, parent_id. Koblingene ressurs →      │
+│ kodeverk lastes direkte, på navn. Se "Kildekontrakt" under.           │
 │ Laster ALDRI `organizations` (persondata).                             │
 └───────────────────────────────────────────────────┬───────────────────┘
                                                       ▼
@@ -50,6 +48,13 @@ Fra tomt skjema til populert database, i tre steg:
                                           ╚═══════════════════╝
 ```
 
+**Demo-normalisering (valgfritt, før steg 2).** Aktiv kommune-instansene er ennå
+ikke normalisert. `etl/demo_normalisering/normaliser.py` viser hvordan masterdatabasen kan
+bli når de er det: det gjør en rå `searchdataall` om til det en normalisert
+instans ville levere, og `last_inn.py` laster resultatet med `--fra-fil`. Hele
+mappen kan slettes når instansene er normalisert; `last_inn.py` trenger ingen
+endring. Se "Demo-normalisering" under.
+
 **Tverrgående, på hvert steg:** alt som feiler (ugyldig verdi, duplikat,
 API-feil, manglende treff) logges i `synk_avvik` sammen med selve posten som
 feilet — én dårlig rad stopper aldri hele kjøringen. Hver kjøring registreres
@@ -67,7 +72,8 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `db/schema_kjerne.sql` | Skjemaet (steg 1) |
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
 | `etl/last_inn.py` | Steg 2 |
-| `etl/lokaletype_mapping/`, `fasilitet_mapping/`, `activity_mapping/` | Vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `last_inn.py` leser |
+| `etl/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
+| `etl/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3 |
 | `matrikkel/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
@@ -108,6 +114,11 @@ python3 etl/last_inn.py alle > etl/ut/alle.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 ```
 
+Skriptet kan også lese `<mappe>/<kommune>.json` i stedet for å hente fra nettet,
+med `--fra-fil <mappe>`. Det brukes av demoen (under), og er nyttig for å kjøre
+samme data på nytt uten nettverk. Kildeuttrekket registreres da med
+`file:///...` som endepunkt og uten HTTP-status.
+
 `etl/ut/` er generert output og ligger i `.gitignore` - filene der er en
 ferskvare, ikke noe som skal committes.
 
@@ -123,18 +134,20 @@ Skjemaet er idempotent - du kan kjøre den kommandoen på nytt uten å ødelegge
 ## Hva skriptet gjør og ikke gjør
 
 Laster: kommune, bygg, adresser (som de står i kilden, uten koordinater),
-ressurser, kildekoder, og vårt eget kodeverk (`lokaletype`/`aktivitet`/`fasilitet`)
-fra vokabularfilene i `etl/*_mapping/`. Kildekodene oversettes til kodeverket via
-`mapping.json` i samme mappe, og ressursene kobles direkte til resultatet
-(`ressurs.lokaletype_id`, `ressurs_aktivitet`, `ressurs_fasilitet`). Kildens egne
-koder lagres i `kildekode` og `ressurs_kildekode`, slik at den ikke-normaliserte
-formen kan sammenlignes med den normaliserte.
+ressurser, og kodeverkene `lokaletype`, `aktivitet` og `fasilitet` fra kildens
+`resource_categories`, `activities` og `facilities`. Et konsept nøkles på navn
+(unikt per tabell), og forelderen settes fra `parent_id` i kilden. Ressursene
+kobles direkte til kodeverkene (`ressurs.lokaletype_id`, `ressurs_aktivitet`,
+`ressurs_fasilitet`). Kildens egne id-er lagres i `kildekode` og
+`ressurs_kildekode`.
 
-Mappingen lagres ikke i databasen; den finnes bare i JSON-filene og påføres ved
-hver kjøring, så en endring i `mapping.json` slår igjennom neste gang skriptet
-kjøres. Koder uten oversettelse loggføres som `ikke_kartlagt` og vises i
-`v_ukartlagte_kildekoder`. Etter at databasen er bygget på nytt, er kodeverkene
-tomme til skriptet er kjørt.
+Skriptet gjør ingen oversettelse. Det er instansene som skal levere et
+normalisert kodeverk (se "Kildekontrakt"). Brudd på kontrakten loggføres i
+`synk_avvik`. Kodeverkene er tomme i en ny database til skriptet er kjørt.
+
+Koblingene (`ressurs_kildekode`, `ressurs_aktivitet`, `ressurs_fasilitet`)
+bygges på nytt for instansen ved hver kjøring. Kodeverkene selv får aldri
+konsepter fjernet; et konsept som forsvinner fra kilden, blir stående.
 
 Laster **ikke**: koordinater og matrikkeldata (eget steg, se
 "Geokoding og bygningsberikelse" under), og **ikke** `organizations`-samlingen
@@ -152,8 +165,8 @@ Hver kjøring registrerer et `kildeuttrekk` (kilde, endepunkt, tidspunkt,
 HTTP-status - ikke hele svaret fra kilden). Alt som ikke lar seg laste
 loggføres i `synk_avvik` sammen med selve posten som feilet (`rapost`, renset
 for personopplysninger som `organizations` og andre persondatafelt): ugyldige
-verdier, koblinger til noe som ikke finnes i uttrekket, databasefeil og feilet
-henting. En enkelt dårlig post stopper aldri hele lasten.
+verdier, koblinger til noe som ikke finnes i uttrekket, brudd på kildekontrakten,
+databasefeil og feilet henting. En enkelt dårlig post stopper aldri hele lasten.
 
 Gå gjennom avvikene fra siste kjøring slik:
 
@@ -167,6 +180,65 @@ docker exec portico_masterdb psql -U postgres -d masterdb -c "
 `post` er selve posten fra kilden som feilet, lagret direkte på avviket. De to
 nyeste uttrekkene per kilde beholdes, uforbeholdent - bevis for et avvik ligger
 på avviket selv, ikke i uttrekket, så gammel metadata kan ryddes trygt bort.
+
+## Kildekontrakt: hva en normalisert instans må levere
+
+`last_inn.py` laster kodeverkene direkte fra `searchdataall`, uten mapping. Det
+forutsetter at hver instans leverer dem i masterens form:
+
+| Samling | Felt | Krav |
+|---|---|---|
+| `resource_categories` (lokaletype), `activities`, `facilities` | `id` | Unik i samlingen |
+| | `name` | Unikt i samlingen, og lik på tvers av instanser (navnet er nøkkelen i masteren) |
+| | `parent_id` | `id` i samme samling, eller `null` for en rot. Én forelder, ingen sykluser. `facilities` har ikke dette feltet i dag |
+| `resources` | `rescategory_id` | `id` i `resource_categories` |
+| `resource_activities`, `resource_facilities` | `resource_id`, `activity_id`/`facility_id` | Peker på en rad i `resources` og i samlingen |
+
+Brudd lastes ikke stille; de loggføres i `synk_avvik`:
+
+| Brudd | Avvikstype | Følge |
+|---|---|---|
+| Manglende `id`, tomt `name`, navn som går igjen, syklus | `ugyldig_verdi` | Posten faller bort (syklus: noden blir rot) |
+| `parent_id` som ikke finnes i samlingen | `manglende_forelder` | Noden blir rot |
+| Kobling til en ressurs eller et konsept som ikke finnes | `manglende_forelder` | Raden lastes ikke |
+
+**Åpent: fullstendighet.** Kontrakten krever ikke at hele treet er med, men i
+dag er det ikke det. Målt på Bergen (2026-11-02) mangler 8 av 102 aktiviteter og
+4 av 56 lokaletyper sin forelder i samlingen, fem aktivitets-id-er brukes av
+koblinger uten å finnes, og 389 ressurser og 28 bygg er referert uten å være med
+i uttrekket. Årsaken er ikke avklart (filtrering i `searchdataall`, eller et
+annet endepunkt som gir alt).
+
+**Åpent: eierskap.** Kunden kan på sikt ønske at masterdatabasen eier vokabular
+og hierarki, og at instansene sjekkes mot det. Da byttes lasting av vokabularet/hirarkiet til aktivitet/fasilitet/lokaletype fra kilden ut med en sjekk av at navnet finnes i masteren.
+
+## Demo-normalisering
+
+Mappingen er midlertidig. Den viser hvordan masterdatabasen blir når instansene
+er normalisert, og brukes ikke i produksjon. Alt den trenger ligger i
+`etl/demo_normalisering/`, og mappen slettes når normaliseringen er på plass.
+
+`normaliser.py` leser `searchdataall` (nettet, eller `--fra-fil`), og skriver
+`<kommune>.json` med samme form, men med kodeverkene erstattet av vokabularet
+fra filene (`id`, `name`, `parent_id`) og koblingene omskrevet. Kildenavn uten
+mapping, eller som mappes til et exclude-konsept, får ingen kobling og skrives
+til standard-feil.
+
+```bash
+python3 etl/demo_normalisering/normaliser.py alle              # skriver etl/ut/normalisert/
+python3 etl/last_inn.py alle --fra-fil etl/ut/normalisert > etl/ut/alle.sql
+docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
+```
+
+Konseptene i vokabularfilene nøkles på navn, med `broader` som forelderens
+navn. En endring i `mapping.json` eller vokabularfilene slår igjennom ved neste
+kjøring av `normaliser.py`. Fasettene (`facets`) er bare en gruppering i
+filene og havner ikke i databasen.
+
+Demoen skjuler brudd på kontrakten: den bygger vokabularet fra filene, så
+manglende foreldre og ukjente kodeverks-id-er i kilden gir ingen avvik. Et rent
+`synk_avvik` for kodeverkene etter en demokjøring sier derfor ingenting om
+kildens kvalitet.
 
 ## Geokoding og bygningsberikelse (MatrikkelAPI)
 

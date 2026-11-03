@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """
-Laster data fra Aktiv kommune inn i masterdatabasen.
+Bygger masterdatabasen fra Aktiv kommune. Kjøres én gang, når databasen
+bygges; deretter brukes synk.py.
+
+Forutsetter normaliserte instanser (se "Kildekontrakt" i etl/README.md). Mot
+en tom database opprettes kodeverkene (lokaletype, aktivitet, fasilitet) fra
+instansenes samlinger, med id, navn og forelder, sammen med bygg, ressurser og
+koblinger. Et konsept som allerede finnes røres aldri: masteren eier
+vokabularet, og forskjeller (samme id med annet navn eller annen forelder)
+loggføres i synk_avvik.
 
 Bruker bare Pythons innebygde bibliotek (urllib, json, re) - ingen "pip install"
 er nødvendig. Skriptet gjør ingenting mot databasen selv; det skriver SQL-tekst
@@ -15,7 +23,8 @@ Bruk:
     docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 
     # Les <mappe>/<kommune>.json i stedet for å hente fra nettet:
-    python3 etl/last_inn.py bergen --fra-fil etl/ut/normalisert > etl/ut/bergen.sql
+    python3 etl/last_inn.py alle --fra-fil etl/ut/normalisert > etl/ut/alle.sql
+    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 
 Se etl/README.md for full forklaring.
 
@@ -33,137 +42,21 @@ via kommune_fagsystem_instans; den dagen det faktisk skjer, må kommune_id i
 stedet utledes fra en geokodet adresse. Se db/schema_kjerne_dokumentasjon.md.
 """
 import argparse
-import html
 import json
 import re
 import sys
-import urllib.error
-import urllib.request
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
 
-KOMMUNER = {
-    "afjord": ("5058", "Åfjord", "Trøndelag"),
-    "alesund": ("1508", "Ålesund", "Møre og Romsdal"),
-    "alver": ("4631", "Alver", "Vestland"),
-    "averoy": ("1554", "Averøy", "Møre og Romsdal"),
-    "baerum": ("3201", "Bærum", "Akershus"),
-    "bergen": ("4601", "Bergen", "Vestland"),
-    "eigersund": ("1101", "Eigersund", "Rogaland"),
-    "gamvik": ("5626", "Gamvik", "Finnmark"),
-    "inderoy": ("5053", "Inderøy", "Trøndelag"),
-    "kristiansand": ("4204", "Kristiansand", "Agder"),
-    "kvam": ("4622", "Kvam", "Vestland"),
-    "larvik": ("3909", "Larvik", "Vestfold"),
-    "narvik": ("1806", "Narvik", "Nordland"),
-    "nordreisa": ("5544", "Nordreisa", "Troms"),
-    "oksnes": ("1868", "Øksnes", "Nordland"),
-    "oygarden": ("4626", "Øygarden", "Vestland"),
-    "sandnes": ("1108", "Sandnes", "Rogaland"),
-    "sogndal": ("4640", "Sogndal", "Vestland"),
-    "sola": ("1124", "Sola", "Rogaland"),
-    "stavanger": ("1103", "Stavanger", "Rogaland"),
-    "sunnfjord": ("4647", "Sunnfjord", "Vestland"),
-    "time": ("1121", "Time", "Rogaland"),
-}
-#Kommuner som ligger i aktiviteetsanalysen men som er helt tomme og mangler endepunkt:
-# "bardu": ("5520", "Bardu", "Troms"),
-# "drammen": ("3301", "Drammen", "Buskerud"),
-# "suldal": ("1134", "Suldal", "Rogaland"),
-
-def er_persondatafelt(felt: str) -> bool:
-    """Felt som kan inneholde navngitte personer (tilsynsperson, kontaktinfo-
-    fritekst) eller en kopi av dem (json_representation), og som derfor ikke
-    tas med i en post som lagres som rapost på et avvik. "organizations"
-    (privatpersoner som søkere) brukes aldri i det hele tatt av dette
-    skriptet. Se "Personvern" i db/schema_kjerne_dokumentasjon.md."""
-    return felt.startswith("tilsyn") or felt in ("contact_info", "json_representation",
-                                                "organizations_ids")
+from helpers import KOMMUNER, hent_json, i_blokk, logg, q, rens, som_heltall
 
 
-def rens_post(d: dict) -> dict:
-    """Fjerner persondatafelt fra én enkelt post før den limes inn som rapost
-    på et avvik - se er_persondatafelt."""
-    return {k: v for k, v in d.items() if not er_persondatafelt(k)}
-
-
-def hent_json(url: str) -> tuple[int, dict]:
-    """Henter JSON fra url med Pythons innebygde urllib. Krever at Capgeminis
-    CA-sertifikat er installert i systemets tillitslager (se etl/README.md).
-    Prøver to ganger: enkelte instanser (Stavanger) svarer av og til tregere
-    enn tidsavbruddet. Returnerer (http_status, innhold)."""
-    for forsok in (1, 2):
-        try:
-            with urllib.request.urlopen(url, timeout=60) as resp:
-                return resp.status, json.loads(resp.read().decode("utf-8"))
-        except (TimeoutError, urllib.error.URLError):
-            if forsok == 2:
-                raise
-
-
-def rens(s):
-    """Dobbel HTML-avkoding; kilden er escapet en gang for mye
-    (f.eks. 'Rom 19 &amp;#40;219&amp;#41;' skal bli 'Rom 19 (219)')."""
-    if s is None:
-        return None
-    s = html.unescape(html.unescape(str(s)))
-    s = re.sub(r"<[^>]+>", " ", s)
-    s = re.sub(r"\s+", " ", s).strip()
-    return s or None
-
-
-def q(v):
-    """Gjør en Python-verdi til en trygg SQL-literal. NULL for tomme verdier,
-    og escaper enkeltfnutter slik at f.eks. navn med apostrof ikke knekker SQL-en."""
-    if v is None or v == "":
-        return "NULL"
-    return "'" + str(v).replace("'", "''").replace("\x00", "") + "'"
-
-
-def q_json(obj) -> str:
-    """JSON-literal. jsonb avviser \\u0000, så den escapen fjernes."""
-    tekst = json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("\\u0000", "")
-    return q(tekst) + "::jsonb"
-
-
-def logg(kn, samling, avvikstype, ekstern_id, detalj, felt=None, nokkelfelt="id", rapost=None) -> str:
-    """Setning som loggfører et avvik mot kildeuttrekket som er registrert
-    først i samme transaksjon (se registrer_kildeuttrekk i schema_kjerne.sql).
-    rapost er posten som utløste avviket - lagres direkte på avviket (renset
-    for personopplysninger), ikke i et delt uttrekk som må graves ut igjen."""
-    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
-    return (f"CALL logg_avvik({q(kn)},{q(samling)},{q(avvikstype)},{q(ekstern_id)},"
-            f"{q(detalj)},{q(felt)},{q(nokkelfelt)},{rapost_sql});\n")
-
-
-def i_blokk(kn, samling, ekstern_id, sql, rapost=None) -> str:
-    """Pakker setningene for én post i en DO-blokk. Feiler noe i databasen
-    (f.eks. et CHECK-brudd vi ikke har forutsett), rulles bare denne posten
-    tilbake og feilen loggføres som db_feil - resten av lasten fortsetter i
-    stedet for at hele transaksjonen stopper."""
-    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
-    return ("DO $blk$ BEGIN\n" + sql + "EXCEPTION WHEN OTHERS THEN\n"
-            f"CALL logg_avvik({q(kn)},{q(samling)},'db_feil',{q(ekstern_id)},"
-            f"SQLSTATE || ': ' || SQLERRM,NULL,'id',{rapost_sql});\nEND $blk$;\n")
-
-
-def som_heltall(v):
-    """(verdi, feilmelding). Tom verdi gir (None, None); ugyldig gir (None, melding)."""
-    if v is None or v == "":
-        return None, None
-    try:
-        n = int(v)
-    except (ValueError, TypeError):
-        return None, f"ikke et heltall: {str(v)[:60]}"
-    if n < 0:
-        return None, f"negativt tall: {n}"
-    return n, None
-
-
-# Kodeverkene i kilden: (tabell i masteren, samling i searchdataall). En
-# normalisert instans leverer dem med id, name og parent_id; hierarkiet er
-# masterens hierarki, og navnet er nøkkelen (unikt per tabell, likt på tvers
-# av instanser).
+# Kodeverkene i kilden: (tabell i masteren, samling i searchdataall). Masteren
+# eier vokabularet og hierarkiet; instansene er normalisert mot det og bruker
+# samme id-er. Ved bygging opprettes konsepter masteren ikke har; et
+# eksisterende konsept røres aldri. Kildens samlinger (id, name, parent_id)
+# sammenlignes med masteren, og avvik logges. Koblingene (ressurs ->
+# lokaletype, aktivitet, fasilitet) eies av kommunen og lastes.
 KODEVERK = (
     ("lokaletype", "resource_categories"),
     ("aktivitet", "activities"),
@@ -173,17 +66,21 @@ KODEVERK = (
 
 def kodeverk_sql(kn, tabell, samling, rader):
     """SQL for ett kodeverk fra kildens samling: kildekodene slik kilden har
-    dem, og masterens konsepter (upsert på navn, forelder fra parent_id).
-    Brudd på kontrakten - manglende id eller navn, navn som går igjen, en
-    parent_id som ikke finnes, sykluser - loggføres, og posten faller bort
-    eller blir rot. Returnerer (sql, navn) der navn[kilde-id] er konseptets
-    navn."""
+    dem, opprettelse av konsepter som mangler i masteren, og en sammenligning
+    mot masterens kodeverk som loggfører avvik. Masteren eier navn og
+    hierarki, så et eksisterende konsept endres aldri. Avvik: en id som ikke
+    ble opprettet, samme id med et annet navn eller en annen forelder, og
+    poster som ikke kan sammenlignes (manglende eller ugyldig id, tomt navn,
+    id som går igjen)."""
     sql = ""
-    navn = {}        # kilde-id -> konseptnavn
-    forelder = {}    # konseptnavn -> forelderens navn, eller None for rot
+    konsepter = {}   # id -> (navn, forelderens id eller None)
     for rad in rader:
         if rad.get("id") is None:
             sql += logg(kn, samling, "ugyldig_verdi", None, "posten mangler id", "id", rapost=rad)
+            continue
+        nr, feil = som_heltall(rad["id"])
+        if feil:
+            sql += logg(kn, samling, "ugyldig_verdi", rad["id"], "id " + feil, "id", rapost=rad)
             continue
         n = rens(rad.get("name"))
         if not n:
@@ -193,48 +90,60 @@ def kodeverk_sql(kn, tabell, samling, rader):
                 f"SELECT id,{q(tabell)},{q(rad['id'])},{q(n)} "
                 f"FROM fagsystem_instans WHERE kildenokkel={q(kn)} "
                 f"ON CONFLICT (fagsystem_instans_id,kodetype,kode) DO UPDATE SET navn=EXCLUDED.navn, sist_sett=now();\n")
-        navn[rad["id"]] = n
-        if n in forelder:
-            sql += logg(kn, samling, "ugyldig_verdi", rad["id"], f"navnet finnes flere ganger: {n[:60]}",
-                        "name", rapost=rad)
-        else:
-            forelder[n] = None
-
-    for rad in rader:
-        n = navn.get(rad.get("id"))
-        pid = rad.get("parent_id")
-        if n is None or pid is None or forelder[n] is not None:
+        if nr in konsepter:
+            sql += logg(kn, samling, "ugyldig_verdi", rad["id"], "id finnes flere ganger", "id", rapost=rad)
             continue
-        if pid not in navn:
-            sql += logg(kn, samling, "manglende_forelder", rad["id"],
-                        "parent_id finnes ikke i samlingen", "parent_id", rapost=rad)
-        else:
-            forelder[n] = navn[pid]
+        # En parent_id som ikke er et heltall sammenlignes som "ingen forelder", og blir et avvik mot masteren.
+        konsepter[nr] = (n, som_heltall(rad.get("parent_id"))[0])
 
-    # Bryter sykluser ved å gjøre noden de oppdages fra til rot.
-    for n in forelder:
-        sett, x = {n}, forelder[n]
-        while x is not None:
-            if x in sett:
-                sql += logg(kn, samling, "ugyldig_verdi", n, f"syklus i hierarkiet: {n[:60]}", "parent_id")
-                forelder[n] = None
-                break
-            sett.add(x)
-            x = forelder[x]
+    if konsepter:
+        v = ("(VALUES " + ",".join(f"({nr},{q(n)},{'NULL' if f is None else f})" for nr, (n, f) in konsepter.items())
+             + ") AS v(id,navn,forelder)")
+        # Opprett konsepter som mangler. Første kilde som bruker en id eller et
+        # navn vinner; at en id ikke ble opprettet (navnet er tatt av en annen
+        # id) fanges av sjekkene under. Forelder settes bare for konsepter som
+        # ble opprettet nå, og bare når forelderen finnes i masteren.
+        sql += (
+            "DO $bygg$ DECLARE ny bigint[]; BEGIN\n"
+            f"WITH ins AS (INSERT INTO {tabell} (id,navn) SELECT id,navn FROM {v} "
+            f"ON CONFLICT DO NOTHING RETURNING id) SELECT array_agg(id) INTO ny FROM ins;\n"
+            f"UPDATE {tabell} t SET parent_id=v.forelder::bigint FROM {v} "
+            f"WHERE t.id=v.id AND t.id=ANY(ny) AND EXISTS (SELECT 1 FROM {tabell} p WHERE p.id=v.forelder::bigint);\n"
+            "END $bygg$;\n")
+        mangler = "id kunne ikke opprettes i masteren (navnet brukes av en annen id)"
+        # Egen DO-blokk, siden løkkevariabelen må deklareres. Avvik mot masteren
+        # er sjekker, ikke en grunn til å stoppe lastingen.
+        sql += (
+            "DO $chk$ DECLARE r record; BEGIN\n"
+            f"FOR r IN SELECT v.id FROM {v} WHERE NOT EXISTS (SELECT 1 FROM {tabell} t WHERE t.id=v.id) LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'manglende_forelder',r.id::text,"
+            f"{q(mangler)},'id','id',NULL);\n"
+            "END LOOP;\n"
+            f"FOR r IN SELECT v.id, v.navn AS nytt, t.navn AS master FROM {v} "
+            f"JOIN {tabell} t ON t.id=v.id WHERE t.navn<>v.navn LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'ugyldig_verdi',r.id::text,"
+            f"'masteren har navnet ' || r.master || '; kilden har ' || r.nytt,'name','id',NULL);\n"
+            "END LOOP;\n"
+            f"FOR r IN SELECT v.id, v.forelder::bigint AS nytt, t.parent_id AS master FROM {v} "
+            f"JOIN {tabell} t ON t.id=v.id WHERE v.forelder::bigint IS DISTINCT FROM t.parent_id LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'ugyldig_verdi',r.id::text,"
+            f"'masteren har forelder ' || COALESCE(r.master::text,'ingen') || '; kilden har ' || "
+            f"COALESCE(r.nytt::text,'ingen'),'parent_id','id',NULL);\n"
+            "END LOOP;\nEND $chk$;\n")
+    return sql
 
-    if forelder:
-        foreldre = ",\n".join(f"({q(n)},{q(f)})" for n, f in forelder.items() if f is not None)
-        rotter = ",".join(q(n) for n, f in forelder.items() if f is None)
-        stmt = (f"INSERT INTO {tabell} (navn) VALUES\n" + ",\n".join(f"({q(n)})" for n in forelder) +
-                "\nON CONFLICT (navn) DO NOTHING;\n")
-        if foreldre:
-            stmt += (f"UPDATE {tabell} a SET parent_id=p.id FROM (VALUES\n{foreldre}\n) AS v(navn,forelder) "
-                     f"JOIN {tabell} p ON p.navn=v.forelder "
-                     f"WHERE a.navn=v.navn AND a.parent_id IS DISTINCT FROM p.id;\n")
-        if rotter:
-            stmt += f"UPDATE {tabell} SET parent_id=NULL WHERE navn IN ({rotter}) AND parent_id IS NOT NULL;\n"
-        sql += i_blokk(kn, samling, None, stmt)
-    return sql, navn
+
+def ukjente_id_er_sql(kn, tabell, samling, felt, ider):
+    """Loggfører de id-ene i koblingene som masteren ikke kjenner. Koblingen
+    lastes ikke (den peker på ingenting), og avviket logges én gang per id."""
+    if not ider:
+        return ""
+    v = "(VALUES " + ",".join(f"({nr})" for nr in sorted(ider)) + ") AS v(id)"
+    return ("DO $chk$ DECLARE r record; BEGIN\n"
+            f"FOR r IN SELECT v.id FROM {v} WHERE NOT EXISTS (SELECT 1 FROM {tabell} t WHERE t.id=v.id) LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'manglende_forelder',r.id::text,"
+            f"'{felt} finnes ikke i masteren','{felt}','{felt}',NULL);\n"
+            "END LOOP;\nEND $chk$;\n")
 
 
 def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
@@ -289,13 +198,12 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
       f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
     # --- kodeverk: kildekoder og masterens vokabular ---
-    # navn_for[tabell][kilde-id] = konseptnavn. Brukes under når ressursene og
-    # koblingene skrives.
-    navn_for = {}
     for tabell, samling in KODEVERK:
-        sql, navn_for[tabell] = kodeverk_sql(kn, tabell, samling, d.get(samling, []))
-        w(sql)
+        w(kodeverk_sql(kn, tabell, samling, d.get(samling, [])))
     w("\n")
+    # id-er i koblingene som masteren må kjenne; sjekkes samlet etter at
+    # koblingene er skrevet. Nøkkel: (tabell, samling, felt i kilden).
+    brukte_ider = {}
 
     # --- bygg + adresse ---
     bydel_per_bygg = {t["b_id"]: rens(t["name"]) for t in d.get("towns", [])}
@@ -378,12 +286,13 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
 
         bygg_sel = (f"(SELECT b.id FROM bygning b JOIN fagsystem_instans f2 ON f2.id=b.fagsystem_instans_id "
                     f"WHERE f2.kildenokkel={q(kn)} AND b.ekstern_id={q(bid)})") if bid else "NULL"
-        # Én lokaletype per ressurs; NULL når den mangler eller peker ut av samlingen.
-        lt_navn = navn_for["lokaletype"].get(r.get("rescategory_id"))
-        if r.get("rescategory_id") is not None and lt_navn is None:
-            w(logg(kn, "resources", "manglende_forelder", r["id"],
-                   "rescategory_id finnes ikke i resource_categories", "rescategory_id", rapost=r))
-        lt_sel = f"(SELECT id FROM lokaletype WHERE navn={q(lt_navn)})" if lt_navn else "NULL"
+        # Én lokaletype per ressurs, på id mot masteren; NULL når den mangler eller masteren ikke kjenner den.
+        lt_id, lt_feil = som_heltall(r.get("rescategory_id"))
+        if lt_feil:
+            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "rescategory_id " + lt_feil, "rescategory_id", rapost=r))
+        elif lt_id is not None:
+            brukte_ider.setdefault(("lokaletype", "resources", "rescategory_id"), set()).add(lt_id)
+        lt_sel = f"(SELECT id FROM lokaletype WHERE id={lt_id})" if lt_id is not None else "NULL"
 
         w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
           f"kapasitet,beskrivelse,aktiv,bookbar) "
@@ -393,7 +302,9 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
           f"FROM kommune k, fagsystem_instans fi "
           f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
           f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn, "
-          f"kapasitet=EXCLUDED.kapasitet, lokaletype_id=EXCLUDED.lokaletype_id;\n")
+          # Aktiv kommune har fasiten på hvilket bygg en ressurs hører til.
+          f"kapasitet=EXCLUDED.kapasitet, lokaletype_id=EXCLUDED.lokaletype_id, "
+          f"bygning_id=EXCLUDED.bygning_id;\n")
     w("\n")
 
     # --- koblinger, med avviksloggføring for brutte referanser ---
@@ -432,16 +343,17 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
                        "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=rad))
                 continue
             w(kildekode_kobling(kodetype, rad[idfelt], rad["resource_id"]))
-            navn = navn_for[kodetype].get(rad[idfelt])
-            if navn is None:
-                w(logg(kn, samling, "manglende_forelder", rad[idfelt],
-                       f"{idfelt} finnes ikke i samlingen", idfelt, idfelt, rapost=rad))
+            nr, feil = som_heltall(rad[idfelt])
+            if nr is None:
+                w(logg(kn, samling, "ugyldig_verdi", rad[idfelt], f"{idfelt} " + (feil or "mangler"),
+                       idfelt, idfelt, rapost=rad))
                 continue
+            brukte_ider.setdefault((kodetype, samling, idfelt), set()).add(nr)
             w(f"INSERT INTO {koblingstabell} (ressurs_id,{maalkol}) "
               f"SELECT r.id,t.id "
               f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id, {kodetype} t "
               f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(rad['resource_id'])} "
-              f"AND t.navn={q(navn)} "
+              f"AND t.id={nr} "
               f"ON CONFLICT DO NOTHING;\n")
 
     for br in d.get("building_resources", []):
@@ -452,6 +364,11 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
             w(logg(kn, "building_resources", "manglende_forelder", br["resource_id"],
                    "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=br))
 
+    # Kommunen eier koblingene, men ikke vokabularet: en kobling til en id
+    # masteren ikke kjenner lastes ikke, og avviket logges én gang per id.
+    for (tabell, samling, felt), ider in brukte_ider.items():
+        w(ukjente_id_er_sql(kn, tabell, samling, felt, ider))
+
     # Beholder de to siste uttrekkene per kilde, uforbeholdent.
     w(f"\nDO $$ BEGIN PERFORM rydd_kildeuttrekk({q(kn)}); END $$;\n")
     w("COMMIT;\n")
@@ -460,7 +377,7 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Laster data fra Aktiv kommune; skriver SQL til standard-ut.",
+    parser = argparse.ArgumentParser(description="Bygger masterdatabasen fra Aktiv kommune; skriver SQL til standard-ut.",
                                      epilog="Kjente kommuner: " + ", ".join(KOMMUNER))
     parser.add_argument("kommune", choices=(*KOMMUNER, "alle"), metavar="kommune|alle")
     parser.add_argument("--fra-fil", type=Path, metavar="MAPPE",
