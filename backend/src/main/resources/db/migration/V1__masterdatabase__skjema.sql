@@ -284,12 +284,17 @@ CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 -- ID betyr ulike ting: kategori 13 er "Overnatting" i Bergen og "Skateanlegg" i
 -- Stavanger, og 58 av 63 ID-er kolliderer slik. Master eier derfor ett kodeverk,
 -- og instansene forventes å levere sitt kodeverk normalisert mot det (samme
--- navn og hierarki). etl/last_inn.py laster det direkte fra kildens samlinger.
+-- id, navn og hierarki). Masteren eier vokabularet og hierarkiet: omdøping
+-- eller endret hierarki i en instans slår aldri inn her, men loggføres i
+-- synk_avvik. Det kommunen eier er koblingene fra ressurs til lokaletype,
+-- aktivitet og fasilitet; de følger kilden.
 -- =============================================================================
 
--- Lastes av etl/last_inn.py fra kildens resource_categories, som for aktivitet;
--- det seedes ikke her. id er den delte id-en på tvers av instansene og settes
--- av den som eier kodeverket (ikke et løpenummer); navnet er unikt per tabell.
+-- Opprettes av etl/last_inn.py når databasen bygges, fra kildens
+-- resource_categories (bare konsepter som mangler; et eksisterende røres aldri).
+-- etl/synk.py skriver aldri her. Det seedes ikke i skjemaet. id er den delte
+-- id-en på tvers av instansene og settes av den som eier kodeverket (ikke et
+-- løpenummer); navnet er unikt per tabell.
 CREATE TABLE IF NOT EXISTS lokaletype
 (
     id         BIGINT PRIMARY KEY,
@@ -302,9 +307,9 @@ CREATE TABLE IF NOT EXISTS lokaletype
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Lastes av etl/last_inn.py fra kildens activities - det seedes ikke her.
--- id er den delte id-en på tvers av instansene (se lokaletype); navnet er unikt
--- per tabell. Et konsept har én forelder.
+-- Opprettes av etl/last_inn.py fra kildens activities, som for lokaletype;
+-- det seedes ikke her. id er den delte id-en på tvers av instansene; navnet er
+-- unikt per tabell. Et konsept har én forelder.
 CREATE TABLE IF NOT EXISTS aktivitet
 (
     id         BIGINT PRIMARY KEY,
@@ -314,7 +319,7 @@ CREATE TABLE IF NOT EXISTS aktivitet
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Lastes av etl/last_inn.py fra kildens facilities, som for aktivitet.
+-- Opprettes av etl/last_inn.py fra kildens facilities, som for lokaletype.
 CREATE TABLE IF NOT EXISTS fasilitet
 (
     id         BIGINT PRIMARY KEY,
