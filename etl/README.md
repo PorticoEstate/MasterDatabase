@@ -15,7 +15,7 @@ Fra tomt skjema til populert database, i tre steg:
 │ db/schema_kjerne.sql                                                  │
 │                                                                        │
 │ Oppretter alle tabeller i en tom database: kommune, bygning, adresse, │
-│ ressurs, kildekode, aktivitet/fasilitet/lokaletype,                   │
+│ ressurs, aktivitet/fasilitet/lokaletype,                              │
 │ gate/matrikkelinfo, synk_avvik/kildeuttrekk. Idempotent — trygt å     │
 │ kjøre på nytt.                                                        │
 └───────────────────────────────────────────────────┬───────────────────┘
@@ -171,14 +171,14 @@ gir avvik og ingen kobling til den id-en.
 Laster: kommune, bygg, adresser (som de står i kilden, uten koordinater) og
 ressurser. Ressursene kobles direkte til kodeverkene på id
 (`ressurs.lokaletype_id`, `ressurs_aktivitet`, `ressurs_fasilitet`). Kildens
-egne id-er lagres i `kildekode` og `ressurs_kildekode`.
+egne koder lagres ikke; etter normalisering er de lik masterens id-er.
 
 Skriptene gjør ingen oversettelse. Det er instansene som skal levere et
 normalisert kodeverk med masterens id-er (se "Kildekontrakt"). Brudd på
 kontrakten loggføres i `synk_avvik`. Kodeverkene er tomme i en ny database til
 `last_inn.py` er kjørt.
 
-Koblingene (`ressurs_kildekode`, `ressurs_aktivitet`, `ressurs_fasilitet`)
+Koblingene (`ressurs_aktivitet`, `ressurs_fasilitet`)
 bygges på nytt for instansen ved hver kjøring. Kodeverkene selv får aldri
 konsepter fjernet; et konsept som forsvinner fra kilden, blir stående.
 

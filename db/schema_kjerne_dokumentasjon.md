@@ -128,9 +128,9 @@ Alle tre er hierarkiske via `parent_id`, så et søk på en hovedgruppe som Idre
 
 **`ressurs_aktivitet`** og **`ressurs_fasilitet`** — koblingstabeller. En gymsal brukes til håndball, turn og dans, og har garderobe, dusj og parkettgulv.
 
-### Kildekoder og normalisering — kjernen
+### Normalisering av kodeverk — kjernen
 
-Dette er tabellene som gjør tverrkommunalt søk mulig. Problemet, målt på faktiske data:
+Dette er det som gjør tverrkommunalt søk mulig. Problemet, målt på faktiske data:
 
 ```
 Kategori-ID 13  →  Bergen: "Overnatting"      Stavanger: "Skateanlegg"
@@ -141,22 +141,20 @@ Kategori-ID  4  →  "Friidrettsanlegg" / "Gressbane" / "Gymsal"
 
 Men du kan heller ikke søke på navn. Blant de 142 kategorinavnene finnes `Gressbane` og `Grasbane`, `Sermonirom` og `Seremonirom`, `Foaje` og `Foajé` — pluss verdier som ikke er lokaletyper i det hele tatt: `Stengt`, `Fiktivt rom`, `Streaming`, og stedsnavn som `Judaberg innbyggertorg`.
 
-Løsningen er at instansene normaliseres mot masterens kodeverk fra og med når den har blitt bygget: samme id, navn og hierarki i alle, med masteren som eier. Da kan man søke på tvers av kommuner på id eller navn. Kildens egen kode lagres likevel uendret i `kildekode`, så de to formene kan sammenlignes. Så lenge instansene ikke er normalisert, simulerer `etl/demo_normalisering/` det: den oversetter hver kommunes rå kategorier til masterens konsepter og leverer en normalisert kopi av `searchdataall`, som `last_inn.py` og `synk.py` laster som om den kom fra en normalisert instans.
+Løsningen er at instansene er normalisert mot masterens kodeverk når databasen bygges: samme id, navn og hierarki i alle, med masteren som eier. Da kan man søke på tvers av kommuner på id eller navn. Så lenge instansene ikke er normalisert, simulerer `etl/demo_normalisering/` det: den oversetter hver kommunes rå kategorier til masterens konsepter og leverer en normalisert kopi av `searchdataall`, som `last_inn.py` og `synk.py` laster som om den kom fra en normalisert instans.
 
 ```
-kildekode                    etl/demo_normalisering/        lokaletype
-(kommunens kode, uendret)    (oversettelse, kun demo)       (masterens kodeverk)
+Kommunens kategori           etl/demo_normalisering/        lokaletype
+(rå kilde)                   (oversettelse, kun demo)       (masterens kodeverk)
 
 Bergen   "17: Gymsal"  ─┐
                          ├──→   "gymsal" → Gymsal (id 4)  ──→   Gymsal
 Øygarden  "4: Gymsal"  ─┘
 ```
 
-**`kildekode`** — kommunens egen kode, lagret uendret. Nøkkelen `(fagsystem_instans_id, kodetype, kode)` gjør at Bergens 13 og Stavangers 13 kan ligge side om side. Tabellen rettes aldri; den er kildens sannhet. `sist_sett` gjør at nye koder oppdages ved neste innlasting.
+Databasen lagrer ikke kildens egne koder. Etter normalisering er de lik masterens id og navn, og hvilke konsepter en ressurs har, står i `ressurs.lokaletype_id`, `ressurs_aktivitet` og `ressurs_fasilitet`. De opprinnelige kodene finnes bare i demoens innfil, og forsvinner når demoen slettes. (Tidligere hadde modellen tabellene `kildekode` og `ressurs_kildekode` for dem; de er fjernet.)
 
-**`ressurs_kildekode`** — ressursens koder slik kilden har dem: én lokaletype-kode (`rescategory_id`) og null eller flere aktivitets- og fasilitetskoder. Den står ved siden av de normaliserte koblingene (`ressurs.lokaletype_id`, `ressurs_aktivitet`, `ressurs_fasilitet`), slik at begge formene kan sammenlignes.
-
-**Mappingen er ikke en del av modellen, og ikke en del av produksjonsflyten.** Oversettelsen fra kildekode til masterkonsept finnes bare i `mapping.json`-filene i `etl/demo_normalisering/` og påføres av `normaliser.py`, ikke av `last_inn.py` eller `synk.py`. Den databasen som skal i bruk bygges først når instansene er normalisert; da slettes demomappen, og `kildekode` og `ressurs_kildekode` kan fjernes uten at resten av modellen berøres. Utfallet i demoen:
+**Mappingen er ikke en del av modellen, og ikke en del av produksjonsflyten.** Oversettelsen fra kildekode til masterkonsept finnes bare i `mapping.json`-filene i `etl/demo_normalisering/` og påføres av `normaliser.py`, ikke av `last_inn.py` eller `synk.py`. Den databasen som skal i bruk bygges først når instansene er normalisert; da slettes demomappen. Utfallet i demoen:
 
 | Utfall i `normaliser.py` | Resultat |
 |---|---|
@@ -215,7 +213,6 @@ Beholdning: de to nyeste uttrekkene per kilde, uforbeholdent. `rydd_kildeuttrekk
 | `geokoding_feilet` | Ingen eller flere treff hos Kartverket, eller API-kallet feilet. |
 | `db_feil` | Databasen avviste posten av en grunn vi ikke har forutsett (f.eks. et CHECK-brudd). Bare den posten rulles tilbake; feilteksten og SQLSTATE står i `detalj`, og resten av lasten fortsetter. |
 | `annet` | Bl.a. at henting fra kilden feilet, eller at geokodet kommunenummer avviker fra antatt. |
-| `ikke_kartlagt` | Ingen skript logger denne lenger. Mappingen er flyttet til demoen, som skriver ukartlagte navn til standard-feil. Typen og `v_ukartlagte_kildekoder` står igjen i skjemaet, og kan fjernes ved en senere opprydding. |
 
 Mekanikken: skriptene skriver bare SQL og kjenner ikke id-en til uttrekket de oppretter. Første setning, `CALL registrer_kildeuttrekk(...)`, setter derfor id-en i en transaksjonslokal innstilling (`masterdb.kildeuttrekk_id`), og `CALL logg_avvik(...)` henter den derfra. Hver bygning/adresse, hver ressurs og hver geokodet adresse kjøres i sin egen `DO`-blokk med `EXCEPTION`-håndtering, som er det som gjør at én dårlig post ikke stopper hele transaksjonen. Python-skriptet har posten i minnet akkurat når avviket oppdages, og sender den rett med i `logg_avvik`-kallet som `rapost` — databasen trenger aldri grave den ut igjen av et lagret svar.
 
@@ -232,8 +229,6 @@ Radene må filtreres bort, ellers stopper innlastingen på fremmednøkkelfeil. M
 En **view** er en lagret spørring som oppfører seg som en tabell. Den lagrer ingen data selv.
 
 **`v_ressurs_sok`** — alt et søk trenger i én flat rad: ressurs, kommune, bygg, adresse, koordinat, lokaletype (`lokaletype_navn`, og `lokaletype_hovedgruppe` som er forelderens navn), aktiviteter og fasiliteter som navnelister (`aktivitet_navn`, `fasilitet_navn`), og ferdig `booking_url`. Søkegrensesnittet slipper å kjenne tabellene bak.
-
-**`v_ukartlagte_kildekoder`** — gammel arbeidsliste for kuratering av mappingen, bygget på `ikke_kartlagt`-avvikene i `v_synk_avvik_gjeldende`. Siden ingen skript logger `ikke_kartlagt` lenger, er den alltid tom. Den kan fjernes sammen med `kildekode` og `ressurs_kildekode` når instansene er normalisert.
 
 **`v_synk_avvik_gjeldende`** — avvikene fra den siste kjøringen per kilde. Eldre avvik ligger i `synk_avvik` som historikk, men regnes ikke som åpne: finnes feilen fortsatt, er den logget på nytt i nyeste kjøring.
 
@@ -347,7 +342,7 @@ Gjentatt kjøring oppdaterer i stedet for å duplisere, men ikke alt overskrives
 - `adresse`: oppdateres bare mens `geokoding` er `ukjent` eller `feilet`. En geokodet eller manuelt satt adresse røres ikke. Konsekvens: endres adressen i kilden etter geokoding, fanges det ikke opp av innlastingen.
 - `ressurs`: navn, `kapasitet`, `lokaletype_id` og `bygning_id` følger kilden (kommunen eier koblingene). En `lokaletype_id` som masteren ikke kjenner, blir NULL og loggføres.
 - `lokaletype`, `aktivitet`, `fasilitet`: røres aldri av en kjøring mot en database som allerede har konseptet. Bare `last_inn.py` oppretter konsepter som mangler. Omdøping og endret forelder i kilden gir avvik i `synk_avvik`, ikke endring.
-- `ressurs_kildekode`, `ressurs_aktivitet`, `ressurs_fasilitet`: bygges på nytt for instansen ved hver kjøring, så endringer i kilden slår alltid igjennom. En kobling til en id masteren ikke kjenner lastes ikke. Det finnes ingen manuelle koblinger i databasen.
+- `ressurs_aktivitet`, `ressurs_fasilitet`: bygges på nytt for instansen ved hver kjøring, så endringer i kilden slår alltid igjennom. En kobling til en id masteren ikke kjenner lastes ikke. Det finnes ingen manuelle koblinger i databasen.
 
 **Kjent forenkling, verdt å lese to ganger:** `kommune_id` settes i steg 2 fra hvilken Aktiv kommune-instans dataene kommer fra (instansens slug slås opp direkte mot en kommune), **ikke** fra geokodingen i steg 3. Det stemmer for alle 12 instansene i dag, siden hver av dem betjener nøyaktig én kommune (se `kommune_fagsystem_instans`). Skulle en instans senere betjene flere kommuner, holder ikke denne forenklingen — da må steg 2 vente på steg 3, og `kommune_id` avgjøres av adressens geokodede `kommunenummer` i stedet.
 
@@ -408,24 +403,11 @@ JOIN v_synk_avvik_detalj d ON d.avvik_id = g.id
 WHERE g.avvikstype IN ('ugyldig_verdi', 'db_feil');
 ```
 
-Ikke-normalisert og normalisert lokaletype side om side:
-
-```sql
-SELECT fi.kildenokkel, r.navn, kk.kode, kk.navn AS lokalt_navn,
-       lt.id AS lokaletype_id, lt.navn AS kanonisk_navn
-FROM ressurs r
-JOIN fagsystem_instans fi ON fi.id = r.fagsystem_instans_id
-JOIN ressurs_kildekode rk ON rk.ressurs_id = r.id
-JOIN kildekode kk         ON kk.id = rk.kildekode_id AND kk.kodetype = 'lokaletype'
-LEFT JOIN lokaletype lt   ON lt.id = r.lokaletype_id
-ORDER BY fi.kildenokkel, kk.kode;
-```
-
 ---
 
 ## Validering
 
-Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt kjøring, og oppretter 18 egne tabeller og 4 egne visninger (pluss PostGIS' egen `spatial_ref_sys`, samt geography_columns og geometry_columns i view.).
+Skjemaet er kjørt mot PostgreSQL 18 med PostGIS 3.6, er idempotent ved gjentatt kjøring, og oppretter 16 egne tabeller og 3 egne visninger (pluss PostGIS' egen `spatial_ref_sys`, samt geography_columns og geometry_columns i view.).
 
 
 Mange-til-mange-relasjonen mellom `kommune` og `fagsystem_instans` er verifisert: én kommune kan knyttes til flere instanser av forskjellig type (booking + fdv samtidig, testet på Bergen), men `UNIQUE (kommune_id, type)` avviser en andre instans av *samme* type for samme kommune. Ruting fungerer ved å filtrere på `fagsystem_instans.type` — bekreftet at et oppslag på Bergens booking-instans og Bergens fdv-instans gir to forskjellige, korrekte `base_url`. Et bygg med en kommune/instans-kombinasjon som ikke finnes i `kommune_fagsystem_instans` avvises fortsatt via `fk_bygning_fagsystem_instans_kommune`, og det samme gjelder `ressurs` via `fk_ressurs_fagsystem_instans_kommune` og `fk_ressurs_bygning`.
@@ -444,7 +426,6 @@ Alle 12 instanser er lastet inn med reelle data:
 | `ressurs` | 1 805 |
 | — med kanonisk lokaletype | 1 755 (97 %) |
 | — med byggtilknytning | 1 613 |
-| `kildekode` | 1 557 |
 | `ressurs_aktivitet` / `ressurs_fasilitet` | 672 / 1 221 |
 | `synk_avvik` (siste kjøring) | 2 829 |
 
@@ -508,16 +489,14 @@ Kodeverkene bruker en delt id, og masteren eier dem. Bygging og løpende synk er
 - `last_inn.py` (bygging) oppretter konsepter som mangler, og rører aldri et som finnes. Ny `etl/synk.py` skriver aldri kodeverkene, og loggfører avvik fra masteren (annet navn eller forelder, ukjent id) i `synk_avvik`. Delte funksjoner ligger i `etl/helpers.py`.
 - Koblingene følger kilden: `ressurs.bygning_id` oppdateres nå ved ny innlasting (tidligere ble den bare satt første gang). En kobling til en id masteren ikke kjenner lastes ikke, og loggføres én gang per id.
 - `v_ressurs_sok` har `lokaletype_navn`, `lokaletype_hovedgruppe`, `aktivitet_navn` og `fasilitet_navn` i stedet for kode-kolonner.
-- `ikke_kartlagt` og `v_ukartlagte_kildekoder` er ikke i bruk lenger (mappingen er flyttet til `etl/demo_normalisering/`), men står igjen i skjemaet.
+- Tabellene `kildekode` og `ressurs_kildekode`, visningen `v_ukartlagte_kildekoder` og avvikstypen `ikke_kartlagt` er fjernet. Etter normalisering var `kildekode` en kopi av kodeverkene, og ingenting annet i modellen brukte dem. Seksjonene i skjemaet er nummerert 1 til 11. Eksisterende databaser må bygges på nytt.
 - Backend-entitetene `Aktivitet`, `Lokaletype` og `Fasilitet` mapper fortsatt `kode`, og må oppdateres av den som eier backend.
 
 ### Mapping ut av modellen (feat/db_forenkling)
 
 Aktiv kommune-instansene skal normaliseres, så mappingen er tatt ut av databasemodellen og påføres bare i ETL. Endret direkte i V1 (`schema_kjerne.sql` er lik); eksisterende databaser må bygges på nytt.
 
-- Fjernet `kildekode_mapping` og `aktivitet_mapping`. `kildekode` er beholdt.
-- Ny tabell `ressurs_kildekode` med ressursens koder slik kilden har dem.
-- `v_ukartlagte_kildekoder` bygger nå på `ikke_kartlagt`-avvik i `v_synk_avvik_gjeldende`. (Senere gjort overflødig, se over.)
+- Fjernet `kildekode_mapping` og `aktivitet_mapping`. `kildekode` ble beholdt, og fikk en ny tabell `ressurs_kildekode` ved siden av; begge er senere fjernet (se over).
 - Seed-dataene for `lokaletype` og `fasilitet` er fjernet; kodeverkene lastes ikke lenger fra skjemaet. (De ble først lastet fra vokabularfiler med koder `LOK-xx-nnn` og `FAC-xx-nnn`; kodene er senere fjernet, se over.)
 - `fasilitet.gruppe` er erstattet av `parent_id`, slik at fasilitet er hierarkisk som de to andre.
 

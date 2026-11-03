@@ -331,36 +331,7 @@ CREATE TABLE IF NOT EXISTS fasilitet
 
 
 -- =============================================================================
--- 7. Lokale kildekoder
--- =============================================================================
-
--- Kommunens egen kode, lagret uendret for sporbarhet. Instansen er med i
--- nøkkelen så Bergens 13 og Stavangers 13 kan ligge side om side.
-CREATE TABLE IF NOT EXISTS kildekode
-(
-    id                   BIGSERIAL PRIMARY KEY,
-    fagsystem_instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(id) ON DELETE CASCADE,
-    kodetype             TEXT NOT NULL CHECK (kodetype IN ('lokaletype','aktivitet','fasilitet')),
-    kode                 TEXT NOT NULL,
-    navn                 TEXT NOT NULL,
-    sist_sett            TIMESTAMPTZ NOT NULL DEFAULT now(),
-    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uniq_kildekode UNIQUE (fagsystem_instans_id, kodetype, kode)
-);
-
-CREATE INDEX IF NOT EXISTS ix_kildekode_navn ON kildekode (lower(navn));
-
--- Kildekoden er den ikke-normaliserte formen: kommunens eget kodeverk slik det
--- står i kilden. Hvordan en kode oversettes til masterens kodeverk er ikke en
--- del av modellen - det eier etl/*_mapping/ (JSON) og påføres ved innlasting.
--- Koder uten oversettelse logges i synk_avvik som 'ikke_kartlagt' og vises i
--- v_ukartlagte_kildekoder. Når kildene er normalisert, kan kildekode og
--- ressurs_kildekode fjernes uten at resten av modellen berøres.
-
-
--- =============================================================================
--- 8. Ressurs: det søkbare og bookbare
+-- 7. Ressurs: det søkbare og bookbare
 --
 -- fagsystem_instans_id og ekstern_id gir både identitet og ruting: base_url
 -- fra instansen pluss ekstern_id gir bookinglenken. Ingen egen rutingtabell
@@ -432,22 +403,9 @@ CREATE TABLE IF NOT EXISTS ressurs_fasilitet
 
 CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasilitet_id);
 
--- Ressursens kodeverdier slik kilden har dem, uten oversettelse: én
--- lokaletype-kode og null eller flere aktivitets- og fasilitetskoder. Står ved
--- siden av de normaliserte koblingene (lokaletype_id, ressurs_aktivitet,
--- ressurs_fasilitet) slik at begge formene kan sammenlignes.
-CREATE TABLE IF NOT EXISTS ressurs_kildekode
-(
-    ressurs_id   BIGINT NOT NULL REFERENCES ressurs(id) ON DELETE CASCADE,
-    kildekode_id BIGINT NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
-    PRIMARY KEY (ressurs_id, kildekode_id)
-);
-
-CREATE INDEX IF NOT EXISTS ix_ressurs_kildekode_kode ON ressurs_kildekode (kildekode_id);
-
 
 -- =============================================================================
--- 9. Ressurslenke: samme fysiske ting, kjent av flere fagsystemer
+-- 8. Ressurslenke: samme fysiske ting, kjent av flere fagsystemer
 --
 -- ressurs.fagsystem_instans_id + ekstern_id er allerede identitet+ruting for
 -- EN instans (se kommentar ved ressurs). Denne tabellen er for når en ANNEN
@@ -494,7 +452,7 @@ CREATE INDEX IF NOT EXISTS ix_ressurslenke_ressurs ON ressurslenke (ressurs_id) 
 
 
 -- =============================================================================
--- 10. Innlasting og sporbarhet
+-- 9. Innlasting og sporbarhet
 -- =============================================================================
 
 -- Metadata om én henting fra en kilde (kilde, endepunkt, tidspunkt,
@@ -532,7 +490,7 @@ CREATE TABLE IF NOT EXISTS synk_avvik
     kilde            TEXT NOT NULL,
     samling          TEXT NOT NULL,
     avvikstype       TEXT NOT NULL CHECK (avvikstype IN
-                          ('manglende_forelder','ikke_kartlagt','geokoding_feilet',
+                          ('manglende_forelder','geokoding_feilet',
                            'ugyldig_verdi','db_feil','annet')),
     ekstern_id       TEXT,
     -- Feltet i posten som var galt (f.eks. 'zip_code'). NULL når hele posten er
@@ -605,7 +563,7 @@ $$;
 
 
 -- =============================================================================
--- 11. Søkevisninger
+-- 10. Søkevisninger
 -- =============================================================================
 
 -- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
@@ -664,30 +622,6 @@ WHERE a.kildeuttrekk_id IN (
     FROM kildeuttrekk
     ORDER BY kilde, hentet_at DESC, id DESC);
 
--- Arbeidslisten for kuratering. Hver rad er en lokal kode som ETL ikke fant en
--- oversettelse for i siste kjøring (avvikstype 'ikke_kartlagt', se
--- v_synk_avvik_gjeldende), og som dermed ikke kan søkes på tvers av kommuner.
--- Kildekoden hører til instansen, ikke til én kommune, siden en instans kan
--- betjene flere - kommunene listes derfor sammenslått via oppslag i
--- kommune_fagsystem_instans.
-CREATE OR REPLACE VIEW v_ukartlagte_kildekoder AS
-SELECT kk.id AS kildekode_id, fi.kildenokkel,
-       (SELECT string_agg(k.navn, ', ' ORDER BY k.navn)
-          FROM kommune_fagsystem_instans kfi
-          JOIN kommune k ON k.id = kfi.kommune_id
-         WHERE kfi.fagsystem_instans_id = fi.id) AS kommuner,
-       kk.kodetype, kk.kode, kk.navn, kk.sist_sett
-FROM v_synk_avvik_gjeldende av
-JOIN fagsystem_instans fi ON fi.kildenokkel = av.kilde
-JOIN kildekode kk ON kk.fagsystem_instans_id = fi.id
-                 AND kk.kode = av.ekstern_id
-                 AND kk.kodetype = CASE av.samling
-                                       WHEN 'resource_categories' THEN 'lokaletype'
-                                       WHEN 'activities'          THEN 'aktivitet'
-                                       WHEN 'facilities'          THEN 'fasilitet'
-                                   END
-WHERE av.avvikstype = 'ikke_kartlagt';
-
 -- Arbeidslisten for den som går gjennom avvik: avviket sammen med posten som
 -- utløste det. "post" er rapost, lagret direkte på avviket idet det oppstod -
 -- krever ikke lenger at kildeuttrekket det skjedde i fortsatt finnes.
@@ -700,7 +634,7 @@ LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 
 
 -- =============================================================================
--- 12. updated_at-triggere
+-- 11. updated_at-triggere
 -- =============================================================================
 
 DO $$
@@ -709,7 +643,7 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'kommune','fagsystem_instans', 'matrikkelinfo','bygning','gate','adresse',
-        'lokaletype','aktivitet','fasilitet','kildekode','ressurs'
+        'lokaletype','aktivitet','fasilitet','ressurs'
     ]
     LOOP
         EXECUTE format('DROP TRIGGER IF EXISTS trg_%1$s_updated_at ON %1$I', t);

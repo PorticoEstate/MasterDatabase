@@ -60,12 +60,11 @@ KODEVERK = (
 
 
 def kodeverk_sql(kn, tabell, samling, rader):
-    """SQL for ett kodeverk fra kildens samling: kildekodene slik kilden har
-    dem, og en sammenligning mot masterens kodeverk som loggfører avvik.
-    Masteren eier navn og hierarki, så ingenting skrives i kodeverkstabellen.
-    Avvik: en id som ikke finnes i masteren, samme id med et annet navn eller
-    en annen forelder, og poster som ikke kan sammenlignes (manglende eller
-    ugyldig id, tomt navn, id som går igjen)."""
+    """SQL for ett kodeverk fra kildens samling: en sammenligning mot masterens
+    kodeverk som loggfører avvik. Masteren eier navn og hierarki, så ingenting
+    skrives i kodeverkstabellen. Avvik: en id som ikke finnes i masteren, samme
+    id med et annet navn eller en annen forelder, og poster som ikke kan
+    sammenlignes (manglende eller ugyldig id, tomt navn, id som går igjen)."""
     sql = ""
     konsepter = {}   # id -> (navn, forelderens id eller None)
     for rad in rader:
@@ -80,10 +79,6 @@ def kodeverk_sql(kn, tabell, samling, rader):
         if not n:
             sql += logg(kn, samling, "ugyldig_verdi", rad["id"], "name er tomt", "name", rapost=rad)
             continue
-        sql += (f"INSERT INTO kildekode (fagsystem_instans_id,kodetype,kode,navn) "
-                f"SELECT id,{q(tabell)},{q(rad['id'])},{q(n)} "
-                f"FROM fagsystem_instans WHERE kildenokkel={q(kn)} "
-                f"ON CONFLICT (fagsystem_instans_id,kodetype,kode) DO UPDATE SET navn=EXCLUDED.navn, sist_sett=now();\n")
         if nr in konsepter:
             sql += logg(kn, samling, "ugyldig_verdi", rad["id"], "id finnes flere ganger", "id", rapost=rad)
             continue
@@ -180,7 +175,7 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
       f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
       f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
-    # --- kodeverk: kildekoder og sjekk mot masterens vokabular ---
+    # --- kodeverk: sjekk mot masterens vokabular ---
     for tabell, samling in KODEVERK:
         w(kodeverk_sql(kn, tabell, samling, d.get(samling, [])))
     w("\n")
@@ -298,23 +293,9 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
     kjente_ressurser = {r["id"] for r in d.get("resources", [])}
     # Koblingene er helt avledet av kilden, så de bygges på nytt hver gang -
     # ellers ville koblinger fra en tidligere versjon av kilden bli liggende.
-    for koblingstabell in ("ressurs_kildekode", "ressurs_aktivitet", "ressurs_fasilitet"):
+    for koblingstabell in ("ressurs_aktivitet", "ressurs_fasilitet"):
         w(f"DELETE FROM {koblingstabell} x USING ressurs r JOIN fagsystem_instans fi "
           f"ON fi.id=r.fagsystem_instans_id WHERE x.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
-
-    def kildekode_kobling(kodetype, kode, ressurs_id) -> str:
-        """Den ikke-normaliserte koblingen: ressursen og kildekoden slik kilden har dem."""
-        return (f"INSERT INTO ressurs_kildekode (ressurs_id,kildekode_id) "
-                f"SELECT r.id,kk.id "
-                f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id "
-                f"JOIN kildekode kk ON kk.fagsystem_instans_id=fi.id AND kk.kodetype={q(kodetype)} "
-                f"AND kk.kode={q(kode)} "
-                f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(ressurs_id)} "
-                f"ON CONFLICT DO NOTHING;\n")
-
-    for r in d.get("resources", []):
-        if r.get("id") is not None and r.get("rescategory_id") is not None:
-            w(kildekode_kobling("lokaletype", r["rescategory_id"], r["id"]))
 
     for samling, kodetype, koblingstabell, maalkol, idfelt in [
         ("resource_activities", "aktivitet", "ressurs_aktivitet", "aktivitet_id", "activity_id"),
@@ -325,7 +306,6 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
                 w(logg(kn, samling, "manglende_forelder", rad["resource_id"],
                        "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=rad))
                 continue
-            w(kildekode_kobling(kodetype, rad[idfelt], rad["resource_id"]))
             nr, feil = som_heltall(rad[idfelt])
             if nr is None:
                 w(logg(kn, samling, "ugyldig_verdi", rad[idfelt], f"{idfelt} " + (feil or "mangler"),
