@@ -5,7 +5,7 @@
   "values": {
     "administrasjonslokale": {
       "activities": [
-        "VEN-001"
+        "Administrasjonslokale"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -15,7 +15,7 @@
     },
     "aktivitetshus": {
       "activities": [
-        "VEN-008"
+        "Aktivitetshus"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -25,7 +25,7 @@
     },
     "alle typer arrangement": {
       "activities": [
-        "EVT-001"
+        "Arrangement (generelt)"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -35,7 +35,7 @@
     },
     "allidrett": {
       "activities": [
-        "ACT-011"
+        "Allidrett/barneidrett"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -45,7 +45,7 @@
     },
     "amerikansk fotball": {
       "activities": [
-        "ACT-013"
+        "Amerikansk fotball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -55,7 +55,7 @@
     },
     "andre": {
       "activities": [
-        "EXC-004"
+        "Uspesifisert"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -67,8 +67,8 @@
     },
     "andre aktivitetar, konsertar, o.l": {
       "activities": [
-        "EVT-012",
-        "EXC-004"
+        "Konsert",
+        "Uspesifisert"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -78,7 +78,7 @@
     },
     "andre aktivitetar, o.l": {
       "activities": [
-        "EXC-004"
+        "Uspesifisert"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -90,7 +90,7 @@
     },
     "andre idretter": {
       "activities": [
-        "ACT-010"
+        "Idrett"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -100,7 +100,7 @@
     },
     "anleggsarbeid": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -112,7 +112,7 @@
     },
     "annen idrett": {
       "activities": [
-        "ACT-010"
+        "Idrett"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -122,7 +122,7 @@
     },
     "annet": {
       "activities": [
-        "EXC-004"
+        "Uspesifisert"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -134,8 +134,8 @@
     },
     "annet - idrett møterom": {
       "activities": [
-        "VEN-021",
-        "ACT-010"
+        "Møterom",
+        "Idrett"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -145,7 +145,7 @@
     },
     "annet - internt i kommunen": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -155,8 +155,8 @@
     },
     "annet - kultur møterom": {
       "activities": [
-        "VEN-021",
-        "ACT-092"
+        "Møterom",
+        "Kultur"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -166,7 +166,7 @@
     },
     "annet - offentlig arrangement": {
       "activities": [
-        "EVT-006"
+        "Offentlig arrangement"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -176,7 +176,7 @@
     },
     "annet - personlig markering": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -186,7 +186,7 @@
     },
     "arena": {
       "activities": [
-        "VEN-003"
+        "Arena"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -196,7 +196,7 @@
     },
     "arrangement": {
       "activities": [
-        "EVT-001"
+        "Arrangement (generelt)"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -206,8 +206,8 @@
     },
     "arrangement og møte": {
       "activities": [
-        "EVT-001",
-        "EVT-002"
+        "Arrangement (generelt)",
+        "Møte"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -217,7 +217,7 @@
     },
     "arrangementer": {
       "activities": [
-        "EVT-001"
+        "Arrangement (generelt)"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -227,7 +227,7 @@
     },
     "arrangementlokale": {
       "activities": [
-        "VEN-007"
+        "Forsamlingslokale"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -237,8 +237,8 @@
     },
     "babysvømming": {
       "activities": [
-        "ACT-083",
-        "GRP-006"
+        "Svømming",
+        "Spedbarn og foreldre"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -248,7 +248,7 @@
     },
     "bad": {
       "activities": [
-        "ACT-074"
+        "Bading"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -258,7 +258,7 @@
     },
     "bading": {
       "activities": [
-        "ACT-074"
+        "Bading"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -268,7 +268,7 @@
     },
     "badminton": {
       "activities": [
-        "ACT-058"
+        "Badminton"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -278,7 +278,7 @@
     },
     "ballsport": {
       "activities": [
-        "ACT-012"
+        "Ballsport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -288,7 +288,7 @@
     },
     "band": {
       "activities": [
-        "ACT-099"
+        "Band"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -298,7 +298,7 @@
     },
     "bandy": {
       "activities": [
-        "ACT-014"
+        "Bandy"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -308,7 +308,7 @@
     },
     "bandy - inne": {
       "activities": [
-        "ACT-021"
+        "Innebandy"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -318,7 +318,7 @@
     },
     "bandøving": {
       "activities": [
-        "ACT-099"
+        "Band"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -328,7 +328,7 @@
     },
     "barnebursdag": {
       "activities": [
-        "EVT-021"
+        "Barnebursdag"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -338,8 +338,8 @@
     },
     "barnebursdag 3 - 12 år": {
       "activities": [
-        "EVT-021",
-        "GRP-001"
+        "Barnebursdag",
+        "Barn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -353,8 +353,8 @@
     },
     "barnebursdag 3 -16 år": {
       "activities": [
-        "EVT-021",
-        "GRP-001"
+        "Barnebursdag",
+        "Barn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -368,7 +368,7 @@
     },
     "barnehage": {
       "activities": [
-        "GRP-009"
+        "Barnehage"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -378,7 +378,7 @@
     },
     "barnehager": {
       "activities": [
-        "GRP-009"
+        "Barnehage"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -388,8 +388,8 @@
     },
     "barneidrett": {
       "activities": [
-        "ACT-011",
-        "GRP-001"
+        "Allidrett/barneidrett",
+        "Barn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -399,7 +399,7 @@
     },
     "barnetilbud": {
       "activities": [
-        "GRP-001"
+        "Barn"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -409,7 +409,7 @@
     },
     "baseball": {
       "activities": [
-        "ACT-015"
+        "Baseball/softball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -419,7 +419,7 @@
     },
     "baseball/softball": {
       "activities": [
-        "ACT-015"
+        "Baseball/softball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -429,7 +429,7 @@
     },
     "basketball": {
       "activities": [
-        "ACT-016"
+        "Basketball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -439,7 +439,7 @@
     },
     "bedrifter o.l": {
       "activities": [
-        "ORG-020"
+        "Næringsliv/kommersiell"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -449,8 +449,8 @@
     },
     "bedriftsidrett": {
       "activities": [
-        "ORG-012",
-        "ACT-010"
+        "Bedriftsidrettslag",
+        "Idrett"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -460,7 +460,7 @@
     },
     "bibliotek": {
       "activities": [
-        "VEN-004"
+        "Bibliotek"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -470,8 +470,8 @@
     },
     "bil/mc klubb": {
       "activities": [
-        "ORG-014",
-        "ACT-046"
+        "Motorklubb (bil/MC)",
+        "Motorsport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -481,7 +481,7 @@
     },
     "boccia": {
       "activities": [
-        "ACT-050"
+        "Boccia"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -491,7 +491,7 @@
     },
     "boksing": {
       "activities": [
-        "ACT-036"
+        "Boksing"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -501,7 +501,7 @@
     },
     "bordtennis": {
       "activities": [
-        "ACT-059"
+        "Bordtennis"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -511,7 +511,7 @@
     },
     "bowls": {
       "activities": [
-        "ACT-051"
+        "Bowls"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -521,7 +521,7 @@
     },
     "bryllup": {
       "activities": [
-        "EVT-023"
+        "Bryllup og vielse"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -531,7 +531,7 @@
     },
     "bryting": {
       "activities": [
-        "ACT-037"
+        "Bryting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -541,7 +541,7 @@
     },
     "buekorps": {
       "activities": [
-        "ACT-100"
+        "Buekorps"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -551,7 +551,7 @@
     },
     "bueskyting": {
       "activities": [
-        "ACT-052"
+        "Bueskyting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -561,7 +561,7 @@
     },
     "bursdagsfeiring": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -571,7 +571,7 @@
     },
     "bydelshus": {
       "activities": [
-        "VEN-009"
+        "Bydelshus/grendehus"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -581,7 +581,7 @@
     },
     "byrom": {
       "activities": [
-        "VEN-006"
+        "Byrom/uterom"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -591,7 +591,7 @@
     },
     "båtforeingar": {
       "activities": [
-        "ORG-004"
+        "Båtforening"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -601,7 +601,7 @@
     },
     "cheerleading": {
       "activities": [
-        "ACT-029"
+        "Cheerleading"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -611,7 +611,7 @@
     },
     "cricket": {
       "activities": [
-        "ACT-017"
+        "Cricket"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -621,7 +621,7 @@
     },
     "curling": {
       "activities": [
-        "ACT-053"
+        "Curling"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -631,8 +631,8 @@
     },
     "dagsmøte": {
       "activities": [
-        "EVT-004",
-        "EVT-002"
+        "Konferanse",
+        "Møte"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -642,7 +642,7 @@
     },
     "dans": {
       "activities": [
-        "ACT-093"
+        "Dans"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -652,8 +652,8 @@
     },
     "dans/ musikk/ kor/ korps": {
       "activities": [
-        "ACT-098",
-        "ACT-093"
+        "Musikk",
+        "Dans"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -663,8 +663,8 @@
     },
     "dans/trening": {
       "activities": [
-        "ACT-093",
-        "ACT-065"
+        "Dans",
+        "Styrke og trening"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -674,7 +674,7 @@
     },
     "dansing": {
       "activities": [
-        "ACT-093"
+        "Dans"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -684,7 +684,7 @@
     },
     "datahjelp": {
       "activities": [
-        "SRV-006"
+        "Veiledning og rådgivning"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -694,7 +694,7 @@
     },
     "dataundervisning": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -704,7 +704,7 @@
     },
     "demonstrasjon": {
       "activities": [
-        "EVT-015"
+        "Markering og demonstrasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -714,7 +714,7 @@
     },
     "disko": {
       "activities": [
-        "EVT-007"
+        "Fest og disko"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -724,7 +724,7 @@
     },
     "diskorom": {
       "activities": [
-        "EVT-007"
+        "Fest og disko"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -734,7 +734,7 @@
     },
     "drill": {
       "activities": [
-        "ACT-030"
+        "Drill"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -744,7 +744,7 @@
     },
     "drop in": {
       "activities": [
-        "EVT-027"
+        "Drop-in / åpent tilbud"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -754,7 +754,7 @@
     },
     "drop-in / arbeidsplasser": {
       "activities": [
-        "VEN-002"
+        "Arbeidsplass/kontorplass"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -764,7 +764,7 @@
     },
     "dykking": {
       "activities": [
-        "ACT-075"
+        "Dykking"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -774,7 +774,7 @@
     },
     "dåp": {
       "activities": [
-        "EVT-024"
+        "Dåp og navnefest"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -784,7 +784,7 @@
     },
     "dåp/navnedag": {
       "activities": [
-        "EVT-024"
+        "Dåp og navnefest"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -794,7 +794,7 @@
     },
     "e-sport": {
       "activities": [
-        "ACT-025"
+        "E-sport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -804,7 +804,7 @@
     },
     "egenorganisert": {
       "activities": [
-        "ORG-001"
+        "Egenorganisert"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -814,7 +814,7 @@
     },
     "ekstra renhold": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -826,7 +826,7 @@
     },
     "familiefest": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -836,7 +836,7 @@
     },
     "fekting": {
       "activities": [
-        "ACT-038"
+        "Fekting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -846,7 +846,7 @@
     },
     "fektting": {
       "activities": [
-        "ACT-038"
+        "Fekting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -856,7 +856,7 @@
     },
     "ferie": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -868,7 +868,7 @@
     },
     "festival": {
       "activities": [
-        "EVT-009"
+        "Festival og mønstring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -878,7 +878,7 @@
     },
     "festivaler": {
       "activities": [
-        "EVT-009"
+        "Festival og mønstring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -888,7 +888,7 @@
     },
     "festivaler / mønstringar": {
       "activities": [
-        "EVT-009"
+        "Festival og mønstring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -898,7 +898,7 @@
     },
     "festivaler / mønstringer": {
       "activities": [
-        "EVT-009"
+        "Festival og mønstring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -908,7 +908,7 @@
     },
     "festivaler og mønstringer": {
       "activities": [
-        "EVT-009"
+        "Festival og mønstring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -918,7 +918,7 @@
     },
     "film": {
       "activities": [
-        "EVT-011"
+        "Kino og film"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -928,7 +928,7 @@
     },
     "fisketurer": {
       "activities": [
-        "ACT-002"
+        "Fiske"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -938,7 +938,7 @@
     },
     "fleiridrettslag": {
       "activities": [
-        "ORG-011"
+        "Idrettslag/fleridrettslag"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -948,7 +948,7 @@
     },
     "fleridrettslag": {
       "activities": [
-        "ORG-011"
+        "Idrettslag/fleridrettslag"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -958,7 +958,7 @@
     },
     "flykningekontoret": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -968,7 +968,7 @@
     },
     "foredrag": {
       "activities": [
-        "EVT-003"
+        "Foredrag og presentasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -978,7 +978,7 @@
     },
     "foreldreutval": {
       "activities": [
-        "ORG-006"
+        "Foreldreutvalg (FAU)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -988,8 +988,8 @@
     },
     "forelesning": {
       "activities": [
-        "EVT-003",
-        "ACT-109"
+        "Foredrag og presentasjon",
+        "Undervisning og kurs"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -999,7 +999,7 @@
     },
     "forestilllinger": {
       "activities": [
-        "EVT-010"
+        "Forestilling"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1009,7 +1009,7 @@
     },
     "formidlingsarena og forsamlingslokaler": {
       "activities": [
-        "VEN-007"
+        "Forsamlingslokale"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1019,7 +1019,7 @@
     },
     "forslag": {
       "activities": [
-        "EXC-003"
+        "Testdata/systemtekst"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1031,7 +1031,7 @@
     },
     "fotball": {
       "activities": [
-        "ACT-018"
+        "Fotball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1041,7 +1041,7 @@
     },
     "fotball (1/3 del av 7'er bane)": {
       "activities": [
-        "ACT-018"
+        "Fotball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1051,7 +1051,7 @@
     },
     "fotball (1/4 av 11'er bane)": {
       "activities": [
-        "ACT-018"
+        "Fotball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1061,8 +1061,8 @@
     },
     "fotballbane": {
       "activities": [
-        "VEN-011",
-        "ACT-018"
+        "Idrettsanlegg utendørs",
+        "Fotball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1072,7 +1072,7 @@
     },
     "foto": {
       "activities": [
-        "ACT-094"
+        "Foto og film"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1082,7 +1082,7 @@
     },
     "friidrett": {
       "activities": [
-        "ACT-026"
+        "Friidrett"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1092,7 +1092,7 @@
     },
     "friluft": {
       "activities": [
-        "ACT-001"
+        "Friluftsliv"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1102,7 +1102,7 @@
     },
     "friluftsaktiviteter": {
       "activities": [
-        "ACT-001"
+        "Friluftsliv"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1112,7 +1112,7 @@
     },
     "friluftsliv": {
       "activities": [
-        "ACT-001"
+        "Friluftsliv"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1122,7 +1122,7 @@
     },
     "friområder": {
       "activities": [
-        "VEN-023"
+        "Uteområde"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1132,8 +1132,8 @@
     },
     "frisklivsentralen": {
       "activities": [
-        "ORG-002",
-        "GRP-003"
+        "Frisklivssentral",
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1143,8 +1143,8 @@
     },
     "fritidsklubb": {
       "activities": [
-        "GRP-007",
-        "EVT-026"
+        "Ungdom",
+        "Sosial møteplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1154,7 +1154,7 @@
     },
     "fritidstilbud": {
       "activities": [
-        "ACT-005"
+        "Fritid og hobby"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1164,7 +1164,7 @@
     },
     "frivillig organisasjon": {
       "activities": [
-        "ORG-003"
+        "Frivillig organisasjon (generelt)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1174,7 +1174,7 @@
     },
     "frivillighet og organisasjonsaktiviteter": {
       "activities": [
-        "ORG-003"
+        "Frivillig organisasjon (generelt)"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1184,7 +1184,7 @@
     },
     "frivilligsentral": {
       "activities": [
-        "ORG-007"
+        "Frivilligsentral"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1194,7 +1194,7 @@
     },
     "funksjonhemma": {
       "activities": [
-        "GRP-004"
+        "Personer med funksjonsnedsettelse"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1204,7 +1204,7 @@
     },
     "futsal": {
       "activities": [
-        "ACT-019"
+        "Futsal"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1214,7 +1214,7 @@
     },
     "fysiotimer": {
       "activities": [
-        "SRV-002"
+        "Helse og terapi"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1224,7 +1224,7 @@
     },
     "galleri": {
       "activities": [
-        "VEN-018"
+        "Galleri og utstillingslokale"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1234,7 +1234,7 @@
     },
     "gapahuk": {
       "activities": [
-        "VEN-024"
+        "Gapahuk/bålplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1244,7 +1244,7 @@
     },
     "generelt": {
       "activities": [
-        "EXC-004"
+        "Uspesifisert"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1256,7 +1256,7 @@
     },
     "gi bort": {
       "activities": [
-        "SRV-001"
+        "Gi bort / ombruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1266,7 +1266,7 @@
     },
     "golf": {
       "activities": [
-        "ACT-054"
+        "Golf"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1276,7 +1276,7 @@
     },
     "grendalag": {
       "activities": [
-        "ORG-008"
+        "Grendelag/velforening"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1286,7 +1286,7 @@
     },
     "grendalag/velforening": {
       "activities": [
-        "ORG-008"
+        "Grendelag/velforening"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1296,7 +1296,7 @@
     },
     "grendelag": {
       "activities": [
-        "ORG-008"
+        "Grendelag/velforening"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1306,7 +1306,7 @@
     },
     "grill/bålpanne": {
       "activities": [
-        "SRV-005"
+        "Utlån av utstyr"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1316,7 +1316,7 @@
     },
     "gruppearbeid": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -1326,7 +1326,7 @@
     },
     "gymnastikk": {
       "activities": [
-        "ACT-028"
+        "Gymnastikk og turn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1336,7 +1336,7 @@
     },
     "gymnastikk og turn": {
       "activities": [
-        "ACT-028"
+        "Gymnastikk og turn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1347,7 +1347,7 @@
     },
     "gymsal": {
       "activities": [
-        "VEN-012"
+        "Idrettshall/gymsal"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1357,7 +1357,7 @@
     },
     "helsebygg": {
       "activities": [
-        "VEN-010"
+        "Helse- og omsorgsbygg"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1367,7 +1367,7 @@
     },
     "hestesport": {
       "activities": [
-        "ACT-033"
+        "Hestesport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1377,7 +1377,7 @@
     },
     "hobbygrupper": {
       "activities": [
-        "ACT-006"
+        "Hobby (generelt)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1387,7 +1387,7 @@
     },
     "humanitære organiasjoner": {
       "activities": [
-        "ORG-009"
+        "Humanitær organisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1397,7 +1397,7 @@
     },
     "humanitære organisasjonar": {
       "activities": [
-        "ORG-009"
+        "Humanitær organisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1407,7 +1407,7 @@
     },
     "humanitære organisasjoner": {
       "activities": [
-        "ORG-009"
+        "Humanitær organisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1417,7 +1417,7 @@
     },
     "hund": {
       "activities": [
-        "ACT-034"
+        "Hundesport"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -1427,7 +1427,7 @@
     },
     "hundesport": {
       "activities": [
-        "ACT-034"
+        "Hundesport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1437,7 +1437,7 @@
     },
     "hurtigløp": {
       "activities": [
-        "ACT-090"
+        "Hurtigløp"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1447,7 +1447,7 @@
     },
     "håndball": {
       "activities": [
-        "ACT-020"
+        "Håndball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1457,7 +1457,7 @@
     },
     "hårklipp": {
       "activities": [
-        "SRV-003"
+        "Personlig pleie"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -1467,7 +1467,7 @@
     },
     "idrett": {
       "activities": [
-        "ACT-010"
+        "Idrett"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1477,8 +1477,8 @@
     },
     "idrett møterom": {
       "activities": [
-        "VEN-021",
-        "ACT-010"
+        "Møterom",
+        "Idrett"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1488,7 +1488,7 @@
     },
     "idrettsaktiviteter": {
       "activities": [
-        "ACT-010"
+        "Idrett"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1498,7 +1498,7 @@
     },
     "idrettshall": {
       "activities": [
-        "VEN-012"
+        "Idrettshall/gymsal"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1508,7 +1508,7 @@
     },
     "idrettskrets - særforbund": {
       "activities": [
-        "ORG-010"
+        "Idrettskrets/særforbund"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1518,7 +1518,7 @@
     },
     "informasjons møter": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1528,7 +1528,7 @@
     },
     "inkludering": {
       "activities": [
-        "GRP-002"
+        "Inkludering og integrering"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -1538,7 +1538,7 @@
     },
     "innbyggerbussen": {
       "activities": [
-        "SRV-004"
+        "Transport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1548,7 +1548,7 @@
     },
     "innbyggertorg": {
       "activities": [
-        "VEN-013"
+        "Innbyggertorg"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1558,7 +1558,7 @@
     },
     "innebandy": {
       "activities": [
-        "ACT-021"
+        "Innebandy"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1568,7 +1568,7 @@
     },
     "innefotball": {
       "activities": [
-        "ACT-018"
+        "Fotball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1578,7 +1578,7 @@
     },
     "interesseorganiasjonar": {
       "activities": [
-        "ORG-013"
+        "Interesseorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1588,7 +1588,7 @@
     },
     "interesseorganiasjoner": {
       "activities": [
-        "ORG-013"
+        "Interesseorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1598,7 +1598,7 @@
     },
     "interesseorganisasjon": {
       "activities": [
-        "ORG-013"
+        "Interesseorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1608,7 +1608,7 @@
     },
     "interesseorganisasjonar": {
       "activities": [
-        "ORG-013"
+        "Interesseorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1618,7 +1618,7 @@
     },
     "interesseorganisasjoner": {
       "activities": [
-        "ORG-013"
+        "Interesseorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1628,7 +1628,7 @@
     },
     "intern": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1638,7 +1638,7 @@
     },
     "intern aktivitet": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1648,7 +1648,7 @@
     },
     "intern avdeling: flyk": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1658,8 +1658,8 @@
     },
     "intern avdeling: kulturskolen": {
       "activities": [
-        "ORG-019",
-        "GRP-003"
+        "Kulturskole",
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1669,8 +1669,8 @@
     },
     "intern avdeling: voks": {
       "activities": [
-        "ORG-024",
-        "GRP-003"
+        "Voksenopplæring",
+        "Kommunal intern bruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1680,7 +1680,7 @@
     },
     "interne avdelinger": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1690,7 +1690,7 @@
     },
     "internt bergen kommune": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1701,7 +1701,7 @@
     },
     "internt bruk - kommune": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1711,7 +1711,7 @@
     },
     "internt i kommunen": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1721,7 +1721,7 @@
     },
     "internt kommune": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1731,7 +1731,7 @@
     },
     "internt stavanger kommune": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1741,7 +1741,7 @@
     },
     "involvering": {
       "activities": [
-        "EVT-005"
+        "Medvirkning og involvering"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -1751,7 +1751,7 @@
     },
     "ishockey": {
       "activities": [
-        "ACT-087"
+        "Ishockey"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1761,7 +1761,7 @@
     },
     "jakt": {
       "activities": [
-        "ACT-003"
+        "Jakt"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1771,7 +1771,7 @@
     },
     "ju jitsu": {
       "activities": [
-        "ACT-040"
+        "Jujutsu"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1782,7 +1782,7 @@
     },
     "judo": {
       "activities": [
-        "ACT-039"
+        "Judo"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1792,7 +1792,7 @@
     },
     "kafe": {
       "activities": [
-        "EVT-028"
+        "Servering (kafé/pub)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1802,7 +1802,7 @@
     },
     "kafè": {
       "activities": [
-        "EVT-028"
+        "Servering (kafé/pub)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1812,7 +1812,7 @@
     },
     "kajakk": {
       "activities": [
-        "ACT-078"
+        "Kajakk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1822,8 +1822,8 @@
     },
     "kamera": {
       "activities": [
-        "SRV-005",
-        "ACT-094"
+        "Utlån av utstyr",
+        "Foto og film"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -1833,7 +1833,7 @@
     },
     "kampsport": {
       "activities": [
-        "ACT-035"
+        "Kampsport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1843,8 +1843,8 @@
     },
     "kano/kajakk": {
       "activities": [
-        "ACT-079",
-        "ACT-078"
+        "Kano",
+        "Kajakk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1854,7 +1854,7 @@
     },
     "kanopadling": {
       "activities": [
-        "ACT-079"
+        "Kano"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1864,7 +1864,7 @@
     },
     "karate": {
       "activities": [
-        "ACT-041"
+        "Karate"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1874,7 +1874,7 @@
     },
     "kickboksing": {
       "activities": [
-        "ACT-042"
+        "Kickboksing"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1884,7 +1884,7 @@
     },
     "kino": {
       "activities": [
-        "EVT-011"
+        "Kino og film"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1894,7 +1894,7 @@
     },
     "kjøkken": {
       "activities": [
-        "VEN-014"
+        "Kjøkken"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1904,7 +1904,7 @@
     },
     "klartring": {
       "activities": [
-        "ACT-044"
+        "Klatring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1914,8 +1914,8 @@
     },
     "klassefest": {
       "activities": [
-        "EVT-020",
-        "GRP-011"
+        "Privat arrangement/selskap",
+        "Skole (grunnskole)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1925,7 +1925,7 @@
     },
     "klasserom": {
       "activities": [
-        "VEN-015"
+        "Klasserom"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1935,7 +1935,7 @@
     },
     "klasseromsundervisning": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1945,7 +1945,7 @@
     },
     "klatrevegg": {
       "activities": [
-        "ACT-044"
+        "Klatring"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1955,7 +1955,7 @@
     },
     "klatring": {
       "activities": [
-        "ACT-044"
+        "Klatring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1965,7 +1965,7 @@
     },
     "klatring/ buldring": {
       "activities": [
-        "ACT-044"
+        "Klatring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1975,7 +1975,7 @@
     },
     "klesinnsamling": {
       "activities": [
-        "SRV-001"
+        "Gi bort / ombruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -1985,7 +1985,7 @@
     },
     "klubbmøte": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -1995,7 +1995,7 @@
     },
     "kommersiell utleie": {
       "activities": [
-        "ORG-020"
+        "Næringsliv/kommersiell"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2005,7 +2005,7 @@
     },
     "kommersiell utleige": {
       "activities": [
-        "ORG-020"
+        "Næringsliv/kommersiell"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2015,7 +2015,7 @@
     },
     "kommunal aktivitet": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2025,7 +2025,7 @@
     },
     "kommunalt": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2035,7 +2035,7 @@
     },
     "kommunalt bruk": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2045,7 +2045,7 @@
     },
     "kommune eige bruk": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2055,7 +2055,7 @@
     },
     "konferanse": {
       "activities": [
-        "EVT-004"
+        "Konferanse"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2065,7 +2065,7 @@
     },
     "konferanser": {
       "activities": [
-        "EVT-004"
+        "Konferanse"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2075,7 +2075,7 @@
     },
     "konfirmasjon": {
       "activities": [
-        "EVT-025"
+        "Konfirmasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2085,7 +2085,7 @@
     },
     "konsert": {
       "activities": [
-        "EVT-012"
+        "Konsert"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2095,7 +2095,7 @@
     },
     "kor": {
       "activities": [
-        "ACT-101"
+        "Kor"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2105,7 +2105,7 @@
     },
     "korps": {
       "activities": [
-        "ACT-102"
+        "Korps"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2115,8 +2115,8 @@
     },
     "korps og orkester": {
       "activities": [
-        "ACT-102",
-        "ACT-103"
+        "Korps",
+        "Orkester"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2126,7 +2126,7 @@
     },
     "kreativt verksted": {
       "activities": [
-        "ACT-096"
+        "Kunst og håndverk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2136,7 +2136,7 @@
     },
     "kreativt verksted og prosesser": {
       "activities": [
-        "ACT-096"
+        "Kunst og håndverk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2146,7 +2146,7 @@
     },
     "kultur": {
       "activities": [
-        "ACT-092"
+        "Kultur"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2156,7 +2156,7 @@
     },
     "kulturaktiviteter": {
       "activities": [
-        "ACT-092"
+        "Kultur"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2166,7 +2166,7 @@
     },
     "kulturarrangement": {
       "activities": [
-        "EVT-008"
+        "Kulturarrangement"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2176,7 +2176,7 @@
     },
     "kulturbygg": {
       "activities": [
-        "VEN-016"
+        "Kulturhus"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2186,7 +2186,7 @@
     },
     "kulturhus": {
       "activities": [
-        "VEN-016"
+        "Kulturhus"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2196,8 +2196,8 @@
     },
     "kulturlokalar møterom": {
       "activities": [
-        "VEN-021",
-        "ACT-092"
+        "Møterom",
+        "Kultur"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2207,7 +2207,7 @@
     },
     "kulturlokale": {
       "activities": [
-        "VEN-017"
+        "Kulturlokale"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2217,7 +2217,7 @@
     },
     "kulturlokaler": {
       "activities": [
-        "VEN-017"
+        "Kulturlokale"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2227,7 +2227,7 @@
     },
     "kulturlokaler formidling og øving": {
       "activities": [
-        "VEN-017"
+        "Kulturlokale"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2237,7 +2237,7 @@
     },
     "kulturlokaler øving og verksteder": {
       "activities": [
-        "VEN-019"
+        "Øvingslokale/verksted"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2247,7 +2247,7 @@
     },
     "kulturlokaler, formidling og øving": {
       "activities": [
-        "VEN-017"
+        "Kulturlokale"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2257,7 +2257,7 @@
     },
     "kulturskolen": {
       "activities": [
-        "ORG-019"
+        "Kulturskole"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2267,7 +2267,7 @@
     },
     "kulturvern og historie": {
       "activities": [
-        "ACT-095"
+        "Kulturvern og lokalhistorie"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2277,7 +2277,7 @@
     },
     "kulturvern og historielag": {
       "activities": [
-        "ACT-095"
+        "Kulturvern og lokalhistorie"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2287,7 +2287,7 @@
     },
     "kulturvern og sogelag": {
       "activities": [
-        "ACT-095"
+        "Kulturvern og lokalhistorie"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2297,7 +2297,7 @@
     },
     "kunst og håndverk": {
       "activities": [
-        "ACT-096"
+        "Kunst og håndverk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2307,8 +2307,8 @@
     },
     "kunst, håndtverk, media": {
       "activities": [
-        "ACT-096",
-        "ACT-094"
+        "Kunst og håndverk",
+        "Foto og film"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2318,8 +2318,8 @@
     },
     "kunst, håndverk og media": {
       "activities": [
-        "ACT-096",
-        "ACT-094"
+        "Kunst og håndverk",
+        "Foto og film"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2329,8 +2329,8 @@
     },
     "kunst, håndverk, media": {
       "activities": [
-        "ACT-096",
-        "ACT-094"
+        "Kunst og håndverk",
+        "Foto og film"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2340,7 +2340,7 @@
     },
     "kunstløp": {
       "activities": [
-        "ACT-091"
+        "Kunstløp"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2350,7 +2350,7 @@
     },
     "kurs": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2360,8 +2360,8 @@
     },
     "kurs og foredrag": {
       "activities": [
-        "ACT-109",
-        "EVT-003"
+        "Undervisning og kurs",
+        "Foredrag og presentasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2371,7 +2371,7 @@
     },
     "lacrosse": {
       "activities": [
-        "ACT-022"
+        "Lacrosse"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2381,7 +2381,7 @@
     },
     "lag og foreninger": {
       "activities": [
-        "ORG-003"
+        "Frivillig organisasjon (generelt)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2391,7 +2391,7 @@
     },
     "lagt til rette for mmnf": {
       "activities": [
-        "GRP-004"
+        "Personer med funksjonsnedsettelse"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2401,8 +2401,8 @@
     },
     "leie av lastesykkel": {
       "activities": [
-        "SRV-005",
-        "SRV-004"
+        "Utlån av utstyr",
+        "Transport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2412,7 +2412,7 @@
     },
     "leie salgsplass": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2422,7 +2422,7 @@
     },
     "leie standplass": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2432,7 +2432,7 @@
     },
     "leilighet": {
       "activities": [
-        "VEN-005"
+        "Bolig/leilighet"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2442,7 +2442,7 @@
     },
     "leirdueskyting": {
       "activities": [
-        "ACT-056"
+        "Leirdueskyting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2452,8 +2452,8 @@
     },
     "leksegruppe": {
       "activities": [
-        "ACT-109",
-        "GRP-001"
+        "Undervisning og kurs",
+        "Barn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2463,7 +2463,7 @@
     },
     "litteratur/litteraturformidling": {
       "activities": [
-        "ACT-097"
+        "Litteratur"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2473,8 +2473,8 @@
     },
     "livsnøytral seremonirom": {
       "activities": [
-        "VEN-026",
-        "EVT-022"
+        "Seremonirom",
+        "Seremoni"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2484,8 +2484,8 @@
     },
     "lokale aktiviteter-idrett-kultur": {
       "activities": [
-        "ACT-010",
-        "ACT-092"
+        "Idrett",
+        "Kultur"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -2495,7 +2495,7 @@
     },
     "lokalmat": {
       "activities": [
-        "ACT-007"
+        "Mat og matlaging"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -2505,7 +2505,7 @@
     },
     "luftsport": {
       "activities": [
-        "ACT-045"
+        "Luftsport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2515,7 +2515,7 @@
     },
     "lyd": {
       "activities": [
-        "SRV-005"
+        "Utlån av utstyr"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2525,7 +2525,7 @@
     },
     "lys": {
       "activities": [
-        "SRV-005"
+        "Utlån av utstyr"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2535,7 +2535,7 @@
     },
     "makeup & hundpleie": {
       "activities": [
-        "SRV-003"
+        "Personlig pleie"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -2545,7 +2545,7 @@
     },
     "malegruppe": {
       "activities": [
-        "ACT-096"
+        "Kunst og håndverk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2555,7 +2555,7 @@
     },
     "maraton": {
       "activities": [
-        "ACT-027"
+        "Løping"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2565,7 +2565,7 @@
     },
     "marked": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2575,7 +2575,7 @@
     },
     "markering": {
       "activities": [
-        "EVT-015"
+        "Markering og demonstrasjon"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2585,7 +2585,7 @@
     },
     "markering/demonstrasjon": {
       "activities": [
-        "EVT-015"
+        "Markering og demonstrasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2595,7 +2595,7 @@
     },
     "matlaging": {
       "activities": [
-        "ACT-007"
+        "Mat og matlaging"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2605,7 +2605,7 @@
     },
     "menighet/ trossamfunn": {
       "activities": [
-        "ORG-018"
+        "Tros- og livssynssamfunn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2615,7 +2615,7 @@
     },
     "menigheter og trosamfunn": {
       "activities": [
-        "ORG-018"
+        "Tros- og livssynssamfunn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2625,7 +2625,7 @@
     },
     "menigheter og trossamfunn": {
       "activities": [
-        "ORG-018"
+        "Tros- og livssynssamfunn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2635,7 +2635,7 @@
     },
     "meningheter og trossamfunn": {
       "activities": [
-        "ORG-018"
+        "Tros- og livssynssamfunn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2645,7 +2645,7 @@
     },
     "messe": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -2655,7 +2655,7 @@
     },
     "mini": {
       "activities": [
-        "EXC-001"
+        "Avklares"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -2667,8 +2667,8 @@
     },
     "minifotball": {
       "activities": [
-        "ACT-018",
-        "GRP-001"
+        "Fotball",
+        "Barn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2678,8 +2678,8 @@
     },
     "minihåndball": {
       "activities": [
-        "ACT-020",
-        "GRP-001"
+        "Håndball",
+        "Barn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2689,8 +2689,8 @@
     },
     "minivolleyball": {
       "activities": [
-        "ACT-024",
-        "GRP-001"
+        "Volleyball",
+        "Barn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2700,7 +2700,7 @@
     },
     "mobilitet": {
       "activities": [
-        "SRV-004"
+        "Transport"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -2710,7 +2710,7 @@
     },
     "motorsport": {
       "activities": [
-        "ACT-046"
+        "Motorsport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2720,7 +2720,7 @@
     },
     "museum": {
       "activities": [
-        "VEN-020"
+        "Museum"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2730,7 +2730,7 @@
     },
     "musikk": {
       "activities": [
-        "ACT-098"
+        "Musikk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2740,8 +2740,8 @@
     },
     "musikk / korps": {
       "activities": [
-        "ACT-098",
-        "ACT-102"
+        "Musikk",
+        "Korps"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2751,8 +2751,8 @@
     },
     "musikk og dans": {
       "activities": [
-        "ACT-098",
-        "ACT-093"
+        "Musikk",
+        "Dans"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2762,7 +2762,7 @@
     },
     "møte": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2772,8 +2772,8 @@
     },
     "møte/presentasjon": {
       "activities": [
-        "EVT-002",
-        "EVT-003"
+        "Møte",
+        "Foredrag og presentasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2783,7 +2783,7 @@
     },
     "møteaktivitet": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2793,7 +2793,7 @@
     },
     "møtelokale": {
       "activities": [
-        "VEN-021"
+        "Møterom"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2803,7 +2803,7 @@
     },
     "møteplass": {
       "activities": [
-        "EVT-026"
+        "Sosial møteplass"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2813,7 +2813,7 @@
     },
     "møter": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2823,8 +2823,8 @@
     },
     "møter og kurs": {
       "activities": [
-        "EVT-002",
-        "ACT-109"
+        "Møte",
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2834,8 +2834,8 @@
     },
     "møter, kurs, mindre selskaper": {
       "activities": [
-        "EVT-002",
-        "ACT-109"
+        "Møte",
+        "Undervisning og kurs"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2845,7 +2845,7 @@
     },
     "møterom": {
       "activities": [
-        "VEN-021"
+        "Møterom"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2856,8 +2856,8 @@
     },
     "møterom i drammen kommune": {
       "activities": [
-        "VEN-021",
-        "GRP-003"
+        "Møterom",
+        "Kommunal intern bruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2867,7 +2867,7 @@
     },
     "møtevirksomhet": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2877,8 +2877,8 @@
     },
     "naturskole": {
       "activities": [
-        "ACT-001",
-        "ACT-109"
+        "Friluftsliv",
+        "Undervisning og kurs"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2888,7 +2888,7 @@
     },
     "nrg": {
       "activities": [
-        "EXC-001"
+        "Avklares"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -2900,7 +2900,7 @@
     },
     "ntnu": {
       "activities": [
-        "GRP-010"
+        "Høyere utdanning"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2910,7 +2910,7 @@
     },
     "næring og kommersiell virksomhet": {
       "activities": [
-        "ORG-020"
+        "Næringsliv/kommersiell"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2920,7 +2920,7 @@
     },
     "off.arrangement": {
       "activities": [
-        "EVT-006"
+        "Offentlig arrangement"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2930,7 +2930,7 @@
     },
     "offentlig": {
       "activities": [
-        "ORG-021"
+        "Offentlig virksomhet"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2940,7 +2940,7 @@
     },
     "offentlig arrangement": {
       "activities": [
-        "EVT-006"
+        "Offentlig arrangement"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2950,7 +2950,7 @@
     },
     "offentlig bading": {
       "activities": [
-        "ACT-074"
+        "Bading"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2960,7 +2960,7 @@
     },
     "opplæring": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2970,7 +2970,7 @@
     },
     "oppvekst/skule": {
       "activities": [
-        "GRP-011"
+        "Skole (grunnskole)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -2980,7 +2980,7 @@
     },
     "organisasjon": {
       "activities": [
-        "ORG-003"
+        "Frivillig organisasjon (generelt)"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -2990,7 +2990,7 @@
     },
     "organisering av aktivitetar": {
       "activities": [
-        "EXC-004"
+        "Uspesifisert"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -3002,7 +3002,7 @@
     },
     "orientering": {
       "activities": [
-        "ACT-047"
+        "Orientering"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3012,7 +3012,7 @@
     },
     "overnatting": {
       "activities": [
-        "EVT-019"
+        "Overnatting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3022,7 +3022,7 @@
     },
     "padeltennis": {
       "activities": [
-        "ACT-060"
+        "Padel"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3032,7 +3032,7 @@
     },
     "paintball": {
       "activities": [
-        "ACT-048"
+        "Paintball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3042,8 +3042,8 @@
     },
     "pensjonistbading": {
       "activities": [
-        "ACT-074",
-        "GRP-005"
+        "Bading",
+        "Seniorer"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3053,8 +3053,8 @@
     },
     "pensjonistforening": {
       "activities": [
-        "ORG-015",
-        "GRP-005"
+        "Pensjonistforening",
+        "Seniorer"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3064,7 +3064,7 @@
     },
     "personlig markering": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3074,8 +3074,8 @@
     },
     "politikk/valgdag": {
       "activities": [
-        "EVT-018",
-        "ORG-016"
+        "Valg",
+        "Politisk organisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3085,7 +3085,7 @@
     },
     "politisk organisasjon": {
       "activities": [
-        "ORG-016"
+        "Politisk organisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3095,7 +3095,7 @@
     },
     "presentasjoner": {
       "activities": [
-        "EVT-003"
+        "Foredrag og presentasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3105,7 +3105,7 @@
     },
     "privat": {
       "activities": [
-        "ORG-022"
+        "Privatperson"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3115,7 +3115,7 @@
     },
     "privat arrangement": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3125,7 +3125,7 @@
     },
     "privat utleige": {
       "activities": [
-        "ORG-022"
+        "Privatperson"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3135,7 +3135,7 @@
     },
     "privat/ lukket arrangement": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3145,7 +3145,7 @@
     },
     "profilering": {
       "activities": [
-        "EVT-016"
+        "Promotering"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3155,7 +3155,7 @@
     },
     "promotering": {
       "activities": [
-        "EVT-016"
+        "Promotering"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3165,7 +3165,7 @@
     },
     "pu/hu": {
       "activities": [
-        "GRP-004"
+        "Personer med funksjonsnedsettelse"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -3175,7 +3175,7 @@
     },
     "pub": {
       "activities": [
-        "EVT-028"
+        "Servering (kafé/pub)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3185,7 +3185,7 @@
     },
     "renhold og vedlikehold": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3197,7 +3197,7 @@
     },
     "revy og teater": {
       "activities": [
-        "ACT-106"
+        "Teater"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3207,7 +3207,7 @@
     },
     "riding": {
       "activities": [
-        "ACT-033"
+        "Hestesport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3217,7 +3217,7 @@
     },
     "roing": {
       "activities": [
-        "ACT-080"
+        "Roing"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3227,7 +3227,7 @@
     },
     "rollerderby": {
       "activities": [
-        "ACT-064"
+        "Rollerderby"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3237,7 +3237,7 @@
     },
     "rugby": {
       "activities": [
-        "ACT-023"
+        "Rugby"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3247,7 +3247,7 @@
     },
     "rytmisk sportsgymnastikk (rg)": {
       "activities": [
-        "ACT-031"
+        "Rytmisk gymnastikk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3257,7 +3257,7 @@
     },
     "salg": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3267,7 +3267,7 @@
     },
     "salgsplass": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3277,7 +3277,7 @@
     },
     "saltimer": {
       "activities": [
-        "VEN-007"
+        "Forsamlingslokale"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -3287,7 +3287,7 @@
     },
     "sambruk": {
       "activities": [
-        "GRP-003"
+        "Kommunal intern bruk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3297,7 +3297,7 @@
     },
     "sameie": {
       "activities": [
-        "ORG-025"
+        "Sameie/borettslag"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3307,7 +3307,7 @@
     },
     "samlinger": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -3317,7 +3317,7 @@
     },
     "samlingsplass": {
       "activities": [
-        "VEN-007"
+        "Forsamlingslokale"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -3327,7 +3327,7 @@
     },
     "samtale": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -3337,7 +3337,7 @@
     },
     "samtale med innbygger": {
       "activities": [
-        "SRV-006"
+        "Veiledning og rådgivning"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3347,7 +3347,7 @@
     },
     "samtaler": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -3357,7 +3357,7 @@
     },
     "sandhåndball": {
       "activities": [
-        "ACT-110"
+        "Sandhåndball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3367,7 +3367,7 @@
     },
     "sandvolleyball": {
       "activities": [
-        "ACT-111"
+        "Sandvolleyball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3377,7 +3377,7 @@
     },
     "seiling": {
       "activities": [
-        "ACT-081"
+        "Seiling"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3387,7 +3387,7 @@
     },
     "seilsport": {
       "activities": [
-        "ACT-081"
+        "Seiling"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3397,7 +3397,7 @@
     },
     "selskap": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3407,7 +3407,7 @@
     },
     "selskapsarrangement": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3417,7 +3417,7 @@
     },
     "seremonier": {
       "activities": [
-        "EVT-022"
+        "Seremoni"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3427,7 +3427,7 @@
     },
     "sirkus": {
       "activities": [
-        "ACT-105"
+        "Sirkus"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3437,7 +3437,7 @@
     },
     "sjakk": {
       "activities": [
-        "ACT-009"
+        "Sjakk"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3447,7 +3447,7 @@
     },
     "sjøsport": {
       "activities": [
-        "ACT-073"
+        "Vannsport"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3457,7 +3457,7 @@
     },
     "skating": {
       "activities": [
-        "ACT-063"
+        "Skateboard og rullesport"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3467,7 +3467,7 @@
     },
     "ski": {
       "activities": [
-        "ACT-088"
+        "Ski"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3477,7 +3477,7 @@
     },
     "ski (langrenn/alpin)": {
       "activities": [
-        "ACT-088"
+        "Ski"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3487,7 +3487,7 @@
     },
     "skisport": {
       "activities": [
-        "ACT-088"
+        "Ski"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3497,7 +3497,7 @@
     },
     "skole": {
       "activities": [
-        "GRP-011"
+        "Skole (grunnskole)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3507,8 +3507,8 @@
     },
     "skolekjøkken": {
       "activities": [
-        "VEN-014",
-        "GRP-011"
+        "Kjøkken",
+        "Skole (grunnskole)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3518,7 +3518,7 @@
     },
     "skuespill": {
       "activities": [
-        "ACT-106"
+        "Teater"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3528,7 +3528,7 @@
     },
     "skular": {
       "activities": [
-        "GRP-011"
+        "Skole (grunnskole)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3538,7 +3538,7 @@
     },
     "skule": {
       "activities": [
-        "GRP-011"
+        "Skole (grunnskole)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3548,7 +3548,7 @@
     },
     "skule - oppvekst": {
       "activities": [
-        "GRP-011"
+        "Skole (grunnskole)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3558,7 +3558,7 @@
     },
     "skyting": {
       "activities": [
-        "ACT-055"
+        "Skyting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3568,7 +3568,7 @@
     },
     "skøyter": {
       "activities": [
-        "ACT-089"
+        "Skøyter"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3578,7 +3578,7 @@
     },
     "slettet/utgått": {
       "activities": [
-        "EXC-003"
+        "Testdata/systemtekst"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3590,7 +3590,7 @@
     },
     "små møter": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3600,8 +3600,8 @@
     },
     "sommerleir": {
       "activities": [
-        "EVT-019",
-        "GRP-001"
+        "Overnatting",
+        "Barn"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3611,7 +3611,7 @@
     },
     "sommerstengt - sommertrening": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3623,7 +3623,7 @@
     },
     "sosial møteplass": {
       "activities": [
-        "EVT-026"
+        "Sosial møteplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3633,7 +3633,7 @@
     },
     "sosiale aktivteter": {
       "activities": [
-        "EVT-026"
+        "Sosial møteplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3643,7 +3643,7 @@
     },
     "sosiale møteplassar": {
       "activities": [
-        "EVT-026"
+        "Sosial møteplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3653,7 +3653,7 @@
     },
     "sosiale møteplasser": {
       "activities": [
-        "EVT-026"
+        "Sosial møteplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3663,7 +3663,7 @@
     },
     "sosiale tilstelninger": {
       "activities": [
-        "EVT-020"
+        "Privat arrangement/selskap"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3673,7 +3673,7 @@
     },
     "spedbarnsgruppe": {
       "activities": [
-        "GRP-006"
+        "Spedbarn og foreldre"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3683,7 +3683,7 @@
     },
     "speidar": {
       "activities": [
-        "ORG-017"
+        "Speiderorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3693,7 +3693,7 @@
     },
     "speidarar": {
       "activities": [
-        "ORG-017"
+        "Speiderorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3703,7 +3703,7 @@
     },
     "speider": {
       "activities": [
-        "ORG-017"
+        "Speiderorganisasjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3713,8 +3713,8 @@
     },
     "speider og friluftsliv": {
       "activities": [
-        "ORG-017",
-        "ACT-001"
+        "Speiderorganisasjon",
+        "Friluftsliv"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3724,8 +3724,8 @@
     },
     "speiding": {
       "activities": [
-        "ORG-017",
-        "ACT-001"
+        "Speiderorganisasjon",
+        "Friluftsliv"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3735,7 +3735,7 @@
     },
     "spill": {
       "activities": [
-        "ACT-008"
+        "Spill"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -3745,7 +3745,7 @@
     },
     "spinning": {
       "activities": [
-        "ACT-066"
+        "Spinning"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3755,7 +3755,7 @@
     },
     "sport og idrett": {
       "activities": [
-        "ACT-010"
+        "Idrett"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3765,7 +3765,7 @@
     },
     "sportsdrill": {
       "activities": [
-        "ACT-030"
+        "Drill"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3775,7 +3775,7 @@
     },
     "språkcafé": {
       "activities": [
-        "ACT-108"
+        "Språkkafé"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3785,7 +3785,7 @@
     },
     "squash": {
       "activities": [
-        "ACT-061"
+        "Squash"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3795,7 +3795,7 @@
     },
     "stand": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3805,7 +3805,7 @@
     },
     "stand (2mx3m)": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3815,7 +3815,7 @@
     },
     "standplass": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3825,7 +3825,7 @@
     },
     "stands": {
       "activities": [
-        "EVT-014"
+        "Marked og stand"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3835,7 +3835,7 @@
     },
     "stengt": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3847,7 +3847,7 @@
     },
     "stengt grunna vedlikehald eller ferie": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3859,7 +3859,7 @@
     },
     "stengt pga arrangement": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3871,7 +3871,7 @@
     },
     "stengt pga ferie eller arrangement": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3883,7 +3883,7 @@
     },
     "stengt pga vedlikehold/reperasjon av utstyr": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3895,7 +3895,7 @@
     },
     "studiegrupper": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3905,7 +3905,7 @@
     },
     "stup": {
       "activities": [
-        "ACT-082"
+        "Stuping"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3915,7 +3915,7 @@
     },
     "stuping": {
       "activities": [
-        "ACT-082"
+        "Stuping"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3925,7 +3925,7 @@
     },
     "styremøter": {
       "activities": [
-        "EVT-002"
+        "Møte"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3935,7 +3935,7 @@
     },
     "styrkeløft": {
       "activities": [
-        "ACT-067"
+        "Styrkeløft"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3945,7 +3945,7 @@
     },
     "styrkeløfting": {
       "activities": [
-        "ACT-067"
+        "Styrkeløft"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3955,7 +3955,7 @@
     },
     "styrketrening": {
       "activities": [
-        "ACT-068"
+        "Styrketrening"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3965,7 +3965,7 @@
     },
     "svømmehall": {
       "activities": [
-        "VEN-022"
+        "Svømmehall"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3975,8 +3975,8 @@
     },
     "svømmekurs": {
       "activities": [
-        "ACT-083",
-        "ACT-109"
+        "Svømming",
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3986,7 +3986,7 @@
     },
     "svømming": {
       "activities": [
-        "ACT-083"
+        "Svømming"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -3996,8 +3996,8 @@
     },
     "sykehjem": {
       "activities": [
-        "VEN-010",
-        "GRP-005"
+        "Helse- og omsorgsbygg",
+        "Seniorer"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4007,7 +4007,7 @@
     },
     "sykling": {
       "activities": [
-        "ACT-072"
+        "Sykling"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4017,7 +4017,7 @@
     },
     "symjehall": {
       "activities": [
-        "VEN-022"
+        "Svømmehall"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4027,7 +4027,7 @@
     },
     "synkronsvømming": {
       "activities": [
-        "ACT-084"
+        "Synkronsvømming"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4037,7 +4037,7 @@
     },
     "søndagskafé": {
       "activities": [
-        "EVT-028"
+        "Servering (kafé/pub)"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4047,7 +4047,7 @@
     },
     "taekwondo": {
       "activities": [
-        "ACT-043"
+        "Taekwondo"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4057,8 +4057,8 @@
     },
     "team-building": {
       "activities": [
-        "EVT-001",
-        "ORG-020"
+        "Arrangement (generelt)",
+        "Næringsliv/kommersiell"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -4068,7 +4068,7 @@
     },
     "teater": {
       "activities": [
-        "ACT-106"
+        "Teater"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4078,8 +4078,8 @@
     },
     "teater og scenekunst": {
       "activities": [
-        "ACT-106",
-        "ACT-104"
+        "Teater",
+        "Scenekunst"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4089,8 +4089,8 @@
     },
     "teaterforestilling": {
       "activities": [
-        "EVT-010",
-        "ACT-106"
+        "Forestilling",
+        "Teater"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4100,7 +4100,7 @@
     },
     "teltplass": {
       "activities": [
-        "VEN-025"
+        "Teltplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4110,7 +4110,7 @@
     },
     "tennis": {
       "activities": [
-        "ACT-062"
+        "Tennis"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4120,7 +4120,7 @@
     },
     "terapi": {
       "activities": [
-        "SRV-002"
+        "Helse og terapi"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -4130,7 +4130,7 @@
     },
     "tiden er ledig. sykkelen reserveres fra forrige ledige torsdag.": {
       "activities": [
-        "EXC-003"
+        "Testdata/systemtekst"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4142,7 +4142,7 @@
     },
     "tivoli": {
       "activities": [
-        "EVT-017"
+        "Tivoli"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4152,7 +4152,7 @@
     },
     "torg": {
       "activities": [
-        "VEN-006"
+        "Byrom/uterom"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4162,7 +4162,7 @@
     },
     "torgplasser": {
       "activities": [
-        "VEN-006"
+        "Byrom/uterom"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4172,7 +4172,7 @@
     },
     "transporthjelp": {
       "activities": [
-        "SRV-004"
+        "Transport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4182,7 +4182,7 @@
     },
     "treklang": {
       "activities": [
-        "EXC-001"
+        "Avklares"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -4194,7 +4194,7 @@
     },
     "trening": {
       "activities": [
-        "ACT-069"
+        "Trim og mosjon"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -4204,8 +4204,8 @@
     },
     "trening senior": {
       "activities": [
-        "ACT-069",
-        "GRP-005"
+        "Trim og mosjon",
+        "Seniorer"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4215,7 +4215,7 @@
     },
     "trim": {
       "activities": [
-        "ACT-069"
+        "Trim og mosjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4225,7 +4225,7 @@
     },
     "trimgrupper": {
       "activities": [
-        "ACT-069"
+        "Trim og mosjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4235,7 +4235,7 @@
     },
     "tur": {
       "activities": [
-        "ACT-004"
+        "Tur og vandring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4245,7 +4245,7 @@
     },
     "turar": {
       "activities": [
-        "ACT-004"
+        "Tur og vandring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4255,7 +4255,7 @@
     },
     "turgruppe": {
       "activities": [
-        "ACT-004"
+        "Tur og vandring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4265,7 +4265,7 @@
     },
     "turn": {
       "activities": [
-        "ACT-032"
+        "Turn"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4275,7 +4275,7 @@
     },
     "undervannsrugby": {
       "activities": [
-        "ACT-076"
+        "Undervannsrugby"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4285,7 +4285,7 @@
     },
     "undervisning": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4295,7 +4295,7 @@
     },
     "undervisning/opplæring": {
       "activities": [
-        "ACT-109"
+        "Undervisning og kurs"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4305,8 +4305,8 @@
     },
     "ungdomsklubb": {
       "activities": [
-        "GRP-007",
-        "EVT-026"
+        "Ungdom",
+        "Sosial møteplass"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4316,7 +4316,7 @@
     },
     "uorganisert": {
       "activities": [
-        "ORG-001"
+        "Egenorganisert"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4326,7 +4326,7 @@
     },
     "utenlandsk forening": {
       "activities": [
-        "ORG-005"
+        "Flerkulturell forening"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -4336,7 +4336,7 @@
     },
     "uteområde": {
       "activities": [
-        "VEN-023"
+        "Uteområde"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4346,7 +4346,7 @@
     },
     "utholdenhetstrening": {
       "activities": [
-        "ACT-069"
+        "Trim og mosjon"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4356,7 +4356,7 @@
     },
     "utlånsordningen er ikke åpen": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4368,7 +4368,7 @@
     },
     "utstilling": {
       "activities": [
-        "EVT-013"
+        "Utstilling"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4378,7 +4378,7 @@
     },
     "utstillinger": {
       "activities": [
-        "EVT-013"
+        "Utstilling"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4388,7 +4388,7 @@
     },
     "utstyr": {
       "activities": [
-        "SRV-005"
+        "Utlån av utstyr"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4398,7 +4398,7 @@
     },
     "valg": {
       "activities": [
-        "EVT-018"
+        "Valg"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4408,7 +4408,7 @@
     },
     "vannpolo": {
       "activities": [
-        "ACT-085"
+        "Vannpolo"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4418,7 +4418,7 @@
     },
     "vannsport": {
       "activities": [
-        "ACT-073"
+        "Vannsport"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4428,8 +4428,8 @@
     },
     "vanntrening": {
       "activities": [
-        "ACT-069",
-        "ACT-074"
+        "Trim og mosjon",
+        "Bading"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4439,7 +4439,7 @@
     },
     "varmtvannsbasseng": {
       "activities": [
-        "VEN-022"
+        "Svømmehall"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4449,7 +4449,7 @@
     },
     "vedlikehold": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4461,7 +4461,7 @@
     },
     "veiledningstime byggesak": {
       "activities": [
-        "SRV-006"
+        "Veiledning og rådgivning"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4471,7 +4471,7 @@
     },
     "vektløfting": {
       "activities": [
-        "ACT-070"
+        "Vektløfting"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4481,7 +4481,7 @@
     },
     "velforeninger": {
       "activities": [
-        "ORG-008"
+        "Grendelag/velforening"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4491,7 +4491,7 @@
     },
     "vennelag/gruppe": {
       "activities": [
-        "ORG-023"
+        "Uformell gruppe/vennelag"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4501,7 +4501,7 @@
     },
     "verksted": {
       "activities": [
-        "ACT-096"
+        "Kunst og håndverk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -4511,7 +4511,7 @@
     },
     "verkstedlokale": {
       "activities": [
-        "VEN-019"
+        "Øvingslokale/verksted"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4521,7 +4521,7 @@
     },
     "vgs": {
       "activities": [
-        "GRP-012"
+        "Videregående skole"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4531,7 +4531,7 @@
     },
     "vid": {
       "activities": [
-        "GRP-010"
+        "Høyere utdanning"
       ],
       "confidence": "L",
       "status": "Proposed",
@@ -4541,7 +4541,7 @@
     },
     "video": {
       "activities": [
-        "ACT-094"
+        "Foto og film"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4551,7 +4551,7 @@
     },
     "vielser": {
       "activities": [
-        "EVT-023"
+        "Bryllup og vielse"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4561,7 +4561,7 @@
     },
     "vigsel": {
       "activities": [
-        "EVT-023"
+        "Bryllup og vielse"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4571,7 +4571,7 @@
     },
     "voksenbading": {
       "activities": [
-        "ACT-074"
+        "Bading"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4584,7 +4584,7 @@
     },
     "voksenopplæringssenteret": {
       "activities": [
-        "ORG-024"
+        "Voksenopplæring"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4594,7 +4594,7 @@
     },
     "volleyball": {
       "activities": [
-        "ACT-024"
+        "Volleyball"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4604,7 +4604,7 @@
     },
     "walk and talk - test": {
       "activities": [
-        "EXC-003"
+        "Testdata/systemtekst"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4616,8 +4616,8 @@
     },
     "workshop": {
       "activities": [
-        "ACT-109",
-        "ACT-096"
+        "Undervisning og kurs",
+        "Kunst og håndverk"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -4627,7 +4627,7 @@
     },
     "x annet": {
       "activities": [
-        "EXC-004"
+        "Uspesifisert"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4639,7 +4639,7 @@
     },
     "yoga": {
       "activities": [
-        "ACT-071"
+        "Yoga"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4649,8 +4649,8 @@
     },
     "åpen hall": {
       "activities": [
-        "EVT-027",
-        "VEN-012"
+        "Drop-in / åpent tilbud",
+        "Idrettshall/gymsal"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -4660,8 +4660,8 @@
     },
     "åpne møter": {
       "activities": [
-        "EVT-002",
-        "EVT-006"
+        "Møte",
+        "Offentlig arrangement"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4671,7 +4671,7 @@
     },
     "åpningstid": {
       "activities": [
-        "EXC-002"
+        "Stengt/utilgjengelig"
       ],
       "confidence": "M",
       "status": "Proposed",
@@ -4683,7 +4683,7 @@
     },
     "øvingslokaler og verksteder": {
       "activities": [
-        "VEN-019"
+        "Øvingslokale/verksted"
       ],
       "confidence": "H",
       "status": "Proposed",
@@ -4693,7 +4693,7 @@
     },
     "øvingsrom": {
       "activities": [
-        "VEN-019"
+        "Øvingslokale/verksted"
       ],
       "confidence": "H",
       "status": "Proposed",

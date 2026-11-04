@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Geokoding + bygningsberikelse: finner adresser via Matrikkelen (MatrikkelAPI)
-for alt last_inn.py har lastet inn - ingen av Aktiv kommune sine 12 instanser
+for alt last_inn.py og synk.py har lastet inn - ingen av Aktiv kommune sine 12 instanser
 leverer koordinater selv. I tillegg - for enhver bygning som fortsatt mangler
 bygningsnummer - hentes selve bygningsobjektet fra Matrikkelen.
 
@@ -12,7 +12,7 @@ prosentpoeng lavere automatisk treffrate (69,7 % mot 73,1 % i en nasjonal
 test av alle 12 kommunene) - et bevisst valg, ikke en forglemmelse. De
 adressene det gjelder havner i synk_avvik som før og rettes manuelt.
 
-Vi kjenner allerede kommunen hver bygning tilhører (satt av last_inn.py), så
+Vi kjenner allerede kommunen hver bygning tilhører (satt av last_inn.py/synk.py), så
 søket gjøres *innenfor riktig kommune* i stedet for fritekst nasjonalt. Se
 db/schema_kjerne_dokumentasjon.md, avsnittet om "gate", for hvorfor denne
 tabellen "må fylles av matrikkelsteget".
@@ -49,7 +49,8 @@ Bruker bare Pythons innebygde bibliotek. Leser brukernavn/passord fra
 miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se matrikkel/test_auth.py)
 - ALDRI skriv disse verdiene til skjerm, logg eller fil.
 
-Bruk (kjøres etter last_inn.py):
+Bruk (kjøres etter last_inn.py, og etter hver kjøring av synk.py, så nye bygg
+får posisjon):
 
     docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
         SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr,
