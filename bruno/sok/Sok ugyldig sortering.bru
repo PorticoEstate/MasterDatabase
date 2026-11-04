@@ -1,0 +1,30 @@
+meta {
+  name: Sok ugyldig sortering
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/sok?sorter=avstand
+  body: none
+  auth: none
+}
+
+params:query {
+  sorter: avstand
+}
+
+docs {
+  sorter=avstand uten lat, lon og radiusMeter er ugyldig og skal gi 400 med
+  en forklaring i "detail", ikke 500.
+}
+
+tests {
+  test("svarer 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("forklarer hva som er galt", function() {
+    expect(res.getBody().detail).to.include("lat, lon og radiusMeter");
+  });
+}

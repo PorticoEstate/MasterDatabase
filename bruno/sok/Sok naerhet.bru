@@ -1,0 +1,41 @@
+meta {
+  name: Sok naerhet
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/sok?lat=60.39&lon=5.32&radiusMeter=5000&sorter=avstand
+  body: none
+  auth: none
+}
+
+params:query {
+  lat: 60.39
+  lon: 5.32
+  radiusMeter: 5000
+  sorter: avstand
+}
+
+docs {
+  Nærhetssøk: treff innenfor radiusMeter (maks 50 000) fra punktet lat/lon,
+  sortert på avstand. Eksempelet er omtrent Bergen sentrum. lat, lon og
+  radiusMeter må oppgis sammen. Hvert treff har avstandMeter.
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("treffene har avstand og er sortert stigende", function() {
+    const r = res.getBody().ressurser.treff;
+    for (let i = 0; i < r.length; i++) {
+      expect(r[i].avstandMeter).to.be.a("number");
+      expect(r[i].avstandMeter).to.be.at.most(5000);
+      if (i > 0) {
+        expect(r[i].avstandMeter).to.be.at.least(r[i - 1].avstandMeter);
+      }
+    }
+  });
+}
