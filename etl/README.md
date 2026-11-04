@@ -12,12 +12,12 @@ Fra tomt skjema til populert database, i tre steg:
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
 │ STEG 1 — SKJEMA                                                       │
-│ db/schema_kjerne.sql                                                  │
+│ backend/src/main/resources/db/migration/V*.sql (Flyway)               │
 │                                                                        │
 │ Oppretter alle tabeller i en tom database: kommune, bygning, adresse, │
 │ ressurs, aktivitet/fasilitet/lokaletype,                              │
-│ gate/matrikkelinfo, synk_avvik/kildeuttrekk. Idempotent — trygt å     │
-│ kjøre på nytt.                                                        │
+│ gate/matrikkelinfo, synk_avvik/kildeuttrekk. Kjøres av backend-       │
+│ containeren ved oppstart; ingenting å kjøre for hånd.                 │
 └───────────────────────────────────────────────────┬───────────────────┘
                                                       ▼
 ┌───────────────────────────────────────────────────────────────────────┐
@@ -73,7 +73,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 
 | Fil | Rolle |
 |---|---|
-| `db/schema_kjerne.sql` | Skjemaet (steg 1) |
+| `backend/src/main/resources/db/migration/V*.sql` | Skjemaet (steg 1), kjøres av Flyway i backend |
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
 | `etl/last_inn.py` | Steg 2, bygging: oppretter kodeverkene og laster alt annet. Kjøres én gang |
 | `etl/synk.py` | Steg 2, jevnlig synkronisering: som `last_inn.py`, men skriver aldri kodeverkene |
@@ -140,12 +140,10 @@ ferskvare, ikke noe som skal committes.
 
 ## Databasen må finnes og ha skjemaet fra før
 
-```bash
-docker exec portico_masterdb psql -U postgres -c "CREATE DATABASE masterdb;"
-docker exec -i portico_masterdb psql -U postgres -d masterdb < db/schema_kjerne.sql
-```
-
-Skjemaet er idempotent - du kan kjøre den kommandoen på nytt uten å ødelegge noe.
+Databasen `masterdb` opprettes av db-containeren, og backend-containeren legger
+på skjemaet med Flyway (`backend/src/main/resources/db/migration/`) hver gang
+den starter. Start stacken og vent til backend er `healthy` (`docker compose ps`)
+før du kjører skriptene.
 
 ## Bygging og synk
 

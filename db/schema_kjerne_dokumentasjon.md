@@ -1,6 +1,6 @@
 # Kjernemodell for masterdatabasen
 
-Dokumentasjon for `db/schema_kjerne.sql`. 19 egne tabeller, 4 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data i dag, unntatt `ressurslenke` (se der).
+Dokumentasjon for skjemaet i Flyway-migrasjonene (`backend/src/main/resources/db/migration/V*.sql`). 19 egne tabeller, 4 visninger, pluss PostGIS' egen referansetabell `spatial_ref_sys`. Alle våre egne tabeller får data i dag, unntatt `ressurslenke` (se der).
 
 **Krever PostGIS.** Docker-imaget er `postgis/postgis:18-3.6` (ikke rent `postgres:18`), og skjemaet starter med `CREATE EXTENSION IF NOT EXISTS postgis;`.
 
@@ -290,15 +290,15 @@ Dette er den faktiske pipelinen, ikke en plan — alle filnavn og kommandoer und
   Matrikkel-API        ──SOAP───▶  etl/matrikkel_adresse.py ──skriver──▶ etl/ut/matrikkel.sql ──psql──▶  masterdb
   (geokoding+bygning)              (eneste geokodingssteg)              (forkastbar output)
 
-  db/schema_kjerne.sql ────────────────────────────────────────────────psql────────────▶  masterdb
-  (strukturen, kjøres først, én gang eller ved endring)
+  backend Flyway (V*.sql) ─────────────────────────────────────────────migrerer───────────▶  masterdb
+  (strukturen, kjøres av backend-containeren ved hver oppstart)
 ```
 
 Ingen av disse stegene trigger det neste automatisk — alt er kommandoer i rekkefølge, bevisst, gitt hvor lite data det er tale om (noen få MB, et par hundre adresser). Matrikkelsteget kjøres etter bygging og etter hver synk, så nye bygg får posisjon. Kartverkets åpne Adresse-API ble tidligere brukt som et raskere forsteg (`etl/geokod.py`), men er fjernet til fordel for ett system med én geokodingskilde å forstå og vedlikeholde - se `etl/README.md` for den målte kostnaden ved det valget.
 
 | Fil | Kjøres når | Hva den gjør | Hardkodet? |
 |---|---|---|---|
-| `db/schema_kjerne.sql` | Én gang mot en ny database, eller på nytt etter en modellendring | Lager alle tabellene, indeksene og visningene. Kodeverkene fylles av `last_inn.py` | Ja — dette er selve modellen |
+| `backend/src/main/resources/db/migration/V*.sql` | Automatisk av Flyway når backend starter | Lager alle tabellene, indeksene og visningene. Kodeverkene fylles av `last_inn.py` | Ja — dette er selve modellen |
 | `etl/last_inn.py` | Én gang, når databasen bygges | Henter `searchdataall` fra én eller alle 12 kommuner (normaliserte instanser, eller demoens utdata med `--fra-fil`), renser tekst (HTML er escapet to ganger i kilden), oppretter kodeverkskonsepter som mangler (et eksisterende røres aldri), laster bygg, ressurser og koblinger på id, og loggfører avvik fra masteren. Skriver SQL til standard-ut | Ja — avvisningslogikken er hardkodet Python |
 | `etl/synk.py` | Jevnlig (cron), etter bygging | Som `last_inn.py`, men skriver aldri kodeverkene: avvik fra masterens vokabular og hierarki loggføres bare. Bygg, ressurser og koblinger lastes, og kilden vinner på dem | Ja — samme lasting som `last_inn.py`, med egen kopi av koden |
 | `etl/helpers.py` | Importeres av begge skriptene | Delte hjelpefunksjoner: `rens`, `q`, `q_json`, `logg`, `i_blokk`, `som_heltall`, `hent_json`, kommunetabellen | Ja |
@@ -310,8 +310,8 @@ Ingen av disse stegene trigger det neste automatisk — alt er kommandoer i rekk
 Kommandorekkefølgen i praksis:
 
 ```bash
-# 1. Struktur (kun ved ny database eller modellendring)
-docker exec -i portico_masterdb psql -U postgres -d masterdb < db/schema_kjerne.sql
+# 1. Struktur: ingenting å kjøre. Backend-containeren legger på skjemaet med Flyway
+#    ved oppstart; vent til den er healthy (docker compose ps).
 
 # 2a. Bygging, én gang (med demoen foran så lenge instansene ikke er normalisert)
 python3 etl/demo_normalisering/normaliser.py alle
