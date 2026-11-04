@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """
-Laster data fra Aktiv kommune inn i masterdatabasen.
+Bygger masterdatabasen fra Aktiv kommune. Kjøres én gang, når databasen
+bygges; deretter brukes synk.py.
+
+Forutsetter normaliserte instanser (se "Kildekontrakt" i etl/README.md). Mot
+en tom database opprettes kodeverkene (lokaletype, aktivitet, fasilitet) fra
+instansenes samlinger, med id, navn og forelder, sammen med bygg, ressurser og
+koblinger. Et konsept som allerede finnes røres aldri: masteren eier
+vokabularet, og forskjeller (samme id med annet navn eller annen forelder)
+loggføres i synk_avvik.
 
 Bruker bare Pythons innebygde bibliotek (urllib, json, re) - ingen "pip install"
 er nødvendig. Skriptet gjør ingenting mot databasen selv; det skriver SQL-tekst
@@ -12,6 +20,10 @@ Bruk:
     docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/bergen.sql
 
     python3 etl/last_inn.py alle > etl/ut/alle.sql
+    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
+
+    # Les <mappe>/<kommune>.json i stedet for å hente fra nettet:
+    python3 etl/last_inn.py alle --fra-fil etl/ut/normalisert > etl/ut/alle.sql
     docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 
 Se etl/README.md for full forklaring.
@@ -29,273 +41,126 @@ Skjemaet (schema_kjerne.sql) tillater at en instans betjener flere kommuner
 via kommune_fagsystem_instans; den dagen det faktisk skjer, må kommune_id i
 stedet utledes fra en geokodet adresse. Se db/schema_kjerne_dokumentasjon.md.
 """
-import html
+import argparse
 import json
 import re
 import sys
-import unicodedata
-import urllib.error
-import urllib.request
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
 
-def last_mapping(mappe: str) -> dict:
-    with open(Path(__file__).parent / mappe / "mapping.json", encoding="utf-8") as f:
-        return json.load(f)["values"]
-
-
-KOMMUNER = {
-    "afjord": ("5058", "Åfjord", "Trøndelag"),
-    "alesund": ("1508", "Ålesund", "Møre og Romsdal"),
-    "alver": ("4631", "Alver", "Vestland"),
-    "averoy": ("1554", "Averøy", "Møre og Romsdal"),
-    "baerum": ("3201", "Bærum", "Akershus"),
-    "bergen": ("4601", "Bergen", "Vestland"),
-    "eigersund": ("1101", "Eigersund", "Rogaland"),
-    "gamvik": ("5626", "Gamvik", "Finnmark"),
-    "inderoy": ("5053", "Inderøy", "Trøndelag"),
-    "kristiansand": ("4204", "Kristiansand", "Agder"),
-    "kvam": ("4622", "Kvam", "Vestland"),
-    "larvik": ("3909", "Larvik", "Vestfold"),
-    "narvik": ("1806", "Narvik", "Nordland"),
-    "nordreisa": ("5544", "Nordreisa", "Troms"),
-    "oksnes": ("1868", "Øksnes", "Nordland"),
-    "oygarden": ("4626", "Øygarden", "Vestland"),
-    "sandnes": ("1108", "Sandnes", "Rogaland"),
-    "sogndal": ("4640", "Sogndal", "Vestland"),
-    "sola": ("1124", "Sola", "Rogaland"),
-    "stavanger": ("1103", "Stavanger", "Rogaland"),
-    "sunnfjord": ("4647", "Sunnfjord", "Vestland"),
-    "time": ("1121", "Time", "Rogaland"),
-}
-#Kommuner som ligger i aktiviteetsanalysen men som er helt tomme og mangler endepunkt:
-# "bardu": ("5520", "Bardu", "Troms"),
-# "drammen": ("3301", "Drammen", "Buskerud"),
-# "suldal": ("1134", "Suldal", "Rogaland"),
-
-# Normalisert kildenavn -> kode i vårt eget kodeverk (lokaletype/fasilitet,
-# seedet i schema_kjerne.sql; aktivitet, se under). Navn som ikke finnes her, lastes inn
-# i kildekode uendret, men får ingen kartlegging - de dukker opp i
-# v_ukartlagte_kildekoder og må kobles manuelt.
-LOKALETYPE = last_mapping("lokaletype_mapping")
-FASILITET = last_mapping("fasilitet_mapping")
-
-# Aktivitet har et eget, rikere format (se activity_mapping/
-# AktivKommune_activity_normalisation.md): mapping.json har under "values"
-# ett oppslag per normalisert kildenavn (norm_aktivitet), med konsept-ID-ene
-# i "activities", og activities.json er vokabularet de peker på, gruppert per
-# fasett. Øvrige felt (confidence, status, attributes, reason, sourceNames)
-# brukes ikke foreløpig. Alle fasetter unntatt "exclude" lastes inn i tabellen
-# aktivitet; EXC-konsepter gir status 'ikke_relevant'. Kartleggingen skrives
-# til tabellen aktivitet_mapping, ikke kildekode_mapping.
-with open(Path(__file__).parent / "activity_mapping" / "mapping.json", encoding="utf-8") as f:
-    _aktivitet_mapping = json.load(f)
-AKTIVITET = {navn: v["activities"] for navn, v in _aktivitet_mapping["values"].items()}
-with open(Path(__file__).parent / "activity_mapping" / "activities.json", encoding="utf-8") as f:
-    VOKABULAR = json.load(f)["facets"]
-EKSKLUDER = {kode: k["label"]["nb"] for kode, k in VOKABULAR["exclude"].items()}
-# F.eks. "AktivKommune_activity_mapping_v0.3" - følger versjonen i mapping.json.
-AKTIVITET_MERKNAD = Path(_aktivitet_mapping.get("source", "activity_mapping")).stem
-
-# Junk uansett kodetype: adresser, stedsnavn og driftsstatus som aldri kan
-# være en ekte lokaletype, aktivitet eller fasilitet.
-IKKE_RELEVANT_UNIVERSELT = {
-    "stengt", "fiktivt rom", "kantinebidrag",
-    "kvitsoygata 3", "judaberg innbyggertorg", "mostun natursenter",
-}
-
-# Junk KUN i én kodetype-kontekst - kan være en ekte verdi i en annen. F.eks.
-# er "Inkludering" ikke en stedstype, men er en fullt plausibel aktivitet
-# (inkluderingstiltak er en vanlig kommunal kategori). For aktivitet avgjør
-# mapping.json selv hva som er junk (EXC-konsepter); IKKE_RELEVANT_UNIVERSELT
-# brukes der bare som reserve for navn som mangler i mapping.json.
-IKKE_RELEVANT_PER_TYPE = {
-    "lokaletype": {"inkludering", "sosial aktivitet", "wc toalett"},
-    "fasilitet": set(),
-}
+from helpers import KOMMUNER, hent_json, i_blokk, logg, q, rens, som_heltall
 
 
-def er_ikke_relevant(kodetype: str, navn_normalisert: str) -> bool:
-    return (navn_normalisert in IKKE_RELEVANT_UNIVERSELT
-            or navn_normalisert in IKKE_RELEVANT_PER_TYPE.get(kodetype, set()))
+# Kodeverkene i kilden: (tabell i masteren, samling i searchdataall). Masteren
+# eier vokabularet og hierarkiet; instansene er normalisert mot det og bruker
+# samme id-er. Ved bygging opprettes konsepter masteren ikke har; et
+# eksisterende konsept røres aldri. Kildens samlinger (id, name, parent_id)
+# sammenlignes med masteren, og avvik logges. Koblingene (ressurs ->
+# lokaletype, aktivitet, fasilitet) eies av kommunen og lastes.
+KODEVERK = (
+    ("lokaletype", "resource_categories"),
+    ("aktivitet", "activities"),
+    ("fasilitet", "facilities"),
+)
 
 
-def er_persondatafelt(felt: str) -> bool:
-    """Felt som kan inneholde navngitte personer (tilsynsperson, kontaktinfo-
-    fritekst) eller en kopi av dem (json_representation), og som derfor ikke
-    tas med i en post som lagres som rapost på et avvik. "organizations"
-    (privatpersoner som søkere) brukes aldri i det hele tatt av dette
-    skriptet. Se "Personvern" i db/schema_kjerne_dokumentasjon.md."""
-    return felt.startswith("tilsyn") or felt in ("contact_info", "json_representation",
-                                                "organizations_ids")
+def kodeverk_sql(kn, tabell, samling, rader):
+    """SQL for ett kodeverk fra kildens samling: opprettelse av konsepter som
+    mangler i masteren, og en sammenligning mot masterens kodeverk som
+    loggfører avvik. Masteren eier navn og hierarki, så et eksisterende
+    konsept endres aldri. Avvik: en id som ikke ble opprettet, samme id med et
+    annet navn eller en annen forelder, og poster som ikke kan sammenlignes
+    (manglende eller ugyldig id, tomt navn, id som går igjen)."""
+    sql = ""
+    konsepter = {}   # id -> (navn, forelderens id eller None)
+    for rad in rader:
+        if rad.get("id") is None:
+            sql += logg(kn, samling, "ugyldig_verdi", None, "posten mangler id", "id", rapost=rad)
+            continue
+        nr, feil = som_heltall(rad["id"])
+        if feil:
+            sql += logg(kn, samling, "ugyldig_verdi", rad["id"], "id " + feil, "id", rapost=rad)
+            continue
+        n = rens(rad.get("name"))
+        if not n:
+            sql += logg(kn, samling, "ugyldig_verdi", rad["id"], "name er tomt", "name", rapost=rad)
+            continue
+        if nr in konsepter:
+            sql += logg(kn, samling, "ugyldig_verdi", rad["id"], "id finnes flere ganger", "id", rapost=rad)
+            continue
+        # En parent_id som ikke er et heltall sammenlignes som "ingen forelder", og blir et avvik mot masteren.
+        konsepter[nr] = (n, som_heltall(rad.get("parent_id"))[0])
+
+    if konsepter:
+        v = ("(VALUES " + ",".join(f"({nr},{q(n)},{'NULL' if f is None else f})" for nr, (n, f) in konsepter.items())
+             + ") AS v(id,navn,forelder)")
+        # Opprett konsepter som mangler. Første kilde som bruker en id eller et
+        # navn vinner; at en id ikke ble opprettet (navnet er tatt av en annen
+        # id) fanges av sjekkene under. Forelder settes bare for konsepter som
+        # ble opprettet nå, og bare når forelderen finnes i masteren.
+        sql += (
+            "DO $bygg$ DECLARE ny bigint[]; BEGIN\n"
+            f"WITH ins AS (INSERT INTO {tabell} (id,navn) SELECT id,navn FROM {v} "
+            f"ON CONFLICT DO NOTHING RETURNING id) SELECT array_agg(id) INTO ny FROM ins;\n"
+            f"UPDATE {tabell} t SET parent_id=v.forelder::bigint FROM {v} "
+            f"WHERE t.id=v.id AND t.id=ANY(ny) AND EXISTS (SELECT 1 FROM {tabell} p WHERE p.id=v.forelder::bigint);\n"
+            "END $bygg$;\n")
+        mangler = "id kunne ikke opprettes i masteren (navnet brukes av en annen id)"
+        # Egen DO-blokk, siden løkkevariabelen må deklareres. Avvik mot masteren
+        # er sjekker, ikke en grunn til å stoppe lastingen.
+        sql += (
+            "DO $chk$ DECLARE r record; BEGIN\n"
+            f"FOR r IN SELECT v.id FROM {v} WHERE NOT EXISTS (SELECT 1 FROM {tabell} t WHERE t.id=v.id) LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'manglende_forelder',r.id::text,"
+            f"{q(mangler)},'id','id',NULL);\n"
+            "END LOOP;\n"
+            f"FOR r IN SELECT v.id, v.navn AS nytt, t.navn AS master FROM {v} "
+            f"JOIN {tabell} t ON t.id=v.id WHERE t.navn<>v.navn LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'ugyldig_verdi',r.id::text,"
+            f"'masteren har navnet ' || r.master || '; kilden har ' || r.nytt,'name','id',NULL);\n"
+            "END LOOP;\n"
+            f"FOR r IN SELECT v.id, v.forelder::bigint AS nytt, t.parent_id AS master FROM {v} "
+            f"JOIN {tabell} t ON t.id=v.id WHERE v.forelder::bigint IS DISTINCT FROM t.parent_id LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'ugyldig_verdi',r.id::text,"
+            f"'masteren har forelder ' || COALESCE(r.master::text,'ingen') || '; kilden har ' || "
+            f"COALESCE(r.nytt::text,'ingen'),'parent_id','id',NULL);\n"
+            "END LOOP;\nEND $chk$;\n")
+    return sql
 
 
-def rens_post(d: dict) -> dict:
-    """Fjerner persondatafelt fra én enkelt post før den limes inn som rapost
-    på et avvik - se er_persondatafelt."""
-    return {k: v for k, v in d.items() if not er_persondatafelt(k)}
+def ukjente_id_er_sql(kn, tabell, samling, felt, ider):
+    """Loggfører de id-ene i koblingene som masteren ikke kjenner. Koblingen
+    lastes ikke (den peker på ingenting), og avviket logges én gang per id."""
+    if not ider:
+        return ""
+    v = "(VALUES " + ",".join(f"({nr})" for nr in sorted(ider)) + ") AS v(id)"
+    return ("DO $chk$ DECLARE r record; BEGIN\n"
+            f"FOR r IN SELECT v.id FROM {v} WHERE NOT EXISTS (SELECT 1 FROM {tabell} t WHERE t.id=v.id) LOOP\n"
+            f"CALL logg_avvik({q(kn)},{q(samling)},'manglende_forelder',r.id::text,"
+            f"'{felt} finnes ikke i masteren','{felt}','{felt}',NULL);\n"
+            "END LOOP;\nEND $chk$;\n")
 
 
-def hent_json(url: str) -> tuple[int, dict]:
-    """Henter JSON fra url med Pythons innebygde urllib. Krever at Capgeminis
-    CA-sertifikat er installert i systemets tillitslager (se etl/README.md).
-    Prøver to ganger: enkelte instanser (Stavanger) svarer av og til tregere
-    enn tidsavbruddet. Returnerer (http_status, innhold)."""
-    for forsok in (1, 2):
-        try:
-            with urllib.request.urlopen(url, timeout=60) as resp:
-                return resp.status, json.loads(resp.read().decode("utf-8"))
-        except (TimeoutError, urllib.error.URLError):
-            if forsok == 2:
-                raise
-
-
-def rens(s):
-    """Dobbel HTML-avkoding; kilden er escapet en gang for mye
-    (f.eks. 'Rom 19 &amp;#40;219&amp;#41;' skal bli 'Rom 19 (219)')."""
-    if s is None:
-        return None
-    s = html.unescape(html.unescape(str(s)))
-    s = re.sub(r"<[^>]+>", " ", s)
-    s = re.sub(r"\s+", " ", s).strip()
-    return s or None
-
-
-def norm(s):
-    """Normaliserer et navn for oppslag i kartleggingstabellene ovenfor:
-    små bokstaver, norske bokstaver til ascii, tegnsetting bort."""
-    s = rens(s) or ""
-    s = s.lower().replace("ø", "o").replace("æ", "a").replace("å", "a")
-    s = unicodedata.normalize("NFKD", s)
-    s = "".join(c for c in s if not unicodedata.combining(c))
-    return re.sub(r"[^a-z0-9]+", " ", s).strip()
-
-
-def norm_aktivitet(s):
-    """Normaliserer et aktivitetsnavn for oppslag i activity_mapping/
-    mapping.json. Mildere enn norm(): beholder æ/ø/å og tegnsetting, og må
-    være identisk med reglene i AktivKommune_activity_normalisation.md §4.4
-    (dobbel HTML-avkoding, trim, sammenslåtte mellomrom, små bokstaver)."""
-    return (rens(s) or "").lower()
-
-
-def q(v):
-    """Gjør en Python-verdi til en trygg SQL-literal. NULL for tomme verdier,
-    og escaper enkeltfnutter slik at f.eks. navn med apostrof ikke knekker SQL-en."""
-    if v is None or v == "":
-        return "NULL"
-    return "'" + str(v).replace("'", "''").replace("\x00", "") + "'"
-
-
-def q_json(obj) -> str:
-    """JSON-literal. jsonb avviser \\u0000, så den escapen fjernes."""
-    tekst = json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("\\u0000", "")
-    return q(tekst) + "::jsonb"
-
-
-def logg(kn, samling, avvikstype, ekstern_id, detalj, felt=None, nokkelfelt="id", rapost=None) -> str:
-    """Setning som loggfører et avvik mot kildeuttrekket som er registrert
-    først i samme transaksjon (se registrer_kildeuttrekk i schema_kjerne.sql).
-    rapost er posten som utløste avviket - lagres direkte på avviket (renset
-    for personopplysninger), ikke i et delt uttrekk som må graves ut igjen."""
-    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
-    return (f"CALL logg_avvik({q(kn)},{q(samling)},{q(avvikstype)},{q(ekstern_id)},"
-            f"{q(detalj)},{q(felt)},{q(nokkelfelt)},{rapost_sql});\n")
-
-
-def i_blokk(kn, samling, ekstern_id, sql, rapost=None) -> str:
-    """Pakker setningene for én post i en DO-blokk. Feiler noe i databasen
-    (f.eks. et CHECK-brudd vi ikke har forutsett), rulles bare denne posten
-    tilbake og feilen loggføres som db_feil - resten av lasten fortsetter i
-    stedet for at hele transaksjonen stopper."""
-    rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"
-    return ("DO $blk$ BEGIN\n" + sql + "EXCEPTION WHEN OTHERS THEN\n"
-            f"CALL logg_avvik({q(kn)},{q(samling)},'db_feil',{q(ekstern_id)},"
-            f"SQLSTATE || ': ' || SQLERRM,NULL,'id',{rapost_sql});\nEND $blk$;\n")
-
-
-def som_heltall(v):
-    """(verdi, feilmelding). Tom verdi gir (None, None); ugyldig gir (None, melding)."""
-    if v is None or v == "":
-        return None, None
-    try:
-        n = int(v)
-    except (ValueError, TypeError):
-        return None, f"ikke et heltall: {str(v)[:60]}"
-    if n < 0:
-        return None, f"negativt tall: {n}"
-    return n, None
-
-
-def vokabular_sql() -> str:
-    """Upsert av aktivitetsvokabularet fra activities.json - alle fasetter
-    unntatt "exclude". Foreldre settes i et eget steg, siden rekkefølgen i
-    filen ikke garanterer at forelderen kommer før barnet. Konsepter med to
-    foreldre (f.eks. Dans) får den første, se aktivitet i schema_kjerne.sql."""
-    konsepter = [(kode, k) for fasett, ks in VOKABULAR.items() if fasett != "exclude"
-                 for kode, k in ks.items()]
-    verdier = ",\n".join(f"({q(kode)},{q(k['label']['nb'])})" for kode, k in konsepter)
-    foreldre = ",\n".join(f"({q(kode)},{q(k['broader'][0])})" for kode, k in konsepter if k.get("broader"))
-    rotter = ",".join(q(kode) for kode, k in konsepter if not k.get("broader"))
-    return ("BEGIN;\n"
-            f"INSERT INTO aktivitet (kode,navn) VALUES\n{verdier}\n"
-            f"ON CONFLICT (kode) DO UPDATE SET navn=EXCLUDED.navn;\n"
-            f"UPDATE aktivitet a SET parent_id=p.id FROM (VALUES\n{foreldre}\n) AS v(kode,forelder) "
-            f"JOIN aktivitet p ON p.kode=v.forelder "
-            f"WHERE a.kode=v.kode AND a.parent_id IS DISTINCT FROM p.id;\n"
-            f"UPDATE aktivitet SET parent_id=NULL WHERE kode IN ({rotter}) AND parent_id IS NOT NULL;\n"
-            "COMMIT;\n\n")
-
-
-def aktivitet_mapping_sql(kn, kode, navn) -> str:
-    """Kartlegging av én aktivitetskode via activity_mapping/mapping.json, til
-    tabellen aktivitet_mapping. Ett navn kan gi flere konsepter, og da én rad
-    per konsept. Tidligere
-    ETL-rader for koden fjernes først, slik at endringer i mapping.json slår
-    igjennom - men bare når koden ikke har noen manuell mapping, som aldri
-    overskrives."""
-    kk = (f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-          f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} ")
-    uten_manuell = ("AND NOT EXISTS (SELECT 1 FROM aktivitet_mapping m2 WHERE m2.kildekode_id=kk.id "
-                    "AND m2.kartlagt_av IS DISTINCT FROM 'etl')")
-    sql = (f"DELETE FROM aktivitet_mapping m USING kildekode kk "
-           f"JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-           f"WHERE m.kildekode_id=kk.id AND m.kartlagt_av='etl' AND fi.kildenokkel={q(kn)} "
-           f"AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} {uten_manuell};\n")
-
-    konsepter = AKTIVITET.get(norm_aktivitet(navn))
-    if konsepter is None:
-        if not er_ikke_relevant("aktivitet", norm(navn)):
-            return sql  # ukartlagt - dukker opp i v_ukartlagte_kildekoder
-        merknad = "Ikke en gyldig aktivitet"
-    else:
-        ekte = [c for c in konsepter if c not in EKSKLUDER]
-        if ekte:
-            return sql + (
-                f"INSERT INTO aktivitet_mapping (kildekode_id,aktivitet_id,status,merknad,kartlagt_av) "
-                f"SELECT kk.id,t.id,'godkjent',{q(AKTIVITET_MERKNAD)},'etl' "
-                f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, aktivitet t "
-                f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype='aktivitet' AND kk.kode={q(kode)} "
-                f"AND t.kode IN ({','.join(q(c) for c in ekte)}) {uten_manuell} "
-                f"ON CONFLICT (kildekode_id,aktivitet_id) WHERE aktivitet_id IS NOT NULL DO NOTHING;\n")
-        merknad = f"{EKSKLUDER[konsepter[0]]} ({AKTIVITET_MERKNAD})"
-    return sql + (
-        f"INSERT INTO aktivitet_mapping (kildekode_id,status,merknad,kartlagt_av) "
-        f"SELECT kk.id,'ikke_relevant',{q(merknad)},'etl' {kk}{uten_manuell} "
-        f"ON CONFLICT (kildekode_id) WHERE aktivitet_id IS NULL DO NOTHING;\n")
-
-
-def generer_sql(slug: str, ut) -> bool:
-    """Skriver SQL for én kommune. Returnerer False hvis henting feilet."""
+def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
+    """Skriver SQL for én kommune. Returnerer False hvis henting feilet. Med
+    fra_fil leses <fra_fil>/<slug>.json i stedet for endepunktet; svaret skal ha
+    samme form som searchdataall."""
     knr, knavn, fylke = KOMMUNER[slug]
     kn = f"aktiv-kommune:{slug}"
     url = f"https://{slug}.aktiv-kommune.no/bookingfrontend/searchdataall"
+    if fra_fil:
+        fil = fra_fil / f"{slug}.json"
+        url = fil.resolve().as_uri()
     hentet = datetime.now(timezone.utc).isoformat()
     w = ut.write
 
     print(f"henter {url} ...", file=sys.stderr)
     try:
-        status, d = hent_json(url)
+        if fra_fil:
+            # Ingen HTTP-forespørsel, derfor ingen status.
+            status, d = None, json.loads(fil.read_text(encoding="utf-8"))
+        else:
+            status, d = hent_json(url)
         if not isinstance(d, dict):
             raise ValueError("svaret er ikke et JSON-objekt")
     except Exception as e:
@@ -311,7 +176,7 @@ def generer_sql(slug: str, ut) -> bool:
     # Må være første setning: alle avvik under henter uttrekk-id-en herfra.
     # payload=NULL: hele svaret lagres ikke lenger - se kommentar ved
     # kildeuttrekk i schema_kjerne.sql.
-    w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status},NULL,{q(hentet)});\n\n")
+    w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status or 'NULL'},NULL,{q(hentet)});\n\n")
 
     w(f"-- {knavn}\n")
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
@@ -327,42 +192,13 @@ def generer_sql(slug: str, ut) -> bool:
       f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
       f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
-    # --- kildekoder + automatisk forslag til kartlegging ---
-    for kodetype, samling, tabell in [
-        ("lokaletype", "resource_categories", LOKALETYPE),
-        ("aktivitet", "activities", AKTIVITET),
-        ("fasilitet", "facilities", FASILITET),
-    ]:
-        for rad in d.get(samling, []):
-            if rad.get("id") is None:
-                w(logg(kn, samling, "ugyldig_verdi", None, "posten mangler id", "id", rapost=rad))
-                continue
-            navn = rens(rad.get("name"))
-            if not navn:
-                continue
-            w(f"INSERT INTO kildekode (fagsystem_instans_id,kodetype,kode,navn) "
-              f"SELECT id,{q(kodetype)},{q(rad['id'])},{q(navn)} "
-              f"FROM fagsystem_instans WHERE kildenokkel={q(kn)} "
-              f"ON CONFLICT (fagsystem_instans_id,kodetype,kode) DO UPDATE SET navn=EXCLUDED.navn, sist_sett=now();\n")
-            if kodetype == "aktivitet":
-                w(aktivitet_mapping_sql(kn, rad["id"], navn))
-                continue
-            n = norm(navn)
-            if er_ikke_relevant(kodetype, n):
-                w(f"INSERT INTO kildekode_mapping (kildekode_id,status,merknad,kartlagt_av) "
-                  f"SELECT kk.id,'ikke_relevant',{q(f'Ikke en gyldig {kodetype}')},'etl' "
-                  f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id "
-                  f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} AND kk.kode={q(rad['id'])} "
-                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
-            elif n in tabell:
-                maalkol = {"lokaletype": "lokaletype_id", "fasilitet": "fasilitet_id"}[kodetype]
-                w(f"INSERT INTO kildekode_mapping (kildekode_id,{maalkol},status,kartlagt_av) "
-                  f"SELECT kk.id,t.id,'godkjent','etl' "
-                  f"FROM kildekode kk JOIN fagsystem_instans fi ON fi.id=kk.fagsystem_instans_id, {kodetype} t "
-                  f"WHERE fi.kildenokkel={q(kn)} AND kk.kodetype={q(kodetype)} "
-                  f"AND kk.kode={q(rad['id'])} AND t.kode={q(tabell[n])} "
-                  f"ON CONFLICT (kildekode_id) DO NOTHING;\n")
+    # --- kodeverk: masterens vokabular ---
+    for tabell, samling in KODEVERK:
+        w(kodeverk_sql(kn, tabell, samling, d.get(samling, [])))
     w("\n")
+    # id-er i koblingene som masteren må kjenne; sjekkes samlet etter at
+    # koblingene er skrevet. Nøkkel: (tabell, samling, felt i kilden).
+    brukte_ider = {}
 
     # --- bygg + adresse ---
     bydel_per_bygg = {t["b_id"]: rens(t["name"]) for t in d.get("towns", [])}
@@ -445,11 +281,13 @@ def generer_sql(slug: str, ut) -> bool:
 
         bygg_sel = (f"(SELECT b.id FROM bygning b JOIN fagsystem_instans f2 ON f2.id=b.fagsystem_instans_id "
                     f"WHERE f2.kildenokkel={q(kn)} AND b.ekstern_id={q(bid)})") if bid else "NULL"
-        lt_sel = (f"(SELECT m.lokaletype_id FROM kildekode kk "
-                  f"JOIN fagsystem_instans f3 ON f3.id=kk.fagsystem_instans_id "
-                  f"JOIN kildekode_mapping m ON m.kildekode_id=kk.id AND m.status='godkjent' "
-                  f"WHERE f3.kildenokkel={q(kn)} AND kk.kodetype='lokaletype' "
-                  f"AND kk.kode={q(r.get('rescategory_id'))})")
+        # Én lokaletype per ressurs, på id mot masteren; NULL når den mangler eller masteren ikke kjenner den.
+        lt_id, lt_feil = som_heltall(r.get("rescategory_id"))
+        if lt_feil:
+            w(logg(kn, "resources", "ugyldig_verdi", r["id"], "rescategory_id " + lt_feil, "rescategory_id", rapost=r))
+        elif lt_id is not None:
+            brukte_ider.setdefault(("lokaletype", "resources", "rescategory_id"), set()).add(lt_id)
+        lt_sel = f"(SELECT id FROM lokaletype WHERE id={lt_id})" if lt_id is not None else "NULL"
 
         w(f"INSERT INTO ressurs (fagsystem_instans_id,ekstern_id,kommune_id,bygning_id,navn,lokaletype_id,"
           f"kapasitet,beskrivelse,aktiv,bookbar) "
@@ -458,7 +296,10 @@ def generer_sql(slug: str, ut) -> bool:
           f"{q(beskr)},{aktiv},{bookbar} "
           f"FROM kommune k, fagsystem_instans fi "
           f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
-          f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn, kapasitet=EXCLUDED.kapasitet;\n")
+          f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn, "
+          # Aktiv kommune har fasiten på hvilket bygg en ressurs hører til.
+          f"kapasitet=EXCLUDED.kapasitet, lokaletype_id=EXCLUDED.lokaletype_id, "
+          f"bygning_id=EXCLUDED.bygning_id;\n")
     w("\n")
 
     # --- koblinger, med avviksloggføring for brutte referanser ---
@@ -467,28 +308,32 @@ def generer_sql(slug: str, ut) -> bool:
     # noe utenfor uttrekket kan ikke lastes, og loggføres i stedet for å
     # forkastes stille.
     kjente_ressurser = {r["id"] for r in d.get("resources", [])}
-    # ressurs_aktivitet er helt avledet av kilden og mappingen, så den bygges
-    # på nytt hver gang - ellers ville koblinger fra en tidligere versjon av
-    # activity_mapping/mapping.json bli liggende.
-    w(f"DELETE FROM ressurs_aktivitet ra USING ressurs r JOIN fagsystem_instans fi "
-      f"ON fi.id=r.fagsystem_instans_id WHERE ra.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
-    for samling, kodetype, koblingstabell, mappingtabell, maalkol, idfelt in [
-        ("resource_activities", "aktivitet", "ressurs_aktivitet", "aktivitet_mapping", "aktivitet_id", "activity_id"),
-        ("resource_facilities", "fasilitet", "ressurs_fasilitet", "kildekode_mapping", "fasilitet_id", "facility_id"),
+    # Koblingene er helt avledet av kilden, så de bygges på nytt hver gang -
+    # ellers ville koblinger fra en tidligere versjon av kilden bli liggende.
+    for koblingstabell in ("ressurs_aktivitet", "ressurs_fasilitet"):
+        w(f"DELETE FROM {koblingstabell} x USING ressurs r JOIN fagsystem_instans fi "
+          f"ON fi.id=r.fagsystem_instans_id WHERE x.ressurs_id=r.id AND fi.kildenokkel={q(kn)};\n")
+
+    for samling, kodetype, koblingstabell, maalkol, idfelt in [
+        ("resource_activities", "aktivitet", "ressurs_aktivitet", "aktivitet_id", "activity_id"),
+        ("resource_facilities", "fasilitet", "ressurs_fasilitet", "fasilitet_id", "facility_id"),
     ]:
         for rad in d.get(samling, []):
             if rad["resource_id"] not in kjente_ressurser:
                 w(logg(kn, samling, "manglende_forelder", rad["resource_id"],
                        "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=rad))
                 continue
+            nr, feil = som_heltall(rad[idfelt])
+            if nr is None:
+                w(logg(kn, samling, "ugyldig_verdi", rad[idfelt], f"{idfelt} " + (feil or "mangler"),
+                       idfelt, idfelt, rapost=rad))
+                continue
+            brukte_ider.setdefault((kodetype, samling, idfelt), set()).add(nr)
             w(f"INSERT INTO {koblingstabell} (ressurs_id,{maalkol}) "
-              f"SELECT r.id,m.{maalkol} "
-              f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id "
-              f"JOIN kildekode kk ON kk.fagsystem_instans_id=fi.id AND kk.kodetype={q(kodetype)} "
-              f"AND kk.kode={q(rad[idfelt])} "
-              f"JOIN {mappingtabell} m ON m.kildekode_id=kk.id "
-              f"AND m.status='godkjent' AND m.{maalkol} IS NOT NULL "
+              f"SELECT r.id,t.id "
+              f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id, {kodetype} t "
               f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(rad['resource_id'])} "
+              f"AND t.id={nr} "
               f"ON CONFLICT DO NOTHING;\n")
 
     for br in d.get("building_resources", []):
@@ -499,6 +344,11 @@ def generer_sql(slug: str, ut) -> bool:
             w(logg(kn, "building_resources", "manglende_forelder", br["resource_id"],
                    "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=br))
 
+    # Kommunen eier koblingene, men ikke vokabularet: en kobling til en id
+    # masteren ikke kjenner lastes ikke, og avviket logges én gang per id.
+    for (tabell, samling, felt), ider in brukte_ider.items():
+        w(ukjente_id_er_sql(kn, tabell, samling, felt, ider))
+
     # Beholder de to siste uttrekkene per kilde, uforbeholdent.
     w(f"\nDO $$ BEGIN PERFORM rydd_kildeuttrekk({q(kn)}); END $$;\n")
     w("COMMIT;\n")
@@ -507,14 +357,15 @@ def generer_sql(slug: str, ut) -> bool:
 
 
 def main():
-    if len(sys.argv) != 2 or sys.argv[1] not in (*KOMMUNER, "alle"):
-        navn = ", ".join(KOMMUNER)
-        print(f"Bruk: python3 {sys.argv[0]} <kommune|alle>\n\nKjente kommuner: {navn}", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Bygger masterdatabasen fra Aktiv kommune; skriver SQL til standard-ut.",
+                                     epilog="Kjente kommuner: " + ", ".join(KOMMUNER))
+    parser.add_argument("kommune", choices=(*KOMMUNER, "alle"), metavar="kommune|alle")
+    parser.add_argument("--fra-fil", type=Path, metavar="MAPPE",
+                        help="les MAPPE/<kommune>.json i stedet for å hente fra nettet")
+    args = parser.parse_args()
 
-    valg = list(KOMMUNER) if sys.argv[1] == "alle" else [sys.argv[1]]
-    sys.stdout.write(vokabular_sql())
-    feilet = [slug for slug in valg if not generer_sql(slug, sys.stdout)]
+    valg = list(KOMMUNER) if args.kommune == "alle" else [args.kommune]
+    feilet = [slug for slug in valg if not generer_sql(slug, sys.stdout, args.fra_fil)]
     if feilet:
         print(f"\nHenting feilet for: {', '.join(feilet)} (loggført i synk_avvik)", file=sys.stderr)
         sys.exit(2)

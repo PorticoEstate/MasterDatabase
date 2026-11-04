@@ -1,7 +1,7 @@
 -- Masterdatabase for kommunale lokaler — kjernemodell
 -- PostgreSQL 12+ med PostGIS 3.x. Testet mot PostgreSQL 18 / PostGIS 3.6.
 --
--- 19 tabeller. 18 får data i dag, enten fra Aktiv kommune-endepunktene eller
+-- 18 tabeller. 17 får data i dag, enten fra Aktiv kommune-endepunktene eller
 -- fra matrikkelen - unntaket er ressurslenke, som forblir tom til et andre
 -- fagsystem (fdv/sensor/...) faktisk kobles på. Se db/schema_kjerne_dokumentasjon.md.
 --
@@ -109,8 +109,8 @@ CREATE INDEX IF NOT EXISTS ix_kommune_fagsystem_instans_instans
 -- bygninger. Vi skiller dem ikke på bygningsnivå - kildedata har ingen felt
 -- som sier "dette er utendørs", og et bygg kan i praksis romme både en hall
 -- og en utendørs kunstgressbane under samme adresse. Innendørs/utendørs
--- avgjøres derfor per ressurs, via ressurs.lokaletype_id (se UTEAREAL-gruppen
--- og de utendørs-spesifikke kodene i lokaletype).
+-- avgjøres derfor per ressurs, via ressurs.lokaletype_id (se utendørsfasettene
+-- LOK-SO- og LOK-OU- i lokaletype).
 --
 -- Identitet: (fagsystem_instans_id, ekstern_id) fra bookingsystemet.
 -- bygningsnr er en referanse til matrikkelen, ikke en identitet: flere
@@ -282,16 +282,24 @@ CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 --
 -- Kjernen i tverrkommunalt søk. Hver kommune har sitt eget kodeverk der samme
 -- ID betyr ulike ting: kategori 13 er "Overnatting" i Bergen og "Skateanlegg" i
--- Stavanger, og 58 av 63 ID-er kolliderer slik. Master eier derfor ett kuratert
--- kodeverk, og de lokale kodene oversettes inn mot det i seksjon 6.
+-- Stavanger, og 58 av 63 ID-er kolliderer slik. Master eier derfor ett kodeverk,
+-- og instansene forventes å levere sitt kodeverk normalisert mot det (samme
+-- id, navn og hierarki). Masteren eier vokabularet og hierarkiet: omdøping
+-- eller endret hierarki i en instans slår aldri inn her, men loggføres i
+-- synk_avvik. Det kommunen eier er koblingene fra ressurs til lokaletype,
+-- aktivitet og fasilitet; de følger kilden.
 -- =============================================================================
 
+-- Opprettes av etl/last_inn.py når databasen bygges, fra kildens
+-- resource_categories (bare konsepter som mangler; et eksisterende røres aldri).
+-- etl/synk.py skriver aldri her. Det seedes ikke i skjemaet. id er den delte
+-- id-en på tvers av instansene og settes av den som eier kodeverket (ikke et
+-- løpenummer); navnet er unikt per tabell.
 CREATE TABLE IF NOT EXISTS lokaletype
 (
-    id         BIGSERIAL PRIMARY KEY,
-    kode       TEXT UNIQUE NOT NULL,
-    navn       TEXT NOT NULL,
-    -- Selvreferanse for hierarki (IDRETT -> GYMSAL). Heter "parent_id", ikke
+    id         BIGINT PRIMARY KEY,
+    navn       TEXT UNIQUE NOT NULL,
+    -- Selvreferanse for hierarki (Idrettshall -> Gymsal). Heter "parent_id", ikke
     -- "lokaletype_id", for å skille den tydelig fra en referanse til en annen
     -- tabell.
     parent_id  BIGINT REFERENCES lokaletype(id) ON DELETE SET NULL,
@@ -299,124 +307,31 @@ CREATE TABLE IF NOT EXISTS lokaletype
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Holder mer enn rene aktiviteter: alle fasettene i etl/activity_mapping/
--- activities.json unntatt "exclude" (aktivitet, arrangement, organisasjon,
--- målgruppe, lokale, tjeneste). Fasetten bæres av prefikset i kode (ACT-,
--- EVT-, ORG-, GRP-, VEN-, SRV-), ikke av en egen kolonne. Vokabularet eies av
--- JSON-filen og lastes av etl/last_inn.py - det seedes ikke her.
---
--- Noen få konsepter har to foreldre i vokabularet (Dans under både Kultur og
--- Idrett); parent_id får den første.
+-- Opprettes av etl/last_inn.py fra kildens activities, som for lokaletype;
+-- det seedes ikke her. id er den delte id-en på tvers av instansene; navnet er
+-- unikt per tabell. Et konsept har én forelder.
 CREATE TABLE IF NOT EXISTS aktivitet
 (
-    id         BIGSERIAL PRIMARY KEY,
-    kode       TEXT UNIQUE NOT NULL
-                   CHECK (kode ~ '^(ACT|EVT|ORG|GRP|VEN|SRV)-[0-9]{3}$'),
-    navn       TEXT NOT NULL,
+    id         BIGINT PRIMARY KEY,
+    navn       TEXT UNIQUE NOT NULL,
     parent_id  BIGINT REFERENCES aktivitet(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Opprettes av etl/last_inn.py fra kildens facilities, som for lokaletype.
 CREATE TABLE IF NOT EXISTS fasilitet
 (
-    id         BIGSERIAL PRIMARY KEY,
-    kode       TEXT UNIQUE NOT NULL,
-    navn       TEXT NOT NULL,
-    gruppe     TEXT NOT NULL CHECK (gruppe IN
-                   ('tilgjengelighet','sanitaer','teknisk','kjokken','sport','moblering','uteareal','annet')),
+    id         BIGINT PRIMARY KEY,
+    navn       TEXT UNIQUE NOT NULL,
+    parent_id  BIGINT REFERENCES fasilitet(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 
 -- =============================================================================
--- 7. Lokale kildekoder og oversettelse
--- =============================================================================
-
--- Kommunens egen kode, lagret uendret for sporbarhet. Instansen er med i
--- nøkkelen så Bergens 13 og Stavangers 13 kan ligge side om side.
-CREATE TABLE IF NOT EXISTS kildekode
-(
-    id                   BIGSERIAL PRIMARY KEY,
-    fagsystem_instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(id) ON DELETE CASCADE,
-    kodetype             TEXT NOT NULL CHECK (kodetype IN ('lokaletype','aktivitet','fasilitet')),
-    kode                 TEXT NOT NULL,
-    navn                 TEXT NOT NULL,
-    sist_sett            TIMESTAMPTZ NOT NULL DEFAULT now(),
-    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uniq_kildekode UNIQUE (fagsystem_instans_id, kodetype, kode)
-);
-
-CREATE INDEX IF NOT EXISTS ix_kildekode_navn ON kildekode (lower(navn));
-
--- Oversettelsen er en menneskelig vurdering, ikke en beregning. Derfor bærer
--- den status og hvem som bestemte den.
--- 'ikke_relevant' finnes fordi kategorilistene inneholder verdier som ikke er
--- lokaletyper: "Stengt", "Fiktivt rom", "Streaming", og stedsnavn som
--- "Judaberg innbyggertorg".
---
--- Gjelder lokaletype og fasilitet, der hver kildekode har høyst ett mål.
--- Aktivitet har sin egen tabell, aktivitet_mapping (under).
---
--- Egen "id" pluss en UNIQUE "kildekode_id", i stedet for å la kildekode_id
--- være primærnøkkel direkte: det holder mønsteret "PK heter id, FK heter
--- <tabell>_id" konsekvent, selv om denne tabellen i praksis er en ett-til-én
--- utvidelse av kildekode.
-CREATE TABLE IF NOT EXISTS kildekode_mapping
-(
-    id            BIGSERIAL PRIMARY KEY,
-    kildekode_id  BIGINT UNIQUE NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
-    lokaletype_id BIGINT REFERENCES lokaletype(id) ON DELETE CASCADE,
-    fasilitet_id  BIGINT REFERENCES fasilitet(id) ON DELETE CASCADE,
-    status        TEXT NOT NULL DEFAULT 'foreslatt'
-                      CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
-    kartlagt_av   TEXT,
-    merknad       TEXT,
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_mapping_ett_mal
-        CHECK (
-            (CASE WHEN lokaletype_id IS NOT NULL THEN 1 ELSE 0 END)
-          + (CASE WHEN fasilitet_id IS NOT NULL THEN 1 ELSE 0 END)
-          = CASE WHEN status = 'ikke_relevant' THEN 0 ELSE 1 END
-        )
-);
-
-CREATE INDEX IF NOT EXISTS ix_mapping_lokaletype ON kildekode_mapping (lokaletype_id);
-CREATE INDEX IF NOT EXISTS ix_mapping_status ON kildekode_mapping (status);
-
--- Oversettelse av aktivitetskoder. Egen tabell fordi ett kildenavn kan bære
--- flere konsepter ("Barnebursdag 3 - 12 år" -> Barnebursdag + Barn), og da får
--- kildekoden én rad per konsept - noe kildekode_mapping (én rad per kode) ikke
--- tillater, og som ellers ville gitt rader med to alltid tomme målkolonner.
--- 'ikke_relevant' (EXC-konsepter i activity_mapping) ligger her med
--- aktivitet_id = NULL, slik at all aktivitetskartlegging finnes på ett sted.
-CREATE TABLE IF NOT EXISTS aktivitet_mapping
-(
-    id           BIGSERIAL PRIMARY KEY,
-    kildekode_id BIGINT NOT NULL REFERENCES kildekode(id) ON DELETE CASCADE,
-    aktivitet_id BIGINT REFERENCES aktivitet(id) ON DELETE CASCADE,
-    status       TEXT NOT NULL DEFAULT 'foreslatt'
-                     CHECK (status IN ('foreslatt','godkjent','ikke_relevant')),
-    kartlagt_av  TEXT,
-    merknad      TEXT,
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_aktivitet_mapping_mal
-        CHECK ((aktivitet_id IS NULL) = (status = 'ikke_relevant'))
-);
-
-CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping
-    ON aktivitet_mapping (kildekode_id, aktivitet_id) WHERE aktivitet_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS ux_aktivitet_mapping_ikke_relevant
-    ON aktivitet_mapping (kildekode_id) WHERE aktivitet_id IS NULL;
-CREATE INDEX IF NOT EXISTS ix_aktivitet_mapping_aktivitet ON aktivitet_mapping (aktivitet_id);
-
-
--- =============================================================================
--- 8. Ressurs: det søkbare og bookbare
+-- 7. Ressurs: det søkbare og bookbare
 --
 -- fagsystem_instans_id og ekstern_id gir både identitet og ruting: base_url
 -- fra instansen pluss ekstern_id gir bookinglenken. Ingen egen rutingtabell
@@ -490,7 +405,7 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 
 
 -- =============================================================================
--- 9. Ressurslenke: samme fysiske ting, kjent av flere fagsystemer
+-- 8. Ressurslenke: samme fysiske ting, kjent av flere fagsystemer
 --
 -- ressurs.fagsystem_instans_id + ekstern_id er allerede identitet+ruting for
 -- EN instans (se kommentar ved ressurs). Denne tabellen er for når en ANNEN
@@ -537,7 +452,7 @@ CREATE INDEX IF NOT EXISTS ix_ressurslenke_ressurs ON ressurslenke (ressurs_id) 
 
 
 -- =============================================================================
--- 10. Innlasting og sporbarhet
+-- 9. Innlasting og sporbarhet
 -- =============================================================================
 
 -- Metadata om én henting fra en kilde (kilde, endepunkt, tidspunkt,
@@ -575,7 +490,7 @@ CREATE TABLE IF NOT EXISTS synk_avvik
     kilde            TEXT NOT NULL,
     samling          TEXT NOT NULL,
     avvikstype       TEXT NOT NULL CHECK (avvikstype IN
-                          ('manglende_forelder','ikke_kartlagt','geokoding_feilet',
+                          ('manglende_forelder','geokoding_feilet',
                            'ugyldig_verdi','db_feil','annet')),
     ekstern_id       TEXT,
     -- Feltet i posten som var galt (f.eks. 'zip_code'). NULL når hele posten er
@@ -648,7 +563,7 @@ $$;
 
 
 -- =============================================================================
--- 11. Søkevisninger
+-- 10. Søkevisninger
 -- =============================================================================
 
 -- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
@@ -656,21 +571,13 @@ $$;
 -- at resultatet er lesbart uten å kjenne navnekonvensjonen i skjemaet.
 -- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte -
 -- det finnes ingen JPA-entitet for det.
---   aktivitet_koder  - bare ACT-koder (EVT-/ORG-/GRP-/... er ikke søkefasetter
---                      for utleie), og tom liste i stedet for NULL
---   fasilitet_koder  - tom liste i stedet for NULL, slik at @>/&& i filtrene
---                      oppfører seg likt for alle rader
--- Vanlig view, ikke materialisert: med rundt 5 000 ressurser er det raskt nok
--- å regne ut søkedokumentet per spørring, og vi slipper et refresh-steg i ETL
--- og risikoen for utdaterte søketreff. Skulle det bli for tregt, kan
--- CREATE MATERIALIZED VIEW ... AS SELECT * FROM v_ressurs_sok legges oppå med
--- GIN/GiST-indekser, uten at Java-koden endres utover tabellnavnet.
---CREATE OR REPLACE VIEW tillater bare nye kolonner på slutten. Kolonnene fra
--- V1 beholder navn, type og rekkefølge, men innholdet i to av dem er endret:
---   aktivitet_koder  - bare ACT-koder (EVT-/ORG-/GRP-/... er ikke søkefasetter
---                      for utleie), og tom liste i stedet for NULL
---   fasilitet_koder  - tom liste i stedet for NULL, slik at @>/&& i
---                      filtrene oppfører seg likt for alle rader
+--
+-- Kodeverkene (lokaletype, aktivitet, fasilitet) har ingen kode-kolonne; id er
+-- den delte nøkkelen på tvers av instansene. Filtrene går derfor på id:
+--   aktivitet_ids / fasilitet_ids - bigint[], tom liste i stedet for NULL, slik
+--                      at @>/&& i filtrene oppfører seg likt for alle rader
+--   aktivitet_navn / fasilitet_navn - samme rekkefølge som visningsnavn
+-- Alle aktiviteter er med (flatt, ingen hierarki); søket bruker bare id og navn.
 --
 -- Vanlig view, ikke materialisert: med rundt 5 000 ressurser er det raskt nok
 -- å regne ut søkedokumentet per spørring, og vi slipper et refresh-steg i ETL
@@ -687,9 +594,9 @@ SELECT
     k.id                           AS kommune_id,
     k.kommunenr,
     k.navn                         AS kommune_navn,
-    lt.kode                        AS lokaletype_kode,
+    lt.id                          AS lokaletype_id,
     lt.navn                        AS lokaletype_navn,
-    p.kode                         AS lokaletype_hovedgruppe,
+    p.navn                         AS lokaletype_hovedgruppe,
     b.id                           AS bygg_id,
     b.navn                         AS bygg_navn,
     b.bydel_navn,
@@ -700,8 +607,8 @@ SELECT
     a.postnummer,
     a.poststed,
     fi.base_url || '/bookingfrontend/resource/' || r.ekstern_id AS booking_url,
-    COALESCE(akt.koder, '{}')      AS aktivitet_koder,
-    COALESCE(fas.koder, '{}')      AS fasilitet_koder,
+    COALESCE(akt.ids, '{}')        AS aktivitet_ids,
+    COALESCE(fas.ids, '{}')        AS fasilitet_ids,
     r.sokevektor,
     r.sist_oppdatert,
 
@@ -750,15 +657,15 @@ LEFT JOIN fagsystem_instans bfi ON bfi.id = b.fagsystem_instans_id
 -- Maks én hovedadresse per bygg (ux_adresse_hovedadresse), så ingen duplikater.
 LEFT JOIN adresse a             ON a.bygning_id = b.id AND a.er_hovedadresse
 LEFT JOIN LATERAL (
-    SELECT array_agg(ak.kode ORDER BY ak.kode) AS koder,
+    SELECT array_agg(ak.id   ORDER BY ak.navn) AS ids,
            array_agg(ak.navn ORDER BY ak.navn) AS navn_liste,
            string_agg(ak.navn, ' ')            AS navn_tekst
       FROM ressurs_aktivitet ra
       JOIN aktivitet ak ON ak.id = ra.aktivitet_id
-     WHERE ra.ressurs_id = r.id AND ak.kode LIKE 'ACT-%'
+     WHERE ra.ressurs_id = r.id
 ) akt ON TRUE
 LEFT JOIN LATERAL (
-    SELECT array_agg(f.kode ORDER BY f.kode) AS koder,
+    SELECT array_agg(f.id   ORDER BY f.navn) AS ids,
            array_agg(f.navn ORDER BY f.navn) AS navn_liste,
            string_agg(f.navn, ' ')           AS navn_tekst
       FROM ressurs_fasilitet rf
@@ -766,27 +673,6 @@ LEFT JOIN LATERAL (
      WHERE rf.ressurs_id = r.id
 ) fas ON TRUE
 WHERE r.aktiv AND r.bookbar;
-
--- Arbeidslisten for kuratering. Hver rad er en lokal kode som ennå ikke kan
--- søkes på tvers av kommuner. Kildekoden hører til instansen, ikke til én
--- kommune, siden en instans kan betjene flere - kommunene listes derfor
--- sammenslått via oppslag i kommune_fagsystem_instans.
-CREATE OR REPLACE VIEW v_ukartlagte_kildekoder AS
-SELECT kk.id AS kildekode_id, fi.kildenokkel,
-       (SELECT string_agg(k.navn, ', ' ORDER BY k.navn)
-          FROM kommune_fagsystem_instans kfi
-          JOIN kommune k ON k.id = kfi.kommune_id
-         WHERE kfi.fagsystem_instans_id = fi.id) AS kommuner,
-       kk.kodetype, kk.kode, kk.navn, kk.sist_sett
-FROM kildekode kk
-JOIN fagsystem_instans fi ON fi.id = kk.fagsystem_instans_id
--- Aktivitet kartlegges i aktivitet_mapping, alt annet i kildekode_mapping.
-WHERE CASE WHEN kk.kodetype = 'aktivitet'
-           THEN NOT EXISTS (SELECT 1 FROM aktivitet_mapping m
-                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
-           ELSE NOT EXISTS (SELECT 1 FROM kildekode_mapping m
-                             WHERE m.kildekode_id = kk.id AND m.status <> 'foreslatt')
-      END;
 
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
 -- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
@@ -811,150 +697,7 @@ LEFT JOIN kildeuttrekk u ON u.id = a.kildeuttrekk_id;
 
 
 -- =============================================================================
--- 12. Kanonisk kodeverk (startsett)
---
--- Utledet fra de 142 distinkte kategorinavnene i de 12 Aktiv kommune-instansene,
--- slått sammen på tvers av målform, skrivefeil og synonymer. aktivitet seedes
--- ikke her - vokabularet lastes av etl/last_inn.py fra activities.json.
--- =============================================================================
-
-INSERT INTO lokaletype (kode, navn)
-VALUES
-    ('IDRETT','Idrett og fysisk aktivitet'),
-    ('KULTUR','Kultur og scene'),
-    ('UNDERVISNING','Undervisning og møte'),
-    ('VERKSTED','Verksted og produksjon'),
-    ('ARRANGEMENT','Selskap og arrangement'),
-    ('BEVERTNING','Mat og bevertning'),
-    ('NAERMILJO','Aktivitets- og nærmiljøhus'),
-    ('UTEAREAL','Utendørs areal'),
-    ('OVERNATTING','Overnatting og bolig'),
-    ('ANNET_LOKALE','Kontor og andre lokaler'),
-    ('UTSTYR','Utstyr')
-ON CONFLICT (kode) DO NOTHING;
-
-INSERT INTO lokaletype (kode, navn, parent_id)
-SELECT v.kode, v.navn, p.id
-FROM (VALUES
-    ('IDRETTSHALL','Idrettshall','IDRETT'),
-    ('GYMSAL','Gymsal','IDRETT'),
-    ('SVOMMEANLEGG','Svømmeanlegg','IDRETT'),
-    ('ISHALL','Ishall og isbane','IDRETT'),
-    ('FRIIDRETTSANLEGG','Friidrettsanlegg','IDRETT'),
-    ('FOTBALLBANE','Fotballbane','IDRETT'),
-    ('BALLBANE','Ballbane og ballbinge','IDRETT'),
-    ('TENNISANLEGG','Tennisanlegg','IDRETT'),
-    ('STYRKEROM','Styrke- og treningsrom','IDRETT'),
-    ('KAMPSPORTROM','Kampsportrom','IDRETT'),
-    ('KLATREANLEGG','Klatreanlegg','IDRETT'),
-    ('TURNANLEGG','Turnanlegg','IDRETT'),
-    ('SKATEANLEGG','Skateanlegg','IDRETT'),
-    ('SKYTEBANE','Skytebane','IDRETT'),
-    ('SJOSPORTANLEGG','Sjøsportanlegg','IDRETT'),
-    ('GARDEROBE','Garderobe','IDRETT'),
-
-    ('KONSERTSAL','Konsertsal og kultursal','KULTUR'),
-    ('SCENE','Scene','KULTUR'),
-    ('AUDITORIUM','Auditorium og foredragssal','KULTUR'),
-    ('OVINGSROM','Øvingsrom og musikkrom','KULTUR'),
-    ('DANSESAL','Dansesal','KULTUR'),
-    ('LYDSTUDIO','Lydstudio','KULTUR'),
-    ('UTSTILLINGSLOKALE','Utstillingslokale og atelier','KULTUR'),
-    ('BIBLIOTEK','Bibliotek','KULTUR'),
-    ('FOAJE','Foajé','KULTUR'),
-
-('KLASSEROM','Klasserom og undervisningsrom','UNDERVISNING'),
-('GRUPPEROM','Grupperom og prosjektrom','UNDERVISNING'),
-('MOTEROM','Møterom og konferanserom','UNDERVISNING'),
-('DATAROM','Datarom','UNDERVISNING'),
-('AULA','Aula','UNDERVISNING'),
-
-('SLOYDSAL','Sløydsal','VERKSTED'),
-('KUNSTVERKSTED','Kunst- og håndverksverksted','VERKSTED'),
-('SYSTUE','Systue','VERKSTED'),
-('MEDIEVERKSTED','Multimedia- og streamingverksted','VERKSTED'),
-('FRISORSALONG','Frisørsalong','VERKSTED'),
-
-('SELSKAPSLOKALE','Selskapslokale','ARRANGEMENT'),
-('FORSAMLINGSLOKALE','Forsamlingslokale','ARRANGEMENT'),
-('SEREMONIROM','Seremonirom','ARRANGEMENT'),
-('BURSDAGSLOKALE','Bursdagslokale','ARRANGEMENT'),
-('ARRANGEMENTSARENA','Arrangementsarena','ARRANGEMENT'),
-('TORGPLASS','Torg og møteplass','ARRANGEMENT'),
-
-('KJOKKEN','Kjøkken','BEVERTNING'),
-('KANTINE','Kantine','BEVERTNING'),
-('KAFE','Kafé og kiosk','BEVERTNING'),
-
-('ALLAKTIVITETSHUS','Allaktivitetshus','NAERMILJO'),
-('AKTIVITETSROM','Aktivitetsrom og flerbruksrom','NAERMILJO'),
-('UNGDOMSLOKALE','Ungdomslokale','NAERMILJO'),
-('DAGSENTER','Dagsenter og miljøstue','NAERMILJO'),
-('INNBYGGERTORG','Innbyggertorg','NAERMILJO'),
-
-('FRILUFTSOMRAADE','Friluftsområde','UTEAREAL'),
-('UTEOMRAADE','Uteområde','UTEAREAL'),
-('TURVEI','Turvei og løype','UTEAREAL'),
-('GAPAHUK','Gapahuk og bålplass','UTEAREAL'),
-('UTESCENE','Utendørsscene','UTEAREAL'),
-
-('OVERNATTINGSROM','Overnattingsrom','OVERNATTING'),
-('BEBOERROM','Beboerrom','OVERNATTING'),
-('OVINGSLEILIGHET','Øvingsleilighet','OVERNATTING'),
-
-('KONTOR','Kontor og arbeidsplass','ANNET_LOKALE'),
-('BUTIKKLOKALE','Butikklokale','ANNET_LOKALE'),
-('LAGER','Lager','ANNET_LOKALE'),
-('GENERELT_LOKALE','Generelt lokale','ANNET_LOKALE'),
-
-('SYKKEL','Sykkel og el-sykkel','UTSTYR'),
-('KANO_KAJAKK','Kano og kajakk','UTSTYR'),
-('FISKEUTSTYR','Fiskeutstyr','UTSTYR'),
-('REDNINGSVEST','Redningsvest','UTSTYR'),
-('LYDANLEGG','Lyd- og lysanlegg','UTSTYR'),
-('ANNET_UTSTYR','Annet utstyr','UTSTYR')
-) AS v(kode, navn, parent_kode)
-JOIN lokaletype p ON p.kode = v.parent_kode
-ON CONFLICT (kode) DO NOTHING;
-
-INSERT INTO fasilitet (kode, navn, gruppe)
-VALUES
-    ('HC_TILGANG','Rullestoltilgang','tilgjengelighet'),
-    ('HC_TOALETT','HC-toalett','tilgjengelighet'),
-    ('TELESLYNGE','Teleslynge','tilgjengelighet'),
-    ('HEIS','Heis','tilgjengelighet'),
-    ('GARDEROBE','Garderobe','sanitaer'),
-    ('DUSJ','Dusj','sanitaer'),
-    ('TOALETT','Toalett','sanitaer'),
-    ('PROSJEKTOR','Prosjektor','teknisk'),
-    ('SKJERM','Skjerm','teknisk'),
-    ('LYDANLEGG','Lydanlegg','teknisk'),
-    ('MIKROFON','Mikrofon','teknisk'),
-    ('WIFI','Trådløst nett','teknisk'),
-    ('STREAMING','Streamingutstyr','teknisk'),
-    ('FLYGEL','Flygel eller piano','teknisk'),
-    ('SCENELYS','Scenelys','teknisk'),
-    ('KJOKKEN','Kjøkken','kjokken'),
-    ('KJOLESKAP','Kjøleskap','kjokken'),
-    ('OPPVASKMASKIN','Oppvaskmaskin','kjokken'),
-    ('KIOSK','Kiosk','kjokken'),
-    ('TRIBUNE','Tribune','sport'),
-    ('MAALBUR','Målbur','sport'),
-    ('TIDTAKING','Tidtakingsanlegg','sport'),
-    ('BANEDELING','Delbar bane','sport'),
-    ('BORD_STOLER','Bord og stoler','moblering'),
-    ('WHITEBOARD','Whiteboard','moblering'),
-    ('PARKETTGULV','Parkettgulv','moblering'),
-    ('PARKERING','Parkering','uteareal'),
-    ('HC_PARKERING','HC-parkering','uteareal'),
-    ('SYKKELPARKERING','Sykkelparkering','uteareal'),
-    ('BAALPLASS','Bålplass','uteareal'),
-    ('FLOMLYS','Flomlys','uteareal'),
-    ('ELEKTRONISK_LAS','Elektronisk låssystem','annet')
-ON CONFLICT (kode) DO NOTHING;
-
--- =============================================================================
--- 13. updated_at-triggere
+-- 11. updated_at-triggere
 -- =============================================================================
 
 DO $$
@@ -963,8 +706,7 @@ DECLARE
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'kommune','fagsystem_instans', 'matrikkelinfo','bygning','gate','adresse',
-        'lokaletype','aktivitet','fasilitet','kildekode','kildekode_mapping',
-        'aktivitet_mapping','ressurs'
+        'lokaletype','aktivitet','fasilitet','ressurs'
     ]
     LOOP
         EXECUTE format('DROP TRIGGER IF EXISTS trg_%1$s_updated_at ON %1$I', t);

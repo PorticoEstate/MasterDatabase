@@ -1,0 +1,4261 @@
+{
+  "source": "AktivKommune_facility_mapping_v0.1.xlsx",
+  "approvedOnly": false,
+  "normalisation": "html-decode x2, unicode NFC, trim, collapse spaces, lowercase",
+  "values": {
+    "1 m sviktbrett": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 1
+      },
+      "sourceNames": [
+        "1 m sviktbrett"
+      ]
+    },
+    "1 m tårn": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 1
+      },
+      "sourceNames": [
+        "1 m tårn"
+      ]
+    },
+    "1 meters stup": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 1
+      },
+      "sourceNames": [
+        "1 meters stup"
+      ]
+    },
+    "1 meters sviktbrett": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 1
+      },
+      "sourceNames": [
+        "1 meters sviktbrett"
+      ]
+    },
+    "1 stk mikrofon": {
+      "facilities": [
+        "Mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "quantity": 1
+      },
+      "sourceNames": [
+        "1 stk mikrofon"
+      ]
+    },
+    "1 stk trådløs mygg": {
+      "facilities": [
+        "Trådløs mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "quantity": 1
+      },
+      "sourceNames": [
+        "1 stk trådløs mygg"
+      ]
+    },
+    "100 tommer tv-skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 100
+      },
+      "sourceNames": [
+        "100 tommer TV-skjerm"
+      ]
+    },
+    "12,5 m basseng": {
+      "facilities": [
+        "Svømmebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "lengthM": 12.5
+      },
+      "sourceNames": [
+        "12,5 m basseng"
+      ]
+    },
+    "2 barneseter": {
+      "facilities": [
+        "Sykkeltilbehør"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "attributes": {
+        "quantity": 2
+      },
+      "sourceNames": [
+        "2 barneseter"
+      ]
+    },
+    "2 stk 100 tommer tv-skjermer": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 100,
+        "quantity": 2
+      },
+      "sourceNames": [
+        "2 stk 100 tommer TV-skjermer"
+      ]
+    },
+    "2 stk kameraer": {
+      "facilities": [
+        "Kamera og videoutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "quantity": 2
+      },
+      "sourceNames": [
+        "2 stk kameraer"
+      ]
+    },
+    "2 stk mikrofon": {
+      "facilities": [
+        "Mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "quantity": 2
+      },
+      "sourceNames": [
+        "2 stk mikrofon"
+      ]
+    },
+    "2 stk trådløs mygg": {
+      "facilities": [
+        "Trådløs mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "quantity": 2
+      },
+      "sourceNames": [
+        "2 stk trådløs mygg"
+      ]
+    },
+    "25 m basseng": {
+      "facilities": [
+        "Svømmebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "lengthM": 25
+      },
+      "sourceNames": [
+        "25 m basseng"
+      ]
+    },
+    "3 m sviktbrett": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 3
+      },
+      "sourceNames": [
+        "3 m sviktbrett"
+      ]
+    },
+    "3 m tårn": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 3
+      },
+      "sourceNames": [
+        "3 m tårn"
+      ]
+    },
+    "3 meter stup": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 3
+      },
+      "sourceNames": [
+        "3 meter stup"
+      ]
+    },
+    "3 meters stup": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 3
+      },
+      "sourceNames": [
+        "3 meters stup"
+      ]
+    },
+    "3 stk trådløs mygg": {
+      "facilities": [
+        "Trådløs mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "quantity": 3
+      },
+      "sourceNames": [
+        "3 stk trådløs mygg"
+      ]
+    },
+    "5 m tårn": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 5
+      },
+      "sourceNames": [
+        "5 m tårn"
+      ]
+    },
+    "5 meter stup": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 5
+      },
+      "sourceNames": [
+        "5 meter stup"
+      ]
+    },
+    "5 meters stup": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "heightM": 5
+      },
+      "sourceNames": [
+        "5 meters stup"
+      ]
+    },
+    "55 tommer tv-skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 55
+      },
+      "sourceNames": [
+        "55 tommer TV-skjerm"
+      ]
+    },
+    "65 tommer tv-skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 65
+      },
+      "sourceNames": [
+        "65 tommer TV-skjerm"
+      ]
+    },
+    "75 tommer tv-skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 75
+      },
+      "sourceNames": [
+        "75 tommer TV-skjerm"
+      ]
+    },
+    "85 tommer tv-skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 85
+      },
+      "sourceNames": [
+        "85 tommer TV-skjerm"
+      ]
+    },
+    "9 seter": {
+      "facilities": [
+        "Kjøretøy"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "attributes": {
+        "seats": 9
+      },
+      "sourceNames": [
+        "9 seter"
+      ]
+    },
+    "airhockey": {
+      "facilities": [
+        "Airhockey"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Airhockey"
+      ]
+    },
+    "aktivitetsrom uten møbler": {
+      "facilities": [
+        "Aktivitetsrom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Aktivitetsrom uten møbler"
+      ]
+    },
+    "amfi, fast plassbygd": {
+      "facilities": [
+        "Amfi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Amfi, fast plassbygd"
+      ]
+    },
+    "amfi, uttrekkbart": {
+      "facilities": [
+        "Amfi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Amfi, uttrekkbart"
+      ]
+    },
+    "apple-tv": {
+      "facilities": [
+        "Trådløs skjermdeling"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Apple-TV"
+      ]
+    },
+    "automatisk døråpner": {
+      "facilities": [
+        "Automatisk døråpner"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Automatisk døråpner"
+      ]
+    },
+    "backline": {
+      "facilities": [
+        "Backline og bandutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Backline"
+      ]
+    },
+    "badmington stativ og nett": {
+      "facilities": [
+        "Nett og stolper"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Badmington stativ og nett"
+      ]
+    },
+    "badstu": {
+      "facilities": [
+        "Badstue"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Badstu"
+      ]
+    },
+    "badstue": {
+      "facilities": [
+        "Badstue"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Badstue"
+      ]
+    },
+    "ballettbarrer": {
+      "facilities": [
+        "Ballettbarre"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ballettbarrer"
+      ]
+    },
+    "band utstyr": {
+      "facilities": [
+        "Backline og bandutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Band utstyr"
+      ]
+    },
+    "barnebasseng": {
+      "facilities": [
+        "Barnebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Barnebasseng"
+      ]
+    },
+    "barnebestikk": {
+      "facilities": [
+        "Dekketøy"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Barnebestikk"
+      ]
+    },
+    "basket-bane": {
+      "facilities": [
+        "Basketballbane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Basket-bane"
+      ]
+    },
+    "basketkurver": {
+      "facilities": [
+        "Basketkurv"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Basketkurver"
+      ]
+    },
+    "basseng": {
+      "facilities": [
+        "Basseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Basseng"
+      ]
+    },
+    "basseng 50m": {
+      "facilities": [
+        "Svømmebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "lengthM": 50
+      },
+      "sourceNames": [
+        "Basseng 50m"
+      ]
+    },
+    "bassengheis": {
+      "facilities": [
+        "Bassengheis",
+        "Universell utforming"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bassengheis"
+      ]
+    },
+    "benk": {
+      "facilities": [
+        "Publikumsbenker"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Benk"
+      ]
+    },
+    "benker til publikum": {
+      "facilities": [
+        "Publikumsbenker"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Benker til publikum"
+      ]
+    },
+    "benker til publlikum": {
+      "facilities": [
+        "Publikumsbenker"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Benker til publlikum"
+      ]
+    },
+    "består av skjerm 55'', lydplanke, appletv, mikrofon/høyttaler og nødvendige kabler": {
+      "facilities": [
+        "Skjermpakke"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 55
+      },
+      "sourceNames": [
+        "Består av Skjerm 55&#039;&#039;, Lydplanke, AppleTV, Mikrofon/Høyttaler og nødvendige kabler"
+      ]
+    },
+    "består av skjerm 65'', lydplanke, appletv, mikrofon/høyttaler og nødvendige kabler": {
+      "facilities": [
+        "Skjermpakke"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 65
+      },
+      "sourceNames": [
+        "Består av Skjerm 65&#039;&#039;, Lydplanke, AppleTV, Mikrofon/Høyttaler og nødvendige kabler"
+      ]
+    },
+    "består av skjerm 75'', lydplanke, appletv og nødvendige kabler": {
+      "facilities": [
+        "Skjermpakke"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 75
+      },
+      "sourceNames": [
+        "Består av Skjerm 75&#039;&#039;, Lydplanke, AppleTV og nødvendige kabler"
+      ]
+    },
+    "består av skjerm 75'', lydplanke, appletv, mikrofon/høyttaler og nødvendige kabler": {
+      "facilities": [
+        "Skjermpakke"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 75
+      },
+      "sourceNames": [
+        "Består av Skjerm 75&#039;&#039;, Lydplanke, AppleTV, Mikrofon/Høyttaler og nødvendige kabler"
+      ]
+    },
+    "består av skjerm 85'', lydplanke, appletv og nødvendige kabler": {
+      "facilities": [
+        "Skjermpakke"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 85
+      },
+      "sourceNames": [
+        "Består av Skjerm 85&#039;&#039;, Lydplanke, AppleTV og nødvendige kabler"
+      ]
+    },
+    "består av skjerm 85'', lydplanke, appletv, mikrofon/høyttaler og nødvendige kabler": {
+      "facilities": [
+        "Skjermpakke"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 85
+      },
+      "sourceNames": [
+        "Består av Skjerm 85&#039;&#039;, Lydplanke, AppleTV, Mikrofon/Høyttaler og nødvendige kabler"
+      ]
+    },
+    "biiljardbord": {
+      "facilities": [
+        "Biljard"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Biiljardbord"
+      ]
+    },
+    "biljardbord": {
+      "facilities": [
+        "Biljard"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Biljardbord"
+      ]
+    },
+    "bluetooth høytaler": {
+      "facilities": [
+        "Høyttaler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bluetooth høytaler"
+      ]
+    },
+    "bord": {
+      "facilities": [
+        "Bord"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bord"
+      ]
+    },
+    "bord og stolar": {
+      "facilities": [
+        "Bord og stoler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bord og stolar"
+      ]
+    },
+    "bord og stoler": {
+      "facilities": [
+        "Bord og stoler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bord og stoler"
+      ]
+    },
+    "bord sammenleggbare": {
+      "facilities": [
+        "Bord"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bord sammenleggbare"
+      ]
+    },
+    "bordtennis": {
+      "facilities": [
+        "Bordtennisbord"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bordtennis"
+      ]
+    },
+    "bordtennisbord": {
+      "facilities": [
+        "Bordtennisbord"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bordtennisbord"
+      ]
+    },
+    "brannslukkingsapparat": {
+      "facilities": [
+        "Brannslukkingsapparat"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Brannslukkingsapparat"
+      ]
+    },
+    "brettspill": {
+      "facilities": [
+        "Brettspill"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Brettspill"
+      ]
+    },
+    "buldrevegg": {
+      "facilities": [
+        "Buldrevegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Buldrevegg"
+      ]
+    },
+    "buldring": {
+      "facilities": [
+        "Buldrevegg"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Buldring"
+      ]
+    },
+    "bålpanne": {
+      "facilities": [
+        "Grill- og bålplass"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Bålpanne"
+      ]
+    },
+    "click share": {
+      "facilities": [
+        "Trådløs skjermdeling"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Click share"
+      ]
+    },
+    "combidamper": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Combidamper"
+      ]
+    },
+    "dekketøy": {
+      "facilities": [
+        "Dekketøy"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dekketøy"
+      ]
+    },
+    "digital tavle": {
+      "facilities": [
+        "Digital tavle"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Digital tavle"
+      ]
+    },
+    "disko-anlegg": {
+      "facilities": [
+        "Diskoanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Disko-anlegg"
+      ]
+    },
+    "diskorom": {
+      "facilities": [
+        "Diskorom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Diskorom"
+      ]
+    },
+    "diskotek": {
+      "facilities": [
+        "Diskoanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Diskotek"
+      ]
+    },
+    "diskotek med dj": {
+      "facilities": [
+        "Diskoanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Diskotek med DJ"
+      ]
+    },
+    "dusj": {
+      "facilities": [
+        "Dusj"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dusj"
+      ]
+    },
+    "dusj/toalett": {
+      "facilities": [
+        "Dusj",
+        "Toalett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dusj/toalett"
+      ]
+    },
+    "dusjer": {
+      "facilities": [
+        "Dusj"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Dusjer"
+      ]
+    },
+    "ekstra langt bagasjebrett": {
+      "facilities": [
+        "Sykkeltilbehør"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ekstra langt bagasjebrett"
+      ]
+    },
+    "el- piano": {
+      "facilities": [
+        "El-piano"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "El- piano"
+      ]
+    },
+    "fleksibel møblering": {
+      "facilities": [
+        "Fleksibel møblering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fleksibel møblering"
+      ]
+    },
+    "fleksibel møblering med gruppeoppsett": {
+      "facilities": [
+        "Fleksibel møblering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fleksibel møblering med gruppeoppsett"
+      ]
+    },
+    "fleksibel møblering med kursbord": {
+      "facilities": [
+        "Fleksibel møblering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fleksibel møblering med kursbord"
+      ]
+    },
+    "fleksibel møblering med mulighet for 2 gruppebord": {
+      "facilities": [
+        "Fleksibel møblering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fleksibel møblering med mulighet for 2 gruppebord"
+      ]
+    },
+    "fleksibel møblering med mulighet for 4 gruppebord": {
+      "facilities": [
+        "Fleksibel møblering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fleksibel møblering med mulighet for 4 gruppebord"
+      ]
+    },
+    "flipover": {
+      "facilities": [
+        "Flipover"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Flipover"
+      ]
+    },
+    "flomlys": {
+      "facilities": [
+        "Flomlys"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Flomlys"
+      ]
+    },
+    "flygel": {
+      "facilities": [
+        "Flygel"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Flygel"
+      ]
+    },
+    "foredrag": {
+      "facilities": [
+        "Ikke fasilitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "exclude": true,
+      "reason": "not_a_facility",
+      "sourceNames": [
+        "Foredrag"
+      ]
+    },
+    "formell møblering med møtebord": {
+      "facilities": [
+        "Formell møblering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Formell møblering med møtebord"
+      ]
+    },
+    "formell møblering med rundt møtebord": {
+      "facilities": [
+        "Formell møblering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Formell møblering med rundt møtebord"
+      ]
+    },
+    "forsamlingslokale": {
+      "facilities": [
+        "Forsamlingslokale"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Forsamlingslokale"
+      ]
+    },
+    "fotball/innebandymål": {
+      "facilities": [
+        "Fotball-/innebandymål"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fotball/innebandymål"
+      ]
+    },
+    "friidrettsbane": {
+      "facilities": [
+        "Friidrettsbane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Friidrettsbane"
+      ]
+    },
+    "fryser": {
+      "facilities": [
+        "Kjøleskap og fryser"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fryser"
+      ]
+    },
+    "fussball": {
+      "facilities": [
+        "Fussball"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Fussball"
+      ]
+    },
+    "gapahuk": {
+      "facilities": [
+        "Gapahuk"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gapahuk"
+      ]
+    },
+    "garderobe": {
+      "facilities": [
+        "Garderobe"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Garderobe"
+      ]
+    },
+    "gratis parkering": {
+      "facilities": [
+        "Parkering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "free": true
+      },
+      "sourceNames": [
+        "Gratis parkering"
+      ]
+    },
+    "gratis wifi": {
+      "facilities": [
+        "Internett/WiFi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "free": true
+      },
+      "sourceNames": [
+        "Gratis Wifi"
+      ]
+    },
+    "grill/bålpanne": {
+      "facilities": [
+        "Grill- og bålplass"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grill/bålpanne"
+      ]
+    },
+    "grillplass": {
+      "facilities": [
+        "Grill- og bålplass"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grillplass"
+      ]
+    },
+    "grusbane": {
+      "facilities": [
+        "Grusbane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grusbane"
+      ]
+    },
+    "grønn skjerm (videoredigering)": {
+      "facilities": [
+        "Kamera og videoutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Grønn skjerm &amp;#40;videoredigering&amp;#41;"
+      ]
+    },
+    "gym benk": {
+      "facilities": [
+        "Turnapparater"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Gym benk"
+      ]
+    },
+    "handballmål": {
+      "facilities": [
+        "Håndballmål"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Handballmål"
+      ]
+    },
+    "handikapparkering": {
+      "facilities": [
+        "HC-parkering"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Handikapparkering"
+      ]
+    },
+    "hc toalett": {
+      "facilities": [
+        "HC-toalett",
+        "Universell utforming"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "HC toalett"
+      ]
+    },
+    "hdmi-overganger (display port, apple lightning, usb-c, mini dp, micro hdmi)": {
+      "facilities": [
+        "HDMI-overganger"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "HDMI-overganger &amp;#40;Display port, Apple lightning, USB-C, mini DP, micro HDMI&amp;#41;"
+      ]
+    },
+    "heis": {
+      "facilities": [
+        "Heis"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Heis"
+      ]
+    },
+    "hev/senk skrivebord": {
+      "facilities": [
+        "Hev/senk-skrivebord"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hev/senk skrivebord"
+      ]
+    },
+    "hodebøylemik": {
+      "facilities": [
+        "Trådløs mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "hodebøylemik"
+      ]
+    },
+    "hoppemadrass/hoppeslott": {
+      "facilities": [
+        "Hoppeslott",
+        "Hoppemadrass"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Hoppemadrass/hoppeslott"
+      ]
+    },
+    "håndballmål": {
+      "facilities": [
+        "Håndballmål"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Håndballmål"
+      ]
+    },
+    "høytaler": {
+      "facilities": [
+        "Høyttaler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Høytaler"
+      ]
+    },
+    "høytalere i tak": {
+      "facilities": [
+        "Høyttaler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Høytalere i tak"
+      ]
+    },
+    "høyttalere": {
+      "facilities": [
+        "Høyttaler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Høyttalere"
+      ]
+    },
+    "idrettsutstyr": {
+      "facilities": [
+        "Idrettsutstyr (generelt)"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Idrettsutstyr"
+      ]
+    },
+    "innspilling lyd": {
+      "facilities": [
+        "Studio og opptak"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Innspilling lyd"
+      ]
+    },
+    "internett": {
+      "facilities": [
+        "Internett/WiFi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Internett"
+      ]
+    },
+    "internett, wifi": {
+      "facilities": [
+        "Internett/WiFi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Internett, wifi"
+      ]
+    },
+    "isbitmaskin": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Isbitmaskin"
+      ]
+    },
+    "kafeteria": {
+      "facilities": [
+        "Kafeteria"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kafeteria"
+      ]
+    },
+    "kaffemaskin": {
+      "facilities": [
+        "Kaffemaskin"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kaffemaskin"
+      ]
+    },
+    "kaffetrakter": {
+      "facilities": [
+        "Kaffemaskin"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kaffetrakter"
+      ]
+    },
+    "kafè": {
+      "facilities": [
+        "Kafeteria"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kafè"
+      ]
+    },
+    "kajakk/kano": {
+      "facilities": [
+        "Kano og kajakk"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kajakk/kano"
+      ]
+    },
+    "kampsportmatter": {
+      "facilities": [
+        "Kampsportmatter"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kampsportmatter"
+      ]
+    },
+    "kano": {
+      "facilities": [
+        "Kano og kajakk"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kano"
+      ]
+    },
+    "kano/kajakk": {
+      "facilities": [
+        "Kano og kajakk"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kano/Kajakk"
+      ]
+    },
+    "kapasitet 1 - 1000": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 1000
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 1000"
+      ]
+    },
+    "kapasitet 1 - 110": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 110
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 110"
+      ]
+    },
+    "kapasitet 1 - 15": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 15
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 15"
+      ]
+    },
+    "kapasitet 1 - 25": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 25
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 25"
+      ]
+    },
+    "kapasitet 1 - 300": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 300
+      },
+      "sourceNames": [
+        "Kapasitet 1 -  300"
+      ]
+    },
+    "kapasitet 1 - 4": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 4
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 4"
+      ]
+    },
+    "kapasitet 1 - 40": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 40
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 40"
+      ]
+    },
+    "kapasitet 1 - 400": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 400
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 400"
+      ]
+    },
+    "kapasitet 1 - 50": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 50
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 50"
+      ]
+    },
+    "kapasitet 1 - 5000": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 5000
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 5000"
+      ]
+    },
+    "kapasitet 1 - 60": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 60
+      },
+      "sourceNames": [
+        "kapasitet 1 - 60"
+      ]
+    },
+    "kapasitet 1 - 8": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 8
+      },
+      "sourceNames": [
+        "Kapasitet 1 - 8"
+      ]
+    },
+    "kapasitet 1 -20": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 20
+      },
+      "sourceNames": [
+        "Kapasitet 1 -20"
+      ]
+    },
+    "kapasitet 1 -30": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 30
+      },
+      "sourceNames": [
+        "Kapasitet 1 -30"
+      ]
+    },
+    "kapasitet 1 gruppe": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kapasitet 1 gruppe"
+      ]
+    },
+    "kapasitet 1-10": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 10
+      },
+      "sourceNames": [
+        "Kapasitet 1-10"
+      ]
+    },
+    "kapasitet 1-100": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 100
+      },
+      "sourceNames": [
+        "Kapasitet 1-100"
+      ]
+    },
+    "kapasitet 1-15": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 15
+      },
+      "sourceNames": [
+        "Kapasitet 1-15"
+      ]
+    },
+    "kapasitet 1-150": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 150
+      },
+      "sourceNames": [
+        "Kapasitet 1-150"
+      ]
+    },
+    "kapasitet 1-18": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 18
+      },
+      "sourceNames": [
+        "Kapasitet 1-18"
+      ]
+    },
+    "kapasitet 1-20": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 20
+      },
+      "sourceNames": [
+        "Kapasitet 1-20"
+      ]
+    },
+    "kapasitet 1-200": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 200
+      },
+      "sourceNames": [
+        "Kapasitet 1-200"
+      ]
+    },
+    "kapasitet 1-25": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 25
+      },
+      "sourceNames": [
+        "Kapasitet 1-25"
+      ]
+    },
+    "kapasitet 1-250": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 250
+      },
+      "sourceNames": [
+        "Kapasitet 1-250"
+      ]
+    },
+    "kapasitet 1-30": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 30
+      },
+      "sourceNames": [
+        "Kapasitet 1-30"
+      ]
+    },
+    "kapasitet 1-40": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 40
+      },
+      "sourceNames": [
+        "Kapasitet 1-40"
+      ]
+    },
+    "kapasitet 1-5": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 5
+      },
+      "sourceNames": [
+        "Kapasitet 1-5"
+      ]
+    },
+    "kapasitet 1-50": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 50
+      },
+      "sourceNames": [
+        "Kapasitet 1-50"
+      ]
+    },
+    "kapasitet 1-6": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 6
+      },
+      "sourceNames": [
+        "Kapasitet 1-6"
+      ]
+    },
+    "kapasitet 1-60": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 60
+      },
+      "sourceNames": [
+        "Kapasitet 1-60"
+      ]
+    },
+    "kapasitet 1-70": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 70
+      },
+      "sourceNames": [
+        "Kapasitet 1-70"
+      ]
+    },
+    "kapasitet 1-8": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 8
+      },
+      "sourceNames": [
+        "Kapasitet 1-8"
+      ]
+    },
+    "kapasitet 1-80": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 1,
+        "capacityMax": 80
+      },
+      "sourceNames": [
+        "Kapasitet 1-80"
+      ]
+    },
+    "kapasitet 10 - 15": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 10,
+        "capacityMax": 15
+      },
+      "sourceNames": [
+        "Kapasitet 10 - 15"
+      ]
+    },
+    "kapasitet 100-200": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 100,
+        "capacityMax": 200
+      },
+      "sourceNames": [
+        "Kapasitet 100-200"
+      ]
+    },
+    "kapasitet 120 m/møbler": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "furnished": true,
+        "capacityMax": 120
+      },
+      "sourceNames": [
+        "Kapasitet 120 m/møbler"
+      ]
+    },
+    "kapasitet 150 - 200": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 150,
+        "capacityMax": 200
+      },
+      "sourceNames": [
+        "Kapasitet 150 - 200"
+      ]
+    },
+    "kapasitet 2": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 2
+      },
+      "sourceNames": [
+        "Kapasitet 2"
+      ]
+    },
+    "kapasitet 2 - 4": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 2,
+        "capacityMax": 4
+      },
+      "sourceNames": [
+        "Kapasitet 2 - 4"
+      ]
+    },
+    "kapasitet 2 - 5": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 2,
+        "capacityMax": 5
+      },
+      "sourceNames": [
+        "Kapasitet 2 - 5"
+      ]
+    },
+    "kapasitet 20-30": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 20,
+        "capacityMax": 30
+      },
+      "sourceNames": [
+        "Kapasitet 20-30"
+      ]
+    },
+    "kapasitet 200-250": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 200,
+        "capacityMax": 250
+      },
+      "sourceNames": [
+        "Kapasitet 200-250"
+      ]
+    },
+    "kapasitet 230 u/møbler": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "furnished": false,
+        "capacityMax": 230
+      },
+      "sourceNames": [
+        "Kapasitet 230 u/møbler"
+      ]
+    },
+    "kapasitet 25": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 25
+      },
+      "sourceNames": [
+        "Kapasitet 25"
+      ]
+    },
+    "kapasitet 25 - 120": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 25,
+        "capacityMax": 120
+      },
+      "sourceNames": [
+        "Kapasitet 25 - 120"
+      ]
+    },
+    "kapasitet 250": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 250
+      },
+      "sourceNames": [
+        "Kapasitet 250"
+      ]
+    },
+    "kapasitet 30": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 30
+      },
+      "sourceNames": [
+        "Kapasitet 30"
+      ]
+    },
+    "kapasitet 30-50": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 30,
+        "capacityMax": 50
+      },
+      "sourceNames": [
+        "Kapasitet 30-50"
+      ]
+    },
+    "kapasitet 35": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 35
+      },
+      "sourceNames": [
+        "Kapasitet 35"
+      ]
+    },
+    "kapasitet 4 250": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 4250
+      },
+      "sourceNames": [
+        "Kapasitet 4 250"
+      ]
+    },
+    "kapasitet 40": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 40
+      },
+      "sourceNames": [
+        "Kapasitet 40"
+      ]
+    },
+    "kapasitet 45": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 45
+      },
+      "sourceNames": [
+        "Kapasitet 45"
+      ]
+    },
+    "kapasitet 50": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 50
+      },
+      "sourceNames": [
+        "Kapasitet 50"
+      ]
+    },
+    "kapasitet 50-100": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 50,
+        "capacityMax": 100
+      },
+      "sourceNames": [
+        "Kapasitet 50-100"
+      ]
+    },
+    "kapasitet inntil 100": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 100
+      },
+      "sourceNames": [
+        "Kapasitet inntil 100"
+      ]
+    },
+    "kapasitet inntil 150": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 150
+      },
+      "sourceNames": [
+        "Kapasitet inntil 150"
+      ]
+    },
+    "kapasitet inntil 80 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 80
+      },
+      "sourceNames": [
+        "Kapasitet inntil 80 personer"
+      ]
+    },
+    "kapasitet mellom 5 og 10.000": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 5,
+        "capacityMax": 10000
+      },
+      "sourceNames": [
+        "Kapasitet mellom 5 og 10.000"
+      ]
+    },
+    "kapasitet opp til 10 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 10
+      },
+      "sourceNames": [
+        "Kapasitet opp til 10 personer"
+      ]
+    },
+    "kapasitet opptil 100 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 100
+      },
+      "sourceNames": [
+        "Kapasitet opptil 100 personer"
+      ]
+    },
+    "kapasitet opptil 20 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 20
+      },
+      "sourceNames": [
+        "Kapasitet  opptil 20 personer"
+      ]
+    },
+    "kapasitet opptil 200 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 200
+      },
+      "sourceNames": [
+        "Kapasitet  opptil 200 personer"
+      ]
+    },
+    "kapasitet opptil 30 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 30
+      },
+      "sourceNames": [
+        "Kapasitet  opptil 30 personer"
+      ]
+    },
+    "kapasitet opptil 50 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 50
+      },
+      "sourceNames": [
+        "Kapasitet  opptil 50 personer"
+      ]
+    },
+    "kapasitet over 10.000": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 10000
+      },
+      "sourceNames": [
+        "Kapasitet over 10.000"
+      ]
+    },
+    "kapasitet over 500 personer": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 500
+      },
+      "sourceNames": [
+        "Kapasitet over 500 personer"
+      ]
+    },
+    "kapasitet: 4 - 10": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 4,
+        "capacityMax": 10
+      },
+      "sourceNames": [
+        "Kapasitet: 4 - 10"
+      ]
+    },
+    "kapasitet: 5 - 10": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMin": 5,
+        "capacityMax": 10
+      },
+      "sourceNames": [
+        "Kapasitet: 5 - 10"
+      ]
+    },
+    "kapasitet: opptil 200": {
+      "facilities": [
+        "Kapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "capacityMax": 200
+      },
+      "sourceNames": [
+        "Kapasitet: opptil 200"
+      ]
+    },
+    "kasse foran": {
+      "facilities": [
+        "Sykkeltilbehør"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kasse foran"
+      ]
+    },
+    "kinooppsett med stoler, ingen bord": {
+      "facilities": [
+        "Kinooppsett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kinooppsett med stoler, ingen bord"
+      ]
+    },
+    "kiosk": {
+      "facilities": [
+        "Kiosk"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kiosk"
+      ]
+    },
+    "kjøkken": {
+      "facilities": [
+        "Kjøkken"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kjøkken"
+      ]
+    },
+    "kjøkkenutstyr": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kjøkkenutstyr"
+      ]
+    },
+    "kjølekapasitet": {
+      "facilities": [
+        "Kjøleskap og fryser"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kjølekapasitet"
+      ]
+    },
+    "kjøleskap": {
+      "facilities": [
+        "Kjøleskap og fryser"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kjøleskap"
+      ]
+    },
+    "klapphekker": {
+      "facilities": [
+        "Klapphekker"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klapphekker"
+      ]
+    },
+    "klatresele": {
+      "facilities": [
+        "Klatreutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatresele"
+      ]
+    },
+    "klatresko": {
+      "facilities": [
+        "Klatreutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatresko"
+      ]
+    },
+    "klatretau": {
+      "facilities": [
+        "Klatreutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatretau"
+      ]
+    },
+    "klatreutstyr": {
+      "facilities": [
+        "Klatreutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatreutstyr"
+      ]
+    },
+    "klatrevegg": {
+      "facilities": [
+        "Klatrevegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatrevegg"
+      ]
+    },
+    "klatring": {
+      "facilities": [
+        "Klatrevegg"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klatring"
+      ]
+    },
+    "klipperom (da vinci-software)": {
+      "facilities": [
+        "Studio og opptak"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Klipperom &amp;#40;Da Vinci-software&amp;#41;"
+      ]
+    },
+    "kokekar": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kokekar"
+      ]
+    },
+    "kokesoner": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kokesoner"
+      ]
+    },
+    "komfyr": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Komfyr"
+      ]
+    },
+    "kontorstol": {
+      "facilities": [
+        "Kontorstol"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kontorstol"
+      ]
+    },
+    "kreativt rom med uformell møblering": {
+      "facilities": [
+        "Aktivitetsrom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kreativt rom med uformell møblering"
+      ]
+    },
+    "kunstgras": {
+      "facilities": [
+        "Kunstgress"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kunstgras"
+      ]
+    },
+    "kursrom med kursbord og stoler": {
+      "facilities": [
+        "Kursrom",
+        "Bord og stoler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Kursrom med kursbord og stoler"
+      ]
+    },
+    "leie av sko/klatresele": {
+      "facilities": [
+        "Klatreutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leie av sko/klatresele"
+      ]
+    },
+    "lekekrok": {
+      "facilities": [
+        "Lekerom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lekekrok"
+      ]
+    },
+    "lekeplass": {
+      "facilities": [
+        "Lekeplass"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lekeplass"
+      ]
+    },
+    "leker": {
+      "facilities": [
+        "Lekerom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Leker"
+      ]
+    },
+    "lekerom": {
+      "facilities": [
+        "Lekerom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lekerom"
+      ]
+    },
+    "lerret": {
+      "facilities": [
+        "Lerret"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lerret"
+      ]
+    },
+    "lerret og projektor i himling, appletv, mikrofon/høyttaler og nødvendige kabler": {
+      "facilities": [
+        "Projektor",
+        "Lerret"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lerret og projektor i himling, AppleTV, Mikrofon/Høyttaler og nødvendige kabler"
+      ]
+    },
+    "lite møterom audio": {
+      "facilities": [
+        "Møterom",
+        "Lydanlegg"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lite møterom audio"
+      ]
+    },
+    "livsnøytral seremonirom": {
+      "facilities": [
+        "Seremonirom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Livsnøytral seremonirom"
+      ]
+    },
+    "lyd- og speakeranlegg": {
+      "facilities": [
+        "Lydanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lyd- og speakeranlegg"
+      ]
+    },
+    "lydanlegg": {
+      "facilities": [
+        "Lydanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lydanlegg"
+      ]
+    },
+    "lydplanke": {
+      "facilities": [
+        "Høyttaler"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lydplanke"
+      ]
+    },
+    "lysanlegg": {
+      "facilities": [
+        "Lysanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lysanlegg"
+      ]
+    },
+    "lysrigg for scenebruk": {
+      "facilities": [
+        "Lysanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Lysrigg for scenebruk"
+      ]
+    },
+    "matter": {
+      "facilities": [
+        "Matter"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Matter"
+      ]
+    },
+    "matter, turn": {
+      "facilities": [
+        "Matter"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Matter, turn"
+      ]
+    },
+    "medium møterom audio": {
+      "facilities": [
+        "Møterom",
+        "Lydanlegg"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Medium møterom audio"
+      ]
+    },
+    "mikrobølgeovn": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Mikrobølgeovn"
+      ]
+    },
+    "mikrofon": {
+      "facilities": [
+        "Mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Mikrofon"
+      ]
+    },
+    "minikjøkken": {
+      "facilities": [
+        "Minikjøkken"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Minikjøkken"
+      ]
+    },
+    "mokkamaster": {
+      "facilities": [
+        "Kaffemaskin"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Mokkamaster"
+      ]
+    },
+    "monkeybar": {
+      "facilities": [
+        "Turnapparater"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Monkeybar"
+      ]
+    },
+    "musikkanlegg": {
+      "facilities": [
+        "Lydanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Musikkanlegg"
+      ]
+    },
+    "musikkanlegg m/blåtann": {
+      "facilities": [
+        "Lydanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Musikkanlegg m/blåtann"
+      ]
+    },
+    "mål": {
+      "facilities": [
+        "Mål"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Mål"
+      ]
+    },
+    "mål for innefotball": {
+      "facilities": [
+        "Fotball-/innebandymål"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Mål for innefotball"
+      ]
+    },
+    "oppholdsrom": {
+      "facilities": [
+        "Oppholdsrom"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Oppholdsrom"
+      ]
+    },
+    "oppvaskmaskin": {
+      "facilities": [
+        "Oppvaskmaskin"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Oppvaskmaskin"
+      ]
+    },
+    "orgel": {
+      "facilities": [
+        "Orgel"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Orgel"
+      ]
+    },
+    "padelbane": {
+      "facilities": [
+        "Padelbane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Padelbane"
+      ]
+    },
+    "padleårer": {
+      "facilities": [
+        "Padleutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Padleårer"
+      ]
+    },
+    "parkettgulv": {
+      "facilities": [
+        "Parkettgulv"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Parkettgulv"
+      ]
+    },
+    "pc": {
+      "facilities": [
+        "PC"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "PC"
+      ]
+    },
+    "piano": {
+      "facilities": [
+        "Piano"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Piano"
+      ]
+    },
+    "piano/flygel": {
+      "facilities": [
+        "Piano",
+        "Flygel"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Piano/flygel"
+      ]
+    },
+    "piggdekk tilgjengelig": {
+      "facilities": [
+        "Sykkeltilbehør"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Piggdekk tilgjengelig"
+      ]
+    },
+    "plaskebasseng": {
+      "facilities": [
+        "Barnebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Plaskebasseng"
+      ]
+    },
+    "plaskedam for de minste": {
+      "facilities": [
+        "Barnebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Plaskedam for de minste"
+      ]
+    },
+    "playstation": {
+      "facilities": [
+        "Spillkonsoll"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Playstation"
+      ]
+    },
+    "podcast-studio med utstyr": {
+      "facilities": [
+        "Studio og opptak"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Podcast-studio med utstyr"
+      ]
+    },
+    "premiepall": {
+      "facilities": [
+        "Premiepall"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Premiepall"
+      ]
+    },
+    "projektor": {
+      "facilities": [
+        "Projektor"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Projektor"
+      ]
+    },
+    "prosjektor": {
+      "facilities": [
+        "Projektor"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Prosjektor"
+      ]
+    },
+    "pumptrack": {
+      "facilities": [
+        "Pumptrack"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Pumptrack"
+      ]
+    },
+    "redningsvest": {
+      "facilities": [
+        "Redningsvest"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Redningsvest"
+      ]
+    },
+    "resultattavle": {
+      "facilities": [
+        "Resultattavle"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Resultattavle"
+      ]
+    },
+    "ribbevegg": {
+      "facilities": [
+        "Ribbevegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ribbevegg",
+        "ribbevegg"
+      ]
+    },
+    "ribbevegger": {
+      "facilities": [
+        "Ribbevegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ribbevegger"
+      ]
+    },
+    "rullestolrampe": {
+      "facilities": [
+        "Rullestolrampe"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Rullestolrampe"
+      ]
+    },
+    "salg badeartikler": {
+      "facilities": [
+        "Salg av badeartikler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Salg badeartikler"
+      ]
+    },
+    "samsung 75’’ 4k skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 75
+      },
+      "sourceNames": [
+        "Samsung 75’’ 4K skjerm"
+      ]
+    },
+    "samsung 85’’ 4k skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "screenSizeInch": 85
+      },
+      "sourceNames": [
+        "Samsung 85’’ 4K skjerm"
+      ]
+    },
+    "sandstrand": {
+      "facilities": [
+        "Sandstrand"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sandstrand"
+      ]
+    },
+    "sandvolleyballbane": {
+      "facilities": [
+        "Sandvolleyballbane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sandvolleyballbane"
+      ]
+    },
+    "scene": {
+      "facilities": [
+        "Scene"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Scene"
+      ]
+    },
+    "scene, 1x2m 16stk. 3 høgder": {
+      "facilities": [
+        "Sceneelementer"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Scene, 1x2m 16stk. 3 høgder"
+      ]
+    },
+    "scenelys": {
+      "facilities": [
+        "Lysanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Scenelys"
+      ]
+    },
+    "septik": {
+      "facilities": [
+        "Septik"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Septik"
+      ]
+    },
+    "serveringsdisk": {
+      "facilities": [
+        "Serveringsdisk"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Serveringsdisk"
+      ]
+    },
+    "shuffleboard": {
+      "facilities": [
+        "Shuffleboard"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Shuffleboard"
+      ]
+    },
+    "sidevesker": {
+      "facilities": [
+        "Sykkeltilbehør"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sidevesker"
+      ]
+    },
+    "sittegrupper": {
+      "facilities": [
+        "Sofa og sittegrupper"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sittegrupper"
+      ]
+    },
+    "skatepark": {
+      "facilities": [
+        "Skatepark"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skatepark"
+      ]
+    },
+    "ski": {
+      "facilities": [
+        "Ski"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ski"
+      ]
+    },
+    "skinner i tak med utstillingsbelysning": {
+      "facilities": [
+        "Lysanlegg"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skinner i tak med utstillingsbelysning"
+      ]
+    },
+    "skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skjerm"
+      ]
+    },
+    "skjerm m/hdmi": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skjerm m/HDMI"
+      ]
+    },
+    "sklie for de minste": {
+      "facilities": [
+        "Vannrutsjebane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sklie for de minste"
+      ]
+    },
+    "skyve-amfi": {
+      "facilities": [
+        "Amfi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skyve-amfi"
+      ]
+    },
+    "skøyter": {
+      "facilities": [
+        "Skøyter"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Skøyter"
+      ]
+    },
+    "smart tv": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Smart TV"
+      ]
+    },
+    "smartboard": {
+      "facilities": [
+        "Digital tavle"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Smartboard"
+      ]
+    },
+    "sofa": {
+      "facilities": [
+        "Sofa og sittegrupper"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sofa"
+      ]
+    },
+    "speakeranlegg": {
+      "facilities": [
+        "Lydanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Speakeranlegg"
+      ]
+    },
+    "speilvegg": {
+      "facilities": [
+        "Speilvegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Speilvegg"
+      ]
+    },
+    "spisebord": {
+      "facilities": [
+        "Spisebord"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Spisebord"
+      ]
+    },
+    "sportsgulv": {
+      "facilities": [
+        "Sportsgulv"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sportsgulv"
+      ]
+    },
+    "sprangkasse skrå 5-delt": {
+      "facilities": [
+        "Turnapparater"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sprangkasse skrå 5-delt"
+      ]
+    },
+    "startpall": {
+      "facilities": [
+        "Startpall"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Startpall"
+      ]
+    },
+    "steamer/oppvasmaskin": {
+      "facilities": [
+        "Oppvaskmaskin"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Steamer/oppvasmaskin"
+      ]
+    },
+    "stekeovn": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stekeovn"
+      ]
+    },
+    "stolar": {
+      "facilities": [
+        "Stoler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stolar"
+      ]
+    },
+    "stolar, stabel à 10 stk.": {
+      "facilities": [
+        "Stoler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stolar, stabel à 10 stk."
+      ]
+    },
+    "stoler": {
+      "facilities": [
+        "Stoler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stoler"
+      ]
+    },
+    "stolper og nett": {
+      "facilities": [
+        "Nett og stolper"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stolper og nett"
+      ]
+    },
+    "storskjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Storskjerm"
+      ]
+    },
+    "stort møterom": {
+      "facilities": [
+        "Møterom"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stort møterom"
+      ]
+    },
+    "stort møterom audio": {
+      "facilities": [
+        "Møterom",
+        "Lydanlegg"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stort møterom audio"
+      ]
+    },
+    "streaming (egne priser gjelder)": {
+      "facilities": [
+        "Streaming"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Streaming &amp;#40;egne priser gjelder&amp;#41;"
+      ]
+    },
+    "strøm": {
+      "facilities": [
+        "Strøm"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Strøm"
+      ]
+    },
+    "strømuttak": {
+      "facilities": [
+        "Strøm"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Strømuttak"
+      ]
+    },
+    "studiepc": {
+      "facilities": [
+        "PC"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "StudiePC"
+      ]
+    },
+    "stupebasseng dybde 3,8 m": {
+      "facilities": [
+        "Stupebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "depthM": 3.8
+      },
+      "sourceNames": [
+        "Stupebasseng dybde 3,8 m"
+      ]
+    },
+    "stupebrett": {
+      "facilities": [
+        "Stupetårn og sviktbrett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Stupebrett"
+      ]
+    },
+    "styrketreningsutstyr": {
+      "facilities": [
+        "Styrketreningsutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Styrketreningsutstyr"
+      ]
+    },
+    "ståbord": {
+      "facilities": [
+        "Ståbord"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Ståbord"
+      ]
+    },
+    "større lydanlegg": {
+      "facilities": [
+        "Lydanlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Større lydanlegg"
+      ]
+    },
+    "svømmebasseng": {
+      "facilities": [
+        "Svømmebasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Svømmebasseng"
+      ]
+    },
+    "sykkel": {
+      "facilities": [
+        "Sykkel"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Sykkel"
+      ]
+    },
+    "symaskiner": {
+      "facilities": [
+        "Hobby- og verkstedutstyr"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Symaskiner"
+      ]
+    },
+    "talarstol": {
+      "facilities": [
+        "Talarstol"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Talarstol"
+      ]
+    },
+    "taleutjevninganlegg fra phonak": {
+      "facilities": [
+        "Teleslynge"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "taleutjevninganlegg fra Phonak"
+      ]
+    },
+    "tastatur": {
+      "facilities": [
+        "PC"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tastatur"
+      ]
+    },
+    "tavle": {
+      "facilities": [
+        "Whiteboard"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tavle"
+      ]
+    },
+    "tekjøkken": {
+      "facilities": [
+        "Minikjøkken"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tekjøkken"
+      ]
+    },
+    "teleslynge": {
+      "facilities": [
+        "Teleslynge"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teleslynge",
+        "teleslynge"
+      ]
+    },
+    "teltplass": {
+      "facilities": [
+        "Teltplass"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Teltplass"
+      ]
+    },
+    "tidtakeranlegg": {
+      "facilities": [
+        "Tidtakeranlegg"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tidtakeranlegg"
+      ]
+    },
+    "tilhenger": {
+      "facilities": [
+        "Tilhenger"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tilhenger"
+      ]
+    },
+    "tilrettelagt for menneske med nedsatt funksjonsevne": {
+      "facilities": [
+        "Universell utforming"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tilrettelagt for menneske med nedsatt funksjonsevne"
+      ]
+    },
+    "tilrettelegging for bevegelseshemmede": {
+      "facilities": [
+        "Universell utforming"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tilrettelegging for bevegelseshemmede"
+      ]
+    },
+    "tjukkasar": {
+      "facilities": [
+        "Hoppemadrass"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tjukkasar"
+      ]
+    },
+    "toalett": {
+      "facilities": [
+        "Toalett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Toalett"
+      ]
+    },
+    "toalett (hc)": {
+      "facilities": [
+        "HC-toalett",
+        "Universell utforming"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Toalett &amp;#40;HC&amp;#41;"
+      ]
+    },
+    "toalett tilknyttet friluftsanlegg": {
+      "facilities": [
+        "Toalett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Toalett tilknyttet friluftsanlegg"
+      ]
+    },
+    "toaletter": {
+      "facilities": [
+        "Toalett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Toaletter"
+      ]
+    },
+    "toalettfasiliteter": {
+      "facilities": [
+        "Toalett"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Toalettfasiliteter"
+      ]
+    },
+    "trampoline": {
+      "facilities": [
+        "Trampoline"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Trampoline"
+      ]
+    },
+    "tribune": {
+      "facilities": [
+        "Tribune"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Tribune"
+      ]
+    },
+    "tribunekapasitet 100": {
+      "facilities": [
+        "Tribunekapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "seatingCapacity": 100
+      },
+      "sourceNames": [
+        "Tribunekapasitet 100"
+      ]
+    },
+    "tribunekapasitet 1000": {
+      "facilities": [
+        "Tribunekapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "seatingCapacity": 1000
+      },
+      "sourceNames": [
+        "Tribunekapasitet 1000"
+      ]
+    },
+    "tribunekapasitet 1800": {
+      "facilities": [
+        "Tribunekapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "seatingCapacity": 1800
+      },
+      "sourceNames": [
+        "Tribunekapasitet 1800"
+      ]
+    },
+    "tribunekapasitet 200": {
+      "facilities": [
+        "Tribunekapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "seatingCapacity": 200
+      },
+      "sourceNames": [
+        "Tribunekapasitet 200"
+      ]
+    },
+    "tribunekapasitet 50": {
+      "facilities": [
+        "Tribunekapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "seatingCapacity": 50
+      },
+      "sourceNames": [
+        "Tribunekapasitet 50"
+      ]
+    },
+    "tribunekapasitet 500": {
+      "facilities": [
+        "Tribunekapasitet"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "attributes": {
+        "seatingCapacity": 500
+      },
+      "sourceNames": [
+        "tribunekapasitet 500"
+      ]
+    },
+    "trimpark": {
+      "facilities": [
+        "Trimpark"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Trimpark"
+      ]
+    },
+    "trådløs mikrofon": {
+      "facilities": [
+        "Trådløs mikrofon"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "trådløs mikrofon"
+      ]
+    },
+    "trådløs og kablet tilkobling av pc": {
+      "facilities": [
+        "Trådløs skjermdeling"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "trådløs og kablet tilkobling av PC"
+      ]
+    },
+    "tv": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "TV"
+      ]
+    },
+    "tv-skjerm": {
+      "facilities": [
+        "Skjerm/TV"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "TV-skjerm"
+      ]
+    },
+    "undervisningsbasseng": {
+      "facilities": [
+        "Undervisningsbasseng"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Undervisningsbasseng"
+      ]
+    },
+    "utendørsscene": {
+      "facilities": [
+        "Utendørsscene"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utendørsscene"
+      ]
+    },
+    "utholdenhetsutstyr": {
+      "facilities": [
+        "Styrketreningsutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Utholdenhetsutstyr"
+      ]
+    },
+    "vann": {
+      "facilities": [
+        "Vann"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vann"
+      ]
+    },
+    "vannfontene": {
+      "facilities": [
+        "Vann"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vannfontene"
+      ]
+    },
+    "vannrutsjebane": {
+      "facilities": [
+        "Vannrutsjebane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vannrutsjebane"
+      ]
+    },
+    "vannsklie": {
+      "facilities": [
+        "Vannrutsjebane"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vannsklie"
+      ]
+    },
+    "vanntilgang": {
+      "facilities": [
+        "Vann"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vanntilgang"
+      ]
+    },
+    "vannuttak": {
+      "facilities": [
+        "Vann"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vannuttak"
+      ]
+    },
+    "varmeskap": {
+      "facilities": [
+        "Kjøkkenutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Varmeskap"
+      ]
+    },
+    "varmtvannsbasseng tilrettelagt for hc": {
+      "facilities": [
+        "Varmtvannsbasseng",
+        "Universell utforming"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Varmtvannsbasseng tilrettelagt for HC"
+      ]
+    },
+    "vask": {
+      "facilities": [
+        "Vask"
+      ],
+      "confidence": "L",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vask"
+      ]
+    },
+    "vaskemaskin": {
+      "facilities": [
+        "Vaskemaskin"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vaskemaskin"
+      ]
+    },
+    "vedfyrt ovn": {
+      "facilities": [
+        "Vedovn"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vedfyrt ovn"
+      ]
+    },
+    "vekter": {
+      "facilities": [
+        "Styrketreningsutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Vekter"
+      ]
+    },
+    "verkstedet": {
+      "facilities": [
+        "Hobby- og verkstedutstyr"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Verkstedet"
+      ]
+    },
+    "verktøy": {
+      "facilities": [
+        "Hobby- og verkstedutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Verktøy"
+      ]
+    },
+    "video-og filmutstyr": {
+      "facilities": [
+        "Kamera og videoutstyr"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Video-og filmutstyr"
+      ]
+    },
+    "videokonferanse": {
+      "facilities": [
+        "Videokonferanse"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "videokonferanse"
+      ]
+    },
+    "videosamtaler": {
+      "facilities": [
+        "Videokonferanse"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Videosamtaler"
+      ]
+    },
+    "volleyball stolpar og nett": {
+      "facilities": [
+        "Nett og stolper"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Volleyball stolpar og nett"
+      ]
+    },
+    "volleyballnett": {
+      "facilities": [
+        "Nett og stolper"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Volleyballnett"
+      ]
+    },
+    "webkamera": {
+      "facilities": [
+        "Videokonferanse"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "Webkamera"
+      ]
+    },
+    "whiteboard": {
+      "facilities": [
+        "Whiteboard"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Whiteboard"
+      ]
+    },
+    "whiteboard (interaktiv tavla)": {
+      "facilities": [
+        "Digital tavle"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Whiteboard &amp;#40;interaktiv tavla&amp;#41;"
+      ]
+    },
+    "whiteboard-stativ": {
+      "facilities": [
+        "Whiteboard"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Whiteboard-stativ"
+      ]
+    },
+    "wi-fi": {
+      "facilities": [
+        "Internett/WiFi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Wi-Fi"
+      ]
+    },
+    "wifi": {
+      "facilities": [
+        "Internett/WiFi"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Wifi"
+      ]
+    },
+    "xxl møterom": {
+      "facilities": [
+        "Møterom"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "XXL Møterom"
+      ]
+    },
+    "xxl møterom audio": {
+      "facilities": [
+        "Møterom",
+        "Lydanlegg"
+      ],
+      "confidence": "M",
+      "status": "Proposed",
+      "sourceNames": [
+        "XXL Møterom audio"
+      ]
+    },
+    "yamaha lyd på hver side av skjerm": {
+      "facilities": [
+        "Høyttaler"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Yamaha lyd på hver side av skjerm"
+      ]
+    },
+    "åpent spiseområde": {
+      "facilities": [
+        "Spiseområde"
+      ],
+      "confidence": "H",
+      "status": "Proposed",
+      "sourceNames": [
+        "Åpent spiseområde"
+      ]
+    }
+  }
+}

@@ -1,0 +1,598 @@
+{
+  "source": "AktivKommune_venue_type_mapping_v0.2.xlsx",
+  "approvedOnly": false,
+  "facets": {
+    "sportsIndoor": {
+      "Idrettshall": {
+        "id": 1,
+        "altLabels": [
+          "idrettshall - privateid"
+        ]
+      },
+      "Flerbrukshall": {
+        "id": 2,
+        "broader": "Idrettshall"
+      },
+      "Friidrettshall": {
+        "id": 3,
+        "broader": "Idrettshall"
+      },
+      "Gymsal": {
+        "id": 4,
+        "broader": "Idrettshall"
+      },
+      "Tennishall": {
+        "id": 5,
+        "broader": "Idrettshall"
+      },
+      "Turnhall": {
+        "id": 6,
+        "broader": "Idrettshall",
+        "altLabels": [
+          "turn-/friidretts areal",
+          "turnområde"
+        ]
+      },
+      "Ishall": {
+        "id": 7
+      },
+      "Curlinghall": {
+        "id": 8,
+        "broader": "Ishall"
+      },
+      "Klatrehall": {
+        "id": 9,
+        "altLabels": [
+          "klatrevegg",
+          "klatring",
+          "klatring/buldring"
+        ]
+      },
+      "Skytehall": {
+        "id": 10,
+        "altLabels": [
+          "skytebane - skytehall"
+        ]
+      },
+      "Trenings- og aktivitetssal": {
+        "id": 11,
+        "altLabels": [
+          "aktivitetessal",
+          "aktivitetssal",
+          "apparatsal",
+          "atletsal",
+          "oppvarmingsrom",
+          "utholdenhetsrom"
+        ]
+      },
+      "Dansesal": {
+        "id": 12,
+        "broader": "Trenings- og aktivitetssal",
+        "altLabels": [
+          "dans/treningsrom"
+        ]
+      },
+      "Kampsportrom": {
+        "id": 13,
+        "broader": "Trenings- og aktivitetssal",
+        "altLabels": [
+          "kampsportmatte",
+          "kamsport"
+        ]
+      },
+      "Spinningsal": {
+        "id": 14,
+        "broader": "Trenings- og aktivitetssal"
+      },
+      "Styrkerom": {
+        "id": 15,
+        "broader": "Trenings- og aktivitetssal",
+        "altLabels": [
+          "styrkeløftlokale",
+          "styrketrening",
+          "vektløfterlokale"
+        ]
+      }
+    },
+    "sportsOutdoor": {
+      "Ballbinge": {
+        "id": 16,
+        "altLabels": [
+          "ballbinger"
+        ]
+      },
+      "Fotballbane": {
+        "id": 17
+      },
+      "Grusbane": {
+        "id": 18,
+        "broader": "Fotballbane"
+      },
+      "Kunstgressbane": {
+        "id": 19,
+        "broader": "Fotballbane",
+        "altLabels": [
+          "kunstgrasbane"
+        ]
+      },
+      "Naturgressbane": {
+        "id": 20,
+        "broader": "Fotballbane",
+        "altLabels": [
+          "grasbane",
+          "gressbane"
+        ]
+      },
+      "Friidrettsanlegg": {
+        "id": 21,
+        "altLabels": [
+          "friidrett stadion",
+          "friidrettsbane"
+        ]
+      },
+      "Kastfelt": {
+        "id": 22,
+        "broader": "Friidrettsanlegg",
+        "altLabels": [
+          "kastfelt - gress",
+          "kastfelt - grus"
+        ]
+      },
+      "Sprintbane": {
+        "id": 23,
+        "broader": "Friidrettsanlegg",
+        "altLabels": [
+          "sprintstripe"
+        ]
+      },
+      "Idrettsanlegg (generelt)": {
+        "id": 24,
+        "altLabels": [
+          "anlegg",
+          "idrettsanlegg",
+          "idrettsanlegg - privateid"
+        ]
+      },
+      "Kunstisbane": {
+        "id": 25,
+        "altLabels": [
+          "utendørs isbane"
+        ]
+      },
+      "Padelbane": {
+        "id": 26,
+        "altLabels": [
+          "padeltennis"
+        ]
+      },
+      "Sandvolleyballbane": {
+        "id": 27
+      },
+      "Skatepark": {
+        "id": 28,
+        "altLabels": [
+          "skateanlegg"
+        ]
+      },
+      "Tennisbane": {
+        "id": 29
+      },
+      "Uteanlegg (generelt)": {
+        "id": 30,
+        "altLabels": [
+          "andre uteanlegg",
+          "uteanlegg"
+        ]
+      }
+    },
+    "pool": {
+      "Svømmehall": {
+        "id": 31,
+        "altLabels": [
+          "basseng - symjehall",
+          "svømmeanlegg"
+        ]
+      },
+      "Basseng": {
+        "id": 32,
+        "broader": "Svømmehall",
+        "altLabels": [
+          "svømmebasseng",
+          "symjebasseng"
+        ]
+      },
+      "Varmtvannsbasseng": {
+        "id": 33,
+        "broader": "Basseng",
+        "altLabels": [
+          "terapibasseng"
+        ]
+      }
+    },
+    "culture": {
+      "Amfi": {
+        "id": 34
+      },
+      "Kinosal": {
+        "id": 35,
+        "altLabels": [
+          "filmrom",
+          "kino"
+        ]
+      },
+      "Kulturhus": {
+        "id": 36
+      },
+      "Kultursal": {
+        "id": 37,
+        "altLabels": [
+          "kulturlokale",
+          "lokale for kultur"
+        ]
+      },
+      "Konsertsal": {
+        "id": 38,
+        "broader": "Kultursal"
+      },
+      "Scene": {
+        "id": 39,
+        "altLabels": [
+          "scene, konferanse, konsert, møte"
+        ]
+      },
+      "Utescene": {
+        "id": 40,
+        "broader": "Scene",
+        "altLabels": [
+          "utendørsscene"
+        ]
+      },
+      "Teaterskole": {
+        "id": 41
+      },
+      "Utstillingslokale": {
+        "id": 42,
+        "altLabels": [
+          "utstilling/kunst"
+        ]
+      },
+      "Øvingsrom": {
+        "id": 43,
+        "altLabels": [
+          "lydisolert rom for musikk",
+          "musikk og danserom",
+          "musikkrom",
+          "øvingsleilighet",
+          "øvingslokale",
+          "øvingsrom, musikkrom, musikk"
+        ]
+      }
+    },
+    "workshop": {
+      "Atelier": {
+        "id": 44,
+        "altLabels": [
+          "ateliet"
+        ]
+      },
+      "Datarom": {
+        "id": 45
+      },
+      "Innovasjonslab": {
+        "id": 46,
+        "altLabels": [
+          "samhandlingslab"
+        ]
+      },
+      "Medieverksted": {
+        "id": 47,
+        "altLabels": [
+          "filmverksted",
+          "multimediaverksted"
+        ]
+      },
+      "Fotostudio": {
+        "id": 48,
+        "broader": "Medieverksted"
+      },
+      "Lydstudio": {
+        "id": 49,
+        "broader": "Medieverksted"
+      },
+      "Verksted": {
+        "id": 50,
+        "altLabels": [
+          "folkeverkstad",
+          "kreativt verksted",
+          "kunst og designverksted",
+          "kunst og håndverk",
+          "verkstedlokale"
+        ]
+      },
+      "Sløydsal": {
+        "id": 51,
+        "broader": "Verksted"
+      },
+      "Systue": {
+        "id": 52,
+        "broader": "Verksted"
+      }
+    },
+    "meeting": {
+      "Auditorium": {
+        "id": 53,
+        "altLabels": [
+          "foredragssal"
+        ]
+      },
+      "Aula": {
+        "id": 54
+      },
+      "Klasserom": {
+        "id": 55,
+        "altLabels": [
+          "lite undervisningsrom",
+          "stort undervisningsrom"
+        ]
+      },
+      "Kontor og arbeidsplass": {
+        "id": 56,
+        "altLabels": [
+          "arbeidsplasser",
+          "kontor"
+        ]
+      },
+      "Kursrom": {
+        "id": 57
+      },
+      "Møterom": {
+        "id": 58,
+        "altLabels": [
+          "møtelokale",
+          "møter, møterom, kurs, selskap"
+        ]
+      },
+      "Grupperom": {
+        "id": 59,
+        "broader": "Møterom",
+        "altLabels": [
+          "prosjektrom"
+        ]
+      },
+      "Konferanserom": {
+        "id": 60,
+        "broader": "Møterom"
+      }
+    },
+    "assembly": {
+      "Aktivitetshus": {
+        "id": 61,
+        "altLabels": [
+          "allaktivitetshus"
+        ]
+      },
+      "Bibliotek": {
+        "id": 62
+      },
+      "Dagsenter": {
+        "id": 63
+      },
+      "Fellesrom": {
+        "id": 64,
+        "altLabels": [
+          "beboerrom",
+          "miljøstue"
+        ]
+      },
+      "Flerbruksrom": {
+        "id": 65,
+        "altLabels": [
+          "aktivitetsrom"
+        ]
+      },
+      "Foajé": {
+        "id": 66,
+        "altLabels": [
+          "foaje"
+        ]
+      },
+      "Forsamlingslokale": {
+        "id": 67,
+        "altLabels": [
+          "arrangementlokale",
+          "arrangementsarena",
+          "arrangementslokale",
+          "forsamlingslokale - privateid",
+          "utleigelokale"
+        ]
+      },
+      "Festsal": {
+        "id": 68,
+        "broader": "Forsamlingslokale"
+      },
+      "Selskapslokale": {
+        "id": 69,
+        "broader": "Forsamlingslokale",
+        "altLabels": [
+          "bursdagslokale",
+          "selskapslokale/flerbruksrom",
+          "selskapslokale/storsal"
+        ]
+      },
+      "Innbyggertorg": {
+        "id": 70,
+        "altLabels": [
+          "judaberg innbyggertorg"
+        ]
+      },
+      "Seremonirom": {
+        "id": 71,
+        "altLabels": [
+          "sermonirom"
+        ]
+      },
+      "Ungdomslokale": {
+        "id": 72
+      }
+    },
+    "food": {
+      "Kafé": {
+        "id": 73,
+        "altLabels": [
+          "bevertning",
+          "kafè",
+          "kafé og kjøkken",
+          "kiosk/kafeteria",
+          "søndagskafé"
+        ]
+      },
+      "Kantine": {
+        "id": 74,
+        "altLabels": [
+          "kantine - kunnskapshjørne",
+          "kantinebidrag"
+        ]
+      },
+      "Kiosk": {
+        "id": 75,
+        "altLabels": [
+          "kiosk - minkjøkken"
+        ]
+      },
+      "Kjøkken": {
+        "id": 76
+      },
+      "Skolekjøkken": {
+        "id": 77,
+        "broader": "Kjøkken",
+        "altLabels": [
+          "skulekjøkken"
+        ]
+      }
+    },
+    "outdoor": {
+      "Byrom og torg": {
+        "id": 78,
+        "altLabels": [
+          "byrom",
+          "torgplass"
+        ]
+      },
+      "Friluftsområde": {
+        "id": 79,
+        "altLabels": [
+          "friluftsanlegg",
+          "friområder",
+          "utendørsområde",
+          "uterom/uteområde"
+        ]
+      },
+      "Gapahuk": {
+        "id": 80,
+        "broader": "Friluftsområde"
+      },
+      "Grill- og bålplass": {
+        "id": 81,
+        "broader": "Friluftsområde",
+        "altLabels": [
+          "bålpanne",
+          "grillplass"
+        ]
+      },
+      "Park": {
+        "id": 82,
+        "broader": "Friluftsområde"
+      },
+      "Teltplass": {
+        "id": 83,
+        "broader": "Friluftsområde"
+      },
+      "Turvei": {
+        "id": 84,
+        "broader": "Friluftsområde",
+        "altLabels": [
+          "turveier"
+        ]
+      },
+      "Natursenter": {
+        "id": 85,
+        "altLabels": [
+          "mostun natursenter"
+        ]
+      },
+      "Sjøsportsanlegg": {
+        "id": 86
+      }
+    },
+    "accommodation": {
+      "Leilighet": {
+        "id": 87
+      },
+      "Overnattingssted": {
+        "id": 88,
+        "altLabels": [
+          "overnatting"
+        ]
+      }
+    },
+    "service": {
+      "Butikklokale": {
+        "id": 89
+      },
+      "Frisørsalong": {
+        "id": 90
+      },
+      "Garderobe og WC": {
+        "id": 91,
+        "altLabels": [
+          "garderobe",
+          "wc/toalett"
+        ],
+        "note": "Usually a facility, not a venue type"
+      },
+      "Lager": {
+        "id": 92,
+        "altLabels": [
+          "frilager"
+        ]
+      },
+      "Salgs- og standplass": {
+        "id": 93,
+        "altLabels": [
+          "salgsplass",
+          "standplass"
+        ]
+      },
+      "Veiledningsrom": {
+        "id": 94,
+        "altLabels": [
+          "veiledning/rådgivningstime",
+          "veiledningstime byggesak"
+        ],
+        "note": "Citizen services (byggesak, rådgivning)"
+      }
+    },
+    "exclude": {
+      "Avklares": {
+        "id": 95,
+        "note": "Address or name - ask source owner"
+      },
+      "Ikke lokaletype": {
+        "id": 96,
+        "note": "Value belongs in another field (activity, facility, equipment)"
+      },
+      "Stengt/utilgjengelig": {
+        "id": 97,
+        "note": "Status, not a venue type"
+      },
+      "Testdata/systemtekst": {
+        "id": 98,
+        "note": "Test or placeholder"
+      },
+      "Uspesifisert": {
+        "id": 99,
+        "note": "Generic catch-all"
+      }
+    }
+  }
+}
