@@ -12,9 +12,10 @@ get {
 
 docs {
   Valgene til filterpanelet ("More filters"): kommuner, lokaletyper,
-  aktiviteter og fasiliteter, hver som { kode, navn }. Bare verdier som er
-  koblet til en bookbar ressurs er med. Vis navn til brukeren, send koden som
-  parameter til "Sok". Aktiviteter er flate (bare ACT-koder, ingen forelder).
+  aktiviteter og fasiliteter. Kommuner er { kode (kommunenr), navn }; de tre
+  andre er { id, navn }. Bare verdier som er koblet til en bookbar ressurs er
+  med. Vis navn til brukeren, send kode/id som parameter til "Sok".
+  Aktiviteter er flate (ingen forelder).
 }
 
 tests {
@@ -30,7 +31,7 @@ tests {
     expect(b.fasiliteter).to.be.an("array");
   });
 
-  test("hvert valg har kode og navn", function() {
+  test("kommuner har kode og navn", function() {
     const kommuner = res.getBody().kommuner;
     if (kommuner.length > 0) {
       expect(kommuner[0].kode).to.be.a("string");
@@ -38,9 +39,13 @@ tests {
     }
   });
 
-  test("aktiviteter er bare ACT-koder", function() {
-    res.getBody().aktiviteter.forEach(function(a) {
-      expect(a.kode).to.match(/^ACT-/);
+  test("lokaletyper, aktiviteter og fasiliteter har id og navn", function() {
+    const b = res.getBody();
+    [b.lokaletyper, b.aktiviteter, b.fasiliteter].forEach(function(liste) {
+      liste.forEach(function(v) {
+        expect(v.id).to.be.a("number");
+        expect(v.navn).to.be.a("string");
+      });
     });
   });
 }

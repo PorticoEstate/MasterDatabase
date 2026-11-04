@@ -116,9 +116,9 @@ public class RessursSokService
 		return new RessursSokParametre(
 			q,
 			liste(p.kommune()),
-			liste(p.lokaletype()),
-			liste(p.aktivitet()),
-			liste(p.fasilitet()),
+			idListe(p.lokaletype()),
+			idListe(p.aktivitet()),
+			idListe(p.fasilitet()),
 			p.lat(), p.lon(), p.radiusMeter(),
 			sorter, side, storrelse);
 	}
@@ -133,6 +133,19 @@ public class RessursSokService
 		return verdier.stream()
 			.filter(v -> v != null && !v.isBlank())
 			.map(String::trim)
+			.toList();
+	}
+
+	// null -> tom liste; dubletter fjernes.
+	private static List<Long> idListe(List<Long> verdier)
+	{
+		if (verdier == null)
+		{
+			return List.of();
+		}
+		return verdier.stream()
+			.filter(v -> v != null)
+			.distinct()
 			.toList();
 	}
 

@@ -13,9 +13,9 @@ get {
 params:query {
   q: bøneshallen
   ~kommune: 4601
-  ~lokaletype: IDRETTSHALL
-  ~aktivitet: ACT-001
-  ~fasilitet: GARDEROBE
+  ~lokaletype: 1
+  ~aktivitet: 1
+  ~fasilitet: 1
   ~sorter: navn
   ~side: 0
   ~storrelse: 20
@@ -46,7 +46,7 @@ tests {
 docs {
   Fritekstsøk + filtre. Returnerer både bygg (ett kort per bygg) og ressurser
   i ett svar. Parametrene med ~ foran er avslått; kryss dem av i Bruno for å
-  bruke dem. Filtrene tar koder, ikke navn (hent kode+navn fra "Filtre").
+  bruke dem. Filtrene tar kommunenr og id-er, ikke navn (hent kode/id + navn fra "Filtre").
   Lister kan gjentas (?aktivitet=A&aktivitet=B) eller kommasepareres.
   
   Merk: aktivitet, lokaletype og fasilitet må finnes i databasen for å gi

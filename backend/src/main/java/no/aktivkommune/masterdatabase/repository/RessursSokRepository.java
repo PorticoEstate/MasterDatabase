@@ -2,6 +2,7 @@ package no.aktivkommune.masterdatabase.repository;
 
 import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
 import no.aktivkommune.masterdatabase.dto.FilterValg;
+import no.aktivkommune.masterdatabase.dto.IdValg;
 import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
 import no.aktivkommune.masterdatabase.dto.SokFiltre;
@@ -111,8 +112,8 @@ public class RessursSokRepository
 	}
 
 	// Valgene til filterpanelet. Aktiviteter og fasiliteter hentes fra
-	// oppslagstabellene (for navnet), men bare de som er koblet til en ressurs
-	// i viewet.
+	// oppslagstabellene (id og navn), men bare de som er koblet til en ressurs
+	// i viewet. Alle aktiviteter er med (flatt, ingen hierarki).
 	public SokFiltre hentFiltre()
 	{
 		return new SokFiltre(
@@ -120,21 +121,20 @@ public class RessursSokRepository
 				SELECT DISTINCT kommunenr AS kode, kommune_navn AS navn
 				  FROM v_ressurs_sok
 				 ORDER BY navn"""),
-			valg("""
-				SELECT DISTINCT lokaletype_kode AS kode, lokaletype_navn AS navn
+			idValg("""
+				SELECT DISTINCT lokaletype_id AS id, lokaletype_navn AS navn
 				  FROM v_ressurs_sok
-				 WHERE lokaletype_kode IS NOT NULL
+				 WHERE lokaletype_id IS NOT NULL
 				 ORDER BY navn"""),
-			valg("""
-				SELECT a.kode, a.navn
+			idValg("""
+				SELECT a.id, a.navn
 				  FROM aktivitet a
-				 WHERE a.kode LIKE 'ACT-%'
-				   AND EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.aktivitet_koder @> ARRAY[a.kode])
+				 WHERE EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.aktivitet_ids @> ARRAY[a.id])
 				 ORDER BY a.navn"""),
-			valg("""
-				SELECT f.kode, f.navn
+			idValg("""
+				SELECT f.id, f.navn
 				  FROM fasilitet f
-				 WHERE EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.fasilitet_koder @> ARRAY[f.kode])
+				 WHERE EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.fasilitet_ids @> ARRAY[f.id])
 				 ORDER BY f.navn"""));
 	}
 
@@ -167,20 +167,20 @@ public class RessursSokRepository
 		}
 		if (!p.lokaletype().isEmpty())
 		{
-			where.append(" AND lokaletype_kode IN (:lokaletype)");
+			where.append(" AND lokaletype_id IN (:lokaletype)");
 			params.put("lokaletype", p.lokaletype());
 		}
 		if (!p.aktivitet().isEmpty())
 		{
 			// &&: ressursen har minst én av de valgte aktivitetene (ELLER).
-			where.append(" AND aktivitet_koder && ARRAY[:aktivitet]::text[]");
+			where.append(" AND aktivitet_ids && ARRAY[:aktivitet]::bigint[]");
 			params.put("aktivitet", p.aktivitet());
 		}
 		if (!p.fasilitet().isEmpty())
 		{
 			// @>: ressursen har alle de valgte fasilitetene (OG). Bytt til &&
 			// hvis produktet heller vil ha ELLER.
-			where.append(" AND fasilitet_koder @> ARRAY[:fasilitet]::text[]");
+			where.append(" AND fasilitet_ids @> ARRAY[:fasilitet]::bigint[]");
 			params.put("fasilitet", p.fasilitet());
 		}
 		if (p.harNarhet())
@@ -231,6 +231,13 @@ public class RessursSokRepository
 	{
 		return jdbc.sql(sql)
 			.query((rs, i) -> new FilterValg(rs.getString("kode"), rs.getString("navn")))
+			.list();
+	}
+
+	private List<IdValg> idValg(String sql)
+	{
+		return jdbc.sql(sql)
+			.query((rs, i) -> new IdValg(rs.getLong("id"), rs.getString("navn")))
 			.list();
 	}
 
