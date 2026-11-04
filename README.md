@@ -2,17 +2,14 @@
 
 Masterdatabase som integrerer data fra flere lignende databaseinstanser (lokale databaser med bygnings- og anleggsdata) og supplerer med informasjon fra autoritative registre som matrikkelen og det nasjonale anleggsregisteret.
 
-## API i Docker (OpenAPI-first)
+## Kjøring i Docker
 
-- Kontrakten ligger i `api/openapi.yaml`.
-- Swagger UI: <http://localhost:8083/swagger.html>
-- Redoc: <http://localhost:8083/redoc.html>
+- API-kontrakten ligger i `api/openapi.yaml`.
 
 Kjør i Docker:
 
 1. Bygg: `docker compose build`
 2. Start: `docker compose up -d`
-3. Åpne Swagger eller Redoc på lenkene over.
 
 Se [DEVELOPMENT_WSL2.md](DEVELOPMENT_WSL2.md) for oppsett av utviklermiljø på WSL2 bak bedriftens brannmur/proxy.
 

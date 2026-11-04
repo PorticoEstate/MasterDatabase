@@ -139,8 +139,6 @@ docker compose up -d
 docker compose ps
 ```
 
-- **Swagger UI**: <http://localhost:8083/swagger.html>
-- **Redoc UI**: <http://localhost:8083/redoc.html>
 - **Database (pgAdmin / Host)**:
   - **Host**: `localhost`
   - **Port**: `5432`
@@ -165,13 +163,11 @@ Once proxy and environment settings are in place:
 # Build containers with proxy arguments
 docker compose build
 
-# Start services (PostgreSQL 18 database + PHP/Apache API)
+# Start services (PostgreSQL database + backend)
 docker compose up -d
 
 # Verify services
 docker compose ps
 ```
 
-- **Swagger UI**: <http://localhost:8083/swagger.html>
-- **Redoc UI**: <http://localhost:8083/redoc.html>
 - **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: `postgres`, DB: `masterdb`
