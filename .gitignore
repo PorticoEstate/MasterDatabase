@@ -3,3 +3,4 @@ matrikkel/ut/
 etl/__pycache__/
 .claude/
 .idea/
+.env

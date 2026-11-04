@@ -86,22 +86,14 @@ git config --global https.proxy http://proxy.srv.bergenkom.no:8080
 
 ---
 
-## 5. Project Environment Settings (`.env.compose`)
+## 5. Project Environment Settings (`.env`)
 
-Docker Compose reads `.env.compose` when building and running containers. Create or verify `.env.compose` in the repository root:
+Docker Compose reads `.env` in the repository root, both for build arguments and for the containers. Copy `.env.example` to `.env` and fill it in (`.env` is gitignored). Behind the corporate proxy, also set the proxy variables:
 
 ```ini
-# Proxy configuration for Docker Compose builds and containers
 http_proxy=http://proxy.srv.bergenkom.no:8080
 https_proxy=http://proxy.srv.bergenkom.no:8080
 no_proxy=localhost,127.0.0.1,host.docker.internal,portico_masterdb,db
-
-# Database connection settings
-DB_HOST=db
-DB_PORT=5432
-DB_NAME=masterdb
-DB_USER=postgres
-DB_PASSWORD=postgres
 ```
 
 ---
@@ -110,7 +102,6 @@ DB_PASSWORD=postgres
 
 When building Docker images behind a corporate proxy:
 - **`network: host` during build**: In [docker-compose.yml](docker-compose.yml), the build step uses `network: host`. This is required when corporate firewalls allow-list requests by the host's source IP (default Docker bridge NAT IPs may be dropped by the proxy).
-- **PEAR / Extension installer proxy**: The [Dockerfile](Dockerfile) configures PHP PEAR and `install-php-extensions` to use the provided `http_proxy` build argument.
 
 ---
 
@@ -143,7 +134,7 @@ docker compose ps
   - **Host**: `localhost`
   - **Port**: `5432`
   - **User**: `postgres`
-  - **Password**: `postgres`
+  - **Password**: the `POSTGRES_PASSWORD` from your `.env`
   - **Database**: `masterdb`
 
 ```

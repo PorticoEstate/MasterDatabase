@@ -6,11 +6,12 @@ services:
     restart: unless-stopped
     environment:
        POSTGRES_USER: postgres
-       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
        POSTGRES_DB: masterdb
        PGDATA: /data/postgres
     ports:
-      - "5432:5432"
+      # Loopback only: reachable from the host (pgAdmin, psql), not from the network
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/data/postgres
  #     - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -31,15 +32,23 @@ services:
       args:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       DB_URL: jdbc:postgresql://db:5432/masterdb
       DB_USER: postgres
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # Healthy once Spring is up, which means Flyway has applied the schema
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     networks:
       - portico_masterbase
 
