@@ -81,7 +81,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
 | `etl/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3. Kjøres etter bygging og etter hver synk, så nye bygg får posisjon |
-| `matrikkel/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
+| `etl/matrikkel_test/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
 **Ikke bygget ennå:** `ressurslenke` (koble samme fysiske bygg/ressurs til
 flere fagsystemer samtidig, f.eks. booking + FDV) — bevisst utsatt til det
@@ -295,7 +295,7 @@ uttrekket) kommer derimot med.
 
 1. **Geokoding** av enhver hovedadresse som ennå ikke er løst. MatrikkelAPI
    (SOAP, krever `MATRIKKEL_BRUKER`/`MATRIKKEL_PASSORD` - se
-   `matrikkel/test_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
+   `etl/matrikkel_test/test_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
    allerede kjenner fra innlastingen.
 2. **Bygningsnummer og bygningsfakta** for enhver bygning som mangler det,
    uansett om adressen ble løst i denne kjøringen eller en tidligere. Aktiv
