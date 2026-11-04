@@ -665,7 +665,7 @@ $$;
 -- og risikoen for utdaterte søketreff. Skulle det bli for tregt, kan
 -- CREATE MATERIALIZED VIEW ... AS SELECT * FROM v_ressurs_sok legges oppå med
 -- GIN/GiST-indekser, uten at Java-koden endres utover tabellnavnet.
-CREATE OR REPLACE VIEW tillater bare nye kolonner på slutten. Kolonnene fra
+--CREATE OR REPLACE VIEW tillater bare nye kolonner på slutten. Kolonnene fra
 -- V1 beholder navn, type og rekkefølge, men innholdet i to av dem er endret:
 --   aktivitet_koder  - bare ACT-koder (EVT-/ORG-/GRP-/... er ikke søkefasetter
 --                      for utleie), og tom liste i stedet for NULL
