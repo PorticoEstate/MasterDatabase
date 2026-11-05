@@ -33,7 +33,7 @@ feiltekst. Se db/schema_kjerne_dokumentasjon.md, "Innlasting og sporbarhet".
 Kjent forenkling: kommune_id settes her fra hvilken Aktiv kommune-instans
 ressursen kommer fra (f.eks. "bergen" -> kommunenr 4601). Det er riktig for
 alle de 12 instansene vi kjenner i dag, som hver betjener nøyaktig én kommune.
-Skjemaet (schema_kjerne.sql) tillater at en instans betjener flere kommuner
+Skjemaet (Flyway-migrasjonene i backend) tillater at en instans betjener flere kommuner
 via kommune_fagsystem_instans; den dagen det faktisk skjer, må kommune_id i
 stedet utledes fra en geokodet adresse. Se db/schema_kjerne_dokumentasjon.md.
 """
@@ -158,7 +158,7 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
     w("BEGIN;\n\n")
     # Må være første setning: alle avvik under henter uttrekk-id-en herfra.
     # payload=NULL: hele svaret lagres ikke lenger - se kommentar ved
-    # kildeuttrekk i schema_kjerne.sql.
+    # kildeuttrekk i skjemaet (V1__masterdatabase__skjema.sql).
     w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status or 'NULL'},NULL,{q(hentet)});\n\n")
 
     w(f"-- {knavn}\n")

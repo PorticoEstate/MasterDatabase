@@ -86,22 +86,14 @@ git config --global https.proxy http://proxy.srv.bergenkom.no:8080
 
 ---
 
-## 5. Project Environment Settings (`.env.compose`)
+## 5. Project Environment Settings (`.env`)
 
-Docker Compose reads `.env.compose` when building and running containers. Create or verify `.env.compose` in the repository root:
+Docker Compose reads `.env` in the repository root, both for build arguments and for the containers. Copy `.env.example` to `.env` and fill it in (`.env` is gitignored). Behind the corporate proxy, also set the proxy variables:
 
 ```ini
-# Proxy configuration for Docker Compose builds and containers
 http_proxy=http://proxy.srv.bergenkom.no:8080
 https_proxy=http://proxy.srv.bergenkom.no:8080
 no_proxy=localhost,127.0.0.1,host.docker.internal,portico_masterdb,db
-
-# Database connection settings
-DB_HOST=db
-DB_PORT=5432
-DB_NAME=masterdb
-DB_USER=postgres
-DB_PASSWORD=postgres
 ```
 
 ---
@@ -114,7 +106,7 @@ When building Docker images behind a corporate proxy:
 
 ---
 
-## 7. Corporate SSL Certificates (If Applicable)
+## 7. Corporate SSL Certificates (If Applicable) (Capgemine users need this when running on work coputerr/network)
 
 If the firewall inspects TLS/SSL traffic:
 1. Export the corporate root CA certificate from Windows (`certmgr.msc` -> Trusted Root Certification Authorities).
@@ -123,6 +115,7 @@ If the firewall inspects TLS/SSL traffic:
    sudo cp /mnt/c/path/to/corporate-ca.crt /usr/local/share/ca-certificates/
    sudo update-ca-certificates
    ```
+3. The `etl` container needs the same certificates to fetch from Aktiv kommune and Matrikkel. Copy them into `certs/` as described in [certs/README.md](certs/README.md).
 
 ---
 
@@ -144,7 +137,7 @@ docker compose ps
   - **Host**: `localhost`
   - **Port**: `5432`
   - **User**: `postgres`
-  - **Password**: `postgres`
+  - **Password**: the `POSTGRES_PASSWORD` from your `.env`
   - **Database**: `masterdb`
 
 ```
@@ -173,3 +166,4 @@ docker compose ps
 
 - **Swagger UI**: <http://localhost:8080/masterdb/swagger-ui.html>
 - **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: `postgres`, DB: `masterdb`
+- **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: Set in .env file - see .env.example, DB: `masterdb`

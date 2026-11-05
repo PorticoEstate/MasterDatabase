@@ -3,7 +3,9 @@
 Kaller KodelisteService.getKodelisterEnkel - den enkleste tjenesten som finnes,
 krever ingen søkeparametre. Leser brukernavn/passord fra miljøvariablene
 MATRIKKEL_BRUKER / MATRIKKEL_PASSORD - se etl/README.md-tilsvarende for Matrikkel.
+MATRIKKEL_MILJO velger miljø: "test" (standard) eller "prod".
 """
+import sys
 import base64
 import os
 import urllib.error
@@ -12,7 +14,12 @@ import xml.dom.minidom
 
 UT_FIL = os.path.join(os.path.dirname(__file__), "ut", "siste_svar.xml")
 
-BASE_URL = "https://prodtest.matrikkel.no"  # testmiljø - matcher strukturen i produksjon
+# Same environment switch as etl/matrikkel_adresse.py.
+MILJOER = {"test": "https://prodtest.matrikkel.no", "prod": "https://matrikkel.no"}
+MILJO = os.environ.get("MATRIKKEL_MILJO", "test")
+if MILJO not in MILJOER:
+    sys.exit(f"Ugyldig MATRIKKEL_MILJO '{MILJO}'; bruk 'test' eller 'prod'.")
+BASE_URL = MILJOER[MILJO]
 
 ENVELOPE = """<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:kod="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/kodeliste"
