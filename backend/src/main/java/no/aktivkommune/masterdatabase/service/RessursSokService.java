@@ -64,6 +64,19 @@ public class RessursSokService
 	{
 		String q = p.q() == null || p.q().isBlank() ? null : p.q().trim();
 
+		// Et navn (?kommune=Bergen) ville ellers bare gitt tomt svar, som er
+		// vanskelig å feilsøke. Frontend sender alltid kommunenr fra filter-
+		// endepunktet, så dette treffer bare manuell testing.
+		List<String> kommune = liste(p.kommune());
+		for (String k : kommune)
+		{
+			if (!k.matches("\\d{4}"))
+			{
+				throw avvis("kommune må være et kommunenummer (4 siffer), f.eks. 4601 - ikke '" + k
+					+ "'. Gyldige verdier finnes i /masterdb/search/filter");
+			}
+		}
+
 		boolean harLat = p.lat() != null;
 		boolean harLon = p.lon() != null;
 		boolean harRadius = p.radiusMeter() != null;
@@ -115,7 +128,7 @@ public class RessursSokService
 
 		return new RessursSokParametre(
 			q,
-			liste(p.kommune()),
+			kommune,
 			idListe(p.lokaletype()),
 			idListe(p.aktivitet()),
 			idListe(p.fasilitet()),
