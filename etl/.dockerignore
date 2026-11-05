@@ -1,0 +1,7 @@
+ut/
+matrikkel_test/ut/
+__pycache__/
+*.pyc
+.env
+Dockerfile
+.dockerignore
