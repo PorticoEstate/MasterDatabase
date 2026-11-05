@@ -1,0 +1,258 @@
+openapi: 3.1.0
+info:
+  title: MasterDB search API
+  description: Search across municipalities. Returns hits and links to the local booking
+    system. Never checks availability or books anything.
+  version: v1
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Search
+  description: Search across municipalities
+paths:
+  /masterdb/search:
+    get:
+      tags:
+      - Search
+      summary: Search buildings and resources
+      description: "Free-text search with filters (municipality, venue type, activity,\
+        \ facility) and optional radius around a point. Returns building cards and\
+        \ a resource list. Never checks availability or books anything."
+      operationId: sok
+      parameters:
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: kommune
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: lokaletype
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+            format: int64
+      - name: aktivitet
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+            format: int64
+      - name: fasilitet
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+            format: int64
+      - name: lat
+        in: query
+        required: false
+        schema:
+          type: number
+          format: double
+      - name: lon
+        in: query
+        required: false
+        schema:
+          type: number
+          format: double
+      - name: radiusMeter
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: sorter
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: side
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: storrelse
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SokSvar"
+  /masterdb/search/filter:
+    get:
+      tags:
+      - Search
+      summary: List filter options
+      description: "Municipalities (code + name) and venue types, activities and facilities\
+        \ (id + name) that are linked to a bookable resource."
+      operationId: filtre
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SokFiltre"
+components:
+  schemas:
+    ByggSokTreff:
+      type: object
+      properties:
+        byggId:
+          type: integer
+          format: int64
+        byggNavn:
+          type: string
+        bydelNavn:
+          type: string
+        kommuneNavn:
+          type: string
+        adressetekst:
+          type: string
+        postnummer:
+          type: string
+        poststed:
+          type: string
+        lat:
+          type: number
+          format: double
+        lon:
+          type: number
+          format: double
+        avstandMeter:
+          type: number
+          format: double
+        antallRessurser:
+          type: integer
+          format: int32
+        bookingUrl:
+          type: string
+        bildeUrl:
+          type: string
+    RessursSokTreff:
+      type: object
+      properties:
+        ressursId:
+          type: integer
+          format: int64
+        navn:
+          type: string
+        byggNavn:
+          type: string
+        kommuneNavn:
+          type: string
+        adressetekst:
+          type: string
+        postnummer:
+          type: string
+        poststed:
+          type: string
+        lokaletypeNavn:
+          type: string
+        lat:
+          type: number
+          format: double
+        lon:
+          type: number
+          format: double
+        avstandMeter:
+          type: number
+          format: double
+        bookingUrl:
+          type: string
+        bildeUrl:
+          type: string
+    SokSvar:
+      type: object
+      properties:
+        bygg:
+          $ref: "#/components/schemas/SokeResultatByggSokTreff"
+        ressurser:
+          $ref: "#/components/schemas/SokeResultatRessursSokTreff"
+    SokeResultatByggSokTreff:
+      type: object
+      properties:
+        treff:
+          type: array
+          items:
+            $ref: "#/components/schemas/ByggSokTreff"
+        totalt:
+          type: integer
+          format: int64
+        side:
+          type: integer
+          format: int32
+        storrelse:
+          type: integer
+          format: int32
+    SokeResultatRessursSokTreff:
+      type: object
+      properties:
+        treff:
+          type: array
+          items:
+            $ref: "#/components/schemas/RessursSokTreff"
+        totalt:
+          type: integer
+          format: int64
+        side:
+          type: integer
+          format: int32
+        storrelse:
+          type: integer
+          format: int32
+    FilterValg:
+      type: object
+      properties:
+        kode:
+          type: string
+        navn:
+          type: string
+    IdValg:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        navn:
+          type: string
+    SokFiltre:
+      type: object
+      properties:
+        kommuner:
+          type: array
+          items:
+            $ref: "#/components/schemas/FilterValg"
+        lokaletyper:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdValg"
+        aktiviteter:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdValg"
+        fasiliteter:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdValg"

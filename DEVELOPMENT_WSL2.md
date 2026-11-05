@@ -110,7 +110,7 @@ DB_PASSWORD=postgres
 
 When building Docker images behind a corporate proxy:
 - **`network: host` during build**: In [docker-compose.yml](docker-compose.yml), the build step uses `network: host`. This is required when corporate firewalls allow-list requests by the host's source IP (default Docker bridge NAT IPs may be dropped by the proxy).
-- **PEAR / Extension installer proxy**: The [Dockerfile](Dockerfile) configures PHP PEAR and `install-php-extensions` to use the provided `http_proxy` build argument.
+- **Maven proxy**: [backend/Dockerfile](backend/Dockerfile) passes the `http_proxy`/`https_proxy` build arguments on to `mvnw`, which needs them to download the Maven distribution and dependencies.
 
 ---
 
@@ -139,8 +139,7 @@ docker compose up -d
 docker compose ps
 ```
 
-- **Swagger UI**: <http://localhost:8083/swagger.html>
-- **Redoc UI**: <http://localhost:8083/redoc.html>
+- **Swagger UI**: <http://localhost:8080/masterdb/swagger-ui.html>
 - **Database (pgAdmin / Host)**:
   - **Host**: `localhost`
   - **Port**: `5432`
@@ -165,13 +164,12 @@ Once proxy and environment settings are in place:
 # Build containers with proxy arguments
 docker compose build
 
-# Start services (PostgreSQL 18 database + PHP/Apache API)
+# Start services (PostgreSQL 18 database + Spring Boot backend)
 docker compose up -d
 
 # Verify services
 docker compose ps
 ```
 
-- **Swagger UI**: <http://localhost:8083/swagger.html>
-- **Redoc UI**: <http://localhost:8083/redoc.html>
+- **Swagger UI**: <http://localhost:8080/masterdb/swagger-ui.html>
 - **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: `postgres`, DB: `masterdb`
