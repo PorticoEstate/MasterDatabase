@@ -6,6 +6,7 @@
 #   run.sh build      last_inn.py: seeds the vocabulary and loads everything
 #   run.sh sync       synk.py: loads buildings, resources and links
 #   run.sh geocode    Matrikkel geocoding and building enrichment
+#   run.sh prune      delete old synk_avvik rows (also done after each nightly run)
 #
 # The Python scripts only write SQL; this script pipes it to psql. The SQL is
 # kept in $UT (a volume) so the last run can be reviewed afterwards.
@@ -16,6 +17,7 @@
 #   SYNK_TID=03:00          time of the nightly sync, in TZ
 #   NORMALISER_DEMO=true    run the demo normaliser before loading
 #   DRY_RUN=false           write the SQL but do not apply it
+#   AVVIK_RETENTION_DAYS=90 synk_avvik rows older than this are deleted nightly
 #   MATRIKKEL_BRUKER / MATRIKKEL_PASSORD / MATRIKKEL_MILJO   see etl/README.md
 #
 # Networks that inspect TLS re-sign HTTPS traffic with their own certificate
@@ -27,6 +29,7 @@ KOMMUNER="${KOMMUNER:-alle}"
 SYNK_TID="${SYNK_TID:-03:00}"
 NORMALISER_DEMO="${NORMALISER_DEMO:-true}"
 DRY_RUN="${DRY_RUN:-false}"
+AVVIK_RETENTION_DAYS="${AVVIK_RETENTION_DAYS:-30}"
 
 HER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UT="${UT:-$HER/ut}"
@@ -169,6 +172,30 @@ do_geocode()
 	apply "$UT/matrikkel.sql"
 }
 
+# Deletes synk_avvik rows older than AVVIK_RETENTION_DAYS, except those in
+# v_synk_avvik_gjeldende (the latest run per source), so a source that stops
+# running keeps its current problems visible. Every run adds avvik rows and
+# nothing else removes them.
+prune_avvik()
+{
+	local antall
+	if ! [[ "$AVVIK_RETENTION_DAYS" =~ ^[1-9][0-9]*$ ]]; then
+		log "prune: AVVIK_RETENTION_DAYS must be a positive whole number, got '$AVVIK_RETENTION_DAYS'"
+		return 1
+	fi
+	if is_true "$DRY_RUN"; then
+		log "DRY_RUN: not pruning synk_avvik"
+		return 0
+	fi
+	antall=$(psql -tA -c "WITH slettet AS (
+			DELETE FROM synk_avvik
+			WHERE created_at < now() - make_interval(days => $AVVIK_RETENTION_DAYS)
+			  AND id NOT IN (SELECT id FROM v_synk_avvik_gjeldende)
+			RETURNING 1)
+		SELECT count(*) FROM slettet") || { log "prune: the delete failed"; return 1; }
+	log "prune: deleted $antall synk_avvik row(s) older than $AVVIK_RETENTION_DAYS days"
+}
+
 seconds_until_sync()
 {
 	local naa maal
@@ -184,6 +211,10 @@ daemon()
 
 	if ! [[ "$SYNK_TID" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
 		log "SYNK_TID must be HH:MM, got '$SYNK_TID'"
+		exit 1
+	fi
+	if ! [[ "$AVVIK_RETENTION_DAYS" =~ ^[1-9][0-9]*$ ]]; then
+		log "AVVIK_RETENTION_DAYS must be a positive whole number, got '$AVVIK_RETENTION_DAYS'"
 		exit 1
 	fi
 	wait_for_schema || exit 1
@@ -213,6 +244,7 @@ daemon()
 			do_sync || log "sync failed"
 		fi
 		do_geocode || true
+		prune_avvik || true
 	done
 }
 
@@ -223,8 +255,9 @@ case "${1:-daemon}" in
 	build) do_build ;;
 	sync) do_sync ;;
 	geocode) do_geocode ;;
+	prune) prune_avvik ;;
 	*)
-		echo "usage: run.sh [daemon|build|sync|geocode]" >&2
+		echo "usage: run.sh [daemon|build|sync|geocode|prune]" >&2
 		exit 1
 		;;
 esac
