@@ -220,7 +220,7 @@ på avviket selv, ikke i uttrekket, så gammel metadata kan ryddes trygt bort.
 ## Kildekontrakt: hva en normalisert instans må levere
 
 Skriptene laster kodeverkene direkte fra `searchdataall`, uten mapping, og
-kobler på id. Det forutsetter at hver instans er normalisert mot masteren og
+kobler på id. Det forutsetter at hver instans er normalisert og
 leverer kodeverkene med masterens id-er:
 
 | Samling | Felt | Krav |
