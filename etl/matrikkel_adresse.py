@@ -46,8 +46,9 @@ om adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
 antall_etasjer/posisjon.
 
 Bruker bare Pythons innebygde bibliotek. Leser brukernavn/passord fra
-miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se matrikkel/test_auth.py)
-- ALDRI skriv disse verdiene til skjerm, logg eller fil.
+miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se etl/matrikkel_test/test_auth.py)
+- ALDRI skriv disse verdiene til skjerm, logg eller fil. MATRIKKEL_MILJO velger
+miljø: "test" (prodtest.matrikkel.no, standard) eller "prod" (matrikkel.no).
 
 Bruk (kjøres etter last_inn.py, og etter hver kjøring av synk.py, så nye bygg
 får posisjon):
@@ -87,7 +88,12 @@ import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 
-BASE_URL = "https://prodtest.matrikkel.no"
+# Environment is chosen with MATRIKKEL_MILJO; the default is the test environment.
+MILJOER = {"test": "https://prodtest.matrikkel.no", "prod": "https://matrikkel.no"}
+MILJO = os.environ.get("MATRIKKEL_MILJO", "test")
+if MILJO not in MILJOER:
+    sys.exit(f"Ugyldig MATRIKKEL_MILJO '{MILJO}'; bruk 'test' eller 'prod'.")
+BASE_URL = MILJOER[MILJO]
 NS_DOM = "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain"
 NS_DOMKOM = "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/kommune"
 NS_DOMADR = "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/adresse"
@@ -95,7 +101,7 @@ NS_DOMME = "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/matrikkele
 NS_DOMBYG = "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/bygning"
 
 # EUREF89 Geografisk = EPSG:4326 (lon/lat), bekreftet mot kodelisten
-# KoordinatsystemKodeId=24 - se matrikkel/ut/siste_svar.xml. Samme SRID som
+# KoordinatsystemKodeId=24 - se etl/matrikkel_test/ut/siste_svar.xml. Samme SRID som
 # adresse.posisjon/bygning.posisjon i masterdb, så ingen omregning trengs.
 MATRIKKEL_CONTEXT = """<dom:locale>no_NO</dom:locale>
 <dom:brukOriginaleKoordinater>false</dom:brukOriginaleKoordinater>
@@ -605,7 +611,7 @@ def main():
         bygg_lon = info["lon"] if info["lon"] is not None else v["lon"]
         bygg_lat = info["lat"] if info["lat"] is not None else v["lat"]
         # bygningstype lagres som Matrikkelens rå kodeverdi (f.eks. "181"), ikke
-        # oversatt til tekst ennå - se KodelisteService/matrikkel/ut/siste_svar.xml
+        # oversatt til tekst ennå - se KodelisteService/etl/matrikkel_test/ut/siste_svar.xml
         # for å slå opp navnet senere.
         bygg_sql = (
             f"UPDATE bygning SET "

@@ -94,7 +94,7 @@ def q_json(obj) -> str:
 
 def logg(kn, samling, avvikstype, ekstern_id, detalj, felt=None, nokkelfelt="id", rapost=None) -> str:
     """Setning som loggfører et avvik mot kildeuttrekket som er registrert
-    først i samme transaksjon (se registrer_kildeuttrekk i schema_kjerne.sql).
+    først i samme transaksjon (se registrer_kildeuttrekk i V1__masterdatabase__skjema.sql).
     rapost er posten som utløste avviket - lagres direkte på avviket (renset
     for personopplysninger), ikke i et delt uttrekk som må graves ut igjen."""
     rapost_sql = q_json(rens_post(rapost)) if rapost is not None else "NULL"

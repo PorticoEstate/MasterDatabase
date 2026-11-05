@@ -12,12 +12,12 @@ Fra tomt skjema til populert database, i tre steg:
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
 │ STEG 1 — SKJEMA                                                       │
-│ db/schema_kjerne.sql                                                  │
+│ backend/src/main/resources/db/migration/V*.sql (Flyway)               │
 │                                                                        │
 │ Oppretter alle tabeller i en tom database: kommune, bygning, adresse, │
 │ ressurs, aktivitet/fasilitet/lokaletype,                              │
-│ gate/matrikkelinfo, synk_avvik/kildeuttrekk. Idempotent — trygt å     │
-│ kjøre på nytt.                                                        │
+│ gate/matrikkelinfo, synk_avvik/kildeuttrekk. Kjøres av backend-       │
+│ containeren ved oppstart; ingenting å kjøre for hånd.                 │
 └───────────────────────────────────────────────────┬───────────────────┘
                                                       ▼
 ┌───────────────────────────────────────────────────────────────────────┐
@@ -73,7 +73,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 
 | Fil | Rolle |
 |---|---|
-| `db/schema_kjerne.sql` | Skjemaet (steg 1) |
+| `backend/src/main/resources/db/migration/V*.sql` | Skjemaet (steg 1), kjøres av Flyway i backend |
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
 | `etl/last_inn.py` | Steg 2, bygging: oppretter kodeverkene og laster alt annet. Kjøres én gang |
 | `etl/synk.py` | Steg 2, jevnlig synkronisering: som `last_inn.py`, men skriver aldri kodeverkene |
@@ -81,7 +81,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
 | `etl/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3. Kjøres etter bygging og etter hver synk, så nye bygg får posisjon |
-| `matrikkel/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
+| `etl/matrikkel_test/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
 **Ikke bygget ennå:** `ressurslenke` (koble samme fysiske bygg/ressurs til
 flere fagsystemer samtidig, f.eks. booking + FDV) — bevisst utsatt til det
@@ -127,7 +127,7 @@ python3 etl/synk.py alle > etl/ut/synk.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/synk.sql
 ```
 
-Selve den planlagte kjøringen (cron) ligger utenfor repoet. Etter hver synk
+Den planlagte kjøringen gjøres av etl-containeren (`etl/run.sh`, hver natt kl. 03:00; se `DEPLOY.md`). Etter hver synk
 kjøres `matrikkel_adresse.py` (steg 3), så nye bygg får posisjon.
 
 Skriptene kan også lese `<mappe>/<kommune>.json` i stedet for å hente fra nettet,
@@ -140,12 +140,10 @@ ferskvare, ikke noe som skal committes.
 
 ## Databasen må finnes og ha skjemaet fra før
 
-```bash
-docker exec portico_masterdb psql -U postgres -c "CREATE DATABASE masterdb;"
-docker exec -i portico_masterdb psql -U postgres -d masterdb < db/schema_kjerne.sql
-```
-
-Skjemaet er idempotent - du kan kjøre den kommandoen på nytt uten å ødelegge noe.
+Databasen `masterdb` opprettes av db-containeren, og backend-containeren legger
+på skjemaet med Flyway (`backend/src/main/resources/db/migration/`) hver gang
+den starter. Start stacken og vent til backend er `healthy` (`docker compose ps`)
+før du kjører skriptene.
 
 ## Bygging og synk
 
@@ -222,7 +220,7 @@ på avviket selv, ikke i uttrekket, så gammel metadata kan ryddes trygt bort.
 ## Kildekontrakt: hva en normalisert instans må levere
 
 Skriptene laster kodeverkene direkte fra `searchdataall`, uten mapping, og
-kobler på id. Det forutsetter at hver instans er normalisert mot masteren og
+kobler på id. Det forutsetter at hver instans er normalisert og
 leverer kodeverkene med masterens id-er:
 
 | Samling | Felt | Krav |
@@ -297,7 +295,7 @@ uttrekket) kommer derimot med.
 
 1. **Geokoding** av enhver hovedadresse som ennå ikke er løst. MatrikkelAPI
    (SOAP, krever `MATRIKKEL_BRUKER`/`MATRIKKEL_PASSORD` - se
-   `matrikkel/test_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
+   `etl/matrikkel_test/test_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
    allerede kjenner fra innlastingen.
 2. **Bygningsnummer og bygningsfakta** for enhver bygning som mangler det,
    uansett om adressen ble løst i denne kjøringen eller en tidligere. Aktiv
