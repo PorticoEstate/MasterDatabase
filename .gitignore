@@ -4,3 +4,5 @@ etl/__pycache__/
 .claude/
 .idea/
 .env
+certs/*
+!certs/README.md
