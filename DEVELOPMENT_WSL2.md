@@ -102,6 +102,7 @@ no_proxy=localhost,127.0.0.1,host.docker.internal,portico_masterdb,db
 
 When building Docker images behind a corporate proxy:
 - **`network: host` during build**: In [docker-compose.yml](docker-compose.yml), the build step uses `network: host`. This is required when corporate firewalls allow-list requests by the host's source IP (default Docker bridge NAT IPs may be dropped by the proxy).
+- **Maven proxy**: [backend/Dockerfile](backend/Dockerfile) passes the `http_proxy`/`https_proxy` build arguments on to `mvnw`, which needs them to download the Maven distribution and dependencies.
 
 ---
 
@@ -131,6 +132,7 @@ docker compose up -d
 docker compose ps
 ```
 
+- **Swagger UI**: <http://localhost:8080/masterdb/swagger-ui.html>
 - **Database (pgAdmin / Host)**:
   - **Host**: `localhost`
   - **Port**: `5432`
@@ -155,11 +157,13 @@ Once proxy and environment settings are in place:
 # Build containers with proxy arguments
 docker compose build
 
-# Start services (PostgreSQL database + backend)
+# Start services (PostgreSQL 18 database + Spring Boot backend)
 docker compose up -d
 
 # Verify services
 docker compose ps
 ```
 
+- **Swagger UI**: <http://localhost:8080/masterdb/swagger-ui.html>
+- **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: `postgres`, DB: `masterdb`
 - **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: Set in .env file - see .env.example, DB: `masterdb`
