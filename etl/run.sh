@@ -7,6 +7,7 @@
 #   run.sh sync       synk.py: loads buildings, resources and links
 #   run.sh geocode    Matrikkel geocoding and building enrichment
 #   run.sh prune      delete old synk_avvik rows (also done after each nightly run)
+#   run.sh status     row counts, geocoding status and latest extracts (read-only)
 #
 # The Python scripts only write SQL; this script pipes it to psql. The SQL is
 # kept in $UT (a volume) so the last run can be reviewed afterwards.
@@ -17,7 +18,7 @@
 #   SYNK_TID=03:00          time of the nightly sync, in TZ
 #   NORMALISER_DEMO=true    run the demo normaliser before loading
 #   DRY_RUN=false           write the SQL but do not apply it
-#   AVVIK_RETENTION_DAYS=90 synk_avvik rows older than this are deleted nightly
+#   AVVIK_RETENTION_DAYS=30 synk_avvik rows older than this are deleted nightly
 #   MATRIKKEL_BRUKER / MATRIKKEL_PASSORD / MATRIKKEL_MILJO   see etl/README.md
 #
 # Networks that inspect TLS re-sign HTTPS traffic with their own certificate
@@ -256,8 +257,9 @@ case "${1:-daemon}" in
 	sync) do_sync ;;
 	geocode) do_geocode ;;
 	prune) prune_avvik ;;
+	status) psql -f status.sql ;;
 	*)
-		echo "usage: run.sh [daemon|build|sync|geocode|prune]" >&2
+		echo "usage: run.sh [daemon|build|sync|geocode|prune|status]" >&2
 		exit 1
 		;;
 esac

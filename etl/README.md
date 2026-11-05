@@ -127,7 +127,7 @@ python3 etl/synk.py alle > etl/ut/synk.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/synk.sql
 ```
 
-Selve den planlagte kjøringen (cron) ligger utenfor repoet. Etter hver synk
+Den planlagte kjøringen gjøres av etl-containeren (`etl/run.sh`, hver natt kl. 03:00; se `DEPLOY.md`). Etter hver synk
 kjøres `matrikkel_adresse.py` (steg 3), så nye bygg får posisjon.
 
 Skriptene kan også lese `<mappe>/<kommune>.json` i stedet for å hente fra nettet,

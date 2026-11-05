@@ -105,7 +105,7 @@ When building Docker images behind a corporate proxy:
 
 ---
 
-## 7. Corporate SSL Certificates (If Applicable)
+## 7. Corporate SSL Certificates (If Applicable) (Capgemine users need this when running on work coputerr/network)
 
 If the firewall inspects TLS/SSL traffic:
 1. Export the corporate root CA certificate from Windows (`certmgr.msc` -> Trusted Root Certification Authorities).
@@ -114,6 +114,7 @@ If the firewall inspects TLS/SSL traffic:
    sudo cp /mnt/c/path/to/corporate-ca.crt /usr/local/share/ca-certificates/
    sudo update-ca-certificates
    ```
+3. The `etl` container needs the same certificates to fetch from Aktiv kommune and Matrikkel. Copy them into `certs/` as described in [certs/README.md](certs/README.md).
 
 ---
 
@@ -161,4 +162,4 @@ docker compose up -d
 docker compose ps
 ```
 
-- **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: `postgres`, DB: `masterdb`
+- **Database (via pgAdmin / Host)**: Host: `localhost`, Port: `5432`, User: `postgres`, Password: Set in .env file - see .env.example, DB: `masterdb`
