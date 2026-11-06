@@ -20,12 +20,10 @@ import java.util.List;
 // frontend sender alltid kode/id fra filter-endepunktet.
 
 public record RessursSokParametre(
-	@Parameter(description = "Fritekst. Treffer navn, bygg, lokaletype, aktiviteter, fasiliteter og sted.",
-		example = "badminton")
+	@Parameter(description = "Fritekst. Treffer navn, bygg, lokaletype, aktiviteter, fasiliteter og sted.")
 	String q,
 
-	@Parameter(description = "Kommunenummer (4 siffer), ikke navn. Gyldige verdier: kommuner[].kode fra /masterdb/search/filter.",
-		example = "4601")
+	@Parameter(description = "Kommunenummer (4 siffer), ikke navn. Gyldige verdier: kommuner[].kommunenr fra /masterdb/search/filter.")
 	List<String> kommune,      // kommunenr
 
 	@Parameter(description = "lokaletype.id. Gyldige verdier: lokaletyper[].id fra /masterdb/search/filter.")

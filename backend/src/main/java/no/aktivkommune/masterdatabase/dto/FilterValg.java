@@ -1,8 +1,8 @@
 package no.aktivkommune.masterdatabase.dto;
 
-// Ett kommunevalg i filterpanelet: navn vises til brukeren, kode (kommunenr)
-// sendes tilbake som parameter til søket. Lokaletype, aktivitet og fasilitet
-// bruker IdValg, siden kodeverkene identifiseres med id.
-public record FilterValg(String kode, String navn)
+// Ett valg i filterpanelet for lokaletype, aktivitet og fasilitet: navn vises
+// til brukeren, id sendes tilbake som parameter til søket. id er den delte
+// nøkkelen i kodeverket (samme id i alle instanser).
+public record FilterValg(long id, String navn)
 {
 }

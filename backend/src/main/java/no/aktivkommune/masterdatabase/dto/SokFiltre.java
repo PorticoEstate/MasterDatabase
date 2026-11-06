@@ -6,10 +6,10 @@ import java.util.List;
 // koblet til en bookbar ressurs, så panelet ikke viser tomme valg.
 // Aktiviteter er en flat liste (ingen forelder/barn); bare id og navn.
 public record SokFiltre(
-	List<FilterValg> kommuner,
-	List<IdValg> lokaletyper,
-	List<IdValg> aktiviteter,
-	List<IdValg> fasiliteter)
+	List<KommuneFilter> kommuner,
+	List<FilterValg> lokaletyper,
+	List<FilterValg> aktiviteter,
+	List<FilterValg> fasiliteter)
 {
 }
 
