@@ -31,7 +31,8 @@ and one command.
 git clone <repository-url> masterdatabase
 cd masterdatabase
 cp .env.example .env
-# edit .env: set POSTGRES_PASSWORD, MATRIKKEL_BRUKER, MATRIKKEL_PASSORD, MATRIKKEL_MILJO
+# edit .env: set POSTGRES_PASSWORD, MASTERDB_API_KEY, MATRIKKEL_BRUKER, MATRIKKEL_PASSORD, MATRIKKEL_MILJO
+# (generate a key with: openssl rand -hex 32)
 docker compose up -d --build
 docker compose logs -f etl
 ```
@@ -59,6 +60,7 @@ the old values: `docker compose up -d --force-recreate etl`.
 | Variable | Default | Meaning |
 |---|---|---|
 | `POSTGRES_PASSWORD` | none (required) | Password of the database superuser. See the note below. |
+| `MASTERDB_API_KEY` | none (required) | API key for the protected backend endpoints (`/masterdb/kommune`). Clients send it in the `X-API-KEY` header. The backend does not start without it. Treat it like a password; generate one with `openssl rand -hex 32`. |
 | `MATRIKKEL_BRUKER` / `MATRIKKEL_PASSORD` | empty | Matrikkel API login. If either is empty, geocoding is skipped. |
 | `MATRIKKEL_MILJO` | `test` | `test` = `prodtest.matrikkel.no`, `prod` = `matrikkel.no`. Must match where your credentials are valid. |
 | `KOMMUNER` | `alle` | `alle`, or a single kommune name such as `bergen`. |
@@ -124,6 +126,8 @@ docker compose exec -T db pg_dump -U postgres masterdb > masterdb-backup.sql
 | `CERTIFICATE_VERIFY_FAILED ... self-signed certificate in certificate chain` in the `etl` log | The network inspects HTTPS traffic. Add its root CA certificate to `certs/`; see [certs/README.md](certs/README.md). |
 | `geocode: skipped, MATRIKKEL_BRUKER / MATRIKKEL_PASSORD are not set` | The credentials are empty in the container. Set them in `.env`, then `docker compose up -d --force-recreate etl`, then `docker compose exec etl ./run.sh geocode`. |
 | Geocoding errors such as `Ugyldig XML fra KommuneService: '<!doctype html>...` | The Matrikkel endpoint answered with a web page instead of an API response. Check that `MATRIKKEL_MILJO` matches your credentials, run `docker compose exec etl python3 matrikkel_test/test_auth.py`, and look for a proxy or block page. |
+| `docker compose up` stops with `Set MASTERDB_API_KEY in .env` | The key is required. Add `MASTERDB_API_KEY` to `.env`, then run `docker compose up -d` again. |
+| `401` from `/masterdb/kommune` | The `X-API-KEY` header is missing or does not match `MASTERDB_API_KEY`. After changing the key in `.env`, run `docker compose up -d --force-recreate backend`. |
 | `etl` container stays `Created` and never starts | It waits for a healthy backend. Run `docker compose logs backend`. |
 | `etl` log repeats `waiting for the schema (Flyway V1)...` | The backend has not migrated the database yet; see the backend log. |
 | One kommune fails to fetch | It is logged in `synk_avvik` and the other kommuner continue. The next nightly sync tries again. |
@@ -137,5 +141,7 @@ docker compose exec -T db pg_dump -U postgres masterdb > masterdb-backup.sql
   The backend therefore starts with schema validation disabled
   (`spring.jpa.hibernate.ddl-auto=none`), and API endpoints that read the
   affected tables may fail. The data pipeline does not depend on the API.
-- The API on port 8080 has no authentication configured. Do not expose it to
-  the internet; restrict access with a firewall.
+- Only the `/masterdb/kommune` endpoints require an API key (`X-API-KEY`),
+  and there is one shared key. The search endpoints, Swagger UI and
+  `/actuator` on port 8080 are open. Do not expose the API to the internet;
+  restrict access with a firewall.
