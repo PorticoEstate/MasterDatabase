@@ -1,0 +1,33 @@
+meta {
+  name: 12 Oppdater ukjent
+  type: http
+  seq: 10
+}
+
+put {
+  url: {{baseUrl}}/masterdb/kommune/999999999
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": "9998",
+    "navn": "Testkommune endret",
+    "fylkesnavn": "Annet fylke"
+  }
+}
+
+tests {
+  test("svarer 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}
+
+docs {
+  Oppdaterer en id som ikke finnes: 404.
+}

@@ -1,0 +1,25 @@
+meta {
+  name: 09 Hent ugyldig id
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/masterdb/kommune/abc
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+tests {
+  test("svarer 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+}
+
+docs {
+  id er ikke et tall: Spring gir 400 (typefeil i path-variabelen).
+}

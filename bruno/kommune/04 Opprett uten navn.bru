@@ -1,0 +1,32 @@
+meta {
+  name: 04 Opprett uten navn
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/masterdb/kommune
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": "9999",
+    "fylkesnavn": "X"
+  }
+}
+
+tests {
+  test("svarer 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+}
+
+docs {
+  navn mangler: @NotBlank gir 400.
+}

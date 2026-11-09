@@ -1,0 +1,44 @@
+meta {
+  name: 01 Opprett
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/masterdb/kommune
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": "9999",
+    "navn": "Testkommune",
+    "fylkesnavn": "Testfylke"
+  }
+}
+
+script:post-response {
+  bru.setVar("kommuneId", res.getBody().id);
+}
+
+docs {
+  Oppretter testkommunen 9999 og lagrer id-en i variabelen kommuneId som resten bruker. Kjor 01-15 i rekkefolge; 14 rydder opp. Hvis en tidligere kjoring stoppet midtveis, slett 9999/9998 manuelt foerst.
+}
+
+tests {
+  test("svarer 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returnerer opprettet kommune med id", function() {
+    const b = res.getBody();
+    expect(b.id).to.be.a("number");
+    expect(b.kommunenr).to.equal("9999");
+    expect(b.navn).to.equal("Testkommune");
+  });
+}

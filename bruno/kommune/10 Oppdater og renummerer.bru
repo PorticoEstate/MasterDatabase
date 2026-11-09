@@ -1,0 +1,33 @@
+meta {
+  name: 10 Oppdater og renummerer
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/masterdb/kommune/{{kommuneId}}
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": "9998",
+    "navn": "Testkommune endret",
+    "fylkesnavn": "Annet fylke"
+  }
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Endrer navn, fylkesnavn og kommunenr (9999 -> 9998). Dette er grunnen til at oppdatering gaar paa id.
+}

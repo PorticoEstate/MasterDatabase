@@ -1,0 +1,31 @@
+meta {
+  name: 11 Hent etter endring
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/masterdb/kommune/{{kommuneId}}
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("endringen er lagret", function() {
+    const b = res.getBody();
+    expect(b.kommunenr).to.equal("9998");
+    expect(b.navn).to.equal("Testkommune endret");
+  });
+}
+
+docs {
+  Samme id, nye verdier.
+}

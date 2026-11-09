@@ -1,0 +1,25 @@
+meta {
+  name: 08 Hent ukjent
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/masterdb/kommune/999999999
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+tests {
+  test("svarer 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}
+
+docs {
+  Gyldig id som ikke finnes: 404.
+}
