@@ -1,8 +1,8 @@
 package no.aktivkommune.masterdatabase.repository;
 
 import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
+import no.aktivkommune.masterdatabase.dto.KommuneFilter;
 import no.aktivkommune.masterdatabase.dto.FilterValg;
-import no.aktivkommune.masterdatabase.dto.IdValg;
 import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
 import no.aktivkommune.masterdatabase.dto.SokFiltre;
@@ -116,26 +116,38 @@ public class RessursSokRepository
 	// i viewet. Alle aktiviteter er med (flatt, ingen hierarki).
 	public SokFiltre hentFiltre()
 	{
-		return new SokFiltre(
-			valg("""
-				SELECT DISTINCT kommunenr AS kode, kommune_navn AS navn
+		return new SokFiltre(hentKommuner(), hentLokaletyper(), hentAktiviteter(), hentFasiliteter());
+	}
+
+	public  List<KommuneFilter> hentKommuner(){
+		return kommuneFilter("""
+				SELECT DISTINCT kommunenr, kommune_navn AS navn
 				  FROM v_ressurs_sok
-				 ORDER BY navn"""),
-			idValg("""
-				SELECT DISTINCT lokaletype_id AS id, lokaletype_navn AS navn
-				  FROM v_ressurs_sok
-				 WHERE lokaletype_id IS NOT NULL
-				 ORDER BY navn"""),
-			idValg("""
+				 ORDER BY navn""");
+	}
+
+	public List<FilterValg> hentAktiviteter(){
+		return filterValg("""
 				SELECT a.id, a.navn
 				  FROM aktivitet a
 				 WHERE EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.aktivitet_ids @> ARRAY[a.id])
-				 ORDER BY a.navn"""),
-			idValg("""
+				 ORDER BY a.navn""");
+	}
+
+	public List<FilterValg> hentLokaletyper(){
+		return filterValg("""
+				SELECT DISTINCT lokaletype_id AS id, lokaletype_navn AS navn
+				  FROM v_ressurs_sok
+				 WHERE lokaletype_id IS NOT NULL
+				 ORDER BY navn""");
+	}
+
+	public List<FilterValg> hentFasiliteter(){
+		return filterValg("""
 				SELECT f.id, f.navn
 				  FROM fasilitet f
 				 WHERE EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.fasilitet_ids @> ARRAY[f.id])
-				 ORDER BY f.navn"""));
+				 ORDER BY f.navn""");
 	}
 
 	// Felles for begge søkene: en CTE som filtrerer viewet og regner ut
@@ -227,17 +239,17 @@ public class RessursSokRepository
 			p.storrelse());
 	}
 
-	private List<FilterValg> valg(String sql)
+	private List<KommuneFilter> kommuneFilter(String sql)
 	{
 		return jdbc.sql(sql)
-			.query((rs, i) -> new FilterValg(rs.getString("kode"), rs.getString("navn")))
+			.query((rs, i) -> new KommuneFilter(rs.getString("kommunenr"), rs.getString("navn")))
 			.list();
 	}
 
-	private List<IdValg> idValg(String sql)
+	private List<FilterValg> filterValg(String sql)
 	{
 		return jdbc.sql(sql)
-			.query((rs, i) -> new IdValg(rs.getLong("id"), rs.getString("navn")))
+			.query((rs, i) -> new FilterValg(rs.getLong("id"), rs.getString("navn")))
 			.list();
 	}
 

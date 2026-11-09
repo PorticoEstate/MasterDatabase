@@ -1,10 +1,12 @@
 package no.aktivkommune.masterdatabase.service;
 
 import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
+import no.aktivkommune.masterdatabase.dto.FilterValg;
+import no.aktivkommune.masterdatabase.dto.KommuneFilter;
 import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
 import no.aktivkommune.masterdatabase.dto.SokFiltre;
-import no.aktivkommune.masterdatabase.dto.SokSvar;
+import no.aktivkommune.masterdatabase.dto.RessursSokSvar;
 import no.aktivkommune.masterdatabase.dto.SokeResultat;
 import no.aktivkommune.masterdatabase.repository.RessursSokRepository;
 import org.springframework.http.HttpStatus;
@@ -35,11 +37,13 @@ public class RessursSokService
 	// Det controlleren bruker: normaliserer én gang og kjører begge søkene i
 	// samme transaksjon, så bygg og ressurser er hentet fra samme øyeblikk.
 	@Transactional(readOnly = true)
-	public SokSvar sok(RessursSokParametre input)
-	{
+	public RessursSokSvar sok(RessursSokParametre input)
+		{
 		RessursSokParametre p = normaliser(input);
-		return new SokSvar(repository.sokBygg(p), repository.sokRessurser(p));
-	}
+		return new RessursSokSvar(
+				repository.sokBygg(p),
+				repository.sokRessurser(p));
+		}
 
 	@Transactional(readOnly = true)
 	public SokeResultat<RessursSokTreff> sokRessurser(RessursSokParametre input)
@@ -53,10 +57,32 @@ public class RessursSokService
 		return repository.sokBygg(normaliser(input));
 	}
 
+	//Henter all filterdata
 	@Transactional(readOnly = true)
 	public SokFiltre hentFiltre()
 	{
 		return repository.hentFiltre();
+	}
+
+	@Transactional (readOnly = true)
+	public List<KommuneFilter> hentKommuner(){
+		return repository.hentKommuner();
+	}
+
+	@Transactional (readOnly = true)
+	public List<FilterValg> hentAktiviteter() {
+		return repository.hentAktiviteter();
+	}
+
+	@Transactional (readOnly = true)
+	public List<FilterValg> hentFasiliteter() {
+		return repository.hentFasiliteter();
+	}
+
+
+	@Transactional (readOnly = true)
+	public List<FilterValg> hentLokaletyper() {
+		return repository.hentLokaletyper();
 	}
 
 	// Pakkeprivat så den kan enhetstestes uten database.
@@ -67,7 +93,7 @@ public class RessursSokService
 		// Et navn (?kommune=Bergen) ville ellers bare gitt tomt svar, som er
 		// vanskelig å feilsøke. Frontend sender alltid kommunenr fra filter-
 		// endepunktet, så dette treffer bare manuell testing.
-		List<String> kommune = liste(p.kommune());
+		List<String> kommune = normaliserListe(p.kommune());
 		for (String k : kommune)
 		{
 			if (!k.matches("\\d{4}"))
@@ -129,15 +155,15 @@ public class RessursSokService
 		return new RessursSokParametre(
 			q,
 			kommune,
-			idListe(p.lokaletype()),
-			idListe(p.aktivitet()),
-			idListe(p.fasilitet()),
+			normaliserIdListe(p.lokaletype()),
+			normaliserIdListe(p.aktivitet()),
+			normaliserIdListe(p.fasilitet()),
 			p.lat(), p.lon(), p.radiusMeter(),
 			sorter, side, storrelse);
 	}
 
 	// null -> tom liste, og blanke verdier (?aktivitet=) fjernes.
-	private static List<String> liste(List<String> verdier)
+	private static List<String> normaliserListe(List<String> verdier)
 	{
 		if (verdier == null)
 		{
@@ -150,7 +176,7 @@ public class RessursSokService
 	}
 
 	// null -> tom liste; dubletter fjernes.
-	private static List<Long> idListe(List<Long> verdier)
+	private static List<Long> normaliserIdListe(List<Long> verdier)
 	{
 		if (verdier == null)
 		{
