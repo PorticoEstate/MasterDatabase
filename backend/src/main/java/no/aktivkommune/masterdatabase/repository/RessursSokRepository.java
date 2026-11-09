@@ -5,7 +5,6 @@ import no.aktivkommune.masterdatabase.dto.KommuneFilter;
 import no.aktivkommune.masterdatabase.dto.FilterValg;
 import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
-import no.aktivkommune.masterdatabase.dto.SokFiltre;
 import no.aktivkommune.masterdatabase.dto.SokeResultat;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -113,12 +112,7 @@ public class RessursSokRepository
 
 	// Valgene til filterpanelet. Aktiviteter og fasiliteter hentes fra
 	// oppslagstabellene (id og navn), men bare de som er koblet til en ressurs
-	// i viewet. Alle aktiviteter er med (flatt, ingen hierarki).
-	public SokFiltre hentFiltre()
-	{
-		return new SokFiltre(hentKommuner(), hentLokaletyper(), hentAktiviteter(), hentFasiliteter());
-	}
-
+	// i viewet.
 	public  List<KommuneFilter> hentKommuner(){
 		return kommuneFilter("""
 				SELECT DISTINCT kommunenr, kommune_navn AS navn

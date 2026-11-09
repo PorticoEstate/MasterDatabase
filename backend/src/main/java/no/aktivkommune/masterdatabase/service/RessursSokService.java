@@ -5,7 +5,6 @@ import no.aktivkommune.masterdatabase.dto.FilterValg;
 import no.aktivkommune.masterdatabase.dto.KommuneFilter;
 import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
-import no.aktivkommune.masterdatabase.dto.SokFiltre;
 import no.aktivkommune.masterdatabase.dto.RessursSokSvar;
 import no.aktivkommune.masterdatabase.dto.SokeResultat;
 import no.aktivkommune.masterdatabase.repository.RessursSokRepository;
@@ -55,13 +54,6 @@ public class RessursSokService
 	public SokeResultat<ByggSokTreff> sokBygg(RessursSokParametre input)
 	{
 		return repository.sokBygg(normaliser(input));
-	}
-
-	//Henter all filterdata
-	@Transactional(readOnly = true)
-	public SokFiltre hentFiltre()
-	{
-		return repository.hentFiltre();
 	}
 
 	@Transactional (readOnly = true)
