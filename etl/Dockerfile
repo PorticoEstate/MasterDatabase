@@ -13,9 +13,13 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 # psql is how the generated SQL reaches the database; tzdata makes TZ (the time
 # of the nightly sync) work; ca-certificates provides update-ca-certificates
-# for the optional extra CA in ./certs (see run.sh).
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends ca-certificates postgresql-client tzdata \
+# for the optional extra CA in ./certs (see run.sh). Pass proxies explicitly:
+# APT does not consistently use the proxy environment variables for HTTPS.
+RUN apt-get -o Acquire::http::Proxy="${http_proxy:-DIRECT}" \
+		-o Acquire::https::Proxy="${https_proxy:-DIRECT}" update \
+	&& apt-get -o Acquire::http::Proxy="${http_proxy:-DIRECT}" \
+		-o Acquire::https::Proxy="${https_proxy:-DIRECT}" \
+		install -y --no-install-recommends ca-certificates postgresql-client tzdata \
 	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
