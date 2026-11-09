@@ -13,15 +13,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import no.aktivkommune.masterdatabase.dto.Kommune;
 import no.aktivkommune.masterdatabase.dto.KommuneRequest;
 import no.aktivkommune.masterdatabase.service.KommuneService;
 
+// Administration of kommuner. Every endpoint requires the X-API-KEY header
+// (checked by ApiKeyFilter); "apiKey" is the scheme declared in OpenApiConfig.
 @RestController
 @RequestMapping("/masterdb/kommune")
-@Tag(name = "Kommune-Endpoint", description = "Endpoint for CRUD operations on kommune.")
+@Tag(name = "Kommune", description = "Create, read, update and delete kommuner. Requires an API key.")
+@SecurityRequirement(name = "apiKey")
+@ApiResponse(responseCode = "401", description = "Missing or invalid API key", content = @Content)
 public class KommuneController
 {
 	private final KommuneService service;
@@ -31,18 +40,27 @@ public class KommuneController
 		this.service = service;
 	}
 
+	@Operation(summary = "Get a kommune by id")
+	@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content)
 	@GetMapping("/{id}")
 	public Kommune getById(@PathVariable long id)
 	{
 		return service.getById(id);
 	}
 
+	@Operation(summary = "List all kommuner", description = "All kommuner, ordered by name.")
 	@GetMapping
 	public List<Kommune> getAll()
 	{
 		return service.getAll();
 	}
 
+	@Operation(summary = "Create a kommune",
+			description = "Returns the created kommune including its generated id.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, or navn missing)", content = @Content),
+		@ApiResponse(responseCode = "409", description = "A kommune with this kommunenr already exists", content = @Content)
+	})
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Kommune createKommune(@Valid @RequestBody KommuneRequest request)
@@ -50,12 +68,24 @@ public class KommuneController
 		return service.create(request.kommunenr(), request.navn(), request.fylkesnavn());
 	}
 
+	@Operation(summary = "Update a kommune",
+			description = "Replaces kommunenr, navn and fylkesnavn. A fylkesnavn left out of the body is set to null. "
+					+ "kommunenr can be changed here, e.g. when a kommune is renumbered.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, or navn missing)", content = @Content),
+		@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content),
+		@ApiResponse(responseCode = "409", description = "Another kommune already has this kommunenr", content = @Content)
+	})
 	@PutMapping("/{id}")
 	public void updateKommune(@PathVariable long id, @Valid @RequestBody KommuneRequest request)
 	{
 		service.update(id, request.kommunenr(), request.navn(), request.fylkesnavn());
 	}
 
+	@Operation(summary = "Delete a kommune",
+			description = "Also deletes everything that belongs to the kommune: buildings, addresses, streets and "
+					+ "resources (ON DELETE CASCADE). This cannot be undone.")
+	@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content)
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteKommune(@PathVariable long id)
