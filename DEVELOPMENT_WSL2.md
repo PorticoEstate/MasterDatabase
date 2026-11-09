@@ -102,7 +102,7 @@ no_proxy=localhost,127.0.0.1,host.docker.internal,portico_masterdb,db
 
 When building Docker images behind a corporate proxy:
 - **`network: host` during build**: In [docker-compose.yml](docker-compose.yml), the build step uses `network: host`. This is required when corporate firewalls allow-list requests by the host's source IP (default Docker bridge NAT IPs may be dropped by the proxy).
-- **Maven proxy**: [backend/Dockerfile](backend/Dockerfile) passes the `http_proxy`/`https_proxy` build arguments on to `mvnw`, which needs them to download the Maven distribution and dependencies.
+- **Maven proxy**: [backend/Dockerfile](backend/Dockerfile) passes the `http_proxy`/`https_proxy` build arguments to the wrapper and configures Maven's JVM proxy properties for dependency downloads.
 
 ---
 
