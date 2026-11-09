@@ -23,16 +23,16 @@ public record RessursSokParametre(
 	@Parameter(description = "Fritekst. Treffer navn, bygg, lokaletype, aktiviteter, fasiliteter og sted.")
 	String q,
 
-	@Parameter(description = "Kommunenummer (4 siffer), ikke navn. Gyldige verdier: kommuner[].kommunenr fra /masterdb/search/filter.")
+	@Parameter(description = "Kommunenummer (4 siffer), ikke navn. Gyldige verdier: kommuner[].kommunenr fra /masterdb/search/municipalities.")
 	List<String> kommune,      // kommunenr
 
-	@Parameter(description = "lokaletype.id. Gyldige verdier: lokaletyper[].id fra /masterdb/search/filter.")
+	@Parameter(description = "lokaletype.id. Gyldige verdier: lokaletyper[].id fra /masterdb/search/resource-categories.")
 	List<Long> lokaletype,     // lokaletype.id
 
-	@Parameter(description = "aktivitet.id. Gyldige verdier: aktiviteter[].id fra /masterdb/search/filter. ELLER mellom valgene.")
+	@Parameter(description = "aktivitet.id. Gyldige verdier: aktiviteter[].id fra /masterdb/search/activities. ELLER mellom valgene.")
 	List<Long> aktivitet,      // aktivitet.id, ELLER mellom valgene
 
-	@Parameter(description = "fasilitet.id. Gyldige verdier: fasiliteter[].id fra /masterdb/search/filter. OG mellom valgene.")
+	@Parameter(description = "fasilitet.id. Gyldige verdier: fasiliteter[].id fra /masterdb/search/facilities. OG mellom valgene.")
 	List<Long> fasilitet,      // fasilitet.id, OG mellom valgene
 
 	// Nærhetssøk. Alle tre må oppgis sammen.
