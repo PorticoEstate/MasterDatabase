@@ -25,7 +25,7 @@ public class RessursSokService
 	static final int STANDARD_STORRELSE = 20;
 	static final int MAKS_STORRELSE = 100;
 	static final int MAKS_RADIUS_METER = 50_000;
-	static final long MAKS_OFFSET = 10_000;
+	static final long MAKS_OFFSET = 50_000;
 
 	private final RessursSokRepository repository;
 
