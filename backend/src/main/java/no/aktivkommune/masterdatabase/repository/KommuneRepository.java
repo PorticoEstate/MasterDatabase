@@ -11,6 +11,15 @@ import no.aktivkommune.masterdatabase.dto.Kommune;
 @Repository
 public class KommuneRepository
 {
+	// A kommune has at most one booking instance (uniq_kommune_fagsystem_type), so the
+	// joins never produce more than one row per kommune.
+	private static final String SELECT_KOMMUNE = """
+			SELECT k.id, k.kommunenr, k.navn, k.fylkesnavn, fi.base_url AS booking_base_url
+			  FROM kommune k
+			  LEFT JOIN kommune_fagsystem_instans kfi ON kfi.kommune_id = k.id AND kfi.type = 'booking'
+			  LEFT JOIN fagsystem_instans fi ON fi.id = kfi.fagsystem_instans_id
+			""";
+
 	private final JdbcClient jdbc;
 
 	public KommuneRepository(JdbcClient jdbc)
@@ -20,20 +29,14 @@ public class KommuneRepository
 
 	public List<Kommune> getAll()
 	{
-		return jdbc.sql("""
-				SELECT id, kommunenr, navn, fylkesnavn
-				  FROM kommune
-				 ORDER BY navn""")
+		return jdbc.sql(SELECT_KOMMUNE + " ORDER BY k.navn")
 			.query(Kommune.class)
 			.list();
 	}
 
 	public Optional<Kommune> getById(long id)
 	{
-		return jdbc.sql("""
-				SELECT id, kommunenr, navn, fylkesnavn
-				  FROM kommune
-				 WHERE id = :id""")
+		return jdbc.sql(SELECT_KOMMUNE + " WHERE k.id = :id")
 			.param("id", id)
 			.query(Kommune.class)
 			.optional();
@@ -71,5 +74,83 @@ public class KommuneRepository
 		return jdbc.sql("DELETE FROM kommune WHERE id = :id")
 			.param("id", id)
 			.update() > 0;
+	}
+
+	// True if a kommune other than kommuneId is linked to the instance with this kildenokkel.
+	// For a kommune that does not exist yet, pass 0.
+	public boolean instanceInUseByOther(String kildenokkel, long kommuneId)
+	{
+		return jdbc.sql("""
+				SELECT EXISTS (SELECT 1
+				                 FROM kommune_fagsystem_instans kfi
+				                 JOIN fagsystem_instans fi ON fi.id = kfi.fagsystem_instans_id
+				                WHERE fi.kildenokkel = :kildenokkel
+				                  AND kfi.kommune_id <> :kommuneId)""")
+			.param("kildenokkel", kildenokkel)
+			.param("kommuneId", kommuneId)
+			.query(Boolean.class)
+			.single();
+	}
+
+	// The kildenokkel of the kommune's booking instance, if it has one.
+	public Optional<String> getBookingKildenokkel(long kommuneId)
+	{
+		return jdbc.sql("""
+				SELECT fi.kildenokkel
+				  FROM kommune_fagsystem_instans kfi
+				  JOIN fagsystem_instans fi ON fi.id = kfi.fagsystem_instans_id
+				 WHERE kfi.kommune_id = :kommuneId AND kfi.type = 'booking'""")
+			.param("kommuneId", kommuneId)
+			.query(String.class)
+			.optional();
+	}
+
+	// Registers the booking instance and links it to the kommune. The instance row is the
+	// same one etl/synk.py writes (same kildenokkel); if it exists already it is reused and
+	// made active again. Without both rows etl/kommuner_query.sql does not list the kommune.
+	public void registerBookingInstance(long kommuneId, String kildenokkel, String navn, String baseUrl)
+	{
+		jdbc.sql("""
+				INSERT INTO fagsystem_instans (kildenokkel, type, navn, base_url)
+				VALUES (:kildenokkel, 'booking', :navn, :baseUrl)
+				ON CONFLICT (kildenokkel) DO UPDATE SET base_url = EXCLUDED.base_url, aktiv = TRUE""")
+			.param("kildenokkel", kildenokkel)
+			.param("navn", navn)
+			.param("baseUrl", baseUrl)
+			.update();
+		jdbc.sql("""
+				INSERT INTO kommune_fagsystem_instans (kommune_id, fagsystem_instans_id, type)
+				SELECT CAST(:kommuneId AS BIGINT), fi.id, fi.type
+				  FROM fagsystem_instans fi
+				 WHERE fi.kildenokkel = :kildenokkel
+				ON CONFLICT (kommune_id, fagsystem_instans_id) DO NOTHING""")
+			.param("kommuneId", kommuneId)
+			.param("kildenokkel", kildenokkel)
+			.update();
+	}
+
+	// Ids of the instances linked to the kommune. Read before the kommune is deleted.
+	public List<Long> getInstanceIds(long kommuneId)
+	{
+		return jdbc.sql("SELECT fagsystem_instans_id FROM kommune_fagsystem_instans WHERE kommune_id = :kommuneId")
+			.param("kommuneId", kommuneId)
+			.query(Long.class)
+			.list();
+	}
+
+	// Deletes the given instances unless some kommune is still linked to them.
+	public void deleteUnusedInstances(List<Long> instanceIds)
+	{
+		if (instanceIds.isEmpty())
+		{
+			return;
+		}
+		jdbc.sql("""
+				DELETE FROM fagsystem_instans fi
+				 WHERE fi.id IN (:ids)
+				   AND NOT EXISTS (SELECT 1 FROM kommune_fagsystem_instans kfi
+				                    WHERE kfi.fagsystem_instans_id = fi.id)""")
+			.param("ids", instanceIds)
+			.update();
 	}
 }

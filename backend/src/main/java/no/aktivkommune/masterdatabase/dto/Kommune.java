@@ -10,7 +10,11 @@ public record Kommune(
 	@Schema(description = "Kommune name", example = "Bergen")
 	String navn,
 	@Schema(description = "County name, may be null", example = "Vestland")
-	String fylkesnavn
+	String fylkesnavn,
+	@Schema(description = "Base URL of the kommune's Aktiv kommune booking system. The nightly sync loads data from here. "
+			+ "Null if no booking system is registered, in which case the kommune is not synced.",
+			example = "https://bergen.aktiv-kommune.no")
+	String bookingBaseUrl
 )
 {
 }

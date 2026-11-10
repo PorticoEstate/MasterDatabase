@@ -21,7 +21,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import no.aktivkommune.masterdatabase.dto.Kommune;
-import no.aktivkommune.masterdatabase.dto.KommuneRequest;
+import no.aktivkommune.masterdatabase.dto.KommuneCreate;
+import no.aktivkommune.masterdatabase.dto.KommuneUpdate;
 import no.aktivkommune.masterdatabase.service.KommuneService;
 
 // Administration of kommuner. Every endpoint requires the X-API-KEY header
@@ -48,7 +49,8 @@ public class KommuneController
 		return service.getById(id);
 	}
 
-	@Operation(summary = "List all kommuner", description = "All kommuner, ordered by name.")
+	@Operation(summary = "List all kommuner",
+			description = "All kommuner, ordered by name. bookingBaseUrl shows which kommuner will be synced with its corresponding aktiv kommun instance.")
 	@GetMapping
 	public List<Kommune> getAll()
 	{
@@ -56,35 +58,42 @@ public class KommuneController
 	}
 
 	@Operation(summary = "Create a kommune",
-			description = "Returns the created kommune including its generated id.")
+			description = "Returns the created kommune including its generated id. With bookingBaseUrl "
+					+ "(https://<name>.aktiv-kommune.no) the kommune's Aktiv kommune booking system is registered "
+					+ "in the same call, and the next nightly sync loads the kommune's data from it. Without "
+					+ "bookingBaseUrl the kommune is created but not synced.")
 	@ApiResponses({
-		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, or navn missing)", content = @Content),
-		@ApiResponse(responseCode = "409", description = "A kommune with this kommunenr already exists", content = @Content)
+		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl not https://<name>.aktiv-kommune.no)", content = @Content),
+		@ApiResponse(responseCode = "409", description = "kommunenr already exists, or bookingBaseUrl is registered for another kommune", content = @Content)
 	})
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Kommune createKommune(@Valid @RequestBody KommuneRequest request)
+	public Kommune createKommune(@Valid @RequestBody KommuneCreate request)
 	{
-		return service.create(request.kommunenr(), request.navn(), request.fylkesnavn());
+		return service.create(request.kommunenr(), request.navn(), request.fylkesnavn(), request.bookingBaseUrl());
 	}
 
 	@Operation(summary = "Update a kommune",
 			description = "Replaces kommunenr, navn and fylkesnavn. A fylkesnavn left out of the body is set to null. "
-					+ "kommunenr can be changed here, e.g. when a kommune is renumbered.")
+					+ "kommunenr can be changed here, e.g. when a kommune is renumbered. bookingBaseUrl is optional: "
+					+ "leaving it out keeps the current booking system (an update never removes one). Giving it "
+					+ "registers the booking system if the kommune has none, so the next nightly sync loads the "
+					+ "kommune; repeating the registered URL changes nothing.")
 	@ApiResponses({
-		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, or navn missing)", content = @Content),
+		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl not https://<name>.aktiv-kommune.no)", content = @Content),
 		@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content),
-		@ApiResponse(responseCode = "409", description = "Another kommune already has this kommunenr", content = @Content)
+		@ApiResponse(responseCode = "409", description = "Another kommune already has this kommunenr; bookingBaseUrl is registered for another kommune; or the kommune already has a different booking system", content = @Content)
 	})
 	@PutMapping("/{id}")
-	public void updateKommune(@PathVariable long id, @Valid @RequestBody KommuneRequest request)
+	public void updateKommune(@PathVariable long id, @Valid @RequestBody KommuneUpdate request)
 	{
-		service.update(id, request.kommunenr(), request.navn(), request.fylkesnavn());
+		service.update(id, request.kommunenr(), request.navn(), request.fylkesnavn(), request.bookingBaseUrl());
 	}
 
 	@Operation(summary = "Delete a kommune",
 			description = "Also deletes everything that belongs to the kommune: buildings, addresses, streets and "
-					+ "resources (ON DELETE CASCADE). This cannot be undone.")
+					+ "resources (ON DELETE CASCADE), and its booking system registration unless another kommune "
+					+ "uses it. This cannot be undone.")
 	@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content)
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
