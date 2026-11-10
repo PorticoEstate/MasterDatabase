@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import no.aktivkommune.masterdatabase.dto.BookingStatusUpdate;
+import no.aktivkommune.masterdatabase.dto.FagsystemStatusUpdate;
 import no.aktivkommune.masterdatabase.dto.Kommune;
 import no.aktivkommune.masterdatabase.dto.KommuneCreate;
 import no.aktivkommune.masterdatabase.dto.KommuneUpdate;
@@ -101,7 +101,7 @@ public class KommuneController
 		@ApiResponse(responseCode = "409", description = "The kommune has no booking system", content = @Content)
 	})
 	@PatchMapping("/{id}/booking")
-	public Kommune setBookingAktiv(@PathVariable long id, @Valid @RequestBody BookingStatusUpdate request)
+	public Kommune setBookingAktiv(@PathVariable long id, @Valid @RequestBody FagsystemStatusUpdate request)
 	{
 		return service.setBookingAktiv(id, request.aktiv());
 	}
