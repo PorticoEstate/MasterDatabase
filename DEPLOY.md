@@ -113,22 +113,23 @@ curl -X POST http://localhost:8080/masterdb/kommune \
   -d '{"kommunenr":"4601","navn":"Bergen","fylkesnavn":"Vestland","bookingBaseUrl":"https://bergen.aktiv-kommune.no"}'
 ```
 
-`kommunenr` (four digits) and `navn` are required. `bookingBaseUrl` is optional:
+`kommunenr` (four digits), `navn` and `bookingBaseUrl` are required. The kommune and its
+booking system are registered, active, in the same transaction, and the next nightly sync
+loads the kommune's data. To load it right away, run `docker compose exec etl ./run.sh sync`.
 
-- **With `bookingBaseUrl`:** the kommune and its booking system are registered in the same
-  transaction, and the next nightly sync loads the kommune's data. To load it right away,
-  run `docker compose exec etl ./run.sh sync`.
-- **Without `bookingBaseUrl`:** the kommune is created but not synced to an Aktiv Kommune instance. Register the
-  booking system later with `PUT /masterdb/kommune/{id}` with the optional `bookingBaseUrl`. This is
-  only accepted if the kommune has no booking system yet, or the same URL again; a
-  different URL gives 409, and an update that omits it never removes it.
-- **Accepted values:** only `https://<name>.aktiv-kommune.no` (no path, port or
-  credentials). Anything else gives 400, because the sync fetches from this address. A
-  URL already used by another kommune gives 409.
+- **Accepted URLs:** only `https://<name>.aktiv-kommune.no` (no path, port or
+  credentials). A missing or different URL gives 400, because the sync fetches from this
+  address. A URL already used by another kommune gives 409.
+- **Stop or resume syncing:** `PATCH /masterdb/kommune/{id}/booking` with `{"aktiv": false}`
+  (or `true`) leaves the kommune and its data in place but includes or excludes it in the
+  nightly sync. `GET` shows the state as `bookingAktiv`.
+- **Kommuner without a booking system** (created some other way): attach one with
+  `PUT /masterdb/kommune/{id}` and a `bookingBaseUrl`. This is only accepted if the kommune
+  has none yet, or the same URL again (no change); a different URL gives 409, and a `PUT`
+  that omits it never removes it.
 
 `DELETE /masterdb/kommune/{id}` removes the kommune and its booking system, and cascades
-to its buildings and resources. Set `fagsystem_instans.aktiv = false` to stop syncing a
-kommune without deleting it. More detail under "Legge til en kommune" in
+to its buildings and resources. More detail under "Legge til en kommune" in
 [etl/README.md](etl/README.md).
 
 ## Day-to-day commands

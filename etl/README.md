@@ -217,15 +217,16 @@ neste synk plukker kommunen opp.
   og når ETL leser listen.
 - **En kilde tilhører én kommune.** Er URL-en allerede registrert på en annen kommune, blir
   svaret 409 og kommunen opprettes ikke.
-- **Uten `bookingBaseUrl`** opprettes kommunen, men den synkroniseres ikke. Kilden kan
-  legges til senere (se under).
-- **Kilden kan registreres senere** med `PUT /masterdb/kommune/{id}` og `bookingBaseUrl`, hvis
-  kommunen ikke har en fra før. Samme URL en gang til endrer ingenting. En annen URL enn den
-  som er registrert gir 409, fordi kommunens bygg og ressurser er knyttet til instansen de ble
+- **`bookingBaseUrl` er påkrevd** ved opprettelse (uten den blir svaret 400), og kilden registreres
+  som aktiv.
+- **`PUT /masterdb/kommune/{id}` med `bookingBaseUrl`** registrerer kilden på en kommune som ikke har
+  en (for eksempel en som er opprettet på annen måte). Samme URL en gang til endrer ingenting. En annen
+  URL enn den som er registrert gir 409, fordi kommunens bygg og ressurser er knyttet til instansen de ble
   lastet fra. En oppdatering uten `bookingBaseUrl` beholder kilden og fjerner den aldri.
 - Å fjerne en kommune med `DELETE` fjerner også kilden hvis ingen annen kommune bruker den, så
-  samme URL kan registreres på nytt. For å stoppe synkroniseringen av en kommune uten å slette
-  den, sett `fagsystem_instans.aktiv = false`.
+  samme URL kan registreres på nytt.
+- **Stoppe og gjenoppta synkroniseringen** uten å slette kommunen: `PATCH /masterdb/kommune/{id}/booking`
+  med `{"aktiv": false}` (eller `true`). `bookingAktiv` i svaret fra `GET` viser status.
 
 Er kommunen opprettet på annen måte enn gjennom API-et, kan kilden også registreres for hånd.
 Bytt ut `<slug>` (subdomenet; små bokstaver, tall og `-`), `<Navn>` og
