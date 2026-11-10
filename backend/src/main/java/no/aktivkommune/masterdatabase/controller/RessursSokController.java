@@ -45,31 +45,40 @@ public class RessursSokController
 
 	//Filtrert valg på kommune.
 	@Operation (summary = "Municipalities (municipality number + name) that are linked to a bookable resource")
-	@GetMapping ("/municipalities")
+	@GetMapping ("/filters/municipalities")
 	public List<KommuneFilter> getMunicipalities()
 	{
 		return service.hentKommuner();
 	}
 
 	//Filtrert valg på alle aktiviteter
-	@Operation (summary = "Activities (id + name) that are linked to a bookable resource")
-	@GetMapping ("/activities")
+	@Operation (summary = "All activities (id, name, parentId)",
+			description = "Every row in the activity table, including top-level categories "
+					+ "(parentId = null). The client builds the tree and sends the ids of all "
+					+ "descendants when a parent is selected in the search.")
+	@GetMapping ("/filters/activities")
 	public List<FilterValg> getActivities()
 	{
 		return service.hentAktiviteter();
 	}
 
 	//Filtrert valg på alle fasiliteter
-	@Operation (summary = "Facilities (id + name) that are linked to a bookable resource")
-	@GetMapping ("/facilities")
+	@Operation (summary = "All facilities (id, name, parentId)",
+			description = "Every row in the facility table, including top-level categories "
+					+ "(parentId = null). The client builds the tree and sends the ids of all "
+					+ "descendants when a parent is selected in the search.")
+	@GetMapping ("/filters/facilities")
 	public List<FilterValg> getFacilities()
 	{
 		return service.hentFasiliteter();
 	}
 
 	//Filtrert valg på alle lokaletyper
-	@Operation (summary = "Resource categories (id + name) that are linked to a bookable resource")
-	@GetMapping ("/resource-categories")
+	@Operation (summary = "All venue types (id, name, parentId)",
+			description = "Every row in the venue type table, including top-level categories "
+					+ "(parentId = null). The client builds the tree and sends the ids of all "
+					+ "descendants when a parent is selected in the search.")
+	@GetMapping ("/filters/resource-categories")
 	public List<FilterValg> getResourceCategories()
 	{
 		return service.hentLokaletyper();
