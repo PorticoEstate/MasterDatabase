@@ -25,6 +25,7 @@ public class RessursSokService
 	static final int STANDARD_STORRELSE = 20;
 	static final int MAKS_STORRELSE = 100;
 	static final int MAKS_RADIUS_METER = 50_000;
+	static final long MAKS_OFFSET = 10_000;
 
 	private final RessursSokRepository repository;
 
@@ -143,6 +144,12 @@ public class RessursSokService
 			? STANDARD_STORRELSE
 			: Math.min(MAKS_STORRELSE, Math.max(1, p.storrelse()));
 
+		//Avvis dersom offset er urimelig stort
+		long offset = (long) side * storrelse;
+
+		if(offset > MAKS_OFFSET) {
+			throw avvis("Side er for stor");
+		}
 		return new RessursSokParametre(
 			q,
 			kommune,

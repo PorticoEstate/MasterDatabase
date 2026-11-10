@@ -216,7 +216,7 @@ public class RessursSokRepository
 	{
 		var params = new HashMap<>(t.params());
 		params.put("limit", p.storrelse());
-		params.put("offset", p.side() * p.storrelse());
+		params.put("offset", (long) p.side() * p.storrelse());
 
 		List<Rad<T>> rader = jdbc.sql(sql)
 			.params(params)
