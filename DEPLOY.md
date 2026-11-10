@@ -102,11 +102,34 @@ volume keeps the old password. Either set it back, or start from scratch with
 
 ## Adding a kommune
 
-The nightly sync reads the list of kommuner from the database, not from the code.
-A kommune is synced when it has an active Aktiv kommune instance registered. Create
-the kommune (`POST /masterdb/kommune`), then register its instance with the two SQL
-statements under "Legge til en kommune" in [etl/README.md](etl/README.md). The next
-sync loads it. Set `fagsystem_instans.aktiv = false` to stop syncing one.
+Add a kommune with `POST /masterdb/kommune` (requires the `X-API-KEY` header; the full
+request and response schema is in Swagger at `/masterdb/swagger-ui.html`). The nightly
+sync reads its list of kommuner from the database, not from the code, so a kommune is
+only synced once it has an active Aktiv kommune booking system registered.
+
+```bash
+curl -X POST http://localhost:8080/masterdb/kommune \
+  -H "X-API-KEY: $MASTERDB_API_KEY" -H "Content-Type: application/json" \
+  -d '{"kommunenr":"4601","navn":"Bergen","fylkesnavn":"Vestland","bookingBaseUrl":"https://bergen.aktiv-kommune.no"}'
+```
+
+`kommunenr` (four digits) and `navn` are required. `bookingBaseUrl` is optional:
+
+- **With `bookingBaseUrl`:** the kommune and its booking system are registered in the same
+  transaction, and the next nightly sync loads the kommune's data. To load it right away,
+  run `docker compose exec etl ./run.sh sync`.
+- **Without `bookingBaseUrl`:** the kommune is created but not synced to an Aktiv Kommune instance. Register the
+  booking system later with `PUT /masterdb/kommune/{id}` with the optional `bookingBaseUrl`. This is
+  only accepted if the kommune has no booking system yet, or the same URL again; a
+  different URL gives 409, and an update that omits it never removes it.
+- **Accepted values:** only `https://<name>.aktiv-kommune.no` (no path, port or
+  credentials). Anything else gives 400, because the sync fetches from this address. A
+  URL already used by another kommune gives 409.
+
+`DELETE /masterdb/kommune/{id}` removes the kommune and its booking system, and cascades
+to its buildings and resources. Set `fagsystem_instans.aktiv = false` to stop syncing a
+kommune without deleting it. More detail under "Legge til en kommune" in
+[etl/README.md](etl/README.md).
 
 ## Day-to-day commands
 

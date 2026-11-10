@@ -22,17 +22,17 @@ Kommune-endepunktene krever en API-nøkkel. Sett `MASTERDB_API_KEY` i `.env` (p�
 |---|---|---|
 | GET | `/masterdb/search` | Fritekstsøk med filtre. Returnerer både `bygg` og `ressurser`, hver paginert. |
 | GET | `/masterdb/search/filter` | Valgene til filterpanelet: kommuner (kode + navn), lokaletyper, aktiviteter og fasiliteter (id + navn). Hentes én gang, ikke per tastetrykk. |
-| GET | `/masterdb/kommune` | Alle kommuner, sortert på navn. Krever API-nøkkel. |
+| GET | `/masterdb/kommune` | Alle kommuner, sortert på navn. `bookingBaseUrl` viser hvilke som synkroniseres. Krever API-nøkkel. |
 | GET | `/masterdb/kommune/{id}` | Én kommune på intern id. 404 hvis den ikke finnes. Krever API-nøkkel. |
-| POST | `/masterdb/kommune` | Oppretter en kommune fra `{kommunenr, navn, fylkesnavn}`. 201 med den opprettede kommunen, 400 ved ugyldig input, 409 hvis `kommunenr` finnes fra før. Krever API-nøkkel. |
-| PUT | `/masterdb/kommune/{id}` | Erstatter `kommunenr`, `navn` og `fylkesnavn` (så `kommunenr` kan rettes, for eksempel etter at en kommune har fått nytt nummer). 404 hvis id-en ikke finnes, 409 hvis `kommunenr` er opptatt. Krever API-nøkkel. |
-| DELETE | `/masterdb/kommune/{id}` | Sletter en kommune. **Sletter også bygg, adresser, gater og ressurser** (`ON DELETE CASCADE`). 204, eller 404. Krever API-nøkkel. |
+| POST | `/masterdb/kommune` | Oppretter en kommune fra `{kommunenr, navn, fylkesnavn, bookingBaseUrl}`. `bookingBaseUrl` er valgfri (`https://<navn>.aktiv-kommune.no`) og registrerer kommunens bookingsystem i samme kall, slik at neste nattlige synk laster den. 201 med den opprettede kommunen, 400 ved ugyldig input eller URL, 409 hvis `kommunenr` finnes fra før eller URL-en er registrert på en annen kommune. Krever API-nøkkel. |
+| PUT | `/masterdb/kommune/{id}` | Erstatter `kommunenr`, `navn` og `fylkesnavn` (så `kommunenr` kan rettes, for eksempel etter at en kommune har fått nytt nummer). `bookingBaseUrl` er valgfri: utelatt beholdes bookingsystemet (en oppdatering fjerner det aldri), oppgitt registreres det hvis kommunen ikke har ett, og samme URL igjen endrer ingenting. 404 hvis id-en ikke finnes, 409 hvis `kommunenr` er opptatt, kommunen allerede har et annet bookingsystem eller URL-en tilhører en annen kommune. Krever API-nøkkel. |
+| DELETE | `/masterdb/kommune/{id}` | Sletter en kommune. **Sletter også bygg, adresser, gater og ressurser** (`ON DELETE CASCADE`) og kommunens bookingsystem hvis ingen annen kommune bruker det. 204, eller 404. Krever API-nøkkel. |
 
 Stiene er engelske, mens query-parametre (`q`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `sorter`, `side`, `storrelse`, `lat`, `lon`, `radiusMeter`) og JSON-felt er norske. Lister kan sendes som `?aktivitet=1&aktivitet=2` eller `?aktivitet=1,2`.
 
 Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java` og `dto/`.
 
-Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (ren SQL via `JdbcClient`). Request-body er `dto/KommuneRequest.java`. Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
+Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (ren SQL via `JdbcClient`). Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/helpers.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
 
 ## API-dokumentasjon (Swagger / OpenAPI)
 
@@ -67,7 +67,7 @@ Husk å committe den oppdaterte filen. Hvis ingen bruker filen, kan den fjernes,
 
 ## Testing med Bruno
 
-Forespørslene ligger i `bruno/` i rotmappen, og `baseUrl` settes i `bruno/environments/lokal.bru`. Kjør dem etter endringer i endepunktene. Forespørslene i `bruno/kommune/` krever at hemmeligheten `apiKey` er satt én gang i miljøet `lokal` (samme verdi som `MASTERDB_API_KEY`). Kjør dem i rekkefølge: de oppretter en testkommune (9999), endrer og sletter den, og lar databasen stå som den var.
+Forespørslene ligger i `bruno/` i rotmappen, og `baseUrl` settes i `bruno/environments/lokal.bru`. Kjør dem etter endringer i endepunktene. Forespørslene i `bruno/kommune/` krever at hemmeligheten `apiKey` er satt én gang i miljøet `lokal` (samme verdi som `MASTERDB_API_KEY`). Kjør dem i rekkefølge: de oppretter to testkommuner (9999 med bookingsystem, 9997 uten), henter og endrer dem, registrerer bookingsystemet på 9997 med en oppdatering, sletter begge og lar databasen stå som den var.
 
 ## Endre sti eller skru av docs
 
