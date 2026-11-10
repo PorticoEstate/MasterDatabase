@@ -11,16 +11,21 @@ import org.springframework.web.server.ResponseStatusException;
 
 import no.aktivkommune.masterdatabase.dto.AktivKommuneUrl;
 import no.aktivkommune.masterdatabase.dto.Kommune;
+import no.aktivkommune.masterdatabase.repository.FagsystemInstansRepository;
 import no.aktivkommune.masterdatabase.repository.KommuneRepository;
 
 @Service
 public class KommuneService
 {
-	private final KommuneRepository repository;
+	private static final String BOOKING = "booking";
 
-	public KommuneService(KommuneRepository repository)
+	private final KommuneRepository repository;
+	private final FagsystemInstansRepository instanser;
+
+	public KommuneService(KommuneRepository repository, FagsystemInstansRepository instanser)
 	{
 		this.repository = repository;
+		this.instanser = instanser;
 	}
 
 	@Transactional(readOnly = true)
@@ -48,7 +53,7 @@ public class KommuneService
 				"bookingBaseUrl is required and must be https://<name>.aktiv-kommune.no");
 		}
 		// The ETL list is keyed on the subdomain, so two kommuner cannot share one.
-		if (repository.instanceInUseByOther(AktivKommuneUrl.kildenokkelOf(slug), 0))
+		if (instanser.usedByOther(AktivKommuneUrl.kildenokkelOf(slug), 0))
 		{
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 				"bookingBaseUrl " + AktivKommuneUrl.baseUrlOf(slug) + " is already registered for another kommune");
@@ -63,7 +68,7 @@ public class KommuneService
 		{
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "kommunenr " + kommunenr + " already exists");
 		}
-		repository.registerBookingInstance(id, AktivKommuneUrl.kildenokkelOf(slug),
+		instanser.register(id, BOOKING, AktivKommuneUrl.kildenokkelOf(slug),
 			"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
 		return repository.getById(id).orElseThrow();
 	}
@@ -105,19 +110,19 @@ public class KommuneService
 		if (slug != null)
 		{
 			String kildenokkel = AktivKommuneUrl.kildenokkelOf(slug);
-			Optional<String> current = repository.getBookingKildenokkel(id);
+			Optional<String> current = instanser.kildenokkelFor(id, BOOKING);
 			if (current.isPresent() && !current.get().equals(kildenokkel))
 			{
 				throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"The kommune already has another booking system (" + current.get()
 						+ "); changing it is not supported");
 			}
-			if (repository.instanceInUseByOther(kildenokkel, id))
+			if (instanser.usedByOther(kildenokkel, id))
 			{
 				throw new ResponseStatusException(HttpStatus.CONFLICT,
 					"bookingBaseUrl " + AktivKommuneUrl.baseUrlOf(slug) + " is already registered for another kommune");
 			}
-			repository.registerBookingInstance(id, kildenokkel,
+			instanser.register(id, BOOKING, kildenokkel,
 				"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
 		}
 	}
@@ -127,7 +132,7 @@ public class KommuneService
 	public Kommune setBookingAktiv(long id, boolean aktiv)
 	{
 		getById(id);  // 404 if the kommune does not exist
-		if (!repository.setBookingAktiv(id, aktiv))
+		if (!instanser.setAktiv(id, BOOKING, aktiv))
 		{
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "The kommune has no booking system");
 		}
@@ -139,11 +144,11 @@ public class KommuneService
 	@Transactional
 	public void delete(long id)
 	{
-		List<Long> instanceIds = repository.getInstanceIds(id);
+		List<Long> instanceIds = instanser.idsFor(id);
 		if (!repository.deleteKommune(id))
 		{
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No kommune with id " + id);
 		}
-		repository.deleteUnusedInstances(instanceIds);
+		instanser.deleteUnused(instanceIds);
 	}
 }

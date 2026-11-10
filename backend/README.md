@@ -33,7 +33,7 @@ Stiene er engelske, mens query-parametre (`q`, `kommune`, `lokaletype`, `aktivit
 
 Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java` og `dto/`.
 
-Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (ren SQL via `JdbcClient`). Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/helpers.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
+Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (kommune-tabellen) og `repository/FagsystemInstansRepository.java` (fagsystem-instanser og koblingen til kommunen); begge bruker ren SQL via `JdbcClient`. Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/helpers.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
 
 ## API-dokumentasjon (Swagger / OpenAPI)
 
