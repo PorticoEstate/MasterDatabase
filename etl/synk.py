@@ -128,9 +128,9 @@ def generer_sql(slug: str, kommuner: dict, ut, fra_fil: Path | None = None) -> b
     """Skriver SQL for én kommune. Returnerer False hvis henting feilet. Med
     fra_fil leses <fra_fil>/<slug>.json i stedet for endepunktet; svaret skal ha
     samme form som searchdataall."""
-    knr, knavn, fylke = kommuner[slug]
+    knr, knavn, fylke, base_url = kommuner[slug]
     kn = f"aktiv-kommune:{slug}"
-    url = f"https://{slug}.aktiv-kommune.no/bookingfrontend/searchdataall"
+    url = f"{base_url}/bookingfrontend/searchdataall"
     if fra_fil:
         fil = fra_fil / f"{slug}.json"
         url = fil.resolve().as_uri()
@@ -165,7 +165,7 @@ def generer_sql(slug: str, kommuner: dict, ut, fra_fil: Path | None = None) -> b
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
       f"VALUES ({q(knr)},{q(knavn)},{q(fylke)}) ON CONFLICT (kommunenr) DO NOTHING;\n")
     w(f"INSERT INTO fagsystem_instans (kildenokkel,type,navn,base_url) "
-      f"VALUES ({q(kn)},'booking',{q('Aktiv kommune ' + knavn)},{q('https://' + slug + '.aktiv-kommune.no')}) "
+      f"VALUES ({q(kn)},'booking',{q('Aktiv kommune ' + knavn)},{q(base_url)}) "
       f"ON CONFLICT (kildenokkel) DO NOTHING;\n")
     # Ekte mange-til-mange: en kommune kan ha flere instanser (booking, fdv,
     # sensor, ...), én instans kan betjene flere kommuner. uniq_kommune_

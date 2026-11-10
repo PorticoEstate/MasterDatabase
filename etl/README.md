@@ -180,7 +180,7 @@ De to skriptene får kommunelisten fra hver sin kilde, og det er ikke valgfritt:
 
 `run.sh sync` lager synk-listen ved å kjøre `kommuner_query.sql`, som lister alle kommuner
 som har en **aktiv** `fagsystem_instans` av typen `booking` med `kildenokkel` som begynner
-på `aktiv-kommune:`. Resultatet (`slug|kommunenr|navn|fylke`, én linje per kommune) skrives
+på `aktiv-kommune:`. Resultatet (`slug|kommunenr|navn|fylke|base_url`, én linje per kommune) skrives
 til `etl/ut/kommuner.txt` og sendes med `--kommuner-fil`. Hvis spørringen feiler,
 synkroniseres ingenting den natten.
 
@@ -197,14 +197,39 @@ De to flaggene gjør hver sin ting og kan brukes sammen:
 
 | Flagg | Hva det styrer | Innhold |
 |---|---|---|
-| `--kommuner-fil FIL` | **Hvilke kommuner** som behandles | En tekstfil, én linje per kommune: `slug\|kommunenr\|navn\|fylke` (utdata fra `kommuner_query.sql`) |
+| `--kommuner-fil FIL` | **Hvilke kommuner** som behandles | En tekstfil, én linje per kommune: `slug\|kommunenr\|navn\|fylke\|base_url` (utdata fra `kommuner_query.sql`) |
 | `--fra-fil MAPPE` | **Hvor dataene hentes fra** | En mappe med `<slug>.json` i samme form som `searchdataall`, i stedet for å hente fra nettet (brukes av demo-normaliseringen) |
 
 ### Legge til en kommune
 
-1. Opprett den i masteren (`POST /masterdb/kommune` eller SQL).
-2. Registrer Aktiv kommune-instansen og koble den til. Bytt ut `<slug>` (subdomenet; små
-   bokstaver, tall og `-`), `<Navn>` og `<kommunenr>`:
+Opprett kommunen med `POST /masterdb/kommune` og oppgi `bookingBaseUrl`, for eksempel
+`https://bergen.aktiv-kommune.no`. Det eneste som kreves er det ene kallet: API-et
+registrerer Aktiv kommune-instansen og kobler den til kommunen i samme transaksjon, og
+neste synk plukker kommunen opp.
+
+```json
+{ "kommunenr": "4601", "navn": "Bergen", "fylkesnavn": "Vestland",
+  "bookingBaseUrl": "https://bergen.aktiv-kommune.no" }
+```
+
+- **URL-en valideres strengt:** `https`, ett subdomene under `aktiv-kommune.no`, ingen sti,
+  ingen port. ETL henter fra URL-en som er lagret, så andre verter avvises (400) både i API-et
+  og når ETL leser listen.
+- **En kilde tilhører én kommune.** Er URL-en allerede registrert på en annen kommune, blir
+  svaret 409 og kommunen opprettes ikke.
+- **Uten `bookingBaseUrl`** opprettes kommunen, men den synkroniseres ikke. Kilden kan
+  legges til senere (se under).
+- **Kilden kan registreres senere** med `PUT /masterdb/kommune/{id}` og `bookingBaseUrl`, hvis
+  kommunen ikke har en fra før. Samme URL en gang til endrer ingenting. En annen URL enn den
+  som er registrert gir 409, fordi kommunens bygg og ressurser er knyttet til instansen de ble
+  lastet fra. En oppdatering uten `bookingBaseUrl` beholder kilden og fjerner den aldri.
+- Å fjerne en kommune med `DELETE` fjerner også kilden hvis ingen annen kommune bruker den, så
+  samme URL kan registreres på nytt. For å stoppe synkroniseringen av en kommune uten å slette
+  den, sett `fagsystem_instans.aktiv = false`.
+
+Er kommunen opprettet på annen måte enn gjennom API-et, kan kilden også registreres for hånd.
+Bytt ut `<slug>` (subdomenet; små bokstaver, tall og `-`), `<Navn>` og
+`<kommunenr>`:
 
 ```sql
 INSERT INTO fagsystem_instans (kildenokkel, type, navn, base_url)
@@ -215,16 +240,16 @@ SELECT k.id, fi.id, fi.type FROM kommune k, fagsystem_instans fi
 WHERE k.kommunenr = '<kommunenr>' AND fi.kildenokkel = 'aktiv-kommune:<slug>';
 ```
 
-Neste synk plukker den opp. For å stoppe synkroniseringen av en kommune, sett
-`fagsystem_instans.aktiv = false`.
-
 Ting å vite:
 - Bare `synk.py` laster en kommune som er lagt til slik. Den laster bygg, ressurser og
   koblinger, men skriver aldri kodeverkene, så id-er masteren ikke kjenner loggføres i
   `synk_avvik` og kobles ikke.
 - Mens `NORMALISER_DEMO=true` kjenner demo-mappingfilene bare de eksisterende kildene, så
   regn med `synk_avvik`-rader for en ny kommune helt til instansen er normalisert.
-- En kommune uten registrert instans synkroniseres ikke. Steg 1 alene er ikke nok.
+- Kommunen lastes ved neste nattlige synk. For å laste den med en gang:
+  `docker compose exec etl ./run.sh sync`.
+- En URL med skrivefeil blir godtatt hvis formen stemmer. Den gir en mislykket henting i
+  `synk_avvik` ved neste synk, ikke en feil ved opprettelsen.
 
 ## Hva skriptene gjør og ikke gjør
 

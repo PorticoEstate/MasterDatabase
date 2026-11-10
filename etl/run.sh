@@ -113,7 +113,7 @@ vocabulary_empty()
 }
 
 # Writes $UT/kommuner.txt: the kommuner registered in the database with an
-# active Aktiv kommune instance (slug|kommunenr|navn|fylke), so a kommune added
+# active Aktiv kommune instance (slug|kommunenr|navn|fylke|base_url), so a kommune added
 # there is synced without any change to the code. If the query fails nothing is
 # synced: falling back to the built-in list could sync the wrong set.
 registered_kommuner()

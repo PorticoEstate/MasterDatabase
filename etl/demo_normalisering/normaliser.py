@@ -182,7 +182,7 @@ def main():
             if args.fra_fil:
                 d = json.loads((args.fra_fil / f"{slug}.json").read_text(encoding="utf-8"))
             else:
-                url = f"https://{slug}.aktiv-kommune.no/bookingfrontend/searchdataall"
+                url = f"{kommuner[slug][3]}/bookingfrontend/searchdataall"
                 print(f"henter {url} ...", file=sys.stderr)
                 d = hent_json(url)[1]
             if not isinstance(d, dict):

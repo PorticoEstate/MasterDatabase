@@ -44,17 +44,24 @@ KOMMUNER = {
 # fagsystem_instans.kildenokkel, so only plain characters are accepted.
 SLUG_MONSTER = re.compile(r"^[a-z0-9-]+$")
 
+# The only base URL the ETL fetches from: https://<slug>.aktiv-kommune.no. The
+# backend validates the same rule before it stores a URL (AktivKommuneUrl.java);
+# the ETL checks again so a bad row in the database cannot make it fetch from
+# another host. Keep the two in step.
+BASE_URL_MONSTER = re.compile(r"^https://([a-z0-9][a-z0-9-]*)\.aktiv-kommune\.no$")
+
 
 def les_kommuner(fil: Path | None) -> dict:
-    """Kommunene som skal behandles, som slug -> (kommunenr, navn, fylke).
+    """Kommunene som skal behandles, som slug -> (kommunenr, navn, fylke, base_url).
 
-    Uten fil: den innebygde KOMMUNER (last_inn.py bruker alltid den).
+    Uten fil: den innebygde KOMMUNER, med base_url utledet fra slug (last_inn.py
+    bruker KOMMUNER direkte; dette er bare standard for demo-normaliseringen).
     Med fil: kommunene som er registrert i databasen, én linje per kommune som
-    slug|kommunenr|navn|fylke (utdata fra kommuner_query.sql; synk.py bruker
-    alltid denne). En ugyldig linje hoppes over med en advarsel, så én dårlig
-    rad ikke stopper hele kjøringen."""
+    slug|kommunenr|navn|fylke|base_url (utdata fra kommuner_query.sql; synk.py
+    bruker alltid denne). En ugyldig linje hoppes over med en advarsel, så én
+    dårlig rad ikke stopper hele kjøringen."""
     if fil is None:
-        return KOMMUNER
+        return {slug: (*verdi, f"https://{slug}.aktiv-kommune.no") for slug, verdi in KOMMUNER.items()}
     try:
         linjer = fil.read_text(encoding="utf-8").splitlines()
     except OSError as e:
@@ -64,12 +71,18 @@ def les_kommuner(fil: Path | None) -> dict:
         if not linje.strip():
             continue
         deler = [d.strip() for d in linje.split("|")]
-        if (len(deler) != 4 or not SLUG_MONSTER.match(deler[0])
+        if (len(deler) != 5 or not SLUG_MONSTER.match(deler[0])
                 or not re.fullmatch(r"[0-9]{4}", deler[1]) or not deler[2]):
             print(f"  advarsel: {fil.name} linje {nr} ignorert: {linje!r}", file=sys.stderr)
             continue
-        slug, knr, navn, fylke = deler
-        kommuner[slug] = (knr, navn, fylke or None)
+        slug, knr, navn, fylke, base_url = deler
+        base_url = base_url.rstrip("/")
+        m = BASE_URL_MONSTER.match(base_url)
+        if not m or m.group(1) != slug:
+            print(f"  advarsel: {fil.name} linje {nr} ignorert: base_url {base_url!r} er ikke "
+                  f"https://{slug}.aktiv-kommune.no", file=sys.stderr)
+            continue
+        kommuner[slug] = (knr, navn, fylke or None, base_url)
     return kommuner
 
 
