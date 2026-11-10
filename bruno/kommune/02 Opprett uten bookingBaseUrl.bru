@@ -1,0 +1,33 @@
+meta {
+  name: 02 Opprett uten bookingBaseUrl
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/masterdb/kommune
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": "9997",
+    "navn": "UtenKilde",
+    "fylkesnavn": "Testfylke"
+  }
+}
+
+docs {
+  bookingBaseUrl er påkrevd ved opprettelse, så dette avvises med 400 og kommunen opprettes ikke.
+}
+
+tests {
+  test("svarer 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

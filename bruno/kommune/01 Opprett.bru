@@ -29,9 +29,9 @@ script:post-response {
 
 docs {
   Oppretter testkommunen 9999 og registrerer bookingsystemet i samme kall. Id-en lagres i
-  variabelen kommuneId, som de andre forespørslene bruker. Kjør 01-08 i rekkefølge; 07 og 08 rydder opp.
-  Kalles den to ganger, gir det andre kallet 409. En bookingBaseUrl som ikke er
-  https://<navn>.aktiv-kommune.no gir 400.
+  variabelen kommuneId, som de andre forespørslene bruker. Kjør 01-08 i rekkefølge; 08 rydder opp.
+  Kalles den to ganger, gir det andre kallet 409. bookingBaseUrl er påkrevd; mangler den, eller er den ikke
+  https://<navn>.aktiv-kommune.no, blir svaret 400 (se 02).
 }
 
 tests {
@@ -44,5 +44,6 @@ tests {
     expect(b.id).to.be.a("number");
     expect(b.kommunenr).to.equal("9999");
     expect(b.bookingBaseUrl).to.equal("https://testkommune.aktiv-kommune.no");
+    expect(b.bookingAktiv).to.equal(true);
   });
 }
