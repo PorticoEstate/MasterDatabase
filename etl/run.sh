@@ -14,7 +14,9 @@
 #
 # Settings (environment, all optional except the PG* connection and, for
 # geocoding, the Matrikkel credentials):
-#   KOMMUNER=alle           "alle" or one kommune slug, e.g. bergen
+#   KOMMUNER=alle           "alle" or one kommune slug, e.g. bergen. For sync, "alle" means
+#                           every kommune with an active Aktiv kommune instance in the
+#                           database (kommuner_query.sql); the first build uses the built-in list.
 #   SYNK_TID=03:00          time of the nightly sync, in TZ
 #   NORMALISER_DEMO=true    run the demo normaliser before loading
 #   DRY_RUN=false           write the SQL but do not apply it
@@ -110,23 +112,40 @@ vocabulary_empty()
 	             AND NOT EXISTS (SELECT 1 FROM fasilitet)"
 }
 
+# Writes $UT/kommuner.txt: the kommuner registered in the database with an
+# active Aktiv kommune instance (slug|kommunenr|navn|fylke), so a kommune added
+# there is synced without any change to the code. If the query fails nothing is
+# synced: falling back to the built-in list could sync the wrong set.
+registered_kommuner()
+{
+	if ! psql -tA -F'|' -f kommuner_query.sql >"$UT/kommuner.txt"; then
+		log "sync: the kommune query failed"
+		return 1
+	fi
+	log "sync: $(grep -c . "$UT/kommuner.txt") kommune(r) with an active Aktiv kommune instance"
+}
+
 # generate build|sync: writes $UT/<modus>.sql. A partial fetch failure (exit
 # code 2) still yields complete SQL, with the failure logged in synk_avvik, so
 # it is a warning and not an error.
 generate()
 {
 	local modus="$1" skript="last_inn.py" rc
-	local args=("$KOMMUNER")
-	[ "$modus" = "sync" ] && skript="synk.py"
+	local args=("$KOMMUNER") kommuner_arg=()
+	if [ "$modus" = "sync" ]; then
+		skript="synk.py"
+		registered_kommuner || return 1
+		kommuner_arg=(--kommuner-fil "$UT/kommuner.txt")
+	fi
 
 	if is_true "$NORMALISER_DEMO"; then
-		python3 demo_normalisering/normaliser.py "$KOMMUNER" --ut "$UT/normalisert"
+		python3 demo_normalisering/normaliser.py "$KOMMUNER" --ut "$UT/normalisert" ${kommuner_arg[@]+"${kommuner_arg[@]}"}
 		rc=$?
 		[ "$rc" -ne 0 ] && log "demo normaliser exited with $rc (see messages above)"
 		args+=(--fra-fil "$UT/normalisert")
 	fi
 
-	python3 "$skript" "${args[@]}" >"$UT/$modus.sql"
+	python3 "$skript" "${args[@]}" ${kommuner_arg[@]+"${kommuner_arg[@]}"} >"$UT/$modus.sql"
 	rc=$?
 	if [ "$rc" -eq 2 ]; then
 		log "$skript: some fetches failed (logged in synk_avvik); continuing with the rest"

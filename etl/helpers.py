@@ -2,11 +2,14 @@
 Hjelpefunksjoner delt av last_inn.py og synk.py: kommunetabellen, henting av
 JSON, rensing av kildetekst, SQL-literaler og avviksloggføring.
 """
+import argparse
 import html
 import json
 import re
+import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 KOMMUNER = {
     "afjord": ("5058", "Åfjord", "Trøndelag"),
@@ -36,6 +39,55 @@ KOMMUNER = {
 # "bardu": ("5520", "Bardu", "Troms"),
 # "drammen": ("3301", "Drammen", "Buskerud"),
 # "suldal": ("1134", "Suldal", "Rogaland"),
+
+# A slug is the Aktiv kommune subdomain and ends up in a URL and in
+# fagsystem_instans.kildenokkel, so only plain characters are accepted.
+SLUG_MONSTER = re.compile(r"^[a-z0-9-]+$")
+
+
+def les_kommuner(fil: Path | None) -> dict:
+    """Kommunene som skal behandles, som slug -> (kommunenr, navn, fylke).
+
+    Uten fil: den innebygde KOMMUNER (last_inn.py bruker alltid den).
+    Med fil: kommunene som er registrert i databasen, én linje per kommune som
+    slug|kommunenr|navn|fylke (utdata fra kommuner_query.sql; synk.py bruker
+    alltid denne). En ugyldig linje hoppes over med en advarsel, så én dårlig
+    rad ikke stopper hele kjøringen."""
+    if fil is None:
+        return KOMMUNER
+    try:
+        linjer = fil.read_text(encoding="utf-8").splitlines()
+    except OSError as e:
+        sys.exit(f"kan ikke lese kommunelisten: {e}")
+    kommuner = {}
+    for nr, linje in enumerate(linjer, 1):
+        if not linje.strip():
+            continue
+        deler = [d.strip() for d in linje.split("|")]
+        if (len(deler) != 4 or not SLUG_MONSTER.match(deler[0])
+                or not re.fullmatch(r"[0-9]{4}", deler[1]) or not deler[2]):
+            print(f"  advarsel: {fil.name} linje {nr} ignorert: {linje!r}", file=sys.stderr)
+            continue
+        slug, knr, navn, fylke = deler
+        kommuner[slug] = (knr, navn, fylke or None)
+    return kommuner
+
+
+def kommuner_fra_kommandolinje(paakrevd: bool = False, argv=None) -> dict:
+    """Leser --kommuner-fil før den egentlige argumentparseren, som trenger
+    listen til valgene for kommune-argumentet. Med paakrevd=True avvises et kall
+    uten flagget (unntatt --help), så synk.py aldri faller tilbake på den
+    innebygde listen."""
+    args_liste = sys.argv[1:] if argv is None else argv
+    forelopig = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
+    forelopig.add_argument("--kommuner-fil", type=Path)
+    args, _ = forelopig.parse_known_args(args_liste)
+    if paakrevd and args.kommuner_fil is None and not {"-h", "--help"} & set(args_liste):
+        print("feil: --kommuner-fil er påkrevd. Lag filen med: "
+              "psql -tA -F'|' -f etl/kommuner_query.sql > etl/ut/kommuner.txt", file=sys.stderr)
+        sys.exit(2)
+    return les_kommuner(args.kommuner_fil)
+
 
 def er_persondatafelt(felt: str) -> bool:
     """Felt som kan inneholde navngitte personer (tilsynsperson, kontaktinfo-

@@ -44,7 +44,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from helpers import KOMMUNER, hent_json, i_blokk, logg, q, rens, som_heltall
+from helpers import hent_json, i_blokk, kommuner_fra_kommandolinje, logg, q, rens, som_heltall
 
 
 # Kodeverkene i kilden: (tabell i masteren, samling i searchdataall). Masteren
@@ -124,11 +124,11 @@ def ukjente_id_er_sql(kn, tabell, samling, felt, ider):
             "END LOOP;\nEND $chk$;\n")
 
 
-def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
+def generer_sql(slug: str, kommuner: dict, ut, fra_fil: Path | None = None) -> bool:
     """Skriver SQL for én kommune. Returnerer False hvis henting feilet. Med
     fra_fil leses <fra_fil>/<slug>.json i stedet for endepunktet; svaret skal ha
     samme form som searchdataall."""
-    knr, knavn, fylke = KOMMUNER[slug]
+    knr, knavn, fylke = kommuner[slug]
     kn = f"aktiv-kommune:{slug}"
     url = f"https://{slug}.aktiv-kommune.no/bookingfrontend/searchdataall"
     if fra_fil:
@@ -340,15 +340,21 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
 
 
 def main():
+    kommuner = kommuner_fra_kommandolinje(paakrevd=True)
     parser = argparse.ArgumentParser(description="Synkroniserer fra Aktiv kommune; skriver SQL til standard-ut.",
-                                     epilog="Kjente kommuner: " + ", ".join(KOMMUNER))
-    parser.add_argument("kommune", choices=(*KOMMUNER, "alle"), metavar="kommune|alle")
+                                     epilog="Kjente kommuner: " + ", ".join(kommuner))
+    parser.add_argument("kommune", choices=(*kommuner, "alle"), metavar="kommune|alle")
     parser.add_argument("--fra-fil", type=Path, metavar="MAPPE",
                         help="les MAPPE/<kommune>.json i stedet for å hente fra nettet")
+    parser.add_argument("--kommuner-fil", type=Path, metavar="FIL", required=True,
+                        help="kommunene som skal synkroniseres, fra databasen (slug|kommunenr|navn|fylke "
+                             "per linje, laget av kommuner_query.sql)")
     args = parser.parse_args()
 
-    valg = list(KOMMUNER) if args.kommune == "alle" else [args.kommune]
-    feilet = [slug for slug in valg if not generer_sql(slug, sys.stdout, args.fra_fil)]
+    valg = list(kommuner) if args.kommune == "alle" else [args.kommune]
+    if not valg:
+        print("ingen kommuner å synkronisere", file=sys.stderr)
+    feilet = [slug for slug in valg if not generer_sql(slug, kommuner, sys.stdout, args.fra_fil)]
     if feilet:
         print(f"\nHenting feilet for: {', '.join(feilet)} (loggført i synk_avvik)", file=sys.stderr)
         sys.exit(2)
