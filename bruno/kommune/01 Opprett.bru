@@ -23,13 +23,9 @@ body:json {
   }
 }
 
-script:post-response {
-  bru.setVar("kommuneId", res.getBody().id);
-}
-
 docs {
-  Oppretter testkommunen 9999 og registrerer bookingsystemet i samme kall. Id-en lagres i
-  variabelen kommuneId, som de andre forespørslene bruker. Kjør 01-08 i rekkefølge; 08 rydder opp.
+  Oppretter testkommunen 9999 og registrerer bookingsystemet i samme kall. Sett id-en fra svaret
+  i path-parameteren id i 03 og 05-08 selv. Kjør 01-08 i rekkefølge; 08 rydder opp.
   Kalles den to ganger, gir det andre kallet 409. bookingBaseUrl er påkrevd; mangler den, eller er den ikke
   https://<navn>.aktiv-kommune.no, blir svaret 400 (se 02).
 }

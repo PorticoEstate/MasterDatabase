@@ -5,9 +5,13 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/masterdb/kommune/{{kommuneId}}/booking
+  url: {{baseUrl}}/masterdb/kommune/:id/booking
   body: json
   auth: none
+}
+
+params:path {
+  id: 25
 }
 
 headers {

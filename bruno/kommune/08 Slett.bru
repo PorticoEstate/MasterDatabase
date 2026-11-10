@@ -5,9 +5,13 @@ meta {
 }
 
 delete {
-  url: {{baseUrl}}/masterdb/kommune/{{kommuneId}}
+  url: {{baseUrl}}/masterdb/kommune/:id
   body: none
   auth: none
+}
+
+params:path {
+  id: 25
 }
 
 headers {
