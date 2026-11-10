@@ -1,7 +1,7 @@
 meta {
-  name: 10 Oppdater og renummerer
+  name: 05 Oppdater
   type: http
-  seq: 8
+  seq: 5
 }
 
 put {
@@ -22,12 +22,13 @@ body:json {
   }
 }
 
+docs {
+  Endrer navn, fylkesnavn og kommunenr (9999 -> 9998). Uten bookingBaseUrl i body beholdes
+  bookingsystemet som det er. Kjør 03 på nytt for å se endringen.
+}
+
 tests {
   test("svarer 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-}
-
-docs {
-  Endrer navn, fylkesnavn og kommunenr (9999 -> 9998). Dette er grunnen til at oppdatering gaar paa id.
 }
