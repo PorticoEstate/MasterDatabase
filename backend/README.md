@@ -14,7 +14,7 @@ Backend kjører på <http://localhost:8080>. `--build` er nødvendig etter endri
 
 Databasetilkobling styres av miljøvariablene `DB_URL`, `DB_USER` og `DB_PASSWORD` (se `src/main/resources/application.properties` og `docker-compose.yml`).
 
-The kommune endpoints require an API key. Set `MASTERDB_API_KEY` in `.env` (required: the backend refuses to start without it, and `docker compose` stops with an error). Clients send the key in the `X-API-KEY` header. The key is checked by `config/ApiKeyFilter.java`, which only applies to paths starting with `/masterdb/kommune`.
+Kommune-endepunktene krever en API-nøkkel. Sett `MASTERDB_API_KEY` i `.env` (påkrevd: backend nekter å starte uten den, og `docker compose` stopper med en feilmelding). Klienter sender nøkkelen i headeren `X-API-KEY`. Nøkkelen sjekkes av `config/ApiKeyFilter.java`, som bare gjelder stier som begynner med `/masterdb/kommune`.
 
 ## Endepunkter
 
@@ -22,17 +22,17 @@ The kommune endpoints require an API key. Set `MASTERDB_API_KEY` in `.env` (requ
 |---|---|---|
 | GET | `/masterdb/search` | Fritekstsøk med filtre. Returnerer både `bygg` og `ressurser`, hver paginert. |
 | GET | `/masterdb/search/filter` | Valgene til filterpanelet: kommuner (kode + navn), lokaletyper, aktiviteter og fasiliteter (id + navn). Hentes én gang, ikke per tastetrykk. |
-| GET | `/masterdb/kommune` | All kommuner, ordered by name. Requires API key. |
-| GET | `/masterdb/kommune/{id}` | One kommune by internal id. 404 if it does not exist. Requires API key. |
-| POST | `/masterdb/kommune` | Create a kommune from `{kommunenr, navn, fylkesnavn}`. 201 with the created kommune, 400 on invalid input, 409 if `kommunenr` exists. Requires API key. |
-| PUT | `/masterdb/kommune/{id}` | Replace `kommunenr`, `navn` and `fylkesnavn` (so `kommunenr` can be corrected, e.g. after a renumbering). 404 if the id does not exist, 409 if the `kommunenr` is taken. Requires API key. |
-| DELETE | `/masterdb/kommune/{id}` | Delete a kommune. **Also deletes its buildings, addresses, streets and resources** (`ON DELETE CASCADE`). 204, or 404. Requires API key. |
+| GET | `/masterdb/kommune` | Alle kommuner, sortert på navn. Krever API-nøkkel. |
+| GET | `/masterdb/kommune/{id}` | Én kommune på intern id. 404 hvis den ikke finnes. Krever API-nøkkel. |
+| POST | `/masterdb/kommune` | Oppretter en kommune fra `{kommunenr, navn, fylkesnavn}`. 201 med den opprettede kommunen, 400 ved ugyldig input, 409 hvis `kommunenr` finnes fra før. Krever API-nøkkel. |
+| PUT | `/masterdb/kommune/{id}` | Erstatter `kommunenr`, `navn` og `fylkesnavn` (så `kommunenr` kan rettes, for eksempel etter at en kommune har fått nytt nummer). 404 hvis id-en ikke finnes, 409 hvis `kommunenr` er opptatt. Krever API-nøkkel. |
+| DELETE | `/masterdb/kommune/{id}` | Sletter en kommune. **Sletter også bygg, adresser, gater og ressurser** (`ON DELETE CASCADE`). 204, eller 404. Krever API-nøkkel. |
 
 Stiene er engelske, mens query-parametre (`q`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `sorter`, `side`, `storrelse`, `lat`, `lon`, `radiusMeter`) og JSON-felt er norske. Lister kan sendes som `?aktivitet=1&aktivitet=2` eller `?aktivitet=1,2`.
 
 Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java` og `dto/`.
 
-The kommune endpoints live in `controller/KommuneController.java`, `service/KommuneService.java` and `repository/KommuneRepository.java` (plain SQL through `JdbcClient`). The request body is `dto/KommuneRequest.java`. Input format is validated in the controller (`@Valid`); "not found" and "already exists" are turned into 404 and 409 in the service.
+Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (ren SQL via `JdbcClient`). Request-body er `dto/KommuneRequest.java`. Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
 
 ## API-dokumentasjon (Swagger / OpenAPI)
 
@@ -63,11 +63,11 @@ Husk å committe den oppdaterte filen. Hvis ingen bruker filen, kan den fjernes,
 - Legg `@Operation(summary = "...", description = "...")` på metoden og `@Tag` på controlleren.
 - Bruk `@ParameterObject` på en DTO som tar imot query-parametre. Uten den vises DTO-en som ett parameter i stedet for ett per felt.
 - Beskriv felt med `@Schema(description = "...")` i DTO-ene.
-- A controller that needs the API key gets `@SecurityRequirement(name = "apiKey")` (the scheme is declared in `OpenApiConfig`). Document the errors springdoc cannot guess (400, 401, 404, 409) with `@ApiResponse`; the success code is picked up from `@ResponseStatus`.
+- En controller som krever API-nøkkelen får `@SecurityRequirement(name = "apiKey")` (skjemaet er deklarert i `OpenApiConfig`). Dokumenter feilene springdoc ikke kan gjette (400, 401, 404, 409) med `@ApiResponse`; suksesskoden hentes fra `@ResponseStatus`.
 
 ## Testing med Bruno
 
-Forespørslene ligger i `bruno/` i rotmappen, og `baseUrl` settes i `bruno/environments/lokal.bru`. Kjør dem etter endringer i endepunktene. The requests in `bruno/kommune/` need the `apiKey` secret set once in the `lokal` environment (the same value as `MASTERDB_API_KEY`). Run them in order: they create a test kommune (9999), change and delete it, and leave the database as it was.
+Forespørslene ligger i `bruno/` i rotmappen, og `baseUrl` settes i `bruno/environments/lokal.bru`. Kjør dem etter endringer i endepunktene. Forespørslene i `bruno/kommune/` krever at hemmeligheten `apiKey` er satt én gang i miljøet `lokal` (samme verdi som `MASTERDB_API_KEY`). Kjør dem i rekkefølge: de oppretter en testkommune (9999), endrer og sletter den, og lar databasen stå som den var.
 
 ## Endre sti eller skru av docs
 

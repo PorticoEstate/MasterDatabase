@@ -77,7 +77,8 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
 | `etl/last_inn.py` | Steg 2, bygging: oppretter kodeverkene og laster alt annet. Kjøres én gang |
 | `etl/synk.py` | Steg 2, jevnlig synkronisering: som `last_inn.py`, men skriver aldri kodeverkene |
-| `etl/helpers.py` | Hjelpefunksjoner delt av de to skriptene (`rens`, `q`, `logg`, `hent_json`, `KOMMUNER` osv.) |
+| `etl/helpers.py` | Hjelpefunksjoner delt av de to skriptene (`rens`, `q`, `logg`, `hent_json`, `KOMMUNER`, `les_kommuner` osv.) |
+| `etl/kommuner_query.sql` | Henter listen over kommuner som skal synkroniseres fra databasen (se "Hvilke kommuner som synkroniseres") |
 | `etl/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
 | `etl/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3. Kjøres etter bygging og etter hver synk, så nye bygg får posisjon |
@@ -120,10 +121,11 @@ python3 etl/last_inn.py alle > etl/ut/alle.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 ```
 
-**Synk etter bygging** (samme argumenter, samme måte å sende SQL-en til Postgres):
+**Synk etter bygging** (samme måte å sende SQL-en til Postgres, men synk trenger kommunelisten fra databasen først, se «Hvilke kommuner som synkroniseres»):
 
 ```bash
-python3 etl/synk.py alle > etl/ut/synk.sql
+psql -tA -F'|' -f etl/kommuner_query.sql > etl/ut/kommuner.txt
+python3 etl/synk.py alle --kommuner-fil etl/ut/kommuner.txt > etl/ut/synk.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/synk.sql
 ```
 
@@ -163,6 +165,66 @@ bare på hvordan de behandler kodeverkene(`lokaletype`, `aktivitet`, `fasilitet`
 Et nytt konsept opprettes altså bare i masteren (manuelt, med id satt manuelt),
 aldri av en instans etter bygging. En instans som begynner å bruke en ny id,
 gir avvik og ingen kobling til den id-en.
+
+## Hvilke kommuner som synkroniseres
+
+De to skriptene får kommunelisten fra hver sin kilde, og det er ikke valgfritt:
+
+- **Bygging** (`last_inn.py`) bruker alltid den innebygde `KOMMUNER` i `helpers.py`. Den er
+  utgangspunktet for en tom master, og byggingen registrerer hver kommune og dens Aktiv
+  kommune-instans i databasen.
+- **Synk** (`synk.py`) bruker alltid kommunene som er registrert i databasen, og nekter å
+  kjøre uten `--kommuner-fil`. Den faller aldri tilbake på den innebygde listen.
+  Demo-normaliseringen følger samme liste som skriptet den mater: uten `--kommuner-fil`
+  (bygging) bruker den den innebygde listen, med filen (synk) databaselisten.
+
+`run.sh sync` lager synk-listen ved å kjøre `kommuner_query.sql`, som lister alle kommuner
+som har en **aktiv** `fagsystem_instans` av typen `booking` med `kildenokkel` som begynner
+på `aktiv-kommune:`. Resultatet (`slug|kommunenr|navn|fylke`, én linje per kommune) skrives
+til `etl/ut/kommuner.txt` og sendes med `--kommuner-fil`. Hvis spørringen feiler,
+synkroniseres ingenting den natten.
+
+For hånd:
+
+```bash
+psql -tA -F'|' -f etl/kommuner_query.sql > etl/ut/kommuner.txt
+python3 etl/synk.py alle --kommuner-fil etl/ut/kommuner.txt > etl/ut/synk.sql
+```
+
+### `--kommuner-fil` og `--fra-fil`
+
+De to flaggene gjør hver sin ting og kan brukes sammen:
+
+| Flagg | Hva det styrer | Innhold |
+|---|---|---|
+| `--kommuner-fil FIL` | **Hvilke kommuner** som behandles | En tekstfil, én linje per kommune: `slug\|kommunenr\|navn\|fylke` (utdata fra `kommuner_query.sql`) |
+| `--fra-fil MAPPE` | **Hvor dataene hentes fra** | En mappe med `<slug>.json` i samme form som `searchdataall`, i stedet for å hente fra nettet (brukes av demo-normaliseringen) |
+
+### Legge til en kommune
+
+1. Opprett den i masteren (`POST /masterdb/kommune` eller SQL).
+2. Registrer Aktiv kommune-instansen og koble den til. Bytt ut `<slug>` (subdomenet; små
+   bokstaver, tall og `-`), `<Navn>` og `<kommunenr>`:
+
+```sql
+INSERT INTO fagsystem_instans (kildenokkel, type, navn, base_url)
+VALUES ('aktiv-kommune:<slug>', 'booking', 'Aktiv kommune <Navn>', 'https://<slug>.aktiv-kommune.no');
+
+INSERT INTO kommune_fagsystem_instans (kommune_id, fagsystem_instans_id, type)
+SELECT k.id, fi.id, fi.type FROM kommune k, fagsystem_instans fi
+WHERE k.kommunenr = '<kommunenr>' AND fi.kildenokkel = 'aktiv-kommune:<slug>';
+```
+
+Neste synk plukker den opp. For å stoppe synkroniseringen av en kommune, sett
+`fagsystem_instans.aktiv = false`.
+
+Ting å vite:
+- Bare `synk.py` laster en kommune som er lagt til slik. Den laster bygg, ressurser og
+  koblinger, men skriver aldri kodeverkene, så id-er masteren ikke kjenner loggføres i
+  `synk_avvik` og kobles ikke.
+- Mens `NORMALISER_DEMO=true` kjenner demo-mappingfilene bare de eksisterende kildene, så
+  regn med `synk_avvik`-rader for en ny kommune helt til instansen er normalisert.
+- En kommune uten registrert instans synkroniseres ikke. Steg 1 alene er ikke nok.
 
 ## Hva skriptene gjør og ikke gjør
 

@@ -63,7 +63,7 @@ the old values: `docker compose up -d --force-recreate etl`.
 | `MASTERDB_API_KEY` | none (required) | API key for the protected backend endpoints (`/masterdb/kommune`). Clients send it in the `X-API-KEY` header. The backend does not start without it. Treat it like a password; generate one with `openssl rand -hex 32`. |
 | `MATRIKKEL_BRUKER` / `MATRIKKEL_PASSORD` | empty | Matrikkel API login. If either is empty, geocoding is skipped. |
 | `MATRIKKEL_MILJO` | `test` | `test` = `prodtest.matrikkel.no`, `prod` = `matrikkel.no`. Must match where your credentials are valid. |
-| `KOMMUNER` | `alle` | `alle`, or a single kommune name such as `bergen`. |
+| `KOMMUNER` | `alle` | `alle`, or a single kommune name such as `bergen`. In the nightly sync `alle` means every kommune with an active Aktiv kommune instance in the database. |
 | `SYNK_TID` | `03:00` | Time of the nightly sync, `HH:MM`, in `TZ`. |
 | `TZ` | `Europe/Oslo` | Time zone for the schedule and the log timestamps. |
 | `NORMALISER_DEMO` | `true` | The source systems are not normalised yet, so a demo normaliser is applied before loading. Keep `true` for now. |
@@ -99,6 +99,14 @@ volume keeps the old password. Either set it back, or start from scratch with
 | Buildings, addresses, resources and links | Updated from the source on each sync |
 | `kildeuttrekk` (metadata about each fetch) | The last two fetches per source |
 | `synk_avvik` (deviation records) | `AVVIK_RETENTION_DAYS` days, except the latest run per source |
+
+## Adding a kommune
+
+The nightly sync reads the list of kommuner from the database, not from the code.
+A kommune is synced when it has an active Aktiv kommune instance registered. Create
+the kommune (`POST /masterdb/kommune`), then register its instance with the two SQL
+statements under "Legge til en kommune" in [etl/README.md](etl/README.md). The next
+sync loads it. Set `fagsystem_instans.aktiv = false` to stop syncing one.
 
 ## Day-to-day commands
 
