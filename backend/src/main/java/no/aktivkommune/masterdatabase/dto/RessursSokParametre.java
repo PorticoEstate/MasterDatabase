@@ -10,32 +10,31 @@ import java.util.List;
 //
 // Filtrene tar kommunenr og id-er, ikke navn: navn kan omdøpes og må URL-kodes.
 // Lokaletype, aktivitet og fasilitet har en delt id i kodeverket. Brukeren ser
-// bare navn; /masterdb/search/filter gir kode/id + navn så frontend kan oversette.
+// bare navn; /masterdb/search/filters/... gir id, navn og parentId så frontend
+// kan oversette og bygge hierarkiet. Frontend sender selv med id-ene til alle
+// undernivåer når en foreldrekategori er avhuket.
 //
 // Wrapper-typer (Integer, ikke int) slik at utelatte parametre blir null og
 // får standardverdi i RessursSokService.normaliser, i stedet for bindingsfeil.
 //
 // @Parameter-beskrivelsene vises i Swagger UI (springdoc leser dem via
 // @ParameterObject i controlleren). De er der for den som tester direkte;
-// frontend sender alltid kode/id fra filter-endepunktet.
 
 public record RessursSokParametre(
-	@Parameter(description = "Fritekst. Treffer navn, bygg, lokaletype, aktiviteter, fasiliteter og sted.",
-		example = "badminton")
+	@Parameter(description = "Fritekst. Treffer navn, bygg, lokaletype, aktiviteter, fasiliteter og sted.")
 	String q,
 
-	@Parameter(description = "Kommunenummer (4 siffer), ikke navn. Gyldige verdier: kommuner[].kode fra /masterdb/search/filter.",
-		example = "4601")
+	@Parameter(description = "Kommunenummer (4 siffer), ikke navn. Gyldige verdier: kommuner[].kommunenr fra /masterdb/search/municipalities.")
 	List<String> kommune,      // kommunenr
 
-	@Parameter(description = "lokaletype.id. Gyldige verdier: lokaletyper[].id fra /masterdb/search/filter.")
-	List<Long> lokaletype,     // lokaletype.id
+	@Parameter(description = "lokaletype.id. Gyldige verdier: id fra /masterdb/search/filters/resource-categories. ELLER mellom valgene. En foreldretype inkluderer IKKE undertypene automatisk: klienten må sende id-ene til alle undertyper.")
+	List<Long> lokaletype,     // lokaletype.id, ELLER
 
-	@Parameter(description = "aktivitet.id. Gyldige verdier: aktiviteter[].id fra /masterdb/search/filter. ELLER mellom valgene.")
-	List<Long> aktivitet,      // aktivitet.id, ELLER mellom valgene
+	@Parameter(description = "aktivitet.id. Gyldige verdier: id fra /masterdb/search/filters/activities. ELLER mellom valgene. En foreldrekategori inkluderer IKKE underaktivitetene automatisk: klienten må sende id-ene til alle underaktiviteter.")
+	List<Long> aktivitet,      // aktivitet.id, ELLER
 
-	@Parameter(description = "fasilitet.id. Gyldige verdier: fasiliteter[].id fra /masterdb/search/filter. OG mellom valgene.")
-	List<Long> fasilitet,      // fasilitet.id, OG mellom valgene
+	@Parameter(description = "fasilitet.id. Gyldige verdier: id fra /masterdb/search/filters/facilities. ELLER mellom valgene. En foreldrefasilitet inkluderer IKKE underfasilitetene automatisk: klienten må sende id-ene til alle underfasiliteter.")
+	List<Long> fasilitet,      // fasilitet.id, ELLER
 
 	// Nærhetssøk. Alle tre må oppgis sammen.
 	@Parameter(description = "Breddegrad for nærhetssøk. Krever lon og radiusMeter.", example = "60.39")

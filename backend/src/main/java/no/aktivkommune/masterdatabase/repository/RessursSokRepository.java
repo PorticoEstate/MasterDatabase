@@ -1,15 +1,13 @@
 package no.aktivkommune.masterdatabase.repository;
 
 import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
+import no.aktivkommune.masterdatabase.dto.KommuneFilter;
 import no.aktivkommune.masterdatabase.dto.FilterValg;
-import no.aktivkommune.masterdatabase.dto.IdValg;
 import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
-import no.aktivkommune.masterdatabase.dto.SokFiltre;
 import no.aktivkommune.masterdatabase.dto.SokeResultat;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -55,7 +53,7 @@ public class RessursSokRepository
 				default -> "navn";
 			} + ", ressurs_id LIMIT :limit OFFSET :offset";
 
-		return kjor(sql, t, p, rs -> new RessursSokTreff(
+		return kjorSok(sql, t, p, rs -> new RessursSokTreff(
 			rs.getLong("ressurs_id"),
 			rs.getString("navn"),
 			rs.getString("bygg_navn"),
@@ -95,7 +93,7 @@ public class RessursSokRepository
 				default -> "bygg_navn";
 			} + ", bygg_id LIMIT :limit OFFSET :offset";
 
-		return kjor(sql, t, p, rs -> new ByggSokTreff(
+		return kjorSok(sql, t, p, rs -> new ByggSokTreff(
 			rs.getLong("bygg_id"),
 			rs.getString("bygg_navn"),
 			rs.getString("bydel_navn"),
@@ -111,31 +109,34 @@ public class RessursSokRepository
 			rs.getString("bygg_bilde_url")));
 	}
 
-	// Valgene til filterpanelet. Aktiviteter og fasiliteter hentes fra
-	// oppslagstabellene (id og navn), men bare de som er koblet til en ressurs
-	// i viewet. Alle aktiviteter er med (flatt, ingen hierarki).
-	public SokFiltre hentFiltre()
+	// Valgene til filterpanelet. Kommuner hentes fra viewet (bare kommuner med
+	// ressurser). Aktivitet, lokaletype og fasilitet hentes
+	// direkte fra egne tabeller, hele hierarkiet.
+	public  List<KommuneFilter> hentKommuner(){
+		return kommuneFilter("""
+				SELECT DISTINCT kommunenr, kommune_navn AS navn
+				  FROM v_ressurs_sok
+				 ORDER BY navn""");
+	}
+
+	public List<FilterValg> hentAktiviteter(){
+		return hentFilterData("aktivitet");
+	}
+
+	public List<FilterValg> hentLokaletyper(){
+		return hentFilterData("lokaletype");
+	}
+
+	public List<FilterValg> hentFasiliteter(){
+		return hentFilterData("fasilitet");
+	}
+
+	// Hele kodeverket fra tabellen, også verdier uten ressurser. Tabellnavnet
+	// kommer alltid fra de tre faste kallene over, aldri fra brukerinput.
+	private List<FilterValg> hentFilterData(String tabell)
 	{
-		return new SokFiltre(
-			valg("""
-				SELECT DISTINCT kommunenr AS kode, kommune_navn AS navn
-				  FROM v_ressurs_sok
-				 ORDER BY navn"""),
-			idValg("""
-				SELECT DISTINCT lokaletype_id AS id, lokaletype_navn AS navn
-				  FROM v_ressurs_sok
-				 WHERE lokaletype_id IS NOT NULL
-				 ORDER BY navn"""),
-			idValg("""
-				SELECT a.id, a.navn
-				  FROM aktivitet a
-				 WHERE EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.aktivitet_ids @> ARRAY[a.id])
-				 ORDER BY a.navn"""),
-			idValg("""
-				SELECT f.id, f.navn
-				  FROM fasilitet f
-				 WHERE EXISTS (SELECT 1 FROM v_ressurs_sok v WHERE v.fasilitet_ids @> ARRAY[f.id])
-				 ORDER BY f.navn"""));
+		return filterValg("SELECT id, navn, parent_id FROM " + tabell
+			+ " ORDER BY parent_id NULLS FIRST, navn");
 	}
 
 	// Felles for begge søkene: en CTE som filtrerer viewet og regner ut
@@ -165,6 +166,9 @@ public class RessursSokRepository
 			where.append(" AND kommunenr IN (:kommune)");
 			params.put("kommune", p.kommune());
 		}
+		// Lokaletype, aktivitet og fasilitet: ELLER mellom valgene. Frontend
+		// sender med id-ene til alle undernivåer når en foreldrekategori er
+		// avhuket; serveren sjekker bare mot id-ene den får.
 		if (!p.lokaletype().isEmpty())
 		{
 			where.append(" AND lokaletype_id IN (:lokaletype)");
@@ -172,15 +176,14 @@ public class RessursSokRepository
 		}
 		if (!p.aktivitet().isEmpty())
 		{
-			// &&: ressursen har minst én av de valgte aktivitetene (ELLER).
+			// &&: ressursen har minst én av de valgte aktivitetene.
 			where.append(" AND aktivitet_ids && ARRAY[:aktivitet]::bigint[]");
 			params.put("aktivitet", p.aktivitet());
 		}
 		if (!p.fasilitet().isEmpty())
 		{
-			// @>: ressursen har alle de valgte fasilitetene (OG). Bytt til &&
-			// hvis produktet heller vil ha ELLER.
-			where.append(" AND fasilitet_ids @> ARRAY[:fasilitet]::bigint[]");
+			// &&: ressursen har minst én av de valgte fasilitetene.
+			where.append(" AND fasilitet_ids && ARRAY[:fasilitet]::bigint[]");
 			params.put("fasilitet", p.fasilitet());
 		}
 		if (p.harNarhet())
@@ -209,11 +212,11 @@ public class RessursSokRepository
 
 	// count(*) OVER () gir totalantallet i samme spørring, så paginering
 	// ikke krever en ekstra rundtur.
-	private <T> SokeResultat<T> kjor(String sql, Treff t, RessursSokParametre p, RadMapper<T> mapper)
+	private <T> SokeResultat<T> kjorSok(String sql, Treff t, RessursSokParametre p, RadMapper<T> mapper)
 	{
 		var params = new HashMap<>(t.params());
 		params.put("limit", p.storrelse());
-		params.put("offset", p.side() * p.storrelse());
+		params.put("offset", (long) p.side() * p.storrelse());
 
 		List<Rad<T>> rader = jdbc.sql(sql)
 			.params(params)
@@ -227,17 +230,20 @@ public class RessursSokRepository
 			p.storrelse());
 	}
 
-	private List<FilterValg> valg(String sql)
+	private List<KommuneFilter> kommuneFilter(String sql)
 	{
 		return jdbc.sql(sql)
-			.query((rs, i) -> new FilterValg(rs.getString("kode"), rs.getString("navn")))
+			.query((rs, i) -> new KommuneFilter(rs.getString("kommunenr"), rs.getString("navn")))
 			.list();
 	}
 
-	private List<IdValg> idValg(String sql)
+	private List<FilterValg> filterValg(String sql)
 	{
 		return jdbc.sql(sql)
-			.query((rs, i) -> new IdValg(rs.getLong("id"), rs.getString("navn")))
+			.query((rs, i) -> new FilterValg(
+				rs.getLong("id"),
+				rs.getString("navn"),
+				rs.getObject(("parent_id"), Long.class)))   //parent_id kan være NULL
 			.list();
 	}
 

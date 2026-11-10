@@ -12,9 +12,9 @@ get {
 
 docs {
   Valgene til filterpanelet ("More filters"): kommuner, lokaletyper,
-  aktiviteter og fasiliteter. Kommuner er { kode (kommunenr), navn }; de tre
+  aktiviteter og fasiliteter. Kommuner er { kommunenr, navn }; de tre
   andre er { id, navn }. Bare verdier som er koblet til en bookbar ressurs er
-  med. Vis navn til brukeren, send kode/id som parameter til "Sok".
+  med. Vis navn til brukeren, send kommunenr/id som parameter til "Sok".
   Aktiviteter er flate (ingen forelder).
 }
 
@@ -31,10 +31,10 @@ tests {
     expect(b.fasiliteter).to.be.an("array");
   });
 
-  test("kommuner har kode og navn", function() {
+  test("kommuner har kommunenr og navn", function() {
     const kommuner = res.getBody().kommuner;
     if (kommuner.length > 0) {
-      expect(kommuner[0].kode).to.be.a("string");
+      expect(kommuner[0].kommunenr).to.be.a("string");
       expect(kommuner[0].navn).to.be.a("string");
     }
   });
