@@ -6,6 +6,10 @@
 #   run.sh build      last_inn.py: seeds the vocabulary and loads everything
 #   run.sh sync       synk.py: loads buildings, resources and links
 #   run.sh geocode    Matrikkel geocoding and building enrichment
+#   run.sh gater [<kommunenr>...]
+#                     fetch every street of a kommune from Matrikkel into gate,
+#                     so gate matches Matrikkel. No argument: every kommune in
+#                     the database (what the daemon does at startup and nightly).
 #   run.sh prune      delete old synk_avvik rows (also done after each nightly run)
 #   run.sh status     row counts, geocoding status and latest extracts (read-only)
 #
@@ -173,6 +177,44 @@ do_geocode()
 	apply "$UT/matrikkel.sql"
 }
 
+# Fetches all streets from Matrikkel for kommuner in the kommune table, so that
+# gate matches Matrikkel for every kommune in the database.
+#   (no argument)  every kommune in the table (new ones, and a refresh of the rest)
+#   <kommunenr>... exactly those
+# Streets are added and renamed, never deleted: adresse.gate_id points at them.
+# A kommune that fails (unknown in Matrikkel, network) is logged in synk_avvik
+# and tried again by the next run.
+do_gater()
+{
+	local liste
+	if [ -z "${MATRIKKEL_BRUKER:-}" ] || [ -z "${MATRIKKEL_PASSORD:-}" ]; then
+		log "gater: skipped, MATRIKKEL_BRUKER / MATRIKKEL_PASSORD are not set"
+		return 0
+	fi
+	if [ "$#" -eq 0 ]; then
+		liste=$(psql -tA -c "SELECT kommunenr FROM kommune ORDER BY kommunenr") \
+			|| { log "gater: the kommune query failed"; return 1; }
+	else
+		liste="$*"
+	fi
+	if [ -z "$liste" ]; then
+		log "gater: no kommuner in the database"
+		return 0
+	fi
+	log "gater: fetching streets for: $(echo $liste)"
+	local rc
+	# shellcheck disable=SC2086
+	python3 hent_gater.py $liste >"$UT/gater.sql"
+	rc=$?
+	if [ "$rc" -eq 2 ]; then
+		log "gater: some kommuner failed (logged in synk_avvik); continuing with the rest"
+	elif [ "$rc" -ne 0 ]; then
+		log "gater: hent_gater.py failed with exit code $rc"
+		return 1
+	fi
+	apply "$UT/gater.sql"
+}
+
 # Deletes synk_avvik rows older than AVVIK_RETENTION_DAYS, except those in
 # v_synk_avvik_gjeldende (the latest run per source), so a source that stops
 # running keeps its current problems visible. Every run adds avvik rows and
@@ -230,6 +272,9 @@ daemon()
 		log "vocabulary present: skipping the initial build"
 	fi
 
+	# Streets for every kommune in the database (also new ones)
+	do_gater || true
+
 	local venting
 	while true; do
 		venting=$(seconds_until_sync)
@@ -244,6 +289,7 @@ daemon()
 		else
 			do_sync || log "sync failed"
 		fi
+		do_gater || true
 		do_geocode || true
 		prune_avvik || true
 	done
@@ -256,10 +302,11 @@ case "${1:-daemon}" in
 	build) do_build ;;
 	sync) do_sync ;;
 	geocode) do_geocode ;;
+	gater) shift; do_gater "$@" ;;
 	prune) prune_avvik ;;
 	status) psql -f status.sql ;;
 	*)
-		echo "usage: run.sh [daemon|build|sync|geocode|prune|status]" >&2
+		echo "usage: run.sh [daemon|build|sync|geocode|gater [kommunenr...]|prune|status]" >&2
 		exit 1
 		;;
 esac
