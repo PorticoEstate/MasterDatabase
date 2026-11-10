@@ -14,7 +14,10 @@ public record Kommune(
 	@Schema(description = "Base URL of the kommune's Aktiv kommune booking system. The nightly sync loads data from here. "
 			+ "Null if no booking system is registered, in which case the kommune is not synced.",
 			example = "https://bergen.aktiv-kommune.no")
-	String bookingBaseUrl
+	String bookingBaseUrl,
+	@Schema(description = "Whether the booking system is included in the nightly sync. Change it with PATCH "
+			+ "/masterdb/kommune/{id}/booking. Null if no booking system is registered.", example = "true")
+	Boolean bookingAktiv
 )
 {
 }

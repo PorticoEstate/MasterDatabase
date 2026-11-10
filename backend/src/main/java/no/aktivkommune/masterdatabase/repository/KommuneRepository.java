@@ -14,7 +14,7 @@ public class KommuneRepository
 	// A kommune has at most one booking instance (uniq_kommune_fagsystem_type), so the
 	// joins never produce more than one row per kommune.
 	private static final String SELECT_KOMMUNE = """
-			SELECT k.id, k.kommunenr, k.navn, k.fylkesnavn, fi.base_url AS booking_base_url
+			SELECT k.id, k.kommunenr, k.navn, k.fylkesnavn, fi.base_url AS booking_base_url, fi.aktiv AS booking_aktiv
 			  FROM kommune k
 			  LEFT JOIN kommune_fagsystem_instans kfi ON kfi.kommune_id = k.id AND kfi.type = 'booking'
 			  LEFT JOIN fagsystem_instans fi ON fi.id = kfi.fagsystem_instans_id
@@ -107,13 +107,14 @@ public class KommuneRepository
 
 	// Registers the booking instance and links it to the kommune. The instance row is the
 	// same one etl/synk.py writes (same kildenokkel); if it exists already it is reused and
-	// made active again. Without both rows etl/kommuner_query.sql does not list the kommune.
+	// left as it is (aktiv is never changed here, only by setBookingAktiv). Without both rows
+	// etl/kommuner_query.sql does not list the kommune.
 	public void registerBookingInstance(long kommuneId, String kildenokkel, String navn, String baseUrl)
 	{
 		jdbc.sql("""
 				INSERT INTO fagsystem_instans (kildenokkel, type, navn, base_url)
 				VALUES (:kildenokkel, 'booking', :navn, :baseUrl)
-				ON CONFLICT (kildenokkel) DO UPDATE SET base_url = EXCLUDED.base_url, aktiv = TRUE""")
+				ON CONFLICT (kildenokkel) DO UPDATE SET base_url = EXCLUDED.base_url""")
 			.param("kildenokkel", kildenokkel)
 			.param("navn", navn)
 			.param("baseUrl", baseUrl)
@@ -127,6 +128,20 @@ public class KommuneRepository
 			.param("kommuneId", kommuneId)
 			.param("kildenokkel", kildenokkel)
 			.update();
+	}
+
+	// Sets aktiv on the kommune's booking instance. False if the kommune has none.
+	public boolean setBookingAktiv(long kommuneId, boolean aktiv)
+	{
+		return jdbc.sql("""
+				UPDATE fagsystem_instans
+				   SET aktiv = :aktiv
+				 WHERE id = (SELECT kfi.fagsystem_instans_id
+				               FROM kommune_fagsystem_instans kfi
+				              WHERE kfi.kommune_id = :kommuneId AND kfi.type = 'booking')""")
+			.param("aktiv", aktiv)
+			.param("kommuneId", kommuneId)
+			.update() > 0;
 	}
 
 	// Ids of the instances linked to the kommune. Read before the kommune is deleted.

@@ -36,26 +36,22 @@ public class KommuneService
 			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No kommune with id " + id));
 	}
 
-	// With a bookingBaseUrl the booking system is registered in the same transaction, so the
-	// kommune is either created ready to be synced or not created at all.
+	// The booking system is registered in the same transaction, so the kommune is either
+	// created ready to be synced or not created at all.
 	@Transactional
 	public Kommune create(String kommunenr, String navn, String fylkesnavn, String bookingBaseUrl)
 	{
-		String slug = null;
-		if (bookingBaseUrl != null)
+		String slug = AktivKommuneUrl.slugOf(bookingBaseUrl);
+		if (slug == null)
 		{
-			slug = AktivKommuneUrl.slugOf(bookingBaseUrl);
-			if (slug == null)
-			{
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"bookingBaseUrl must be https://<name>.aktiv-kommune.no");
-			}
-			// The ETL list is keyed on the subdomain, so two kommuner cannot share one.
-			if (repository.instanceInUseByOther(AktivKommuneUrl.kildenokkelOf(slug), 0))
-			{
-				throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"bookingBaseUrl " + AktivKommuneUrl.baseUrlOf(slug) + " is already registered for another kommune");
-			}
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+				"bookingBaseUrl is required and must be https://<name>.aktiv-kommune.no");
+		}
+		// The ETL list is keyed on the subdomain, so two kommuner cannot share one.
+		if (repository.instanceInUseByOther(AktivKommuneUrl.kildenokkelOf(slug), 0))
+		{
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+				"bookingBaseUrl " + AktivKommuneUrl.baseUrlOf(slug) + " is already registered for another kommune");
 		}
 
 		long id;
@@ -67,18 +63,14 @@ public class KommuneService
 		{
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "kommunenr " + kommunenr + " already exists");
 		}
-
-		if (slug != null)
-		{
-			repository.registerBookingInstance(id, AktivKommuneUrl.kildenokkelOf(slug),
-				"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
-		}
+		repository.registerBookingInstance(id, AktivKommuneUrl.kildenokkelOf(slug),
+			"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
 		return repository.getById(id).orElseThrow();
 	}
 
 	// kommunenr, navn and fylkesnavn are replaced. The booking system is only touched when a
 	// bookingBaseUrl is given: it is set if the kommune has none, and repeating the registered
-	// URL changes nothing. A different URL is rejected, because the kommune's buildings and
+	// URL changes nothing (aktiv is left as it is). A different URL is rejected, because the kommune's buildings and
 	// resources are tied to the instance they were loaded from. An update never removes the
 	// booking system. Any error rolls the whole update back.
 	@Transactional
@@ -128,6 +120,18 @@ public class KommuneService
 			repository.registerBookingInstance(id, kildenokkel,
 				"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
 		}
+	}
+
+	// Includes or excludes the kommune's booking system in the nightly sync. Idempotent.
+	@Transactional
+	public Kommune setBookingAktiv(long id, boolean aktiv)
+	{
+		getById(id);  // 404 if the kommune does not exist
+		if (!repository.setBookingAktiv(id, aktiv))
+		{
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "The kommune has no booking system");
+		}
+		return getById(id);
 	}
 
 	// Also removes the kommune's booking system if no other kommune uses it, so the same URL

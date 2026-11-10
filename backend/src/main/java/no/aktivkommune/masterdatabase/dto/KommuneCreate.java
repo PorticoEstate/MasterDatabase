@@ -12,11 +12,11 @@ public record KommuneCreate(
 	@NotBlank String navn,
 	@Schema(description = "County name. Optional; null when left out.", example = "Vestland")
 	String fylkesnavn,
-	@Schema(description = "Base URL of the kommune's Aktiv kommune booking system. Optional. When given, the booking "
-			+ "system is registered and the next nightly sync loads the kommune's data from it. Without it the kommune "
-			+ "is created but not synced. Must be https://<name>.aktiv-kommune.no.",
+	@Schema(description = "Base URL of the kommune's Aktiv kommune booking system. Required. The booking system is "
+			+ "registered (active) in the same call, and the next nightly sync loads the kommune's data from it. "
+			+ "Must be https://<name>.aktiv-kommune.no.",
 			example = "https://bergen.aktiv-kommune.no")
-	@Pattern(regexp = AktivKommuneUrl.REGEX, flags = Pattern.Flag.CASE_INSENSITIVE,
+	@NotBlank @Pattern(regexp = AktivKommuneUrl.REGEX, flags = Pattern.Flag.CASE_INSENSITIVE,
 			message = "bookingBaseUrl must be https://<name>.aktiv-kommune.no") String bookingBaseUrl
 )
 {

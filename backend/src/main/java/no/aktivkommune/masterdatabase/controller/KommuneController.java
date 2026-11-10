@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import no.aktivkommune.masterdatabase.dto.BookingStatusUpdate;
 import no.aktivkommune.masterdatabase.dto.Kommune;
 import no.aktivkommune.masterdatabase.dto.KommuneCreate;
 import no.aktivkommune.masterdatabase.dto.KommuneUpdate;
@@ -50,7 +52,7 @@ public class KommuneController
 	}
 
 	@Operation(summary = "List all kommuner",
-			description = "All kommuner, ordered by name. bookingBaseUrl shows which kommuner will be synced with its corresponding aktiv kommun instance.")
+			description = "All kommuner, ordered by name. bookingBaseUrl and bookingAktiv show which kommuner the nightly sync loads data for (those with a booking system that is active).")
 	@GetMapping
 	public List<Kommune> getAll()
 	{
@@ -58,12 +60,11 @@ public class KommuneController
 	}
 
 	@Operation(summary = "Create a kommune",
-			description = "Returns the created kommune including its generated id. With bookingBaseUrl "
-					+ "(https://<name>.aktiv-kommune.no) the kommune's Aktiv kommune booking system is registered "
-					+ "in the same call, and the next nightly sync loads the kommune's data from it. Without "
-					+ "bookingBaseUrl the kommune is created but not synced.")
+			description = "Returns the created kommune including its generated id. bookingBaseUrl "
+					+ "(https://<name>.aktiv-kommune.no) is required: the kommune's Aktiv kommune booking system is "
+					+ "registered, active, in the same call, and the next nightly sync loads the kommune's data from it.")
 	@ApiResponses({
-		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl not https://<name>.aktiv-kommune.no)", content = @Content),
+		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl missing or not https://<name>.aktiv-kommune.no)", content = @Content),
 		@ApiResponse(responseCode = "409", description = "kommunenr already exists, or bookingBaseUrl is registered for another kommune", content = @Content)
 	})
 	@PostMapping
@@ -78,7 +79,8 @@ public class KommuneController
 					+ "kommunenr can be changed here, e.g. when a kommune is renumbered. bookingBaseUrl is optional: "
 					+ "leaving it out keeps the current booking system (an update never removes one). Giving it "
 					+ "registers the booking system if the kommune has none, so the next nightly sync loads the "
-					+ "kommune; repeating the registered URL changes nothing.")
+					+ "kommune; repeating the registered URL changes nothing. To stop or resume syncing, use "
+					+ "PATCH /{id}/booking.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl not https://<name>.aktiv-kommune.no)", content = @Content),
 		@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content),
@@ -88,6 +90,20 @@ public class KommuneController
 	public void updateKommune(@PathVariable long id, @Valid @RequestBody KommuneUpdate request)
 	{
 		service.update(id, request.kommunenr(), request.navn(), request.fylkesnavn(), request.bookingBaseUrl());
+	}
+
+	@Operation(summary = "Include or exclude the booking system in the sync",
+			description = "Sets whether the nightly sync loads data for this kommune. aktiv=false stops the sync "
+					+ "but keeps the kommune and its data; aktiv=true resumes it. Idempotent. Returns the kommune.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "400", description = "aktiv missing", content = @Content),
+		@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content),
+		@ApiResponse(responseCode = "409", description = "The kommune has no booking system", content = @Content)
+	})
+	@PatchMapping("/{id}/booking")
+	public Kommune setBookingAktiv(@PathVariable long id, @Valid @RequestBody BookingStatusUpdate request)
+	{
+		return service.setBookingAktiv(id, request.aktiv());
 	}
 
 	@Operation(summary = "Delete a kommune",
