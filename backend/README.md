@@ -1,6 +1,6 @@
 # Backend (søke-API)
 
-Spring Boot-applikasjon som lar nettsiden søke på tvers av kommuner. Brukeren kan søke på fritekst, filtrere (kommune, lokaletype, aktivitet, fasilitet), eventuelt begrense til et område rundt et punkt, og få treff som bygg-kort og ressursliste. Et treff lenker videre til det lokale bookingsystemet. API-et sjekker aldri tilgjengelighet og booker ingenting. I tillegg finnes et API for administrasjon av kommuner (`/masterdb/kommune`), beskyttet av en API-nøkkel.
+Spring Boot-applikasjon som lar nettsiden søke på tvers av kommuner. Brukeren kan søke på fritekst, filtrere (kommune, lokaletype, aktivitet, fasilitet), eventuelt begrense til et område rundt et punkt, og få treff som bygg-kort og ressursliste. Et treff lenker videre til det lokale bookingsystemet. API-et sjekker aldri tilgjengelighet og booker ingenting. I tillegg finnes et API for administrasjon av kommuner (`/masterdb/kommune`), beskyttet av en API-nøkkel (som resten av API-et, bortsett fra søk).
 
 ## Kjøre lokalt
 
@@ -14,7 +14,7 @@ Backend kjører på <http://localhost:8080>. `--build` er nødvendig etter endri
 
 Databasetilkobling styres av miljøvariablene `DB_URL`, `DB_USER` og `DB_PASSWORD` (se `src/main/resources/application.properties` og `docker-compose.yml`).
 
-Kommune-endepunktene krever en API-nøkkel. Sett `MASTERDB_API_KEY` i `.env` (påkrevd: backend nekter å starte uten den, og `docker compose` stopper med en feilmelding). Klienter sender nøkkelen i headeren `X-API-KEY`. Nøkkelen sjekkes av `config/ApiKeyFilter.java`, som bare gjelder stier som begynner med `/masterdb/kommune`.
+Alle endepunkter unntatt søk (`/masterdb/search`) og `/actuator/health` krever en API-nøkkel. Sett `MASTERDB_API_KEY` i `.env` (påkrevd: backend nekter å starte uten den, og `docker compose` stopper med en feilmelding). Klienter sender nøkkelen i headeren `X-API-KEY`. Nøkkelen sjekkes av `config/ApiKeyFilter.java`, som beskytter alt unntatt de åpne stiene i `OPEN_PATHS`. Nye endepunkter er dermed beskyttet som standard. Swagger UI og `/masterdb/api-docs` krever også nøkkelen.
 
 ## Endepunkter
 

@@ -3,6 +3,7 @@ package no.aktivkommune.masterdatabase.config;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,12 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ApiKeyFilter extends OncePerRequestFilter {
 
 	private static final String HEADER = "X-API-KEY";
+
+	// Everything requires the key except these paths (and anything below them). Keep this list
+	// short: a new endpoint is protected by default. /actuator/health is open because the
+	// container healthcheck in docker-compose.yml calls it without a key.
+	private static final List<String> OPEN_PATHS = List.of("/masterdb/search", "/actuator/health");
+
 	private final String expectedKey;  // @Value("${masterdb.api-key}")
 
 	public ApiKeyFilter(@Value("${masterdb.api-key}") String expectedKey)
@@ -27,7 +34,8 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request)
 	{
-		return !request.getRequestURI().startsWith("/masterdb/kommune");
+		String path = request.getRequestURI();
+		return OPEN_PATHS.stream().anyMatch(open -> path.equals(open) || path.startsWith(open + "/"));
 	}
 
 
