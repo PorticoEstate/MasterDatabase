@@ -1,7 +1,6 @@
 package no.aktivkommune.masterdatabase.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -19,34 +18,17 @@ public class FagsystemInstansRepository
 		this.jdbc = jdbc;
 	}
 
-	// True if a kommune other than kommuneId is linked to the instance with this kildenokkel.
-	// For a kommune that does not exist yet, pass 0.
-	public boolean usedByOther(String kildenokkel, long kommuneId)
+	// True if a kommune is already linked to the instance with this kildenokkel.
+	public boolean isRegistered(String kildenokkel)
 	{
 		return jdbc.sql("""
 				SELECT EXISTS (SELECT 1
 				                 FROM kommune_fagsystem_instans kfi
 				                 JOIN fagsystem_instans fi ON fi.id = kfi.fagsystem_instans_id
-				                WHERE fi.kildenokkel = :kildenokkel
-				                  AND kfi.kommune_id <> :kommuneId)""")
+				                WHERE fi.kildenokkel = :kildenokkel)""")
 			.param("kildenokkel", kildenokkel)
-			.param("kommuneId", kommuneId)
 			.query(Boolean.class)
 			.single();
-	}
-
-	// The kildenokkel of the kommune's instance of this type, if it has one.
-	public Optional<String> kildenokkelFor(long kommuneId, String type)
-	{
-		return jdbc.sql("""
-				SELECT fi.kildenokkel
-				  FROM kommune_fagsystem_instans kfi
-				  JOIN fagsystem_instans fi ON fi.id = kfi.fagsystem_instans_id
-				 WHERE kfi.kommune_id = :kommuneId AND kfi.type = :type""")
-			.param("kommuneId", kommuneId)
-			.param("type", type)
-			.query(String.class)
-			.optional();
 	}
 
 	// Registers the instance and links it to the kommune. If an instance with this kildenokkel

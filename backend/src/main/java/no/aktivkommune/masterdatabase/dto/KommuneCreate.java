@@ -19,7 +19,7 @@ public record KommuneCreate(
 	String fylkesnavn,
 
 	@Schema(description = "Base URL of the kommune's Aktiv kommune booking system. Required. The booking system is "
-			+ "registered (active) in the same call, and the next nightly sync loads the kommune's data from it. "
+			+ "registered (inactive) in the same call; the nightly sync skips it until it is activated. "
 			+ "Must be https://<name>.aktiv-kommune.no.",
 			example = "https://bergen.aktiv-kommune.no")
 	@NotBlank @Pattern(regexp = AktivKommuneUrl.REGEX, flags = Pattern.Flag.CASE_INSENSITIVE,

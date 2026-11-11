@@ -76,20 +76,18 @@ public class KommuneController
 
 	@Operation(summary = "Update a kommune",
 			description = "Replaces kommunenr, navn and fylkesnavn. A fylkesnavn left out of the body is set to null. "
-					+ "kommunenr can be changed here, e.g. when a kommune is renumbered. bookingBaseUrl is optional: "
-					+ "leaving it out keeps the current booking system (an update never removes one). Giving it "
-					+ "registers the booking system if the kommune has none, so the next nightly sync loads the "
-					+ "kommune; repeating the registered URL changes nothing. To stop or resume syncing, use "
+					+ "kommunenr can be changed here, e.g. when a kommune is renumbered. The booking system "
+					+ "is not touched: its URL is set when the kommune is created. To stop or resume syncing, use "
 					+ "PATCH /{id}/booking.")
 	@ApiResponses({
-		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl not https://<name>.aktiv-kommune.no)", content = @Content),
+		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits or navn missing)", content = @Content),
 		@ApiResponse(responseCode = "404", description = "No kommune with this id", content = @Content),
-		@ApiResponse(responseCode = "409", description = "Another kommune already has this kommunenr; bookingBaseUrl is registered for another kommune; or the kommune already has a different booking system", content = @Content)
+		@ApiResponse(responseCode = "409", description = "Another kommune already has this kommunenr", content = @Content)
 	})
 	@PutMapping("/{id}")
 	public void updateKommune(@PathVariable long id, @Valid @RequestBody KommuneUpdate request)
 	{
-		service.update(id, request.kommunenr(), request.navn(), request.fylkesnavn(), request.bookingBaseUrl());
+		service.update(id, request.kommunenr(), request.navn(), request.fylkesnavn());
 	}
 
 	@Operation(summary = "Include or exclude the booking system in the sync",

@@ -1,7 +1,6 @@
 package no.aktivkommune.masterdatabase.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -53,7 +52,7 @@ public class KommuneService
 				"bookingBaseUrl is required and must be https://<name>.aktiv-kommune.no");
 		}
 		// The ETL list is keyed on the subdomain, so two kommuner cannot share one.
-		if (instanser.usedByOther(AktivKommuneUrl.kildenokkelOf(slug), 0))
+		if (instanser.isRegistered(AktivKommuneUrl.kildenokkelOf(slug)))
 		{
 			throw new ResponseStatusException(HttpStatus.CONFLICT,
 				"bookingBaseUrl " + AktivKommuneUrl.baseUrlOf(slug) + " is already registered for another kommune");
@@ -73,25 +72,12 @@ public class KommuneService
 		return repository.getById(id).orElseThrow();
 	}
 
-	// kommunenr, navn and fylkesnavn are replaced. The booking system is only touched when a
-	// bookingBaseUrl is given: it is set if the kommune has none, and repeating the registered
-	// URL changes nothing (aktiv is left as it is). A different URL is rejected, because the kommune's buildings and
-	// resources are tied to the instance they were loaded from. An update never removes the
-	// booking system. Any error rolls the whole update back.
+	// kommunenr, navn and fylkesnavn are replaced. The booking system is not touched here:
+	// it is registered when the kommune is created, and its URL is tied to the buildings and
+	// resources loaded from it.
 	@Transactional
-	public void update(long id, String kommunenr, String navn, String fylkesnavn, String bookingBaseUrl)
+	public void update(long id, String kommunenr, String navn, String fylkesnavn)
 	{
-		String slug = null;
-		if (bookingBaseUrl != null)
-		{
-			slug = AktivKommuneUrl.slugOf(bookingBaseUrl);
-			if (slug == null)
-			{
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"bookingBaseUrl must be https://<name>.aktiv-kommune.no");
-			}
-		}
-
 		boolean updated;
 		try
 		{
@@ -105,25 +91,6 @@ public class KommuneService
 		if (!updated)
 		{
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No kommune with id " + id);
-		}
-
-		if (slug != null)
-		{
-			String kildenokkel = AktivKommuneUrl.kildenokkelOf(slug);
-			Optional<String> current = instanser.kildenokkelFor(id, BOOKING);
-			if (current.isPresent() && !current.get().equals(kildenokkel))
-			{
-				throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"The kommune already has another booking system (" + current.get()
-						+ "); changing it is not supported");
-			}
-			if (instanser.usedByOther(kildenokkel, id))
-			{
-				throw new ResponseStatusException(HttpStatus.CONFLICT,
-					"bookingBaseUrl " + AktivKommuneUrl.baseUrlOf(slug) + " is already registered for another kommune");
-			}
-			instanser.register(id, BOOKING, kildenokkel,
-				"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
 		}
 	}
 
