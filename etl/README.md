@@ -205,7 +205,7 @@ De to flaggene gjør hver sin ting og kan brukes sammen:
 Opprett kommunen med `POST /masterdb/kommune` og oppgi `bookingBaseUrl`, for eksempel
 `https://bergen.aktiv-kommune.no`. Det eneste som kreves er det ene kallet: API-et
 registrerer Aktiv kommune-instansen og kobler den til kommunen i samme transaksjon, og
-neste synk plukker kommunen opp.
+kommunen synkroniseres når kilden er aktivert (se under).
 
 ```json
 { "kommunenr": "4601", "navn": "Bergen", "fylkesnavn": "Vestland",
@@ -218,11 +218,10 @@ neste synk plukker kommunen opp.
 - **En kilde tilhører én kommune.** Er URL-en allerede registrert på en annen kommune, blir
   svaret 409 og kommunen opprettes ikke.
 - **`bookingBaseUrl` er påkrevd** ved opprettelse (uten den blir svaret 400), og kilden registreres
-  som aktiv.
-- **`PUT /masterdb/kommune/{id}` med `bookingBaseUrl`** registrerer kilden på en kommune som ikke har
-  en (for eksempel en som er opprettet på annen måte). Samme URL en gang til endrer ingenting. En annen
-  URL enn den som er registrert gir 409, fordi kommunens bygg og ressurser er knyttet til instansen de ble
-  lastet fra. En oppdatering uten `bookingBaseUrl` beholder kilden og fjerner den aldri.
+  som inaktiv.
+- **URL-en settes bare ved opprettelse.** `PUT /masterdb/kommune/{id}` endrer `kommunenr`, `navn` og
+  `fylkesnavn`, og rører aldri bookingkilden, fordi kommunens bygg og ressurser er knyttet til instansen
+  de ble lastet fra. For å bytte URL: slett kommunen og opprett den på nytt.
 - Å fjerne en kommune med `DELETE` fjerner også kilden hvis ingen annen kommune bruker den, så
   samme URL kan registreres på nytt.
 - En ny kommune opprettes med inaktiv bookingkilde (`aktiv = false`) og synkroniseres ikke før den

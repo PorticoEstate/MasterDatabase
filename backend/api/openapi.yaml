@@ -40,11 +40,8 @@ paths:
       summary: Update a kommune
       description: "Replaces kommunenr, navn and fylkesnavn. A fylkesnavn left out\
         \ of the body is set to null. kommunenr can be changed here, e.g. when a kommune\
-        \ is renumbered. bookingBaseUrl is optional: leaving it out keeps the current\
-        \ booking system (an update never removes one). Giving it registers the booking\
-        \ system if the kommune has none, so the next nightly sync loads the kommune;\
-        \ repeating the registered URL changes nothing. To stop or resume syncing,\
-        \ use PATCH /{id}/booking."
+        \ is renumbered. The booking system is not touched: its URL is set when the\
+        \ kommune is created. To stop or resume syncing, use PATCH /{id}/booking."
       operationId: updateKommune
       parameters:
       - name: id
@@ -61,14 +58,11 @@ paths:
         required: true
       responses:
         "400":
-          description: "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl\
-            \ not https://<name>.aktiv-kommune.no)"
+          description: "Invalid body (kommunenr not 4 digits or navn missing)"
         "404":
           description: No kommune with this id
         "409":
-          description: Another kommune already has this kommunenr; bookingBaseUrl
-            is registered for another kommune; or the kommune already has a different
-            booking system
+          description: Another kommune already has this kommunenr
         "401":
           description: Missing or invalid API key
       security:
@@ -117,8 +111,9 @@ paths:
       summary: Create a kommune
       description: "Returns the created kommune including its generated id. bookingBaseUrl\
         \ (https://<name>.aktiv-kommune.no) is required: the kommune's Aktiv kommune\
-        \ booking system is registered, active, in the same call, and the next nightly\
-        \ sync loads the kommune's data from it."
+        \ booking system is registered, and active is set to false, in the same call.\
+        \ The nightly sync does not load the kommune until it is activated with PATCH\
+        \ /{id}/booking."
       operationId: createKommune
       requestBody:
         content:
@@ -322,14 +317,6 @@ components:
           type: string
           description: County name. Optional; null when left out.
           example: Vestland
-        bookingBaseUrl:
-          type: string
-          description: "Base URL of the kommune's Aktiv kommune booking system. Optional.\
-            \ Leaving it out keeps the current booking system; an update never removes\
-            \ one. Can be set when the kommune has none, or repeated with the same\
-            \ URL (no change). A different URL than the registered one is rejected\
-            \ (409). Must be https://<name>.aktiv-kommune.no."
-          example: https://bergen.aktiv-kommune.no
           pattern: "^https://([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)\\.aktiv-kommune\\\
             .no/?$"
       required:
@@ -356,8 +343,8 @@ components:
         bookingBaseUrl:
           type: string
           description: "Base URL of the kommune's Aktiv kommune booking system. Required.\
-            \ The booking system is registered (active) in the same call, and the\
-            \ next nightly sync loads the kommune's data from it. Must be https://<name>.aktiv-kommune.no."
+            \ The booking system is registered (inactive) in the same call; the\
+            \ nightly sync skips it until it is activated. Must be https://<name>.aktiv-kommune.no."
           example: https://bergen.aktiv-kommune.no
           minLength: 1
           pattern: "^https://([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)\\.aktiv-kommune\\\

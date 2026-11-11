@@ -114,8 +114,9 @@ curl -X POST http://localhost:8080/masterdb/kommune \
 ```
 
 `kommunenr` (four digits), `navn` and `bookingBaseUrl` are required. The kommune and its
-booking system are registered, active, in the same transaction, and the next nightly sync
-loads the kommune's data. To load it right away, run `docker compose exec etl ./run.sh sync`.
+booking system are registered in the same transaction, with the booking system inactive.
+Once it is up and running, activate it (below); the next nightly sync then loads the kommune's
+data. To load it right away, run `docker compose exec etl ./run.sh sync`.
 
 - **Accepted URLs:** only `https://<name>.aktiv-kommune.no` (no path, port or
   credentials). A missing or different URL gives 400, because the sync fetches from this
@@ -125,10 +126,9 @@ loads the kommune's data. To load it right away, run `docker compose exec etl ./
 - **Start, stop or resume syncing:** `PATCH /masterdb/kommune/{id}/booking` with `{"aktiv": false}`
   (or `true`) leaves the kommune and its data in place but includes or excludes it in the
   nightly sync. `GET` shows the state as `bookingAktiv`.
-- **Kommuner without a booking system** (created some other way): attach one with
-  `PUT /masterdb/kommune/{id}` and a `bookingBaseUrl`. This is only accepted if the kommune
-  has none yet, or the same URL again (no change); a different URL gives 409, and a `PUT`
-  that omits it never removes it.
+- **The booking URL is set at creation only.** `PUT /masterdb/kommune/{id}` changes `kommunenr`,
+  `navn` and `fylkesnavn`, and never touches the booking system. To change a URL, delete the
+  kommune and create it again (this removes its buildings and resources).
 
 `DELETE /masterdb/kommune/{id}` removes the kommune and its booking system, and cascades
 to its buildings and resources. More detail under "Legge til en kommune" in
