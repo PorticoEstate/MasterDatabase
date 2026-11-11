@@ -27,7 +27,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 	// tried from the UI (Authorize button).
 	private static final List<String> OPEN_PATHS = List.of(
 		"/masterdb/search", "/actuator/health",
-		"/masterdb/swagger-ui", "/masterdb/swagger-ui.html", "/masterdb/api-docs");
+		"/masterdb/swagger-ui", "/masterdb/swagger-ui.html", "/masterdb/api-docs", "/masterdb/api-docs.yaml");
 
 	private final String expectedKey;  // @Value("${masterdb.api-key}")
 
