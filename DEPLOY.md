@@ -175,8 +175,8 @@ docker compose exec -T db pg_dump -U postgres masterdb > masterdb-backup.sql
   The backend therefore starts with schema validation disabled
   (`spring.jpa.hibernate.ddl-auto=none`), and API endpoints that read the
   affected tables may fail. The data pipeline does not depend on the API.
-- Every endpoint requires an API key (`X-API-KEY`) except `/masterdb/search` and
-  `/actuator/health` on port 8080, and there is one shared key. This includes Swagger UI
-  and `/masterdb/api-docs`; a browser cannot send the header for the page itself, so use
-  Bruno or curl, or add the paths to `OPEN_PATHS` in `ApiKeyFilter` for local development. Do not expose the API to the internet;
+- Every endpoint requires an API key (`X-API-KEY`) except `/masterdb/search`, Swagger UI,
+  `/masterdb/api-docs` and `/actuator/health` on port 8080, and there is one shared key.
+  The open paths are listed in `OPEN_PATHS` in `ApiKeyFilter`. In Swagger UI, use
+  Authorize to send the key when trying the protected endpoints. Do not expose the API to the internet;
   restrict access with a firewall.

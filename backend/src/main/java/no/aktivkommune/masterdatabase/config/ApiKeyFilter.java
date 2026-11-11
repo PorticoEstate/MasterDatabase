@@ -21,8 +21,13 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 
 	// Everything requires the key except these paths (and anything below them). Keep this list
 	// short: a new endpoint is protected by default. /actuator/health is open because the
-	// container healthcheck in docker-compose.yml calls it without a key.
-	private static final List<String> OPEN_PATHS = List.of("/masterdb/search", "/actuator/health");
+	// container healthcheck in docker-compose.yml calls it without a key. Swagger UI and the
+	// spec it loads (/masterdb/api-docs, incl. /swagger-config) are open because a browser cannot
+	// send the header for the page itself; the protected endpoints still need the key when
+	// tried from the UI (Authorize button).
+	private static final List<String> OPEN_PATHS = List.of(
+		"/masterdb/search", "/actuator/health",
+		"/masterdb/swagger-ui", "/masterdb/swagger-ui.html", "/masterdb/api-docs");
 
 	private final String expectedKey;  // @Value("${masterdb.api-key}")
 

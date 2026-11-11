@@ -14,7 +14,7 @@ Backend kjører på <http://localhost:8080>. `--build` er nødvendig etter endri
 
 Databasetilkobling styres av miljøvariablene `DB_URL`, `DB_USER` og `DB_PASSWORD` (se `src/main/resources/application.properties` og `docker-compose.yml`).
 
-Alle endepunkter unntatt søk (`/masterdb/search`) og `/actuator/health` krever en API-nøkkel. Sett `MASTERDB_API_KEY` i `.env` (påkrevd: backend nekter å starte uten den, og `docker compose` stopper med en feilmelding). Klienter sender nøkkelen i headeren `X-API-KEY`. Nøkkelen sjekkes av `config/ApiKeyFilter.java`, som beskytter alt unntatt de åpne stiene i `OPEN_PATHS`. Nye endepunkter er dermed beskyttet som standard. Swagger UI og `/masterdb/api-docs` krever også nøkkelen.
+Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-docs` og `/actuator/health` krever en API-nøkkel. Sett `MASTERDB_API_KEY` i `.env` (påkrevd: backend nekter å starte uten den, og `docker compose` stopper med en feilmelding). Klienter sender nøkkelen i headeren `X-API-KEY`. Nøkkelen sjekkes av `config/ApiKeyFilter.java`, som beskytter alt unntatt de åpne stiene i `OPEN_PATHS`. Nye endepunkter er dermed beskyttet som standard.
 
 ## Endepunkter
 
