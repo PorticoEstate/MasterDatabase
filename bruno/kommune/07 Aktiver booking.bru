@@ -1,0 +1,39 @@
+meta {
+  name: 07 Aktiver booking
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/masterdb/kommune/:id/booking
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 25
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "aktiv": true
+  }
+}
+
+docs {
+  Tar synken for kommunen i bruk igjen etter 06.
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("bookingAktiv er true", function() {
+    expect(res.getBody().bookingAktiv).to.equal(true);
+  });
+}

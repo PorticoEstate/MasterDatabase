@@ -181,8 +181,8 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
     w(f"-- {knavn}\n")
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
       f"VALUES ({q(knr)},{q(knavn)},{q(fylke)}) ON CONFLICT (kommunenr) DO NOTHING;\n")
-    w(f"INSERT INTO fagsystem_instans (kildenokkel,type,navn,base_url) "
-      f"VALUES ({q(kn)},'booking',{q('Aktiv kommune ' + knavn)},{q('https://' + slug + '.aktiv-kommune.no')}) "
+    w(f"INSERT INTO fagsystem_instans (kildenokkel,type,navn,base_url,aktiv) "
+      f"VALUES ({q(kn)},'booking',{q('Aktiv kommune ' + knavn)},{q('https://' + slug + '.aktiv-kommune.no')},TRUE) "
       f"ON CONFLICT (kildenokkel) DO NOTHING;\n")
     # Ekte mange-til-mange: en kommune kan ha flere instanser (booking, fdv,
     # sensor, ...), én instans kan betjene flere kommuner. uniq_kommune_
