@@ -120,7 +120,9 @@ loads the kommune's data. To load it right away, run `docker compose exec etl ./
 - **Accepted URLs:** only `https://<name>.aktiv-kommune.no` (no path, port or
   credentials). A missing or different URL gives 400, because the sync fetches from this
   address. A URL already used by another kommune gives 409.
-- **Stop or resume syncing:** `PATCH /masterdb/kommune/{id}/booking` with `{"aktiv": false}`
+- **New kommuner start inactive:** `POST` registers the booking system with `aktiv = false`, so the
+  nightly sync skips it until it is activated (below). The seed kommuner from `last_inn.py` are active.
+- **Start, stop or resume syncing:** `PATCH /masterdb/kommune/{id}/booking` with `{"aktiv": false}`
   (or `true`) leaves the kommune and its data in place but includes or excludes it in the
   nightly sync. `GET` shows the state as `bookingAktiv`.
 - **Kommuner without a booking system** (created some other way): attach one with

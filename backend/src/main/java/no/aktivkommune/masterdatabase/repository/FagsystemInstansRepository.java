@@ -51,7 +51,7 @@ public class FagsystemInstansRepository
 
 	// Registers the instance and links it to the kommune. If an instance with this kildenokkel
 	// exists already it is reused and only its base_url is set; aktiv is never changed here,
-	// only by setAktiv. Without both rows etl/kommuner_query.sql does not list the kommune.
+	// only by setAktiv. A new instance gets the column default (inactive, see V2), so it is not synced until activated. Without both rows etl/kommuner_query.sql does not list the kommune.
 	public void register(long kommuneId, String type, String kildenokkel, String navn, String baseUrl)
 	{
 		jdbc.sql("""

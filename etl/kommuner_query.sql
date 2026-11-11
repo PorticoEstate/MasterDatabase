@@ -5,8 +5,8 @@
 --
 -- The slug is the part of fagsystem_instans.kildenokkel after 'aktiv-kommune:',
 -- the same key last_inn.py and synk.py write. A kommune without such an instance
--- is not listed, and so is not synced. Set fagsystem_instans.aktiv = false to
--- stop syncing one.
+-- is not listed, and so is not synced. New instances start with aktiv = false;
+-- set fagsystem_instans.aktiv = true to start syncing one, false to stop.
 SELECT substr(fi.kildenokkel, length('aktiv-kommune:') + 1) AS slug,
        k.kommunenr, k.navn, COALESCE(k.fylkesnavn, ''), fi.base_url
 FROM kommune k

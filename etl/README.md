@@ -225,6 +225,8 @@ neste synk plukker kommunen opp.
   lastet fra. En oppdatering uten `bookingBaseUrl` beholder kilden og fjerner den aldri.
 - Å fjerne en kommune med `DELETE` fjerner også kilden hvis ingen annen kommune bruker den, så
   samme URL kan registreres på nytt.
+- En ny kommune opprettes med inaktiv bookingkilde (`aktiv = false`) og synkroniseres ikke før den
+  aktiveres med `PATCH` under. Seed-kommunene fra `last_inn.py` er aktive.
 - **Stoppe og gjenoppta synkroniseringen** uten å slette kommunen: `PATCH /masterdb/kommune/{id}/booking`
   med `{"aktiv": false}` (eller `true`). `bookingAktiv` i svaret fra `GET` viser status.
 
