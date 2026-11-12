@@ -1,7 +1,7 @@
 package no.aktivkommune.masterdatabase.dto;
 
 // Ett byggkort ("Buildings and facilities"). antallRessurser er antall
-// bookbare ressurser i bygget som traff søket. bookingUrl/bildeUrl er null
+// bookbare ressurser i bygget som traff søket. bookingUrl er null
 // for bygg som bare er kjent fra matrikkelen (ingen ekstern_id).
 public record ByggSokTreff(
 	Long byggId,
@@ -15,7 +15,6 @@ public record ByggSokTreff(
 	Double lon,
 	Double avstandMeter,
 	int antallRessurser,
-	String bookingUrl,
-	String bildeUrl)
+	String bookingUrl)
 {
 }

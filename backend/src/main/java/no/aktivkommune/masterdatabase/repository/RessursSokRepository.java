@@ -42,7 +42,7 @@ public class RessursSokRepository
 		String sql = sok.sql() + """
 
 			SELECT ressurs_id, navn, bygg_navn, kommune_navn, adressetekst, postnummer, poststed,
-			       lokaletype_navn, lat, lon, avstand, booking_url, bilde_url,
+			       lokaletype_navn, lat, lon, avstand, booking_url,
 			       count(*) OVER () AS totalt
 			  FROM treff
 			 ORDER BY\s""" + switch (p.sorter())
@@ -64,8 +64,8 @@ public class RessursSokRepository
 			rs.getObject("lat", Double.class),
 			rs.getObject("lon", Double.class),
 			rs.getObject("avstand", Double.class),
-			rs.getString("booking_url"),
-			rs.getString("bilde_url")));
+			rs.getString("booking_url")));
+
 	}
 
 	// Ett kort per bygg med minst én ressurs som traff. Ressurser uten bygg er
@@ -77,7 +77,7 @@ public class RessursSokRepository
 
 			SELECT bygg_id, bygg_navn, bydel_navn, kommune_navn, adressetekst, postnummer, poststed,
 			       lat, lon,
-				   bygg_booking_url, bygg_bilde_url,
+				   bygg_booking_url,
 			       count(*)     AS antall_ressurser,
 			       max(rang)    AS rang,
 			       min(avstand) AS avstand,
@@ -85,7 +85,7 @@ public class RessursSokRepository
 			  FROM treff
 			 WHERE bygg_id IS NOT NULL
 			 GROUP BY bygg_id, bygg_navn, bydel_navn, kommune_navn, adressetekst, postnummer,
-			          poststed, lat, lon, bygg_booking_url, bygg_bilde_url
+			          poststed, lat, lon, bygg_booking_url
 			 ORDER BY\s""" + switch (p.sorter())
 			{
 				case "relevans" -> "rang DESC, bygg_navn";
@@ -105,8 +105,7 @@ public class RessursSokRepository
 			rs.getObject("lon", Double.class),
 			rs.getObject("avstand", Double.class),
 			rs.getInt("antall_ressurser"),
-			rs.getString("bygg_booking_url"),
-			rs.getString("bygg_bilde_url")));
+			rs.getString("bygg_booking_url")));
 	}
 
 	// Valgene til filterpanelet. Kommuner hentes fra viewet (bare kommuner med
@@ -171,9 +170,7 @@ public class RessursSokRepository
 			where.append(" AND kommunenr IN (:kommune)");
 			params.put("kommune", p.kommune());
 		}
-		// Lokaletype, aktivitet og fasilitet: ELLER mellom valgene. Frontend
-		// sender med id-ene til alle undernivåer når en foreldrekategori er
-		// avhuket; serveren sjekker bare mot id-ene den får.
+		// Lokaletype, aktivitet og fasilitet: ELLER mellom valgene.
 		if (!p.lokaletype().isEmpty())
 		{
 			where.append(" AND lokaletype_id IN (:lokaletype)");
@@ -245,23 +242,6 @@ public class RessursSokRepository
 			p.storrelse());
 	}
 
-	/*private List<KommuneFilter> kommuneFilter(String sql)
-	{
-		return jdbc.sql(sql)
-			.query((rs, i) -> new KommuneFilter(rs.getString("kommunenr"), rs.getString("navn")))
-			.list();
-	} */
-
-	/*private List<FilterValg> filterValg(String sql)
-	{
-		return jdbc.sql(sql)
-			.query((rs, i) -> new FilterValg(
-				rs.getLong("id"),
-				rs.getString("navn"),
-				rs.getObject(("parent_id"), Long.class)))   //parent_id kan være NULL
-			.list();
-	}
-*/
 	@FunctionalInterface
 	private interface RadMapper<T>
 	{

@@ -15,7 +15,6 @@ public record RessursSokTreff(
 	Double lat,
 	Double lon,
 	Double avstandMeter,
-	String bookingUrl,
-	String bildeUrl)
+	String bookingUrl)
 {
 }
