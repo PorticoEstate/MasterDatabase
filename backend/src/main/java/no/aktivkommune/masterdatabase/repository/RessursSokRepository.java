@@ -1,5 +1,4 @@
 package no.aktivkommune.masterdatabase.repository;
-
 import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
 import no.aktivkommune.masterdatabase.dto.KommuneFilter;
 import no.aktivkommune.masterdatabase.dto.FilterValg;
@@ -39,8 +38,8 @@ public class RessursSokRepository
 
 	public SokeResultat<RessursSokTreff> sokRessurser(RessursSokParametre p)
 	{
-		Treff t = treff(p);
-		String sql = t.sql() + """
+		Treff sok = treff(p);
+		String sql = sok.sql() + """
 
 			SELECT ressurs_id, navn, bygg_navn, kommune_navn, adressetekst, postnummer, poststed,
 			       lokaletype_navn, lat, lon, avstand, booking_url, bilde_url,
@@ -53,7 +52,7 @@ public class RessursSokRepository
 				default -> "navn";
 			} + ", ressurs_id LIMIT :limit OFFSET :offset";
 
-		return kjorSok(sql, t, p, rs -> new RessursSokTreff(
+		return kjorSok(sql, sok, p, rs -> new RessursSokTreff(
 			rs.getLong("ressurs_id"),
 			rs.getString("navn"),
 			rs.getString("bygg_navn"),
@@ -73,11 +72,12 @@ public class RessursSokRepository
 	// ikke med her, men finnes i sokRessurser.
 	public SokeResultat<ByggSokTreff> sokBygg(RessursSokParametre p)
 	{
-		Treff t = treff(p);
-		String sql = t.sql() + """
+		Treff sok = treff(p);
+		String sql = sok.sql() + """
 
 			SELECT bygg_id, bygg_navn, bydel_navn, kommune_navn, adressetekst, postnummer, poststed,
-			       lat, lon, bygg_booking_url, bygg_bilde_url,
+			       lat, lon,
+				   bygg_booking_url, bygg_bilde_url,
 			       count(*)     AS antall_ressurser,
 			       max(rang)    AS rang,
 			       min(avstand) AS avstand,
@@ -93,7 +93,7 @@ public class RessursSokRepository
 				default -> "bygg_navn";
 			} + ", bygg_id LIMIT :limit OFFSET :offset";
 
-		return kjorSok(sql, t, p, rs -> new ByggSokTreff(
+		return kjorSok(sql, sok, p, rs -> new ByggSokTreff(
 			rs.getLong("bygg_id"),
 			rs.getString("bygg_navn"),
 			rs.getString("bydel_navn"),
@@ -113,10 +113,12 @@ public class RessursSokRepository
 	// ressurser). Aktivitet, lokaletype og fasilitet hentes
 	// direkte fra egne tabeller, hele hierarkiet.
 	public  List<KommuneFilter> hentKommuner(){
-		return kommuneFilter("""
+		return jdbc.sql("""
 				SELECT DISTINCT kommunenr, kommune_navn AS navn
 				  FROM v_ressurs_sok
-				 ORDER BY navn""");
+				 ORDER BY navn""")
+				 .query(KommuneFilter.class)
+				 .list();
 	}
 
 	public List<FilterValg> hentAktiviteter(){
@@ -135,8 +137,11 @@ public class RessursSokRepository
 	// kommer alltid fra de tre faste kallene over, aldri fra brukerinput.
 	private List<FilterValg> hentFilterData(String tabell)
 	{
-		return filterValg("SELECT id, navn, parent_id FROM " + tabell
-			+ " ORDER BY parent_id NULLS FIRST, navn");
+		return jdbc.sql("SELECT id, navn, parent_id FROM " + tabell
+			+ " ORDER BY parent_id NULLS FIRST, navn")
+			.query(FilterValg.class)
+			.list();
+
 	}
 
 	// Felles for begge søkene: en CTE som filtrerer viewet og regner ut
@@ -176,8 +181,14 @@ public class RessursSokRepository
 		}
 		if (!p.aktivitet().isEmpty())
 		{
+			// Hver valgte aktivitet er utvidet til seg selv + alle etterkommere (mv_aktivitet:hierarki)
 			// &&: ressursen har minst én av de valgte aktivitetene.
-			where.append(" AND aktivitet_ids && ARRAY[:aktivitet]::bigint[]");
+			where.append("""
+					 AND aktivitet_ids && ARRAY(
+					SELECT underaktivitet_id
+					FROM mv_aktivitet_hierarki
+					WHERE aktivitet_id IN (:aktivitet))
+					""");
 			params.put("aktivitet", p.aktivitet());
 		}
 		if (!p.fasilitet().isEmpty())
@@ -206,21 +217,25 @@ public class RessursSokRepository
 		return new Treff(sql, params);
 	}
 
+	//Hver rad fra søket har to typer innhold.  (selve treffet, og totalt på hele søket)
 	private record Rad<T>(T treff, long totalt)
 	{
 	}
 
 	// count(*) OVER () gir totalantallet i samme spørring, så paginering
 	// ikke krever en ekstra rundtur.
-	private <T> SokeResultat<T> kjorSok(String sql, Treff t, RessursSokParametre p, RadMapper<T> mapper)
+	//Kjør SQL → bygg Java-objekter → pakk dem inn i SokeResultat.
+	// <T> fordi type treffet som returneres både kan være RessursSokTreff og ByggSokTreff
+	//RadMapper<T> forteller hvordan en rad i databasen skal gjøres om til et Java-objekt
+	private <T> SokeResultat<T> kjorSok(String sql, Treff treff, RessursSokParametre p, RadMapper<T> radmapper)
 	{
-		var params = new HashMap<>(t.params());
+		var params = new HashMap<>(treff.params());
 		params.put("limit", p.storrelse());
 		params.put("offset", (long) p.side() * p.storrelse());
 
 		List<Rad<T>> rader = jdbc.sql(sql)
 			.params(params)
-			.query((rs, i) -> new Rad<>(mapper.map(rs), rs.getLong("totalt")))
+			.query((rs, i) -> new Rad<>(radmapper.map(rs), rs.getLong("totalt")))
 			.list();
 
 		return new SokeResultat<>(
@@ -230,14 +245,14 @@ public class RessursSokRepository
 			p.storrelse());
 	}
 
-	private List<KommuneFilter> kommuneFilter(String sql)
+	/*private List<KommuneFilter> kommuneFilter(String sql)
 	{
 		return jdbc.sql(sql)
 			.query((rs, i) -> new KommuneFilter(rs.getString("kommunenr"), rs.getString("navn")))
 			.list();
-	}
+	} */
 
-	private List<FilterValg> filterValg(String sql)
+	/*private List<FilterValg> filterValg(String sql)
 	{
 		return jdbc.sql(sql)
 			.query((rs, i) -> new FilterValg(
@@ -246,7 +261,7 @@ public class RessursSokRepository
 				rs.getObject(("parent_id"), Long.class)))   //parent_id kan være NULL
 			.list();
 	}
-
+*/
 	@FunctionalInterface
 	private interface RadMapper<T>
 	{

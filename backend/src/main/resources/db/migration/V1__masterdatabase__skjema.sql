@@ -569,8 +569,7 @@ $$;
 -- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
 -- bare "id" internt; visningen gir hver id et beskrivende navn i output, slik
 -- at resultatet er lesbart uten å kjenne navnekonvensjonen i skjemaet.
--- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte -
--- det finnes ingen JPA-entitet for det.
+-- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte.
 --
 -- Kodeverkene (lokaletype, aktivitet, fasilitet) har ingen kode-kolonne; id er
 -- den delte nøkkelen på tvers av instansene. Filtrene går derfor på id:
@@ -656,6 +655,8 @@ LEFT JOIN bygning b             ON b.id = r.bygning_id
 LEFT JOIN fagsystem_instans bfi ON bfi.id = b.fagsystem_instans_id
 -- Maks én hovedadresse per bygg (ux_adresse_hovedadresse), så ingen duplikater.
 LEFT JOIN adresse a             ON a.bygning_id = b.id AND a.er_hovedadresse
+
+-- sub-query som finner alle tilknyttede aktiviteter og samler dem som ID-er, navneliste og søketekst
 LEFT JOIN LATERAL (
     SELECT array_agg(ak.id   ORDER BY ak.navn) AS ids,
            array_agg(ak.navn ORDER BY ak.navn) AS navn_liste,
@@ -664,6 +665,8 @@ LEFT JOIN LATERAL (
       JOIN aktivitet ak ON ak.id = ra.aktivitet_id
      WHERE ra.ressurs_id = r.id
 ) akt ON TRUE
+
+-- sub-query som finner alle tilknyttede fasiliteter og samler dem som ID-er, navneliste og søketekst
 LEFT JOIN LATERAL (
     SELECT array_agg(f.id   ORDER BY f.navn) AS ids,
            array_agg(f.navn ORDER BY f.navn) AS navn_liste,
@@ -673,6 +676,33 @@ LEFT JOIN LATERAL (
      WHERE rf.ressurs_id = r.id
 ) fas ON TRUE
 WHERE r.aktiv AND r.bookbar;
+
+
+-- Et materialisert view for aktiviteter som viser aktivitetshierarkiet. Både forfedre og etterkommere
+CREATE MATERIALIZED VIEW mv_aktivitet_hierarki AS
+WITH RECURSIVE aktivitet_tre AS (
+	-- hver aktivitet inneholder seg selv
+	SELECT
+	id AS aktivitet_id,
+	id AS underaktivitet_id
+	FROM aktivitet
+
+	UNION ALL
+
+	--finner aktivitetens etterkommer(e)
+	SELECT
+	aktivitet_tre.aktivitet_id,
+	aktivitet.id AS underaktivitet_id
+	FROM aktivitet
+	JOIN aktivitet_tre
+		ON aktivitet.parent_id = aktivitet_tre.underaktivitet_id
+)
+
+SELECT *
+FROM aktivitet_tre;
+
+CREATE INDEX idx_mv_aktivitet_hierarki
+ON mv_aktivitet_hierarki (aktivitet_id);
 
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
 -- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
