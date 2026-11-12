@@ -416,6 +416,12 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 -- én tabell dekker begge de fysiske ankrene vi har i dag, uten at bygning/
 -- ressurs selv trenger flere fagsystem-FK-er. Se db/ressurslenke.md.
 --
+-- url er selve lenken til ressursen i det lenkede fagsystemet. Bookingsystemet
+-- ressursen kommer fra har også en rad her (skrevet av ETL, ressurslenke_sql i
+-- etl/helpers.py), og v_ressurs_sok.booking_url leses derfra. Lenker til andre
+-- systemer legges til av det som laster dem; booking-synken rører dem ikke.
+-- bygning_id-armen er foreløpig ubrukt: bygglenkene bygges fortsatt i viewet.
+--
 -- Bevisst INGEN egen "kontekst"/type-kolonne her: hvilken TYPE fagsystem
 -- (booking/fdv/sensor/annet) en lenke tilhører er allerede
 -- fagsystem_instans.type, hentet via fagsystem_instans_id. Å kopiere den inn
@@ -432,6 +438,7 @@ CREATE TABLE IF NOT EXISTS ressurslenke
     bygning_id           BIGINT REFERENCES bygning(id) ON DELETE CASCADE,
     ressurs_id           BIGINT REFERENCES ressurs(id) ON DELETE CASCADE,
     ekstern_id           TEXT NOT NULL,
+    url                  TEXT,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT chk_ressurslenke_exactly_one CHECK (
         (bygning_id IS NOT NULL)::int + (ressurs_id IS NOT NULL)::int = 1),
@@ -606,7 +613,7 @@ SELECT
     a.adressetekst,
     a.postnummer,
     a.poststed,
-    fi.base_url || '/bookingfrontend/resource/' || r.ekstern_id AS booking_url,
+    rl.url                         AS booking_url,
     COALESCE(akt.ids, '{}')        AS aktivitet_ids,
     COALESCE(fas.ids, '{}')        AS fasilitet_ids,
     r.sokevektor,
@@ -627,7 +634,7 @@ SELECT
     --   https://bergen.aktiv-kommune.no/bookingfrontend/client/en/building/74
     -- Språksegmentet ('en') er det som ble brukt i den bekreftede lenken;
     -- TODO: sjekk om 'no' fungerer og er ønsket.
-    -- TODO: ressurs-siden (booking_url over, fra V1) og bildestiene
+    -- TODO: ressurs-siden (booking_url over, fra ressurslenke) og bildestiene
     -- ({ownertype} i /main-picture) er ikke bekreftet mot Aktiv kommune.
     fi.base_url || '/bookingfrontend/resource/' || r.ekstern_id || '/main-picture' AS bilde_url,
     CASE WHEN b.ekstern_id IS NOT NULL THEN
@@ -654,6 +661,9 @@ LEFT JOIN lokaletype lt         ON lt.id = r.lokaletype_id
 LEFT JOIN lokaletype p          ON p.id = lt.parent_id
 LEFT JOIN bygning b             ON b.id = r.bygning_id
 LEFT JOIN fagsystem_instans bfi ON bfi.id = b.fagsystem_instans_id
+-- Lenken til ressursens eget bookingsystem. Maks én rad (ux_ressurslenke_ressurs).
+LEFT JOIN ressurslenke rl       ON rl.ressurs_id = r.id
+                               AND rl.fagsystem_instans_id = r.fagsystem_instans_id
 -- Maks én hovedadresse per bygg (ux_adresse_hovedadresse), så ingen duplikater.
 LEFT JOIN adresse a             ON a.bygning_id = b.id AND a.er_hovedadresse
 LEFT JOIN LATERAL (
