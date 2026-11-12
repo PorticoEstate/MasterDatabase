@@ -570,13 +570,7 @@ $$;
 -- bare "id" internt; visningen gir hver id et beskrivende navn i output, slik
 -- at resultatet er lesbart uten å kjenne navnekonvensjonen i skjemaet.
 -- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte.
---
--- Kodeverkene (lokaletype, aktivitet, fasilitet) har ingen kode-kolonne; id er
--- den delte nøkkelen på tvers av instansene. Filtrene går derfor på id:
---   aktivitet_ids / fasilitet_ids - bigint[], tom liste i stedet for NULL, slik
---                      at @>/&& i filtrene oppfører seg likt for alle rader
---   aktivitet_navn / fasilitet_navn - samme rekkefølge som visningsnavn
--- Alle aktiviteter er med (flatt, ingen hierarki); søket bruker bare id og navn.
+
 --
 -- Vanlig view, ikke materialisert: med rundt 5 000 ressurser er det raskt nok
 -- å regne ut søkedokumentet per spørring, og vi slipper et refresh-steg i ETL
@@ -605,7 +599,7 @@ SELECT
     a.adressetekst,
     a.postnummer,
     a.poststed,
-    fi.base_url || '/bookingfrontend/resource/' || r.ekstern_id AS booking_url,
+    fi.base_url || '/bookingfrontend/client/resource/' || r.ekstern_id AS booking_url,
     COALESCE(akt.ids, '{}')        AS aktivitet_ids,
     COALESCE(fas.ids, '{}')        AS fasilitet_ids,
     r.sokevektor,
@@ -618,21 +612,11 @@ SELECT
     COALESCE(fas.navn_liste, '{}') AS fasilitet_navn,
 
     -- Lenker til det lokale systemet. Søket selv kaller det aldri; frontend
-    -- bruker lenkene til videresending og til å hente hovedbildet.
+    -- bruker lenkene til videresending.
     -- Instansens base_url + ekstern_id er både identitet og ruting: ekstern_id
     -- er kun gyldig i sin egen instans.
-    --
-    -- Bygg-siden er bekreftet mot Bergen (Bøneshallen):
-    --   https://bergen.aktiv-kommune.no/bookingfrontend/client/en/building/74
-    -- Språksegmentet ('en') er det som ble brukt i den bekreftede lenken;
-    -- TODO: sjekk om 'no' fungerer og er ønsket.
-    -- TODO: ressurs-siden (booking_url over, fra V1) og bildestiene
-    -- ({ownertype} i /main-picture) er ikke bekreftet mot Aktiv kommune.
-    fi.base_url || '/bookingfrontend/resource/' || r.ekstern_id || '/main-picture' AS bilde_url,
     CASE WHEN b.ekstern_id IS NOT NULL THEN
         bfi.base_url || '/bookingfrontend/client/en/building/' || b.ekstern_id END AS bygg_booking_url,
-    CASE WHEN b.ekstern_id IS NOT NULL THEN
-        bfi.base_url || '/bookingfrontend/building/' || b.ekstern_id || '/main-picture' END AS bygg_bilde_url,
 
     -- Fritekst. ressurs.sokevektor dekker bare navn og beskrivelse; her tas
     -- bygg, type, aktiviteter, fasiliteter og sted med, vektet så treff i
