@@ -82,6 +82,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
 | `etl/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3. Kjøres etter bygging og etter hver synk, så nye bygg får posisjon |
+| `etl/hent_gater.py` | Henter ALLE gater for en kommune fra Matrikkelen inn i `gate`. Kjøres av daemonen for kommuner som mangler gater, og for hånd med `run.sh gater` |
 | `etl/matrikkel_test/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
 **Ikke bygget ennå:** `ressurslenke` (koble samme fysiske bygg/ressurs til
@@ -443,6 +444,31 @@ enten ekte stave-/formatfeil Matrikkelen heller ikke kan matche (f.eks.
 «Wolfsgate 12x» mot det offisielle «Wolffs gate»), eller mangler husnummer
 helt i kildedata (f.eks. «Festplassen», «Nygårdsparken») - et
 datakvalitetsproblem i kilden, ikke noe et adresseoppslag kan løse.
+
+## Gater for hele kommunen (`gate`)
+
+`gate` fylles på to måter. `matrikkel_adresse.py` legger inn gaten til hver
+adresse den løser. `hent_gater.py` henter i tillegg *alle* veger i kommunen
+(`AdresseService.findVegerForKommune`, så adressekode og navn via
+`StoreService.getObjects`), uten at kommunen trenger en Aktiv kommune-instans,
+bygg eller adresser. Det eneste som kreves er en rad i `kommune`.
+
+Daemonen kjører steget ved oppstart og hver natt (før geokodingen), for
+*alle* kommuner i `kommune`. `gate` holdes dermed lik Matrikkelen: nye gater
+legges til, endrede navn oppdateres, og en ny kommune får alle sine gater ved
+neste kjøring (ved oppstart, ellers kl. 03:00 / SYNK_TID). En kommune der
+henting feilet (logget i `synk_avvik`, kilde `matrikkel-gate`) prøves på nytt
+neste natt. Gater slettes aldri, siden `adresse.gate_id` peker på dem. Kjøres
+også når en tom database populeres: bygging legger inn kommunene, og gatene
+hentes rett etterpå.
+
+```bash
+docker compose exec etl ./run.sh gater              # alle kommuner
+docker compose exec etl ./run.sh gater 4601 5601    # bestemte kommuner
+```
+
+Trygt å kjøre om igjen: eksisterende gater beholder id-en, så `adresse.gate_id`
+peker fortsatt riktig.
 
 ## Kjent forenkling
 

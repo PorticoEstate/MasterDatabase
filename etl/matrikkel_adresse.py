@@ -231,6 +231,40 @@ def finn_veg_ider(matrikkel_kommune_id: int, gatenavn: str) -> list[int]:
     return [int(_tekst(item, "value")) for item in _alle(_forste(svar, "return"), "item")]
 
 
+def finn_veg_ider_for_kommune(matrikkel_kommune_id: int) -> list[int]:
+    """Alle veger i kommunen (brukes av hent_gater.py)."""
+    svar = _kall("AdresseService", f"""
+        <adr:findVegerForKommune xmlns:adr="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/adresse"
+            xmlns:dom="{NS_DOM}">
+            <adr:kommuneId><dom:value>{matrikkel_kommune_id}</dom:value></adr:kommuneId>
+            <adr:matrikkelContext>{MATRIKKEL_CONTEXT}</adr:matrikkelContext>
+        </adr:findVegerForKommune>""")
+    return [int(_tekst(item, "value")) for item in _alle(_forste(svar, "return"), "item")]
+
+
+def hent_veger(veg_ider: list[int], batch: int = 500) -> list[dict]:
+    """Henter adressekode og adressenavn for mange veger, `batch` om gangen."""
+    resultat = []
+    for start in range(0, len(veg_ider), batch):
+        items = "".join(
+            f'<dom:item xsi:type="domadr:VegId"><dom:value>{i}</dom:value></dom:item>'
+            for i in veg_ider[start:start + batch]
+        )
+        svar = _kall("StoreService", f"""
+            <store:getObjects xmlns:store="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/store"
+                xmlns:dom="{NS_DOM}" xmlns:domadr="{NS_DOMADR}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <store:ids>{items}</store:ids>
+                <store:matrikkelContext>{MATRIKKEL_CONTEXT}</store:matrikkelContext>
+            </store:getObjects>""")
+        for item in _alle(_forste(svar, "return"), "item"):
+            kode = _tekst(item, "adressekode")
+            resultat.append({
+                "adressekode": int(kode) if kode else None,
+                "adressenavn": _tekst(item, "adressenavn"),
+            })
+    return resultat
+
+
 def finn_vegadresse_direkte(matrikkel_kommune_id: int, adressekode: int,
                             nummer: int, bokstav: str | None) -> int | None:
     """Rask vei når adressekoden allerede er kjent (fra en tidligere kjøring,
