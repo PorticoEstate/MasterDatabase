@@ -51,6 +51,28 @@ SLUG_MONSTER = re.compile(r"^[a-z0-9-]+$")
 BASE_URL_MONSTER = re.compile(r"^https://([a-z0-9][a-z0-9-]*)\.aktiv-kommune\.no$")
 
 
+# Path of a resource in an Aktiv kommune booking system, appended to the
+# instance's base_url. Stored in ressurslenke.url.
+RESSURS_URL_MONSTER = "/bookingfrontend/resource/"
+
+
+def ressurslenke_sql(kn: str) -> str:
+    """SQL that gives every resource of the instance `kn` its link in ressurslenke.
+
+    Set-based and idempotent: one row per (instance, resource), updated in place.
+    Links to other fagsystem instances are not touched.
+    """
+    return (
+        f"INSERT INTO ressurslenke (fagsystem_instans_id,ressurs_id,ekstern_id,url) "
+        f"SELECT r.fagsystem_instans_id,r.id,r.ekstern_id,"
+        f"fi.base_url || {q(RESSURS_URL_MONSTER)} || r.ekstern_id "
+        f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id "
+        f"WHERE fi.kildenokkel={q(kn)} "
+        f"ON CONFLICT (fagsystem_instans_id,ressurs_id) WHERE ressurs_id IS NOT NULL "
+        f"DO UPDATE SET url=EXCLUDED.url, ekstern_id=EXCLUDED.ekstern_id;\n"
+    )
+
+
 def les_kommuner(fil: Path | None) -> dict:
     """Kommunene som skal behandles, som slug -> (kommunenr, navn, fylke, base_url).
 
