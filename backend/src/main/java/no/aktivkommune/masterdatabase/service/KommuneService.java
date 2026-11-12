@@ -43,7 +43,7 @@ public class KommuneService
 	// The booking system is registered in the same transaction, so the kommune is either
 	// created ready to be synced or not created at all.
 	@Transactional
-	public Kommune create(String kommunenr, String navn, String fylkesnavn, String bookingBaseUrl)
+	public Kommune create(String kommunenr, String navn, String fylkesnavn, String bookingBaseUrl, boolean active)
 	{
 		String slug = AktivKommuneUrl.slugOf(bookingBaseUrl);
 		if (slug == null)
@@ -67,8 +67,12 @@ public class KommuneService
 		{
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "kommunenr " + kommunenr + " already exists");
 		}
-		instanser.register(id, BOOKING, AktivKommuneUrl.kildenokkelOf(slug),
-			"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
+		instanser.register(
+			id,
+			BOOKING,
+			AktivKommuneUrl.kildenokkelOf(slug),
+			"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug),
+			active);
 		return repository.getById(id).orElseThrow();
 	}
 
@@ -99,7 +103,7 @@ public class KommuneService
 	public Kommune setBookingAktiv(long id, boolean aktiv)
 	{
 		getById(id);  // 404 if the kommune does not exist
-		if (!instanser.setAktiv(id, BOOKING, aktiv))
+		if (!instanser.setAktivStatus(id, BOOKING, aktiv))
 		{
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "The kommune has no booking system");
 		}

@@ -61,17 +61,18 @@ public class KommuneController
 
 	@Operation(summary = "Create a kommune",
 			description = "Returns the created kommune including its generated id. bookingBaseUrl "
-					+ "(https://<name>.aktiv-kommune.no) is required: the kommune's Aktiv kommune booking system is "
-					+ "registered, and active is set to false, in the same call. Nightly sync won't load until status is set active .")
+					+ "(https://<name>.aktiv-kommune.no) and active are required: the kommune's Aktiv kommune "
+					+ "booking system is registered with the given active status in the same call. The nightly sync "
+					+ "only loads data from the instance when active is true.")
 	@ApiResponses({
-		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl missing or not https://<name>.aktiv-kommune.no)", content = @Content),
+		@ApiResponse(responseCode = "400", description = "Invalid body (kommunenr not 4 digits, navn missing, bookingBaseUrl missing or not https://<name>.aktiv-kommune.no, or active missing)", content = @Content),
 		@ApiResponse(responseCode = "409", description = "kommunenr already exists, or bookingBaseUrl is registered for another kommune", content = @Content)
 	})
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Kommune createKommune(@Valid @RequestBody KommuneCreate request)
 	{
-		return service.create(request.kommunenr(), request.navn(), request.fylkesnavn(), request.bookingBaseUrl());
+		return service.create(request.kommunenr(), request.navn(), request.fylkesnavn(), request.bookingBaseUrl(), request.active());
 	}
 
 	@Operation(summary = "Update a kommune",
