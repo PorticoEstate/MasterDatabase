@@ -405,22 +405,16 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 
 
 -- =============================================================================
--- 8. Ressurslenke: samme fysiske ting, kjent av flere fagsystemer
+-- 8. Ressurslenke: samme ressurs, kjent av flere fagsystemer
 --
--- ressurs.fagsystem_instans_id + ekstern_id er allerede identitet+ruting for
--- EN instans (se kommentar ved ressurs). Denne tabellen er for når en ANNEN
--- instans (fdv, sensor, ...) også kjenner samme fysiske bygg/ressurs, under
--- sin egen ekstern_id - uten at det tvinger frem en duplikatrad i ressurs.
+-- Én rad per (ressurs, fagsystem_instans), med ressursens url i det systemet og
+-- dens ekstern_id der. Bare ressurser har lenker; bygg har ingen (bygglenkene
+-- bygges i v_ressurs_sok fra bygning.ekstern_id).
 --
--- "Exclusive arc": nøyaktig én av bygning_id/ressurs_id er fylt ut per rad -
--- én tabell dekker begge de fysiske ankrene vi har i dag, uten at bygning/
--- ressurs selv trenger flere fagsystem-FK-er. Se db/ressurslenke.md.
---
--- url er selve lenken til ressursen i det lenkede fagsystemet. Bookingsystemet
--- ressursen kommer fra har også en rad her (skrevet av ETL, ressurslenke_sql i
--- etl/helpers.py), og v_ressurs_sok.booking_url leses derfra. Lenker til andre
--- systemer legges til av det som laster dem; booking-synken rører dem ikke.
--- bygning_id-armen er foreløpig ubrukt: bygglenkene bygges fortsatt i viewet.
+-- Bookingsystemet ressursen kommer fra har også en rad her (skrevet av ETL,
+-- ressurslenke_sql i etl/helpers.py), og v_ressurs_sok.booking_url leses derfra.
+-- Lenker til andre systemer (fdv, sensor, ...) legges til av det som laster
+-- dem; booking-synken rører dem ikke.
 --
 -- Bevisst INGEN egen "kontekst"/type-kolonne her: hvilken TYPE fagsystem
 -- (booking/fdv/sensor/annet) en lenke tilhører er allerede
@@ -429,33 +423,31 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 -- unntaket der en slik kopi faktisk trengs - en UNIQUE som ikke kan krysse
 -- tabellgrenser). Det betyr også at et helt nytt fagsystem (nummer 3, 4, ...)
 -- ikke krever noen endring i DENNE tabellen, bare en ny fagsystem_instans-rad.
+--
+-- Merk: ressurs.ekstern_id (og fagsystem_instans_id) er nå teknisk overflødig,
+-- siden ressurslenke har samme informasjon for ressursens eget bookingsystem.
+-- De beholdes fordi innlastingen og synken bruker (fagsystem_instans_id,
+-- ekstern_id) på ressurs som identitet (ON CONFLICT i last_inn.py og synk.py)
+-- og for å finne ressursen når aktiviteter og fasiliteter lastes. Skal de
+-- fjernes, må begge skriptene flyttes over til oppslag via ressurslenke, og
+-- bilde_url i viewet må få en annen kilde enn r.ekstern_id.
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS ressurslenke
 (
     id                   BIGSERIAL PRIMARY KEY,
     fagsystem_instans_id BIGINT NOT NULL REFERENCES fagsystem_instans(id) ON DELETE CASCADE,
-    bygning_id           BIGINT REFERENCES bygning(id) ON DELETE CASCADE,
-    ressurs_id           BIGINT REFERENCES ressurs(id) ON DELETE CASCADE,
+    ressurs_id           BIGINT NOT NULL REFERENCES ressurs(id) ON DELETE CASCADE,
     ekstern_id           TEXT NOT NULL,
     url                  TEXT,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_ressurslenke_exactly_one CHECK (
-        (bygning_id IS NOT NULL)::int + (ressurs_id IS NOT NULL)::int = 1),
+    -- Samme instans lenker samme ressurs inn bare én gang.
+    CONSTRAINT uniq_ressurslenke_ressurs UNIQUE (fagsystem_instans_id, ressurs_id),
     CONSTRAINT uniq_ressurslenke_ekstern UNIQUE (fagsystem_instans_id, ekstern_id)
 );
 
--- Én partiell unik indeks per fysisk type: hindrer at samme instans lenker
--- samme bygg/ressurs inn to ganger. Kan ikke være én vanlig UNIQUE over begge
--- kolonnene, siden nøyaktig én av dem alltid er NULL (se CHECK over).
-CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_bygning
-    ON ressurslenke (fagsystem_instans_id, bygning_id) WHERE bygning_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS ux_ressurslenke_ressurs
-    ON ressurslenke (fagsystem_instans_id, ressurs_id) WHERE ressurs_id IS NOT NULL;
-
--- Omvendt oppslag: "hvilke fagsystemer kjenner dette bygget/denne ressursen".
-CREATE INDEX IF NOT EXISTS ix_ressurslenke_bygning ON ressurslenke (bygning_id) WHERE bygning_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS ix_ressurslenke_ressurs ON ressurslenke (ressurs_id) WHERE ressurs_id IS NOT NULL;
+-- Omvendt oppslag: "hvilke fagsystemer kjenner denne ressursen".
+CREATE INDEX IF NOT EXISTS ix_ressurslenke_ressurs ON ressurslenke (ressurs_id);
 
 
 -- =============================================================================
@@ -661,7 +653,7 @@ LEFT JOIN lokaletype lt         ON lt.id = r.lokaletype_id
 LEFT JOIN lokaletype p          ON p.id = lt.parent_id
 LEFT JOIN bygning b             ON b.id = r.bygning_id
 LEFT JOIN fagsystem_instans bfi ON bfi.id = b.fagsystem_instans_id
--- Lenken til ressursens eget bookingsystem. Maks én rad (ux_ressurslenke_ressurs).
+-- Lenken til ressursens eget bookingsystem. Maks én rad (uniq_ressurslenke_ressurs).
 LEFT JOIN ressurslenke rl       ON rl.ressurs_id = r.id
                                AND rl.fagsystem_instans_id = r.fagsystem_instans_id
 -- Maks én hovedadresse per bygg (ux_adresse_hovedadresse), så ingen duplikater.

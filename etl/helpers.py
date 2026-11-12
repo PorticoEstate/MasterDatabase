@@ -68,7 +68,7 @@ def ressurslenke_sql(kn: str) -> str:
         f"fi.base_url || {q(RESSURS_URL_MONSTER)} || r.ekstern_id "
         f"FROM ressurs r JOIN fagsystem_instans fi ON fi.id=r.fagsystem_instans_id "
         f"WHERE fi.kildenokkel={q(kn)} "
-        f"ON CONFLICT (fagsystem_instans_id,ressurs_id) WHERE ressurs_id IS NOT NULL "
+        f"ON CONFLICT (fagsystem_instans_id,ressurs_id) "
         f"DO UPDATE SET url=EXCLUDED.url, ekstern_id=EXCLUDED.ekstern_id;\n"
     )
 
