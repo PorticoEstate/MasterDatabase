@@ -444,7 +444,7 @@ def i_blokk(ekstern_id, sql, rapost, kilde="matrikkel-adresse", samling="adresse
 def main():
     out = sys.stdout
     out.write("BEGIN;\n\n")
-    out.write(f"CALL registrer_kildeuttrekk('matrikkel',{q(BASE_URL)},NULL,NULL);\n\n")
+    out.write(f"CALL registrer_kildeuttrekk('matrikkel',{q(BASE_URL)},NULL);\n\n")
 
     kommune_id_cache: dict[str, int] = {}
     veg_cache: dict[int, dict] = {}

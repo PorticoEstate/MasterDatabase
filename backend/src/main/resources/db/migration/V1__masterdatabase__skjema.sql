@@ -456,9 +456,9 @@ CREATE INDEX IF NOT EXISTS ix_ressurslenke_ressurs ON ressurslenke (ressurs_id) 
 -- =============================================================================
 
 -- Metadata om én henting fra en kilde (kilde, endepunkt, tidspunkt,
--- HTTP-status). payload er valgfri og brukes ikke lenger til å lagre hele
--- kildens retur — den aktuelle posten bak et avvik lagres i stedet direkte på
--- avviket selv (synk_avvik.rapost), se der for begrunnelse.
+-- HTTP-status). Kildens retur lagres ikke — den aktuelle posten bak et avvik
+-- lagres i stedet direkte på avviket selv (synk_avvik.rapost), se der for
+-- begrunnelse.
 CREATE TABLE IF NOT EXISTS kildeuttrekk
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -466,7 +466,6 @@ CREATE TABLE IF NOT EXISTS kildeuttrekk
     endepunkt   TEXT NOT NULL,
     hentet_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     http_status INTEGER,
-    payload     JSONB,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -513,14 +512,14 @@ CREATE INDEX IF NOT EXISTS ix_synk_avvik_uttrekk ON synk_avvik (kildeuttrekk_id)
 -- transaksjonslokal innstilling, og alle avvik i samme transaksjon henter den
 -- derfra. Virker også inne i DO-blokker, der psql-variabler ikke kan brukes.
 CREATE OR REPLACE PROCEDURE registrer_kildeuttrekk(
-    p_kilde TEXT, p_endepunkt TEXT, p_http_status INTEGER, p_payload JSONB,
+    p_kilde TEXT, p_endepunkt TEXT, p_http_status INTEGER,
     p_hentet_at TIMESTAMPTZ DEFAULT now())
 LANGUAGE plpgsql AS $$
 DECLARE
     ny_id BIGINT;
 BEGIN
-    INSERT INTO kildeuttrekk (kilde, endepunkt, hentet_at, http_status, payload)
-    VALUES (p_kilde, p_endepunkt, p_hentet_at, p_http_status, p_payload)
+    INSERT INTO kildeuttrekk (kilde, endepunkt, hentet_at, http_status)
+    VALUES (p_kilde, p_endepunkt, p_hentet_at, p_http_status)
     RETURNING id INTO ny_id;
     PERFORM set_config('masterdb.kildeuttrekk_id', ny_id::text, true);
 END;

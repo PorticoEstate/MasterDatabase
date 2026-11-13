@@ -166,7 +166,7 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
     except Exception as e:
         # Ingenting å laste, men feilen skal fortsatt kunne ses i basen.
         status = getattr(e, "code", None)
-        w(f"BEGIN;\nCALL registrer_kildeuttrekk({q(kn)},{q(url)},{status or 'NULL'},NULL,{q(hentet)});\n")
+        w(f"BEGIN;\nCALL registrer_kildeuttrekk({q(kn)},{q(url)},{status or 'NULL'},{q(hentet)});\n")
         w(logg(kn, "searchdataall", "annet", None, f"Henting feilet: {type(e).__name__}: {str(e)[:200]}"))
         w("COMMIT;\n")
         print(f"  FEILET: {e}", file=sys.stderr)
@@ -174,9 +174,9 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
 
     w("BEGIN;\n\n")
     # Må være første setning: alle avvik under henter uttrekk-id-en herfra.
-    # payload=NULL: hele svaret lagres ikke lenger - se kommentar ved
-    # kildeuttrekk i skjemaet (V1__masterdatabase__skjema.sql).
-    w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status or 'NULL'},NULL,{q(hentet)});\n\n")
+    # Hele svaret lagres ikke - se kommentar ved kildeuttrekk i skjemaet
+    # (V1__masterdatabase__skjema.sql).
+    w(f"CALL registrer_kildeuttrekk({q(kn)},{q(url)},{status or 'NULL'},{q(hentet)});\n\n")
 
     w(f"-- {knavn}\n")
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
