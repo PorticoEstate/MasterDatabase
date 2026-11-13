@@ -209,7 +209,7 @@ kommunen synkroniseres når kilden er aktivert (se under).
 
 ```json
 { "kommunenr": "4601", "navn": "Bergen", "fylkesnavn": "Vestland",
-  "bookingBaseUrl": "https://bergen.aktiv-kommune.no" }
+  "bookingBaseUrl": "https://bergen.aktiv-kommune.no", "active": true }
 ```
 
 - **URL-en valideres strengt:** `https`, ett subdomene under `aktiv-kommune.no`, ingen sti,
@@ -218,7 +218,7 @@ kommunen synkroniseres når kilden er aktivert (se under).
 - **En kilde tilhører én kommune.** Er URL-en allerede registrert på en annen kommune, blir
   svaret 409 og kommunen opprettes ikke.
 - **`bookingBaseUrl` er påkrevd** ved opprettelse (uten den blir svaret 400), og kilden registreres
-  som inaktiv.
+  med aktiv-status fra det påkrevde feltet `active` (boolean; manglende gir 400).
 - **URL-en settes bare ved opprettelse.** `PUT /masterdb/kommune/{id}` endrer `kommunenr`, `navn` og
   `fylkesnavn`, og rører aldri bookingkilden, fordi kommunens bygg og ressurser er knyttet til instansen
   de ble lastet fra. For å bytte URL: slett kommunen og opprett den på nytt.
