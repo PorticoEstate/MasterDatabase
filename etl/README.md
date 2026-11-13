@@ -84,9 +84,11 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/matrikkel_adresse.py` | Steg 3. Kjøres etter bygging og etter hver synk, så nye bygg får posisjon |
 | `etl/matrikkel_test/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
-**Ikke bygget ennå:** `ressurslenke` (koble samme fysiske bygg/ressurs til
-flere fagsystemer samtidig, f.eks. booking + FDV) — bevisst utsatt til det
-faktisk finnes et andre fagsystem å koble til, se `db/ressurslenke.md`.
+**`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
+med én rad og URL per system. `last_inn.py` og `synk.py` skriver ressursens egen
+bookinglenke (`ressurslenke_sql` i `helpers.py`), og `v_ressurs_sok.booking_url`
+leses derfra. Lenker til andre systemer legges til av det som laster dem; synken
+rører dem ikke. Bygglenker bygges fortsatt i viewet.
 
 ## Forutsetning: HTTPS må virke fra WSL
 

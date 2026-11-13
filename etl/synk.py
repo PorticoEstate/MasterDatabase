@@ -44,7 +44,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from helpers import hent_json, i_blokk, kommuner_fra_kommandolinje, logg, q, rens, som_heltall
+from helpers import ressurslenke_sql, hent_json, i_blokk, kommuner_fra_kommandolinje, logg, q, rens, som_heltall
 
 
 # Kodeverkene i kilden: (tabell i masteren, samling i searchdataall). Masteren
@@ -283,6 +283,8 @@ def generer_sql(slug: str, kommuner: dict, ut, fra_fil: Path | None = None) -> b
           # Aktiv kommune har fasiten på hvilket bygg en ressurs hører til.
           f"kapasitet=EXCLUDED.kapasitet, lokaletype_id=EXCLUDED.lokaletype_id, "
           f"bygning_id=EXCLUDED.bygning_id;\n")
+    # Link to the resource in its own booking system (ressurslenke).
+    w(ressurslenke_sql(kn))
     w("\n")
 
     # --- koblinger, med avviksloggføring for brutte referanser ---
