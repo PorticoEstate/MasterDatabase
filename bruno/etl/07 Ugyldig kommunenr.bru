@@ -1,0 +1,31 @@
+meta {
+  name: 07 Ugyldig kommunenr
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/masterdb/etl/jobs/gater
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": ["46"]
+  }
+}
+
+docs {
+  Kommunenr må være fire siffer. Skal gi 400, og ingenting settes i kø.
+}
+
+tests {
+  test("svarer 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

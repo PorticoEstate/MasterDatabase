@@ -1,0 +1,29 @@
+meta {
+  name: 06 Hent alle jobber
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/masterdb/etl/jobs
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  De siste jobbene etl-containeren husker (opptil 50), nyeste først.
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("er en liste", function() {
+    expect(res.getBody()).to.be.an("array");
+  });
+}

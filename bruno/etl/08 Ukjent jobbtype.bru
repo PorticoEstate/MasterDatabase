@@ -1,0 +1,25 @@
+meta {
+  name: 08 Ukjent jobbtype
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/masterdb/etl/jobs/build
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  Bare sync, geocode og gater kan startes utenfra. build og prune er interne. Skal gi 404.
+}
+
+tests {
+  test("svarer 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

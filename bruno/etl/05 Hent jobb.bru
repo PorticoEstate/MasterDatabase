@@ -1,0 +1,33 @@
+meta {
+  name: 05 Hent jobb
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/masterdb/etl/jobs/{{etlJobId}}
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  Status for jobben fra 01 (id-en ligger i variabelen etlJobId; kjør 01 først). Kjør flere ganger:
+  status går queued, running, ok (eller failed). output viser de siste linjene jobben logget.
+  Historikken ligger bare i minnet i etl-containeren og glemmes ved omstart (da blir svaret 404).
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("har status og output", function() {
+    const b = res.getBody();
+    expect(["queued", "running", "ok", "failed"]).to.include(b.status);
+    expect(b.output).to.be.an("array");
+  });
+}

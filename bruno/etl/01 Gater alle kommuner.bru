@@ -1,0 +1,42 @@
+meta {
+  name: 01 Gater alle kommuner
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/masterdb/etl/jobs/gater
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+script:post-response {
+  if (res.getStatus() === 202) {
+    bru.setVar("etlJobId", res.getBody().id);
+  }
+}
+
+docs {
+  Setter en gater-jobb i kø i etl-containeren: henter alle gater for alle kommuner i databasen fra
+  Matrikkelen (krever MATRIKKEL_BRUKER/MATRIKKEL_PASSORD i etl; uten dem hoppes jobben over og blir "ok").
+  Svaret kommer med en gang med jobb-id-en, som lagres i variabelen etlJobId og brukes av 05.
+  Kjøres den to ganger mens den første fortsatt står i kø, gir det andre kallet samme id og deduplicated = true.
+}
+
+tests {
+  test("svarer 202", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+
+  test("returnerer jobb-id og type", function() {
+    const b = res.getBody();
+    expect(b.id).to.be.a("string");
+    expect(b.type).to.equal("gater");
+    expect(b.queuePosition).to.be.a("number");
+    expect(b.deduplicated).to.be.a("boolean");
+  });
+}
