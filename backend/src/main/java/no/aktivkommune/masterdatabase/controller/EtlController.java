@@ -45,7 +45,8 @@ public class EtlController
 	}
 
 	@Operation(summary = "Queue an ETL job",
-			description = "type is sync, geocode or gater. The job is queued in the etl container, which runs one "
+			description = "Type is sync, geocode or gater."
+					+ "The job is queued in the etl container, which runs one "
 					+ "job at a time, and the call returns at once with the job id. An identical job that is "
 					+ "still waiting is reused (deduplicated=true). For gater, a body {\"kommunenr\": [...]} limits it to "
 					+ "those kommuner; without a body every kommune in the database is fetched. Follow the job with "
