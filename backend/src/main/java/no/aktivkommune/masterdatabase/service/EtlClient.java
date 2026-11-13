@@ -1,9 +1,9 @@
 package no.aktivkommune.masterdatabase.service;
 
 import java.net.http.HttpClient;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -53,7 +53,20 @@ public class EtlClient
 			RestClient.RequestBodySpec request = client.post().uri("/jobs/{type}", type);
 			if (kommunenr != null && !kommunenr.isEmpty())
 			{
-				request = request.contentType(MediaType.APPLICATION_JSON).body(Map.of("kommunenr", kommunenr));
+				// The body is built as bytes so that Content-Length is sent. Without it the JDK client
+				// uses chunked encoding, which the ETL does not read: it would see an empty body and
+				// run the job for every kommune. The four-digit check keeps the hand-built JSON safe.
+				for (String nr : kommunenr)
+				{
+					if (!nr.matches("[0-9]{4}"))
+					{
+						throw new IllegalArgumentException("kommunenr must be 4 digits");
+					}
+				}
+				byte[] json = ("{\"kommunenr\":[\"" + String.join("\",\"", kommunenr) + "\"]}")
+					.getBytes(StandardCharsets.UTF_8);
+				request = request.contentType(MediaType.APPLICATION_JSON).contentLength(json.length);
+				return request.body(json).retrieve().body(EtlJobAccepted.class);
 			}
 			return request.retrieve().body(EtlJobAccepted.class);
 		});

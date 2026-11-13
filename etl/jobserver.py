@@ -219,6 +219,8 @@ class JobServer:
                     return self.error(400, str(exc))
                 except OverflowError:
                     return self.error(413, "request body too large")
+                except LookupError:
+                    return self.error(411, "Content-Length required (chunked bodies are not supported)")
                 job, dedup, position = jobserver.submit(job_type, args)
                 self.reply(202, {"id": job.id, "type": job.type, "status": job.status,
                                  "queuePosition": position, "deduplicated": dedup})
@@ -232,6 +234,10 @@ class JobServer:
                 """Returns the validated argument list. The body is optional; if
                 present it must be a JSON object, and only gater takes a key
                 (kommunenr: a list of four-digit strings)."""
+                if self.headers.get("Transfer-Encoding") and self.headers.get("Content-Length") is None:
+                    # Would otherwise be read as an empty body, and a gater job for one
+                    # kommune would silently become a job for all of them.
+                    raise LookupError
                 try:
                     length = int(self.headers.get("Content-Length") or 0)
                 except ValueError:
