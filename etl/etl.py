@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Runs the ETL pipeline inside the etl container (Python port of the old run.sh).
 
-  etl.py daemon     (default) initial build if the master has no vocabulary
-                    yet (build, then gater, then geocode), then a nightly
-                    sync, geocode and prune at SYNK_TID
+  etl.py daemon     (default) starts the job server (internal HTTP API, see
+                    jobserver.py), runs the initial build if the master has no
+                    vocabulary yet (build, then gater, then geocode), then a
+                    nightly sync, geocode and prune at SYNK_TID
   etl.py build      last_inn.py: seeds the vocabulary and loads everything
   etl.py sync       synk.py: loads buildings, resources and links
   etl.py geocode    Matrikkel geocoding and building enrichment
@@ -17,16 +18,20 @@
 
 run.sh is a thin shim over this file, so `./run.sh status` etc. still work.
 
+The other commands run one job directly and exit, without the job server.
+
 The Python scripts only write SQL; this script pipes it to psql. The SQL is
 kept in $UT (a volume) so the last run can be reviewed afterwards.
 
 Settings (environment, all optional except the PG* connection and, for
 geocoding, the Matrikkel credentials):
-  KOMMUNER=alle           "alle" or one kommune slug, e.g. bergen
+  KOMMUNER=alle           "alle" or one kommune slug, e.g. bergen. For sync, "alle" means
+                          every kommune registered in the database (kommuner_query.sql)
   SYNK_TID=03:00          time of the nightly sync, in TZ
   NORMALISER_DEMO=true    run the demo normaliser before loading
   DRY_RUN=false           write the SQL but do not apply it
   AVVIK_RETENTION_DAYS=30 synk_avvik rows older than this are deleted nightly
+  ETL_PORT=8000           port of the job server (daemon only; never publish it)
   MATRIKKEL_BRUKER / MATRIKKEL_PASSORD / MATRIKKEL_MILJO   see etl/README.md
 
 Networks that inspect TLS re-sign HTTPS traffic with their own certificate
@@ -42,6 +47,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import threading
 import time
 
 KOMMUNER = os.environ.get("KOMMUNER") or "alle"
@@ -56,8 +62,25 @@ UT = os.environ.get("UT") or os.path.join(HER, "ut")
 USAGE = "usage: run.sh [daemon|build|sync|geocode|gater [kommunenr...]|prune|status]"
 
 
+_local = threading.local()
+
+
+def set_log_sink(sink):
+    """Makes this thread's log output also go to sink(line); None stops it. The
+    job server's worker uses it to keep the output of each job."""
+    _local.sink = sink
+
+
+def emit(text):
+    print(text, flush=True)
+    sink = getattr(_local, "sink", None)
+    if sink is not None:
+        for line in text.splitlines():
+            sink(line)
+
+
 def log(msg):
-    print("%s [etl] %s" % (time.strftime("%Y-%m-%d %H:%M:%S %Z"), msg), flush=True)
+    emit("%s [etl] %s" % (time.strftime("%Y-%m-%d %H:%M:%S %Z"), msg))
 
 
 def is_true(value):
@@ -113,12 +136,12 @@ def apply(fil):
         lines = err.read().splitlines()
     if res.returncode != 0:
         log("psql failed for %s:" % fil)
-        print("\n".join(lines[:5]), flush=True)
+        emit("\n".join(lines[:5]))
         return False
     errors = [line for line in lines if "ERROR" in line]
     if errors:
         log("psql reported errors for %s (%d lines), first ones:" % (fil, len(errors)))
-        print("\n".join(errors[:5]), flush=True)
+        emit("\n".join(errors[:5]))
     return True
 
 
@@ -143,21 +166,45 @@ def vocabulary_empty():
     return out == "t"
 
 
+def registered_kommuner():
+    """Writes $UT/kommuner.txt: the kommuner registered in the database with an
+    active Aktiv kommune instance (slug|kommunenr|navn|fylke|base_url), so a kommune
+    added there is synced without any change to the code. If the query fails
+    nothing is synced: falling back to the built-in list could sync the wrong set."""
+    fil = os.path.join(UT, "kommuner.txt")
+    with open(fil, "w") as out:
+        res = subprocess.run(["psql", "-tA", "-F|", "-f", "kommuner_query.sql"], stdout=out)
+    if res.returncode != 0:
+        log("sync: the kommune query failed")
+        return None
+    with open(fil) as inp:
+        antall = sum(1 for line in inp if line.strip())
+    log("sync: %d kommune(r) with an active Aktiv kommune instance" % antall)
+    return fil
+
+
 def generate(modus):
     """generate build|sync: writes $UT/<modus>.sql. A partial fetch failure (exit
     code 2) still yields complete SQL, with the failure logged in synk_avvik, so
     it is a warning and not an error."""
     skript = "synk.py" if modus == "sync" else "last_inn.py"
     args = [KOMMUNER]
+    kommuner_arg = []
+    if modus == "sync":
+        fil = registered_kommuner()
+        if fil is None:
+            return False
+        kommuner_arg = ["--kommuner-fil", fil]
 
     if is_true(NORMALISER_DEMO):
-        res = subprocess.run(py("demo_normalisering/normaliser.py", KOMMUNER, "--ut", os.path.join(UT, "normalisert")))
+        res = subprocess.run(py("demo_normalisering/normaliser.py", KOMMUNER,
+                                "--ut", os.path.join(UT, "normalisert"), *kommuner_arg))
         if res.returncode != 0:
             log("demo normaliser exited with %d (see messages above)" % res.returncode)
         args += ["--fra-fil", os.path.join(UT, "normalisert")]
 
     with open(os.path.join(UT, modus + ".sql"), "w") as out:
-        res = subprocess.run(py(skript, *args), stdout=out)
+        res = subprocess.run(py(skript, *args, *kommuner_arg), stdout=out)
     if res.returncode == 2:
         log("%s: some fetches failed (logged in synk_avvik); continuing with the rest" % skript)
     elif res.returncode != 0:
@@ -274,13 +321,57 @@ def seconds_until_sync():
     return int((maal - naa).total_seconds())
 
 
-def daemon():
-    def stop(signum, frame):
-        log("stopping")
-        sys.exit(0)
+def startup_sequence():
+    """Waits for the schema, then runs the initial build (build, gater, geocode) if
+    the master has no vocabulary yet. Exits the process if the schema or the
+    vocabulary tables cannot be reached, so docker restarts the container."""
+    if not wait_for_schema():
+        os._exit(1)
+    tom = vocabulary_empty()
+    if tom is None:
+        log("could not query the vocabulary tables")
+        os._exit(1)
+    if not tom:
+        log("vocabulary present: skipping the initial build")
+        return True
+    log("no vocabulary in the master yet: initial build")
+    if not do_build():
+        log("initial build failed; the next start or the nightly run retries if the vocabulary is still empty")
+    # Streets for every kommune the build loaded
+    do_gater()
+    do_geocode()
+    return True
 
-    signal.signal(signal.SIGTERM, stop)
-    signal.signal(signal.SIGINT, stop)
+
+def nightly_load():
+    """Seeds the vocabulary if an earlier build left it empty, otherwise syncs."""
+    if vocabulary_empty():
+        ok = do_build()
+        if not ok:
+            log("build failed")
+        do_gater()
+        return ok
+    ok = do_sync()
+    if not ok:
+        log("sync failed")
+    return ok
+
+
+# Job types of the job server. Only sync, geocode and gater are reachable over
+# HTTP (jobserver.HTTP_TYPES); the others are internal.
+RUNNERS = {
+    "sync": lambda args: do_sync(),
+    "geocode": lambda args: do_geocode(),
+    "gater": lambda args: do_gater(args),
+    "build": lambda args: do_build(),
+    "prune": lambda args: prune_avvik(),
+    "startup": lambda args: startup_sequence(),
+    "nightly-load": lambda args: nightly_load(),
+}
+
+
+def daemon():
+    import jobserver
 
     if re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", SYNK_TID) is None:
         log("SYNK_TID must be HH:MM, got '%s'" % SYNK_TID)
@@ -288,37 +379,31 @@ def daemon():
     if not retention_valid():
         log("AVVIK_RETENTION_DAYS must be a positive whole number, got '%s'" % AVVIK_RETENTION_DAYS)
         return 1
-    if not wait_for_schema():
+    port = os.environ.get("ETL_PORT") or "8000"
+    if re.fullmatch(r"[0-9]{1,5}", port) is None or not 0 < int(port) < 65536:
+        log("ETL_PORT must be a port number, got '%s'" % port)
         return 1
 
-    tom = vocabulary_empty()
-    if tom is None:
-        log("could not query the vocabulary tables")
-        return 1
-    if tom:
-        log("no vocabulary in the master yet: initial build")
-        if not do_build():
-            log("initial build failed; the next start or the nightly run retries if the vocabulary is still empty")
-        # Streets for every kommune the build loaded
-        do_gater()
-        do_geocode()
-    else:
-        log("vocabulary present: skipping the initial build")
+    def stop(signum, frame):
+        log("stopping")
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+
+    server = jobserver.JobServer(RUNNERS, set_log_sink, log)
+    server.start_worker()
+    httpd = server.make_http_server(int(port))
+    threading.Thread(target=httpd.serve_forever, name="etl-http", daemon=True).start()
+    log("job server listening on port %s" % port)
+
+    # Everything goes through the queue so that jobs never overlap. The HTTP
+    # server is already up, so jobs requested during startup just wait their turn.
+    server.submit("startup")
+    server.start_nightly(seconds_until_sync, SYNK_TID)
 
     while True:
-        venting = seconds_until_sync()
-        log("next sync at %s (in %ds)" % (SYNK_TID, venting))
-        time.sleep(venting)
-
-        # Seeds the vocabulary if an earlier build left it empty.
-        if vocabulary_empty():
-            if not do_build():
-                log("build failed")
-            do_gater()
-        elif not do_sync():
-            log("sync failed")
-        do_geocode()
-        prune_avvik()
+        signal.pause()
 
 
 def main(argv):

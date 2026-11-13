@@ -37,6 +37,8 @@ services:
       - "8080:8080"
     environment:
       MASTERDB_API_KEY: ${MASTERDB_API_KEY:?Set MASTERDB_API_KEY in .env (see .env.example)}
+      # Job server in the etl container, reachable on this network only
+      ETL_URL: http://etl:8000
       DB_URL: jdbc:postgresql://db:5432/masterdb
       DB_USER: postgres
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
@@ -55,6 +57,9 @@ services:
       - portico_masterbase
 
   etl:
+    # The job server (etl/jobserver.py, port ETL_PORT, default 8000) has NO authentication.
+    # Its only protection is that this service has no `ports:` mapping, so only containers
+    # on this network can reach it. Never add `ports:` here.
     container_name: portico_masterdb_etl
     build:
       context: ./etl
