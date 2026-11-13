@@ -22,6 +22,8 @@ Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-d
 |---|---|---|
 | GET | `/masterdb/search` | Fritekstsøk med filtre. Returnerer både `bygg` og `ressurser`, hver paginert. |
 | GET | `/masterdb/search/filter` | Valgene til filterpanelet: kommuner (kode + navn), lokaletyper, aktiviteter og fasiliteter (id + navn). Hentes én gang, ikke per tastetrykk. |
+| POST | `/masterdb/etl/jobs/{type}` | Setter en ETL-jobb i kø i etl-containeren (`sync`, `geocode` eller `gater`; for `gater` valgfri body `{"kommunenr": [...]}`). Krever API-nøkkel. Svarer 202 med jobb-id. |
+| GET | `/masterdb/etl/jobs` og `/masterdb/etl/jobs/{id}` | Siste jobber og status for én jobb. Krever API-nøkkel. |
 | GET | `/masterdb/kommune` | Alle kommuner, sortert på navn. `bookingBaseUrl` og `bookingAktiv` viser hvilke som synkroniseres. Krever API-nøkkel. |
 | GET | `/masterdb/kommune/{id}` | Én kommune på intern id. 404 hvis den ikke finnes. Krever API-nøkkel. |
 | POST | `/masterdb/kommune` | Oppretter en kommune fra `{kommunenr, navn, fylkesnavn, bookingBaseUrl}`. `bookingBaseUrl` er påkrevd (`https://<navn>.aktiv-kommune.no`) og registrerer kommunens bookingsystem (inaktivt) i samme kall; den synkroniseres ikke før den aktiveres med `PATCH .../booking`. 201 med den opprettede kommunen, 400 ved ugyldig input, manglende eller ugyldig URL, 409 hvis `kommunenr` finnes fra før eller URL-en er registrert på en annen kommune. Krever API-nøkkel. |
