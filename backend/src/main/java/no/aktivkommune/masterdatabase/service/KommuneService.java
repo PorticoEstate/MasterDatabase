@@ -2,6 +2,7 @@ package no.aktivkommune.masterdatabase.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,14 @@ public class KommuneService
 
 	private final KommuneRepository repository;
 	private final FagsystemInstansRepository instanser;
+	private final ApplicationEventPublisher events;
 
-	public KommuneService(KommuneRepository repository, FagsystemInstansRepository instanser)
+	public KommuneService(KommuneRepository repository, FagsystemInstansRepository instanser,
+		ApplicationEventPublisher events)
 	{
 		this.repository = repository;
 		this.instanser = instanser;
+		this.events = events;
 	}
 
 	@Transactional(readOnly = true)
@@ -41,7 +45,8 @@ public class KommuneService
 	}
 
 	// The booking system is registered in the same transaction, so the kommune is either
-	// created ready to be synced or not created at all.
+	// created ready to be synced or not created at all. After the commit, EtlTrigger queues
+	// a gater job for the new kommune (a failure there does not affect the create).
 	@Transactional
 	public Kommune create(String kommunenr, String navn, String fylkesnavn, String bookingBaseUrl)
 	{
@@ -69,6 +74,7 @@ public class KommuneService
 		}
 		instanser.register(id, BOOKING, AktivKommuneUrl.kildenokkelOf(slug),
 			"Aktiv kommune " + navn.strip(), AktivKommuneUrl.baseUrlOf(slug));
+		events.publishEvent(new KommuneCreatedEvent(kommunenr));
 		return repository.getById(id).orElseThrow();
 	}
 
