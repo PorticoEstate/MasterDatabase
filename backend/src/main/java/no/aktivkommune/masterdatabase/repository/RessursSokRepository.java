@@ -1,7 +1,5 @@
 package no.aktivkommune.masterdatabase.repository;
 import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
-import no.aktivkommune.masterdatabase.dto.KommuneFilter;
-import no.aktivkommune.masterdatabase.dto.FilterValg;
 import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
 import no.aktivkommune.masterdatabase.dto.SokeResultat;
@@ -41,7 +39,8 @@ public class RessursSokRepository
 		Treff sok = treff(p);
 		String sql = sok.sql() + """
 
-			SELECT ressurs_id, navn, bygg_navn, kommune_navn, adressetekst, postnummer, poststed,
+			SELECT ressurs_id, navn, bygg_navn, kommune_navn,
+					adressetekst, postnummer, poststed,
 			       lokaletype_navn, lat, lon, avstand, booking_url,
 			       count(*) OVER () AS totalt
 			  FROM treff
@@ -108,41 +107,6 @@ public class RessursSokRepository
 			rs.getString("bygg_booking_url")));
 	}
 
-	// Valgene til filterpanelet. Kommuner hentes fra viewet (bare kommuner med
-	// ressurser). Aktivitet, lokaletype og fasilitet hentes
-	// direkte fra egne tabeller, hele hierarkiet.
-	public  List<KommuneFilter> hentKommuner(){
-		return jdbc.sql("""
-				SELECT DISTINCT kommunenr, kommune_navn AS navn
-				  FROM v_ressurs_sok
-				 ORDER BY navn""")
-				 .query(KommuneFilter.class)
-				 .list();
-	}
-
-	public List<FilterValg> hentAktiviteter(){
-		return hentFilterData("aktivitet");
-	}
-
-	public List<FilterValg> hentLokaletyper(){
-		return hentFilterData("lokaletype");
-	}
-
-	public List<FilterValg> hentFasiliteter(){
-		return hentFilterData("fasilitet");
-	}
-
-	// Hele kodeverket fra tabellen, også verdier uten ressurser. Tabellnavnet
-	// kommer alltid fra de tre faste kallene over, aldri fra brukerinput.
-	private List<FilterValg> hentFilterData(String tabell)
-	{
-		return jdbc.sql("SELECT id, navn, parent_id FROM " + tabell
-			+ " ORDER BY parent_id NULLS FIRST, navn")
-			.query(FilterValg.class)
-			.list();
-
-	}
-
 	// Felles for begge søkene: en CTE som filtrerer viewet og regner ut
 	// rangering og avstand per ressurs. Ett if-blokk per filter, så et nytt
 	// filter (f.eks. bydel) er én blokk til.
@@ -165,17 +129,25 @@ public class RessursSokRepository
 			params.put("q", p.q());
 			params.put("qLike", "%" + escapeLike(p.q().toLowerCase(Locale.ROOT)) + "%");
 		}
+
 		if (!p.kommune().isEmpty())
 		{
 			where.append(" AND kommunenr IN (:kommune)");
 			params.put("kommune", p.kommune());
 		}
+
 		// Lokaletype, aktivitet og fasilitet: ELLER mellom valgene.
 		if (!p.lokaletype().isEmpty())
 		{
-			where.append(" AND lokaletype_id IN (:lokaletype)");
+			where.append("""
+				 AND lokaletype_id IN(
+				SELECT underlokaletype_id
+				FROM mv_lokaletype_hierarki
+				WHERE lokaletype_id IN (:lokaletype))
+			  """);
 			params.put("lokaletype", p.lokaletype());
 		}
+
 		if (!p.aktivitet().isEmpty())
 		{
 			// Hver valgte aktivitet er utvidet til seg selv + alle etterkommere (mv_aktivitet:hierarki)
@@ -188,12 +160,19 @@ public class RessursSokRepository
 					""");
 			params.put("aktivitet", p.aktivitet());
 		}
+
 		if (!p.fasilitet().isEmpty())
 		{
 			// &&: ressursen har minst én av de valgte fasilitetene.
-			where.append(" AND fasilitet_ids && ARRAY[:fasilitet]::bigint[]");
+			where.append("""
+					AND fasilitet_ids && ARRAY(
+					SELECT underfasilitet_id
+					FROM mv_fasilitet_hierarki
+					WHERE fasilitet_id IN (:fasilitet))
+					""");
 			params.put("fasilitet", p.fasilitet());
 		}
+
 		if (p.harNarhet())
 		{
 			where.append(" AND ST_DWithin(posisjon, ").append(PUNKT).append(", :radius)");

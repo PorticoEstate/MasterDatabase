@@ -7,6 +7,7 @@ import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
 import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
 import no.aktivkommune.masterdatabase.dto.RessursSokSvar;
 import no.aktivkommune.masterdatabase.dto.SokeResultat;
+import no.aktivkommune.masterdatabase.repository.FilterRepository;
 import no.aktivkommune.masterdatabase.repository.RessursSokRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,11 +28,13 @@ public class RessursSokService
 	static final int MAKS_RADIUS_METER = 50_000;
 	static final long MAKS_OFFSET = 50_000;
 
-	private final RessursSokRepository repository;
+	private final RessursSokRepository ressursRepository;
+	private final FilterRepository filterRepository;
 
-	public RessursSokService(RessursSokRepository repository)
+	public RessursSokService(RessursSokRepository ressursRepository, FilterRepository filterRepository)
 	{
-		this.repository = repository;
+		this.ressursRepository = ressursRepository;
+		this.filterRepository = filterRepository;
 	}
 
 	// Det controlleren bruker: normaliserer én gang og kjører begge søkene i
@@ -41,41 +44,20 @@ public class RessursSokService
 		{
 		RessursSokParametre p = normaliser(input);
 		return new RessursSokSvar(
-				repository.sokBygg(p),
-				repository.sokRessurser(p));
+				ressursRepository.sokBygg(p),
+				ressursRepository.sokRessurser(p));
 		}
 
 	@Transactional(readOnly = true)
 	public SokeResultat<RessursSokTreff> sokRessurser(RessursSokParametre input)
 	{
-		return repository.sokRessurser(normaliser(input));
+		return ressursRepository.sokRessurser(normaliser(input));
 	}
 
 	@Transactional(readOnly = true)
 	public SokeResultat<ByggSokTreff> sokBygg(RessursSokParametre input)
 	{
-		return repository.sokBygg(normaliser(input));
-	}
-
-	@Transactional (readOnly = true)
-	public List<KommuneFilter> hentKommuner(){
-		return repository.hentKommuner();
-	}
-
-	@Transactional (readOnly = true)
-	public List<FilterValg> hentAktiviteter() {
-		return repository.hentAktiviteter();
-	}
-
-	@Transactional (readOnly = true)
-	public List<FilterValg> hentFasiliteter() {
-		return repository.hentFasiliteter();
-	}
-
-
-	@Transactional (readOnly = true)
-	public List<FilterValg> hentLokaletyper() {
-		return repository.hentLokaletyper();
+		return ressursRepository.sokBygg(normaliser(input));
 	}
 
 	// Pakkeprivat så den kan enhetstestes uten database.
@@ -189,5 +171,26 @@ public class RessursSokService
 	private static ResponseStatusException avvis(String melding)
 	{
 		return new ResponseStatusException(HttpStatus.BAD_REQUEST, melding);
+	}
+
+	//Filtervalg
+	@Transactional (readOnly = true)
+	public List<KommuneFilter> hentKommuner(){
+		return filterRepository.hentKommuner();
+	}
+
+	@Transactional (readOnly = true)
+	public List<FilterValg> hentAktiviteter() {
+		return filterRepository.hentAktiviteter();
+	}
+
+	@Transactional (readOnly = true)
+	public List<FilterValg> hentFasiliteter() {
+		return filterRepository.hentFasiliteter();
+	}
+
+	@Transactional (readOnly = true)
+	public List<FilterValg> hentLokaletyper() {
+		return filterRepository.hentLokaletyper();
 	}
 }
