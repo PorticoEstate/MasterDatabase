@@ -2,14 +2,16 @@
 # Runs the ETL pipeline inside the etl container.
 #
 #   run.sh daemon     (default) initial build if the master has no vocabulary
-#                     yet, then a nightly sync at SYNK_TID
+#                     yet (build, then gater, then geocode), then a nightly
+#                     sync, geocode and prune at SYNK_TID
 #   run.sh build      last_inn.py: seeds the vocabulary and loads everything
 #   run.sh sync       synk.py: loads buildings, resources and links
 #   run.sh geocode    Matrikkel geocoding and building enrichment
 #   run.sh gater [<kommunenr>...]
 #                     fetch every street of a kommune from Matrikkel into gate,
 #                     so gate matches Matrikkel. No argument: every kommune in
-#                     the database (what the daemon does at startup and nightly).
+#                     the database. The daemon runs it once, after the initial
+#                     build; otherwise it only runs when started by hand.
 #   run.sh prune      delete old synk_avvik rows (also done after each nightly run)
 #   run.sh status     row counts, geocoding status and latest extracts (read-only)
 #
@@ -267,13 +269,12 @@ daemon()
 	if [ "$tom" = "t" ]; then
 		log "no vocabulary in the master yet: initial build"
 		do_build || log "initial build failed; the next start or the nightly run retries if the vocabulary is still empty"
+		# Streets for every kommune the build loaded
+		do_gater || true
 		do_geocode || true
 	else
 		log "vocabulary present: skipping the initial build"
 	fi
-
-	# Streets for every kommune in the database (also new ones)
-	do_gater || true
 
 	local venting
 	while true; do
@@ -286,10 +287,10 @@ daemon()
 		tom=$(vocabulary_empty) || tom=""
 		if [ "$tom" = "t" ]; then
 			do_build || log "build failed"
+			do_gater || true
 		else
 			do_sync || log "sync failed"
 		fi
-		do_gater || true
 		do_geocode || true
 		prune_avvik || true
 	done
