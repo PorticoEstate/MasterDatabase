@@ -366,6 +366,13 @@ def main():
 
     valg = list(KOMMUNER) if args.kommune == "alle" else [args.kommune]
     feilet = [slug for slug in valg if not generer_sql(slug, sys.stdout, args.fra_fil)]
+
+	#Viewet over aktivitet-, fasilitet- og lokaletype-hierarkiet er materialisert og må fylles på nytt
+    # etter at kodeverket er lastet. Én gang til slutt, ikke per kommune.
+    sys.stdout.write("\nREFRESH MATERIALIZED VIEW mv_aktivitet_hierarki;\n")
+    sys.stdout.write("\nREFRESH MATERIALIZED VIEW mv_lokaletype_hierarki;\n")
+    sys.stdout.write("\nREFRESH MATERIALIZED VIEW mv_fasilitet_hierarki; \n")
+
     if feilet:
         print(f"\nHenting feilet for: {', '.join(feilet)} (loggført i synk_avvik)", file=sys.stderr)
         sys.exit(2)

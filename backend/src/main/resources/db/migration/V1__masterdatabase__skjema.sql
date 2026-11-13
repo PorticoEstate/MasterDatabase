@@ -661,8 +661,7 @@ LEFT JOIN LATERAL (
 ) fas ON TRUE
 WHERE r.aktiv AND r.bookbar;
 
-
--- Et materialisert view for aktiviteter som viser aktivitetshierarkiet. Både forfedre og etterkommere
+-- Et materialisert view for aktiviteter som viser hierarkiet, inkluderer forfedre og etterkommere
 CREATE MATERIALIZED VIEW mv_aktivitet_hierarki AS
 WITH RECURSIVE aktivitet_tre AS (
 	-- hver aktivitet inneholder seg selv
@@ -671,7 +670,7 @@ WITH RECURSIVE aktivitet_tre AS (
 	id AS underaktivitet_id
 	FROM aktivitet
 
-	UNION ALL
+	UNION
 
 	--finner aktivitetens etterkommer(e)
 	SELECT
@@ -687,6 +686,58 @@ FROM aktivitet_tre;
 
 CREATE INDEX idx_mv_aktivitet_hierarki
 ON mv_aktivitet_hierarki (aktivitet_id);
+
+-- Et materialisert view for fasiliteter som viser hierarkiet, inkluderer forfedre og etterkommere
+CREATE MATERIALIZED VIEW mv_fasilitet_hierarki AS
+WITH RECURSIVE fasilitet_tre AS (
+	SELECT
+	id as fasilitet_id,
+	id as underfasilitet_id
+	FROM fasilitet
+
+	UNION
+
+	--finner fasilitetenes etterkommer(e)
+	SELECT
+	fasilitet_tre.fasilitet_id,
+	fasilitet.id AS underfasilitet_id
+	FROM fasilitet
+	JOIN fasilitet_tre
+		ON fasilitet.parent_id = fasilitet_tre.underfasilitet_id
+)
+
+SELECT *
+FROM fasilitet_tre;
+
+CREATE INDEX idx_mv_fasilitet_hierarki
+ON mv_fasilitet_hierarki(fasilitet_id);
+
+-- Et materialisert view for lokaletyper som viser hierarkiet, inkluderer forfedre og etterkommere
+CREATE MATERIALIZED VIEW mv_lokaletype_hierarki AS
+WITH RECURSIVE lokaletype_tre AS (
+
+--hver lokaletype inneholder seg selv i underkategorien
+SELECT
+id AS lokaletype_id,
+id AS underlokaletype_id
+FROM lokaletype
+
+UNION
+
+SELECT
+lokaletype_tre.lokaletype_id,
+lokaletype.id AS underlokaletype_id
+FROM lokaletype
+JOIN lokaletype_tre
+	ON lokaletype.parent_id = lokaletype_tre.underlokaletype_id
+)
+
+SELECT *
+FROM lokaletype_tre;
+
+CREATE INDEX idx_mv_lokaletype_hierarki
+ON mv_lokaletype_hierarki(lokaletype_id);
+
 
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
 -- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt
