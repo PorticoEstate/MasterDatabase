@@ -1,16 +1,175 @@
 openapi: 3.1.0
 info:
-  title: MasterDB search API
-  description: Search across municipalities. Returns hits and links to the local booking
-    system. Never checks availability or books anything.
+  title: MasterDB API
+  description: "Search across municipalities (returns hits and links to the local\
+    \ booking system, never checks availability or books anything), and administration\
+    \ of kommuner (requires an API key)."
   version: v1
 servers:
 - url: http://localhost:8080
   description: Generated server url
 tags:
+- name: Kommune
+  description: "Create, read, update and delete kommuner. Requires an API key."
 - name: Search
   description: Search across municipalities
 paths:
+  /masterdb/kommune/{id}:
+    get:
+      tags:
+      - Kommune
+      summary: Get a kommune by id
+      operationId: getById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "404":
+          description: No kommune with this id
+        "401":
+          description: Missing or invalid API key
+      security:
+      - apiKey: []
+    put:
+      tags:
+      - Kommune
+      summary: Update a kommune
+      description: "Replaces kommunenr, navn and fylkesnavn. A fylkesnavn left out\
+        \ of the body is set to null. kommunenr can be changed here, e.g. when a kommune\
+        \ is renumbered. The booking system is not touched: its URL is set when the\
+        \ kommune is created. To stop or resume syncing, use PATCH /{id}/booking."
+      operationId: updateKommune
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KommuneUpdate"
+        required: true
+      responses:
+        "400":
+          description: Invalid body (kommunenr not 4 digits or navn missing)
+        "404":
+          description: No kommune with this id
+        "409":
+          description: Another kommune already has this kommunenr
+        "401":
+          description: Missing or invalid API key
+      security:
+      - apiKey: []
+    delete:
+      tags:
+      - Kommune
+      summary: Delete a kommune
+      description: "Also deletes everything that belongs to the kommune: buildings,\
+        \ addresses, streets and resources (ON DELETE CASCADE), and its booking system\
+        \ registration unless another kommune uses it. This cannot be undone."
+      operationId: deleteKommune
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "404":
+          description: No kommune with this id
+        "401":
+          description: Missing or invalid API key
+        "204":
+          description: No Content
+      security:
+      - apiKey: []
+  /masterdb/kommune:
+    get:
+      tags:
+      - Kommune
+      summary: List all kommuner
+      description: "All kommuner, ordered by name. bookingBaseUrl and bookingAktiv\
+        \ show which kommuner the nightly sync loads data for (those with a booking\
+        \ system that is active)."
+      operationId: getAll
+      responses:
+        "401":
+          description: Missing or invalid API key
+      security:
+      - apiKey: []
+    post:
+      tags:
+      - Kommune
+      summary: Create a kommune
+      description: "Returns the created kommune including its generated id. bookingBaseUrl\
+        \ (https://<name>.aktiv-kommune.no) is required: the kommune's Aktiv kommune\
+        \ booking system is registered, and active is set to false, in the same call.\
+        \ Nightly sync won't load until status is set active ."
+      operationId: createKommune
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KommuneCreate"
+        required: true
+      responses:
+        "400":
+          description: "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl\
+            \ missing or not https://<name>.aktiv-kommune.no, or active missing)"
+        "409":
+          description: "kommunenr already exists, or bookingBaseUrl is registered\
+            \ for another kommune"
+        "401":
+          description: Missing or invalid API key
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Kommune"
+      security:
+      - apiKey: []
+  /masterdb/kommune/{id}/booking:
+    patch:
+      tags:
+      - Kommune
+      summary: Include or exclude the booking system in the sync
+      description: Sets whether the nightly sync loads data for this kommune. aktiv=false
+        stops the sync but keeps the kommune and its data; aktiv=true resumes it.
+        Idempotent. Returns the kommune.
+      operationId: setBookingAktiv
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FagsystemStatusUpdate"
+        required: true
+      responses:
+        "400":
+          description: aktiv missing
+        "404":
+          description: No kommune with this id
+        "409":
+          description: The kommune has no booking system
+        "401":
+          description: Missing or invalid API key
+      security:
+      - apiKey: []
   /masterdb/search:
     get:
       tags:
@@ -23,18 +182,25 @@ paths:
       parameters:
       - name: q
         in: query
+        description: "Fritekst. Treffer navn, bygg, lokaletype, aktiviteter, fasiliteter\
+          \ og sted."
         required: false
         schema:
           type: string
+        example: badminton
       - name: kommune
         in: query
+        description: "Kommunenummer (4 siffer), ikke navn. Gyldige verdier: kommuner[].kode\
+          \ fra /masterdb/search/filter."
         required: false
         schema:
           type: array
           items:
             type: string
+        example: 4601
       - name: lokaletype
         in: query
+        description: "lokaletype.id. Gyldige verdier: lokaletyper[].id fra /masterdb/search/filter."
         required: false
         schema:
           type: array
@@ -43,6 +209,8 @@ paths:
             format: int64
       - name: aktivitet
         in: query
+        description: "aktivitet.id. Gyldige verdier: aktiviteter[].id fra /masterdb/search/filter.\
+          \ ELLER mellom valgene."
         required: false
         schema:
           type: array
@@ -51,6 +219,8 @@ paths:
             format: int64
       - name: fasilitet
         in: query
+        description: "fasilitet.id. Gyldige verdier: fasiliteter[].id fra /masterdb/search/filter.\
+          \ OG mellom valgene."
         required: false
         schema:
           type: array
@@ -59,39 +229,51 @@ paths:
             format: int64
       - name: lat
         in: query
+        description: Breddegrad for nærhetssøk. Krever lon og radiusMeter.
         required: false
         schema:
           type: number
           format: double
+        example: 60.39
       - name: lon
         in: query
+        description: Lengdegrad for nærhetssøk. Krever lat og radiusMeter.
         required: false
         schema:
           type: number
           format: double
+        example: 5.32
       - name: radiusMeter
         in: query
+        description: "Radius i meter rundt lat/lon, maks 50 000."
         required: false
         schema:
           type: integer
           format: int32
+        example: 5000
       - name: sorter
         in: query
+        description: "relevans | avstand | navn. Standard: avstand ved nærhetssøk,\
+          \ relevans ved fritekst, ellers navn."
         required: false
         schema:
           type: string
       - name: side
         in: query
+        description: "Sidenummer, 0-indeksert."
         required: false
         schema:
           type: integer
           format: int32
+        example: 0
       - name: storrelse
         in: query
+        description: "Treff per side, standard 20, maks 100."
         required: false
         schema:
           type: integer
           format: int32
+        example: 20
       responses:
         "200":
           description: OK
@@ -116,6 +298,107 @@ paths:
                 $ref: "#/components/schemas/SokFiltre"
 components:
   schemas:
+    KommuneUpdate:
+      type: object
+      properties:
+        kommunenr:
+          type: string
+          description: "Kommune number, exactly 4 digits"
+          example: "4601"
+          minLength: 1
+          pattern: "[0-9]{4}"
+        navn:
+          type: string
+          description: Kommune name
+          example: Bergen
+          minLength: 1
+        fylkesnavn:
+          type: string
+          description: County name. Optional; null when left out.
+          example: Vestland
+      required:
+      - kommunenr
+      - navn
+    KommuneCreate:
+      type: object
+      properties:
+        kommunenr:
+          type: string
+          description: "Kommune number, exactly 4 digits"
+          example: "4601"
+          minLength: 1
+          pattern: "[0-9]{4}"
+        navn:
+          type: string
+          description: Kommune name
+          example: Bergen
+          minLength: 1
+        fylkesnavn:
+          type: string
+          description: County name. Optional; null when left out.
+          example: Vestland
+        bookingBaseUrl:
+          type: string
+          description: Base URL of the kommune's Aktiv kommune booking system. Required.
+            Must be https://<name>.aktiv-kommune.no.
+          example: https://bergen.aktiv-kommune.no
+          minLength: 1
+          pattern: "^https://([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)\\.aktiv-kommune\\\
+            .no/?$"
+        active:
+          type: boolean
+          description: Whether the kommune's booking system is active. Required.
+            If true, the nightly sync loads data from the Aktiv kommune instance;
+            if false, the sync skips it until it is activated (PATCH /masterdb/kommune/{id}/booking).
+          example: true
+      required:
+      - active
+      - bookingBaseUrl
+      - kommunenr
+      - navn
+    Kommune:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Internal id, generated by the database. Use it in the URL\
+            \ for get, update and delete."
+          example: 17
+        kommunenr:
+          type: string
+          description: "Kommune number, 4 digits"
+          example: "4601"
+        navn:
+          type: string
+          description: Kommune name
+          example: Bergen
+        fylkesnavn:
+          type: string
+          description: "County name, may be null"
+          example: Vestland
+        bookingBaseUrl:
+          type: string
+          description: "Base URL of the kommune's Aktiv kommune booking system. The\
+            \ nightly sync loads data from here. Null if no booking system is registered,\
+            \ in which case the kommune is not synced."
+          example: https://bergen.aktiv-kommune.no
+        bookingAktiv:
+          type: boolean
+          description: "Whether the booking system is included in the nightly sync.\
+            \ Change it with PATCH /masterdb/kommune/{id}/booking. Null if no booking\
+            \ system is registered."
+          example: true
+    FagsystemStatusUpdate:
+      type: object
+      properties:
+        aktiv:
+          type: boolean
+          description: "true: the booking system is included in the nightly sync.\
+            \ false: it is skipped, but the kommune and its data are kept."
+          example: false
+      required:
+      - aktiv
     ByggSokTreff:
       type: object
       properties:
@@ -256,3 +539,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/IdValg"
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      name: X-API-KEY
+      in: header

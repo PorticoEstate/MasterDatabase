@@ -1,0 +1,40 @@
+meta {
+  name: 06 Deaktiver booking
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/masterdb/kommune/:id/booking
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 25
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "aktiv": false
+  }
+}
+
+docs {
+  Stopper den nattlige synken for kommunen fra 01, men beholder kommunen og dataene. Kjør 03 for å
+  se bookingAktiv = false. Samme kall en gang til endrer ingenting. Kommuner uten bookingsystem gir 409.
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("bookingAktiv er false", function() {
+    expect(res.getBody().bookingAktiv).to.equal(false);
+  });
+}

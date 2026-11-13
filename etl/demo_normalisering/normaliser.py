@@ -34,7 +34,7 @@ from pathlib import Path
 HER = Path(__file__).resolve().parent
 ETL = HER.parent
 sys.path.insert(0, str(ETL))
-from helpers import KOMMUNER, hent_json, rens  # noqa: E402
+from helpers import hent_json, kommuner_fra_kommandolinje, rens  # noqa: E402
 
 # Mapping og vokabular per kodetype, i samme format for alle tre (se
 # activity_mapping/AktivKommune_activity_normalisation.md): mapping.json har
@@ -161,24 +161,28 @@ def normaliser(d: dict, ukartlagt: dict) -> dict:
 
 
 def main():
+    kommuner = kommuner_fra_kommandolinje()
     parser = argparse.ArgumentParser(description="DEMO: skriver en normalisert kopi av searchdataall per kommune.",
-                                     epilog="Kjente kommuner: " + ", ".join(KOMMUNER))
-    parser.add_argument("kommune", choices=(*KOMMUNER, "alle"), metavar="kommune|alle")
+                                     epilog="Kjente kommuner: " + ", ".join(kommuner))
+    parser.add_argument("kommune", choices=(*kommuner, "alle"), metavar="kommune|alle")
     parser.add_argument("--fra-fil", type=Path, metavar="MAPPE",
                         help="les MAPPE/<kommune>.json i stedet for å hente fra nettet")
     parser.add_argument("--ut", type=Path, default=ETL / "ut" / "normalisert", metavar="MAPPE",
                         help="skriv MAPPE/<kommune>.json (standard: etl/ut/normalisert)")
+    parser.add_argument("--kommuner-fil", type=Path, metavar="FIL",
+                        help="kommuneliste fra databasen (slug|kommunenr|navn|fylke per linje, se "
+                             "kommuner_query.sql); uten den brukes den innebygde listen")
     args = parser.parse_args()
 
     args.ut.mkdir(parents=True, exist_ok=True)
-    valg = list(KOMMUNER) if args.kommune == "alle" else [args.kommune]
+    valg = list(kommuner) if args.kommune == "alle" else [args.kommune]
     feilet = []
     for slug in valg:
         try:
             if args.fra_fil:
                 d = json.loads((args.fra_fil / f"{slug}.json").read_text(encoding="utf-8"))
             else:
-                url = f"https://{slug}.aktiv-kommune.no/bookingfrontend/searchdataall"
+                url = f"{kommuner[slug][3]}/bookingfrontend/searchdataall"
                 print(f"henter {url} ...", file=sys.stderr)
                 d = hent_json(url)[1]
             if not isinstance(d, dict):

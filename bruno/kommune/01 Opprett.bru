@@ -1,0 +1,46 @@
+meta {
+  name: 01 Opprett
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/masterdb/kommune
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": "9999",
+    "navn": "Testkommune",
+    "fylkesnavn": "Testfylke",
+    "bookingBaseUrl": "https://testkommune.aktiv-kommune.no",
+    "active": false
+  }
+}
+
+docs {
+  Oppretter testkommunen 9999 og registrerer bookingsystemet i samme kall. Sett id-en fra svaret
+  i path-parameteren id i 03 og 05-08 selv. Kjør 01-08 i rekkefølge; 08 rydder opp.
+  Kalles den to ganger, gir det andre kallet 409. bookingBaseUrl er påkrevd; mangler den, eller er den ikke
+  https://<navn>.aktiv-kommune.no, blir svaret 400 (se 02).
+}
+
+tests {
+  test("svarer 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returnerer kommunen med id og bookingBaseUrl", function() {
+    const b = res.getBody();
+    expect(b.id).to.be.a("number");
+    expect(b.kommunenr).to.equal("9999");
+    expect(b.bookingBaseUrl).to.equal("https://testkommune.aktiv-kommune.no");
+    expect(b.bookingAktiv).to.equal(false);
+  });
+}

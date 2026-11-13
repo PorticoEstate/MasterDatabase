@@ -1,6 +1,6 @@
 # Backend (søke-API)
 
-Spring Boot-applikasjon som lar nettsiden søke på tvers av kommuner. Brukeren kan søke på fritekst, filtrere (kommune, lokaletype, aktivitet, fasilitet), eventuelt begrense til et område rundt et punkt, og få treff som bygg-kort og ressursliste. Et treff lenker videre til det lokale bookingsystemet. API-et sjekker aldri tilgjengelighet og booker ingenting.
+Spring Boot-applikasjon som lar nettsiden søke på tvers av kommuner. Brukeren kan søke på fritekst, filtrere (kommune, lokaletype, aktivitet, fasilitet), eventuelt begrense til et område rundt et punkt, og få treff som bygg-kort og ressursliste. Et treff lenker videre til det lokale bookingsystemet. API-et sjekker aldri tilgjengelighet og booker ingenting. I tillegg finnes et API for administrasjon av kommuner (`/masterdb/kommune`), beskyttet av en API-nøkkel (som resten av API-et, bortsett fra søk).
 
 ## Kjøre lokalt
 
@@ -14,16 +14,26 @@ Backend kjører på <http://localhost:8080>. `--build` er nødvendig etter endri
 
 Databasetilkobling styres av miljøvariablene `DB_URL`, `DB_USER` og `DB_PASSWORD` (se `src/main/resources/application.properties` og `docker-compose.yml`).
 
+Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-docs` og `/actuator/health` krever en API-nøkkel. Sett `MASTERDB_API_KEY` i `.env` (påkrevd: backend nekter å starte uten den, og `docker compose` stopper med en feilmelding). Klienter sender nøkkelen i headeren `X-API-KEY`. Nøkkelen sjekkes av `config/ApiKeyFilter.java`, som beskytter alt unntatt de åpne stiene i `OPEN_PATHS`. Nye endepunkter er dermed beskyttet som standard.
+
 ## Endepunkter
 
 | Metode | Sti | Beskrivelse |
 |---|---|---|
 | GET | `/masterdb/search` | Fritekstsøk med filtre. Returnerer både `bygg` og `ressurser`, hver paginert. |
-| GET | `/masterdb/search/filter` | Valgene til filterpanelet: kommuner (kommunenr + navn), lokaletyper, aktiviteter og fasiliteter (id + navn). Hentes én gang, ikke per tastetrykk. |
+| GET | `/masterdb/search/filter` | Valgene til filterpanelet: kommuner (kode + navn), lokaletyper, aktiviteter og fasiliteter (id + navn). Hentes én gang, ikke per tastetrykk. |
+| GET | `/masterdb/kommune` | Alle kommuner, sortert på navn. `bookingBaseUrl` og `bookingAktiv` viser hvilke som synkroniseres. Krever API-nøkkel. |
+| GET | `/masterdb/kommune/{id}` | Én kommune på intern id. 404 hvis den ikke finnes. Krever API-nøkkel. |
+| POST | `/masterdb/kommune` | Oppretter en kommune fra `{kommunenr, navn, fylkesnavn, bookingBaseUrl, active}`. `bookingBaseUrl` er påkrevd (`https://<navn>.aktiv-kommune.no`) og registrerer kommunens bookingsystem i samme kall. `active` (boolean) er påkrevd og bestemmer om det er aktivt; en inaktiv kilde synkroniseres ikke før den aktiveres med `PATCH .../booking`. 201 med den opprettede kommunen, 400 ved ugyldig input, manglende eller ugyldig URL, manglende `active`, 409 hvis `kommunenr` finnes fra før eller URL-en er registrert på en annen kommune. Krever API-nøkkel. |
+| PUT | `/masterdb/kommune/{id}` | Erstatter `kommunenr`, `navn` og `fylkesnavn` (så `kommunenr` kan rettes, for eksempel etter at en kommune har fått nytt nummer). Bookingsystemet røres ikke (URL-en settes ved opprettelse). 404 hvis id-en ikke finnes, 409 hvis `kommunenr` er opptatt. Krever API-nøkkel. |
+| PATCH | `/masterdb/kommune/{id}/booking` | Tar kommunens bookingsystem med i (`{"aktiv": true}`) eller ut av (`{"aktiv": false}`) den nattlige synken. Kommunen og dataene beholdes. Idempotent; returnerer kommunen. 404 hvis id-en ikke finnes, 409 hvis kommunen ikke har bookingsystem. Krever API-nøkkel. |
+| DELETE | `/masterdb/kommune/{id}` | Sletter en kommune. **Sletter også bygg, adresser, gater og ressurser** (`ON DELETE CASCADE`) og kommunens bookingsystem hvis ingen annen kommune bruker det. 204, eller 404. Krever API-nøkkel. |
 
 Stiene er engelske, mens query-parametre (`q`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `sorter`, `side`, `storrelse`, `lat`, `lon`, `radiusMeter`) og JSON-felt er norske. Lister kan sendes som `?aktivitet=1&aktivitet=2` eller `?aktivitet=1,2`.
 
 Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java` og `dto/`.
+
+Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (kommune-tabellen) og `repository/FagsystemInstansRepository.java` (fagsystem-instanser og koblingen til kommunen); begge bruker ren SQL via `JdbcClient`. Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/helpers.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
 
 ## API-dokumentasjon (Swagger / OpenAPI)
 
@@ -35,7 +45,7 @@ Dokumentasjonen **genereres fra koden** av [springdoc](https://springdoc.org) (a
 | OpenAPI (JSON) | <http://localhost:8080/masterdb/api-docs> |
 | OpenAPI (YAML) | <http://localhost:8080/masterdb/api-docs.yaml> |
 
-Adressene settes i `application.properties` (`springdoc.api-docs.path` og `springdoc.swagger-ui.path`). Tittel og beskrivelse settes i `config/OpenApiConfig.java`.
+Adressene settes i `application.properties` (`springdoc.api-docs.path` og `springdoc.swagger-ui.path`). Tittel og beskrivelse settes i `config/OpenApiConfig.java`, som også deklarerer API-nøkkelen (`X-API-KEY`) som sikkerhetsskjemaet `apiKey`. I Swagger UI gir **Authorize** deg et felt for nøkkelen.
 
 Den levende dokumentasjonen stemmer alltid med koden etter ombygging og omstart av backend.
 
@@ -54,12 +64,13 @@ Husk å committe den oppdaterte filen. Hvis ingen bruker filen, kan den fjernes,
 - Legg `@Operation(summary = "...", description = "...")` på metoden og `@Tag` på controlleren.
 - Bruk `@ParameterObject` på en DTO som tar imot query-parametre. Uten den vises DTO-en som ett parameter i stedet for ett per felt.
 - Beskriv felt med `@Schema(description = "...")` i DTO-ene.
+- En controller som krever API-nøkkelen får `@SecurityRequirement(name = "apiKey")` (skjemaet er deklarert i `OpenApiConfig`). Dokumenter feilene springdoc ikke kan gjette (400, 401, 404, 409) med `@ApiResponse`; suksesskoden hentes fra `@ResponseStatus`.
 
 ## Testing med Bruno
 
-Forespørslene ligger i `bruno/` i rotmappen, og `baseUrl` settes i `bruno/environments/lokal.bru`. Kjør dem etter endringer i endepunktene.
+Forespørslene ligger i `bruno/` i rotmappen, og `baseUrl` settes i `bruno/environments/lokal.bru`. Kjør dem etter endringer i endepunktene. Forespørslene i `bruno/kommune/` krever at hemmeligheten `apiKey` er satt én gang i miljøet `lokal` (samme verdi som `MASTERDB_API_KEY`). Kjør dem i rekkefølge: de oppretter to testkommuner (9999 med bookingsystem, 9997 uten), henter og endrer dem, registrerer bookingsystemet på 9997 med en oppdatering, sletter begge og lar databasen stå som den var.
 
 ## Endre sti eller skru av docs
 
-- **Endre stiene:** `@RequestMapping` og `@GetMapping` i controlleren. Oppdater deretter Bruno-filene i `bruno/sok/`, andre klienter (frontend) og `api/openapi.yaml`.
+- **Endre stiene:** `@RequestMapping` og `@GetMapping` i controlleren. Oppdater deretter Bruno-filene i `bruno/sok/` og `bruno/kommune/`, andre klienter (frontend) og `api/openapi.yaml`.
 - **Skru av Swagger UI i produksjon:** sett `springdoc.swagger-ui.enabled=false` (og eventuelt `springdoc.api-docs.enabled=false`). Swagger UI og spesifikasjonen er ellers åpne for alle som når backend.
