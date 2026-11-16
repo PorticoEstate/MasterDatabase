@@ -53,7 +53,7 @@ Fra tomt skjema til populert database, i tre steg:
 ```
 
 **Demo-normalisering (valgfritt, før steg 2).** Aktiv kommune-instansene er ennå
-ikke normalisert. `etl/demo_normalisering/normaliser.py` viser hvordan masterdatabasen kan
+ikke normalisert. `etl/dev/demo_normalisering/normaliser.py` viser hvordan masterdatabasen kan
 bli når de er det: det gjør en rå `searchdataall` om til det en normalisert
 instans ville levere, og `last_inn.py` laster resultatet med `--fra-fil`. Hele
 mappen kan slettes når instansene er normalisert; verken `last_inn.py` eller
@@ -78,12 +78,12 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/last_inn.py` | Steg 2, bygging: oppretter kodeverkene og laster alt annet. Kjøres én gang |
 | `etl/synk.py` | Steg 2, jevnlig synkronisering: som `last_inn.py`, men skriver aldri kodeverkene |
 | `etl/helpers.py` | Hjelpefunksjoner delt av de to skriptene (`rens`, `q`, `logg`, `hent_json`, `KOMMUNER`, `les_kommuner` osv.) |
-| `etl/kommuner_query.sql` | Henter listen over kommuner som skal synkroniseres fra databasen (se "Hvilke kommuner som synkroniseres") |
-| `etl/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
-| `etl/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
+| `etl/sql/kommuner_query.sql` | Henter listen over kommuner som skal synkroniseres fra databasen (se "Hvilke kommuner som synkroniseres") |
+| `etl/dev/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
+| `etl/dev/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3. Kjøres etter bygging og etter hver synk, så nye bygg får posisjon |
-| `etl/hent_gater.py` | Henter ALLE gater for en kommune fra Matrikkelen inn i `gate`. Kjøres av daemonen én gang etter første bygg, og ellers for hånd med `run.sh gater` |
-| `etl/matrikkel_test/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
+| `etl/hent_gater.py` | Henter ALLE gater for en kommune fra Matrikkelen inn i `gate`. Kjøres av daemonen én gang etter første bygg, og ellers for hånd med `main.py gater` |
+| `etl/dev/check_matrikkel_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
 **`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
 med én rad og URL per system. `last_inn.py` og `synk.py` skriver ressursens egen
@@ -127,12 +127,12 @@ docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 **Synk etter bygging** (samme måte å sende SQL-en til Postgres, men synk trenger kommunelisten fra databasen først, se «Hvilke kommuner som synkroniseres»):
 
 ```bash
-psql -tA -F'|' -f etl/kommuner_query.sql > etl/ut/kommuner.txt
+psql -tA -F'|' -f etl/sql/kommuner_query.sql > etl/ut/kommuner.txt
 python3 etl/synk.py alle --kommuner-fil etl/ut/kommuner.txt > etl/ut/synk.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/synk.sql
 ```
 
-Den planlagte kjøringen gjøres av etl-containeren (`etl/run.sh`, hver natt kl. 03:00; se `DEPLOY.md`). Etter hver synk
+Den planlagte kjøringen gjøres av etl-containeren (`etl/main.py`, hver natt kl. 03:00; se `DEPLOY.md`). Etter hver synk
 kjøres `matrikkel_adresse.py` (steg 3), så nye bygg får posisjon.
 
 Skriptene kan også lese `<mappe>/<kommune>.json` i stedet for å hente fra nettet,
@@ -181,7 +181,7 @@ De to skriptene får kommunelisten fra hver sin kilde, og det er ikke valgfritt:
   Demo-normaliseringen følger samme liste som skriptet den mater: uten `--kommuner-fil`
   (bygging) bruker den den innebygde listen, med filen (synk) databaselisten.
 
-`run.sh sync` lager synk-listen ved å kjøre `kommuner_query.sql`, som lister alle kommuner
+`main.py sync` lager synk-listen ved å kjøre `sql/kommuner_query.sql`, som lister alle kommuner
 som har en **aktiv** `fagsystem_instans` av typen `booking` med `kildenokkel` som begynner
 på `aktiv-kommune:`. Resultatet (`slug|kommunenr|navn|fylke|base_url`, én linje per kommune) skrives
 til `etl/ut/kommuner.txt` og sendes med `--kommuner-fil`. Hvis spørringen feiler,
@@ -190,7 +190,7 @@ synkroniseres ingenting den natten.
 For hånd:
 
 ```bash
-psql -tA -F'|' -f etl/kommuner_query.sql > etl/ut/kommuner.txt
+psql -tA -F'|' -f etl/sql/kommuner_query.sql > etl/ut/kommuner.txt
 python3 etl/synk.py alle --kommuner-fil etl/ut/kommuner.txt > etl/ut/synk.sql
 ```
 
@@ -200,7 +200,7 @@ De to flaggene gjør hver sin ting og kan brukes sammen:
 
 | Flagg | Hva det styrer | Innhold |
 |---|---|---|
-| `--kommuner-fil FIL` | **Hvilke kommuner** som behandles | En tekstfil, én linje per kommune: `slug\|kommunenr\|navn\|fylke\|base_url` (utdata fra `kommuner_query.sql`) |
+| `--kommuner-fil FIL` | **Hvilke kommuner** som behandles | En tekstfil, én linje per kommune: `slug\|kommunenr\|navn\|fylke\|base_url` (utdata fra `sql/kommuner_query.sql`) |
 | `--fra-fil MAPPE` | **Hvor dataene hentes fra** | En mappe med `<slug>.json` i samme form som `searchdataall`, i stedet for å hente fra nettet (brukes av demo-normaliseringen) |
 
 ### Legge til en kommune
@@ -252,7 +252,7 @@ Ting å vite:
 - Mens `NORMALISER_DEMO=true` kjenner demo-mappingfilene bare de eksisterende kildene, så
   regn med `synk_avvik`-rader for en ny kommune helt til instansen er normalisert.
 - Kommunen lastes ved neste nattlige synk. For å laste den med en gang:
-  `docker compose exec etl ./run.sh sync`.
+  `docker compose exec etl python3 main.py sync`.
 - En URL med skrivefeil blir godtatt hvis formen stemmer. Den gir en mislykket henting i
   `synk_avvik` ved neste synk, ikke en feil ved opprettelsen.
 
@@ -348,7 +348,7 @@ peke på id-er som finnes.
 
 Mappingen er midlertidig. Den viser hvordan masterdatabasen blir når instansene
 er normalisert, og brukes ikke i produksjon. Alt den trenger ligger i
-`etl/demo_normalisering/`, og mappen slettes når normaliseringen er på plass.
+`etl/dev/demo_normalisering/`, og mappen slettes når normaliseringen er på plass.
 
 `normaliser.py` leser `searchdataall` (nettet, eller `--fra-fil`), og skriver
 `<kommune>.json` med samme form, men med kodeverkene erstattet av vokabularet
@@ -357,7 +357,7 @@ mapping, eller som mappes til et exclude-konsept, får ingen kobling og skrives
 til standard-feil.
 
 ```bash
-python3 etl/demo_normalisering/normaliser.py alle              # skriver etl/ut/normalisert/
+python3 etl/dev/demo_normalisering/normaliser.py alle              # skriver etl/ut/normalisert/
 python3 etl/last_inn.py alle --fra-fil etl/ut/normalisert > etl/ut/alle.sql
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 ```
@@ -387,7 +387,7 @@ uttrekket) kommer derimot med.
 
 1. **Geokoding** av enhver hovedadresse som ennå ikke er løst. MatrikkelAPI
    (SOAP, krever `MATRIKKEL_BRUKER`/`MATRIKKEL_PASSORD` - se
-   `etl/matrikkel_test/test_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
+   `etl/dev/check_matrikkel_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
    allerede kjenner fra innlastingen.
 2. **Bygningsnummer og bygningsfakta** for enhver bygning som mangler det,
    uansett om adressen ble løst i denne kjøringen eller en tidligere. Aktiv
@@ -465,8 +465,8 @@ neste gang steget kjøres for den. Gater slettes aldri, siden `adresse.gate_id`
 peker på dem.
 
 ```bash
-docker compose exec etl ./run.sh gater              # alle kommuner
-docker compose exec etl ./run.sh gater 4601 5601    # bestemte kommuner
+docker compose exec etl python3 main.py gater              # alle kommuner
+docker compose exec etl python3 main.py gater 4601 5601    # bestemte kommuner
 ```
 
 Trygt å kjøre om igjen: eksisterende gater beholder id-en, så `adresse.gate_id`

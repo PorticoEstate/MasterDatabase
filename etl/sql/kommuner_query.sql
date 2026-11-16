@@ -1,6 +1,6 @@
 -- The kommuner that synk.py (and the demo normaliser) should fetch: every
 -- kommune with an active Aktiv kommune booking instance in the database.
--- Run with: psql -tA -F'|' -f kommuner_query.sql
+-- Run with: psql -tA -F'|' -f etl/sql/kommuner_query.sql
 -- Output, one line per kommune: slug|kommunenr|navn|fylkesnavn|base_url
 --
 -- The slug is the part of fagsystem_instans.kildenokkel after 'aktiv-kommune:',

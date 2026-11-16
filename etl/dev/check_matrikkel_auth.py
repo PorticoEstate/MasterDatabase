@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 import xml.dom.minidom
 
-UT_FIL = os.path.join(os.path.dirname(__file__), "ut", "siste_svar.xml")
+UT_FIL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ut", "siste_svar.xml")
 
 # Same environment switch as etl/matrikkel_adresse.py.
 MILJOER = {"test": "https://prodtest.matrikkel.no", "prod": "https://matrikkel.no"}

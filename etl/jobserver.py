@@ -1,7 +1,7 @@
 """Job queue, nightly timer and internal HTTP API of the etl container.
 
-etl.py daemon wires this up. The module knows nothing about what the jobs do:
-it gets a dict of runners {job type: function(args) -> bool} from etl.py.
+main.py daemon wires this up. The module knows nothing about what the jobs do:
+it gets a dict of runners {job type: function(args) -> bool} from main.py.
 
 All jobs write the same tables, so a single worker thread runs them one at a
 time, in the order they were queued. The HTTP API only enqueues and reports;

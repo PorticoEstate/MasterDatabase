@@ -119,7 +119,7 @@ def kommuner_fra_kommandolinje(paakrevd: bool = False, argv=None) -> dict:
     args, _ = forelopig.parse_known_args(args_liste)
     if paakrevd and args.kommuner_fil is None and not {"-h", "--help"} & set(args_liste):
         print("feil: --kommuner-fil er påkrevd. Lag filen med: "
-              "psql -tA -F'|' -f etl/kommuner_query.sql > etl/ut/kommuner.txt", file=sys.stderr)
+              "psql -tA -F'|' -f etl/sql/kommuner_query.sql > etl/ut/kommuner.txt", file=sys.stderr)
         sys.exit(2)
     return les_kommuner(args.kommuner_fil)
 

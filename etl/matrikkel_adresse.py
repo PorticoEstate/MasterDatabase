@@ -46,7 +46,7 @@ om adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
 antall_etasjer/posisjon.
 
 Bruker bare Pythons innebygde bibliotek. Leser brukernavn/passord fra
-miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se etl/matrikkel_test/test_auth.py)
+miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se etl/dev/check_matrikkel_auth.py)
 - ALDRI skriv disse verdiene til skjerm, logg eller fil. MATRIKKEL_MILJO velger
 miljø: "test" (prodtest.matrikkel.no, standard) eller "prod" (matrikkel.no).
 
@@ -101,7 +101,7 @@ NS_DOMME = "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/matrikkele
 NS_DOMBYG = "http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/domain/bygning"
 
 # EUREF89 Geografisk = EPSG:4326 (lon/lat), bekreftet mot kodelisten
-# KoordinatsystemKodeId=24 - se etl/matrikkel_test/ut/siste_svar.xml. Samme SRID som
+# KoordinatsystemKodeId=24 - se etl/ut/siste_svar.xml. Samme SRID som
 # adresse.posisjon/bygning.posisjon i masterdb, så ingen omregning trengs.
 MATRIKKEL_CONTEXT = """<dom:locale>no_NO</dom:locale>
 <dom:brukOriginaleKoordinater>false</dom:brukOriginaleKoordinater>
@@ -645,7 +645,7 @@ def main():
         bygg_lon = info["lon"] if info["lon"] is not None else v["lon"]
         bygg_lat = info["lat"] if info["lat"] is not None else v["lat"]
         # bygningstype lagres som Matrikkelens rå kodeverdi (f.eks. "181"), ikke
-        # oversatt til tekst ennå - se KodelisteService/etl/matrikkel_test/ut/siste_svar.xml
+        # oversatt til tekst ennå - se KodelisteService/etl/ut/siste_svar.xml
         # for å slå opp navnet senere.
         bygg_sql = (
             f"UPDATE bygning SET "

@@ -350,7 +350,7 @@ def main():
                         help="les MAPPE/<kommune>.json i stedet for å hente fra nettet")
     parser.add_argument("--kommuner-fil", type=Path, metavar="FIL", required=True,
                         help="kommunene som skal synkroniseres, fra databasen (slug|kommunenr|navn|fylke "
-                             "per linje, laget av kommuner_query.sql)")
+                             "per linje, laget av sql/kommuner_query.sql)")
     args = parser.parse_args()
 
     valg = list(kommuner) if args.kommune == "alle" else [args.kommune]

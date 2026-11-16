@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
-"""Runs the ETL pipeline inside the etl container (Python port of the old run.sh).
+"""Runs the ETL pipeline inside the etl container: the entrypoint of the image.
 
-  etl.py daemon     (default) starts the job server (internal HTTP API, see
+  main.py daemon     (default) starts the job server (internal HTTP API, see
                     jobserver.py), runs the initial build if the master has no
                     vocabulary yet (build, then gater, then geocode), then a
                     nightly sync, geocode and prune at SYNK_TID
-  etl.py build      last_inn.py: seeds the vocabulary and loads everything
-  etl.py sync       synk.py: loads buildings, resources and links
-  etl.py geocode    Matrikkel geocoding and building enrichment
-  etl.py gater [<kommunenr>...]
+  main.py build      last_inn.py: seeds the vocabulary and loads everything
+  main.py sync       synk.py: loads buildings, resources and links
+  main.py geocode    Matrikkel geocoding and building enrichment
+  main.py gater [<kommunenr>...]
                     fetch every street of a kommune from Matrikkel into gate,
                     so gate matches Matrikkel. No argument: every kommune in
                     the database. The daemon runs it once, after the initial
                     build; otherwise it only runs when started by hand.
-  etl.py prune      delete old synk_avvik rows (also done after each nightly run)
-  etl.py status     row counts, geocoding status and latest extracts (read-only)
+  main.py prune      delete old synk_avvik rows (also done after each nightly run)
+  main.py status     row counts, geocoding status and latest extracts (read-only)
 
-run.sh is a thin shim over this file, so `./run.sh status` etc. still work.
+In the container: `docker compose exec etl python3 main.py status` etc.
 
 The other commands run one job directly and exit, without the job server.
 
@@ -26,7 +26,7 @@ kept in $UT (a volume) so the last run can be reviewed afterwards.
 Settings (environment, all optional except the PG* connection and, for
 geocoding, the Matrikkel credentials):
   KOMMUNER=alle           "alle" or one kommune slug, e.g. bergen. For sync, "alle" means
-                          every kommune registered in the database (kommuner_query.sql)
+                          every kommune registered in the database (sql/kommuner_query.sql)
   SYNK_TID=03:00          time of the nightly sync, in TZ
   NORMALISER_DEMO=true    run the demo normaliser before loading
   DRY_RUN=false           write the SQL but do not apply it
@@ -59,7 +59,7 @@ AVVIK_RETENTION_DAYS = os.environ.get("AVVIK_RETENTION_DAYS") or "30"
 HER = os.path.dirname(os.path.abspath(__file__))
 UT = os.environ.get("UT") or os.path.join(HER, "ut")
 
-USAGE = "usage: run.sh [daemon|build|sync|geocode|gater [kommunenr...]|prune|status]"
+USAGE = "usage: main.py [daemon|build|sync|geocode|gater [kommunenr...]|prune|status]"
 
 
 _local = threading.local()
@@ -173,7 +173,7 @@ def registered_kommuner():
     nothing is synced: falling back to the built-in list could sync the wrong set."""
     fil = os.path.join(UT, "kommuner.txt")
     with open(fil, "w") as out:
-        res = subprocess.run(["psql", "-tA", "-F|", "-f", "kommuner_query.sql"], stdout=out)
+        res = subprocess.run(["psql", "-tA", "-F|", "-f", "sql/kommuner_query.sql"], stdout=out)
     if res.returncode != 0:
         log("sync: the kommune query failed")
         return None
@@ -197,7 +197,7 @@ def generate(modus):
         kommuner_arg = ["--kommuner-fil", fil]
 
     if is_true(NORMALISER_DEMO):
-        res = subprocess.run(py("demo_normalisering/normaliser.py", KOMMUNER,
+        res = subprocess.run(py("dev/demo_normalisering/normaliser.py", KOMMUNER,
                                 "--ut", os.path.join(UT, "normalisert"), *kommuner_arg))
         if res.returncode != 0:
             log("demo normaliser exited with %d (see messages above)" % res.returncode)
@@ -234,7 +234,7 @@ def do_geocode():
     log("geocode: querying addresses to look up (MATRIKKEL_MILJO=%s)" % (os.environ.get("MATRIKKEL_MILJO") or "test"))
     adresser = os.path.join(UT, "adresser.txt")
     with open(adresser, "w") as out:
-        res = subprocess.run(["psql", "-tA", "-F|", "-f", "geocode_query.sql"], stdout=out)
+        res = subprocess.run(["psql", "-tA", "-F|", "-f", "sql/geocode_query.sql"], stdout=out)
     if res.returncode != 0:
         log("geocode: the address query failed")
         return False
@@ -428,7 +428,7 @@ def main(argv):
     if cmd == "prune":
         return 0 if prune_avvik() else 1
     if cmd == "status":
-        return subprocess.run(["psql", "-f", "status.sql"]).returncode
+        return subprocess.run(["psql", "-f", "sql/status.sql"]).returncode
     print(USAGE, file=sys.stderr)
     return 1
 

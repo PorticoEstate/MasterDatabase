@@ -32,7 +32,7 @@ import unicodedata
 from pathlib import Path
 
 HER = Path(__file__).resolve().parent
-ETL = HER.parent
+ETL = HER.parent.parent
 sys.path.insert(0, str(ETL))
 from helpers import hent_json, kommuner_fra_kommandolinje, rens  # noqa: E402
 

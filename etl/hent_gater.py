@@ -2,7 +2,7 @@
 """
 Henter ALLE gater (veger) for de oppgitte kommunene fra Matrikkelen og skriver
 SQL som legger dem i tabellen gate. Skriver bare SQL til standard-ut, som de
-andre skriptene; run.sh sender den til psql.
+andre skriptene; main.py sender den til psql.
 
     python3 hent_gater.py 4601 5601 > ut/gater.sql
 
