@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import no.aktivkommune.masterdatabase.dto.AktivKommuneUrl;
 import no.aktivkommune.masterdatabase.dto.Kommune;
+import no.aktivkommune.masterdatabase.event.KommuneCreatedEvent;
 import no.aktivkommune.masterdatabase.repository.FagsystemInstansRepository;
 import no.aktivkommune.masterdatabase.repository.KommuneRepository;
 

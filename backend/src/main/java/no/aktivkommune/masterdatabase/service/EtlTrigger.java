@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import no.aktivkommune.masterdatabase.event.KommuneCreatedEvent;
+
 // Starts the street fetch (gater job) for a newly created kommune.
 //
 // Runs only after the create has committed, so the ETL's "SELECT kommunenr FROM kommune"

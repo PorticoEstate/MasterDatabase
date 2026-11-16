@@ -1,4 +1,4 @@
-package no.aktivkommune.masterdatabase.service;
+package no.aktivkommune.masterdatabase.event;
 
 // Published by KommuneService.create inside its transaction. Listeners that must see the
 // committed row (e.g. the ETL fetching streets for it) use @TransactionalEventListener.
