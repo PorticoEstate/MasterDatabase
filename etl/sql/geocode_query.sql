@@ -1,4 +1,4 @@
--- Addresses that matrikkel_adresse.py should look up in the Matrikkel.
+-- Addresses that jobs/geocode.py should look up in the Matrikkel.
 -- Run with: psql -tA -F'|' -f etl/sql/geocode_query.sql
 -- Same query as in etl/README.md ("Geokoding og bygningsberikelse"). The three
 -- OR terms make it safe to re-run: a row only appears while geocoding, the

@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 // fagsystem_instans and its link to kommuner (kommune_fagsystem_instans). The same rows are
-// written by etl/synk.py and etl/last_inn.py, so kildenokkel is the shared key. A kommune has
+// written by etl/jobs/sync.py and etl/jobs/build.py, so kildenokkel is the shared key. A kommune has
 // at most one instance per type (uniq_kommune_fagsystem_type).
 @Repository
 public class FagsystemInstansRepository

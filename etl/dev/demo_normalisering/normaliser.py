@@ -2,7 +2,7 @@
 """
 DEMO: gjør en rå Aktiv kommune-instans om til det en normalisert instans ville
 levere. Skal slettes (sammen med mappene med mapping og vokabular) når
-instansene er normalisert - last_inn.py trenger ingen endring.
+instansene er normalisert - jobs/build.py trenger ingen endring.
 
 Skriptet leser searchdataall (fra nettet, eller fra en fil) og skriver samme
 JSON-form tilbake, men med kodeverkene erstattet:
@@ -22,7 +22,7 @@ Bruk:
     python3 etl/demo_normalisering/normaliser.py alle --ut etl/ut/normalisert
     python3 etl/demo_normalisering/normaliser.py bergen --fra-fil etl/ut/ra
 
-    python3 etl/last_inn.py bergen --fra-fil etl/ut/normalisert > etl/ut/bergen.sql
+    (cd etl && python3 -m jobs.build bergen --fra-fil ut/normalisert) > etl/ut/bergen.sql
 """
 import argparse
 import json

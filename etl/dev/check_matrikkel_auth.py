@@ -14,7 +14,7 @@ import xml.dom.minidom
 
 UT_FIL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ut", "siste_svar.xml")
 
-# Same environment switch as etl/matrikkel_adresse.py.
+# Same environment switch as etl/jobs/geocode.py.
 MILJOER = {"test": "https://prodtest.matrikkel.no", "prod": "https://matrikkel.no"}
 MILJO = os.environ.get("MATRIKKEL_MILJO", "test")
 if MILJO not in MILJOER:

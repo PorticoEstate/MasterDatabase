@@ -36,7 +36,7 @@ Behind a corporate proxy, also see [DEVELOPMENT_WSL2.md](DEVELOPMENT_WSL2.md) an
 ## How it works
 
 ```
-Aktiv kommune instances --last_inn.py / synk.py--> PostGIS <--matrikkel_adresse.py-- Matrikkel
+Aktiv kommune instances --jobs/build.py / jobs/sync.py--> PostGIS <--jobs/geocode.py-- Matrikkel
                                                       ^
                                     Spring Boot backend (Flyway owns the schema)
 ```
@@ -52,7 +52,7 @@ Aktiv kommune instances --last_inn.py / synk.py--> PostGIS <--matrikkel_adresse.
 
 | Path | Contents |
 |---|---|
-| [etl/](etl/README.md) | The pipeline: `main.py`, `last_inn.py`, `synk.py`, `matrikkel_adresse.py`, and the demo normaliser |
+| [etl/](etl/README.md) | The pipeline: `main.py`, `jobs/build.py`, `jobs/sync.py`, `jobs/geocode.py`, and the demo normaliser |
 | [backend/](backend/) | Spring Boot application. The Flyway migration in `src/main/resources/db/migration/` is the schema, and its comments document the tables |
 | [bruno/](bruno/) | Bruno request collection for trying the local API |
 | [certs/](certs/README.md) | Optional extra CA certificates for networks that inspect TLS |

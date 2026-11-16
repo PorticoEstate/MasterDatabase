@@ -290,9 +290,9 @@ CREATE INDEX IF NOT EXISTS ix_adresse_posisjon ON adresse USING GIST (posisjon);
 -- aktivitet og fasilitet; de følger kilden.
 -- =============================================================================
 
--- Opprettes av etl/last_inn.py når databasen bygges, fra kildens
+-- Opprettes av etl/jobs/build.py når databasen bygges, fra kildens
 -- resource_categories (bare konsepter som mangler; et eksisterende røres aldri).
--- etl/synk.py skriver aldri her. Det seedes ikke i skjemaet. id er den delte
+-- etl/jobs/sync.py skriver aldri her. Det seedes ikke i skjemaet. id er den delte
 -- id-en på tvers av instansene og settes av den som eier kodeverket (ikke et
 -- løpenummer); navnet er unikt per tabell.
 CREATE TABLE IF NOT EXISTS lokaletype
@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS lokaletype
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Opprettes av etl/last_inn.py fra kildens activities, som for lokaletype;
+-- Opprettes av etl/jobs/build.py fra kildens activities, som for lokaletype;
 -- det seedes ikke her. id er den delte id-en på tvers av instansene; navnet er
 -- unikt per tabell. Et konsept har én forelder.
 CREATE TABLE IF NOT EXISTS aktivitet
@@ -319,7 +319,7 @@ CREATE TABLE IF NOT EXISTS aktivitet
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Opprettes av etl/last_inn.py fra kildens facilities, som for lokaletype.
+-- Opprettes av etl/jobs/build.py fra kildens facilities, som for lokaletype.
 CREATE TABLE IF NOT EXISTS fasilitet
 (
     id         BIGINT PRIMARY KEY,
@@ -427,7 +427,7 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 -- Merk: ressurs.ekstern_id (og fagsystem_instans_id) er nå teknisk overflødig,
 -- siden ressurslenke har samme informasjon for ressursens eget bookingsystem.
 -- De beholdes fordi innlastingen og synken bruker (fagsystem_instans_id,
--- ekstern_id) på ressurs som identitet (ON CONFLICT i last_inn.py og synk.py)
+-- ekstern_id) på ressurs som identitet (ON CONFLICT i jobs/build.py og jobs/sync.py)
 -- og for å finne ressursen når aktiviteter og fasiliteter lastes. Skal de
 -- fjernes, må begge skriptene flyttes over til oppslag via ressurslenke, og
 -- bilde_url i viewet må få en annen kilde enn r.ekstern_id.

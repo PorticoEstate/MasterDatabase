@@ -1,6 +1,6 @@
 """
 The kommune table of the ETL: the built-in seed list, the format of the
-kommune list file, and its validation. Used by last_inn.py, synk.py and the
+kommune list file, and its validation. Used by jobs/build.py, jobs/sync.py and the
 demo normaliser.
 """
 import argparse
@@ -53,10 +53,10 @@ BASE_URL_MONSTER = re.compile(r"^https://([a-z0-9][a-z0-9-]*)\.aktiv-kommune\.no
 def les_kommuner(fil: Path | None) -> dict:
     """Kommunene som skal behandles, som slug -> (kommunenr, navn, fylke, base_url).
 
-    Uten fil: den innebygde KOMMUNER, med base_url utledet fra slug (last_inn.py
+    Uten fil: den innebygde KOMMUNER, med base_url utledet fra slug (jobs/build.py
     bruker KOMMUNER direkte; dette er bare standard for demo-normaliseringen).
     Med fil: kommunene som er registrert i databasen, én linje per kommune som
-    slug|kommunenr|navn|fylke|base_url (utdata fra kommuner_query.sql; synk.py
+    slug|kommunenr|navn|fylke|base_url (utdata fra kommuner_query.sql; jobs/sync.py
     bruker alltid denne). En ugyldig linje hoppes over med en advarsel, så én
     dårlig rad ikke stopper hele kjøringen."""
     if fil is None:
@@ -88,7 +88,7 @@ def les_kommuner(fil: Path | None) -> dict:
 def kommuner_fra_kommandolinje(paakrevd: bool = False, argv=None) -> dict:
     """Leser --kommuner-fil før den egentlige argumentparseren, som trenger
     listen til valgene for kommune-argumentet. Med paakrevd=True avvises et kall
-    uten flagget (unntatt --help), så synk.py aldri faller tilbake på den
+    uten flagget (unntatt --help), så jobs/sync.py aldri faller tilbake på den
     innebygde listen."""
     args_liste = sys.argv[1:] if argv is None else argv
     forelopig = argparse.ArgumentParser(add_help=False, allow_abbrev=False)

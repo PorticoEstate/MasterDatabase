@@ -122,7 +122,7 @@ activate it first (below). To load it right away, run `docker compose exec etl p
   credentials). A missing or different URL gives 400, because the sync fetches from this
   address. A URL already used by another kommune gives 409.
 - **Active status is chosen at creation:** `POST` registers the booking system with `aktiv` set from
-  `active`. If `false`, the nightly sync skips it until it is activated (below). The seed kommuner from `last_inn.py` are active.
+  `active`. If `false`, the nightly sync skips it until it is activated (below). The seed kommuner from `jobs/build.py` are active.
 - **Start, stop or resume syncing:** `PATCH /masterdb/kommune/{id}/booking` with `{"aktiv": false}`
   (or `true`) leaves the kommune and its data in place but includes or excludes it in the
   nightly sync. `GET` shows the state as `bookingAktiv`.
