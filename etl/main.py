@@ -5,8 +5,8 @@
                     jobserver.py), runs the initial build if the master has no
                     vocabulary yet (build, then gater, then geocode), then a
                     nightly sync, geocode and prune at SYNK_TID
-  main.py build      last_inn.py: seeds the vocabulary and loads everything
-  main.py sync       synk.py: loads buildings, resources and links
+  main.py build      jobs/build.py: seeds the vocabulary and loads everything
+  main.py sync       jobs/sync.py: loads buildings, resources and links
   main.py geocode    Matrikkel geocoding and building enrichment
   main.py gater [<kommunenr>...]
                     fetch every street of a kommune from Matrikkel into gate,
@@ -87,9 +87,15 @@ def is_true(value):
     return value.lower() in ("true", "1", "yes")
 
 
-def py(script, *args):
-    """Command line for one of the sibling Python scripts."""
-    return [sys.executable, script] + list(args)
+def py(module, *args):
+    """Command line for one of the jobs (a module of the jobs package; main.py
+    runs from the etl directory, so `-m` finds jobs/ and lib/)."""
+    return [sys.executable, "-m", module] + list(args)
+
+
+def py_script(path, *args):
+    """Command line for a standalone script (the demo normaliser)."""
+    return [sys.executable, path] + list(args)
 
 
 def psql_query(sql):
@@ -187,7 +193,7 @@ def generate(modus):
     """generate build|sync: writes $UT/<modus>.sql. A partial fetch failure (exit
     code 2) still yields complete SQL, with the failure logged in synk_avvik, so
     it is a warning and not an error."""
-    skript = "synk.py" if modus == "sync" else "last_inn.py"
+    skript = "jobs.sync" if modus == "sync" else "jobs.build"
     args = [KOMMUNER]
     kommuner_arg = []
     if modus == "sync":
@@ -197,7 +203,7 @@ def generate(modus):
         kommuner_arg = ["--kommuner-fil", fil]
 
     if is_true(NORMALISER_DEMO):
-        res = subprocess.run(py("dev/demo_normalisering/normaliser.py", KOMMUNER,
+        res = subprocess.run(py_script("dev/demo_normalisering/normaliser.py", KOMMUNER,
                                 "--ut", os.path.join(UT, "normalisert"), *kommuner_arg))
         if res.returncode != 0:
             log("demo normaliser exited with %d (see messages above)" % res.returncode)
@@ -214,12 +220,12 @@ def generate(modus):
 
 
 def do_build():
-    log("build: loading %s with last_inn.py" % KOMMUNER)
+    log("build: loading %s with jobs.build" % KOMMUNER)
     return generate("build") and apply(os.path.join(UT, "build.sql"))
 
 
 def do_sync():
-    log("sync: loading %s with synk.py" % KOMMUNER)
+    log("sync: loading %s with jobs.sync" % KOMMUNER)
     return generate("sync") and apply(os.path.join(UT, "sync.sql"))
 
 
@@ -244,9 +250,9 @@ def do_geocode():
     # The output is one transaction that commits at the very end, so a failed
     # run leaves a truncated file that must not be applied.
     with open(adresser) as inp, open(os.path.join(UT, "matrikkel.sql"), "w") as out:
-        res = subprocess.run(py("matrikkel_adresse.py"), stdin=inp, stdout=out)
+        res = subprocess.run(py("jobs.geocode"), stdin=inp, stdout=out)
     if res.returncode != 0:
-        log("geocode: matrikkel_adresse.py failed; nothing applied")
+        log("geocode: jobs.geocode failed; nothing applied")
         return False
     return apply(os.path.join(UT, "matrikkel.sql"))
 
@@ -275,11 +281,11 @@ def do_gater(kommunenr=()):
         return True
     log("gater: fetching streets for: %s" % " ".join(liste))
     with open(os.path.join(UT, "gater.sql"), "w") as out:
-        res = subprocess.run(py("hent_gater.py", *liste), stdout=out)
+        res = subprocess.run(py("jobs.gater", *liste), stdout=out)
     if res.returncode == 2:
         log("gater: some kommuner failed (logged in synk_avvik); continuing with the rest")
     elif res.returncode != 0:
-        log("gater: hent_gater.py failed with exit code %d" % res.returncode)
+        log("gater: jobs.gater failed with exit code %d" % res.returncode)
         return False
     return apply(os.path.join(UT, "gater.sql"))
 

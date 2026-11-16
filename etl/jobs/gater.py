@@ -4,7 +4,7 @@ Henter ALLE gater (veger) for de oppgitte kommunene fra Matrikkelen og skriver
 SQL som legger dem i tabellen gate. Skriver bare SQL til standard-ut, som de
 andre skriptene; main.py sender den til psql.
 
-    python3 hent_gater.py 4601 5601 > ut/gater.sql
+    python3 -m jobs.gater 4601 5601 > ut/gater.sql
 
 Kjeden (MatrikkelAPI, SOAP):
     KommuneService.findKommuneIdForIdent   kommunenummer -> intern KommuneId
@@ -20,11 +20,11 @@ riktig.
 Hver kommune er sin egen transaksjon. Feiler en kommune (ukjent i Matrikkelen,
 nettverk), logges det i synk_avvik og de andre kommunene fortsetter; exit-kode 2
 betyr at minst én feilet. Leser MATRIKKEL_BRUKER / MATRIKKEL_PASSORD /
-MATRIKKEL_MILJO som matrikkel_adresse.py - verdiene skrives aldri ut.
+MATRIKKEL_MILJO som jobs/geocode.py - verdiene skrives aldri ut.
 """
 import sys
 
-import matrikkel_adresse as m
+from jobs import geocode as m
 
 RADER_PER_INSERT = 1000
 
@@ -51,7 +51,7 @@ def sql_for_kommune(kommunenr: str, veger: list[dict]) -> str:
 def main() -> int:
     kommunenr_liste = sys.argv[1:]
     if not kommunenr_liste:
-        print("bruk: hent_gater.py <kommunenr> [<kommunenr> ...]", file=sys.stderr)
+        print("bruk: python3 -m jobs.gater <kommunenr> [<kommunenr> ...]", file=sys.stderr)
         return 1
 
     antall_feilet = 0

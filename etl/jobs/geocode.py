@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Geokoding + bygningsberikelse: finner adresser via Matrikkelen (MatrikkelAPI)
-for alt last_inn.py og synk.py har lastet inn - ingen av Aktiv kommune sine 12 instanser
+for alt jobs/build.py og jobs/sync.py har lastet inn - ingen av Aktiv kommune sine 12 instanser
 leverer koordinater selv. I tillegg - for enhver bygning som fortsatt mangler
 bygningsnummer - hentes selve bygningsobjektet fra Matrikkelen.
 
@@ -12,7 +12,7 @@ prosentpoeng lavere automatisk treffrate (69,7 % mot 73,1 % i en nasjonal
 test av alle 12 kommunene) - et bevisst valg, ikke en forglemmelse. De
 adressene det gjelder havner i synk_avvik som før og rettes manuelt.
 
-Vi kjenner allerede kommunen hver bygning tilhører (satt av last_inn.py/synk.py), så
+Vi kjenner allerede kommunen hver bygning tilhører (satt av jobs/build.py/jobs/sync.py), så
 søket gjøres *innenfor riktig kommune* i stedet for fritekst nasjonalt. Se
 db/schema_kjerne_dokumentasjon.md, avsnittet om "gate", for hvorfor denne
 tabellen "må fylles av matrikkelsteget".
@@ -50,7 +50,7 @@ miljøvariablene MATRIKKEL_BRUKER / MATRIKKEL_PASSORD (se etl/dev/check_matrikke
 - ALDRI skriv disse verdiene til skjerm, logg eller fil. MATRIKKEL_MILJO velger
 miljø: "test" (prodtest.matrikkel.no, standard) eller "prod" (matrikkel.no).
 
-Bruk (kjøres etter last_inn.py, og etter hver kjøring av synk.py, så nye bygg
+Bruk (kjøres etter jobs/build.py, og etter hver kjøring av jobs/sync.py, så nye bygg
 får posisjon):
 
     docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
@@ -65,7 +65,7 @@ får posisjon):
                OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id));
     " > etl/ut/adresser_a_matrikkelsoke.txt
 
-    python3 etl/matrikkel_adresse.py < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
+    (cd etl && python3 -m jobs.geocode) < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
 
     docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/matrikkel.sql
 
@@ -232,7 +232,7 @@ def finn_veg_ider(matrikkel_kommune_id: int, gatenavn: str) -> list[int]:
 
 
 def finn_veg_ider_for_kommune(matrikkel_kommune_id: int) -> list[int]:
-    """Alle veger i kommunen (brukes av hent_gater.py)."""
+    """Alle veger i kommunen (brukes av jobs/gater.py)."""
     svar = _kall("AdresseService", f"""
         <adr:findVegerForKommune xmlns:adr="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/adresse"
             xmlns:dom="{NS_DOM}">
