@@ -53,7 +53,7 @@ BASE_URL_MONSTER = re.compile(r"^https://([a-z0-9][a-z0-9-]*)\.aktiv-kommune\.no
 
 # Path of a resource in an Aktiv kommune booking system, appended to the
 # instance's base_url. Stored in ressurslenke.url.
-RESSURS_URL_MONSTER = "/bookingfrontend/resource/"
+RESSURS_URL_MONSTER = "/bookingfrontend/client/resource/"
 
 
 def ressurslenke_sql(kn: str) -> str:
