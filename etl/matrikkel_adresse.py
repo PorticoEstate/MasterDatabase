@@ -14,8 +14,8 @@ adressene det gjelder havner i synk_avvik som før og rettes manuelt.
 
 Vi kjenner allerede kommunen hver bygning tilhører (satt av last_inn.py/synk.py), så
 søket gjøres *innenfor riktig kommune* i stedet for fritekst nasjonalt. Se
-db/schema_kjerne_dokumentasjon.md, avsnittet om "gate", for hvorfor denne
-tabellen "må fylles av matrikkelsteget".
+kommentaren ved tabellen gate i Flyway-migrasjonen V1
+(backend/src/main/resources/db/migration/) for hvorfor gate fylles herfra.
 
 Kjeden per adresse (alt via MatrikkelAPI, SOAP):
     KommuneService.findKommuneIdForIdent   kommunenummer -> intern KommuneId
@@ -41,7 +41,7 @@ gnr/bnr/fnr/snr) uansett geokodingsstatus - billig og idempotent, så det
 forsøkes for enhver adresse vi klarer å slå opp. Skriver ved adresse-treff
 som fortsatt mangler geokoding: i tillegg gate (upsert) og adresse (gate_id,
 husnr, bokstav, posisjon, geokoding='matrikkel' - den autoritative statusen,
-se schema_kjerne_dokumentasjon.md). Skriver ved bygningstreff (uavhengig av
+se kommentarene ved adresse i Flyway-migrasjonen V1). Skriver ved bygningstreff (uavhengig av
 om adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
 antall_etasjer/posisjon.
 
@@ -336,7 +336,7 @@ def hent_bygning(bygg_id: int) -> dict:
     """Henter bygningsnummer + de få andre faktafeltene vi lagrer
     (bygningstype som rå kode - se kommentar ved bruk - bruksareal og antall
     etasjer). antall_etasjer telles fra etasjelisten (én rad per etasjeplan i
-    Matrikkelen), ikke et eget enkelttall - se db/schema_kjerne_dokumentasjon.md."""
+    Matrikkelen), ikke et eget enkelttall."""
     svar = _kall("StoreService", f"""
         <store:getObject xmlns:store="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/store"
             xmlns:dom="{NS_DOM}" xmlns:dombyg="{NS_DOMBYG}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

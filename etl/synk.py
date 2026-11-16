@@ -28,14 +28,14 @@ Hver kjøring registrerer et kildeuttrekk (metadata: kilde, endepunkt,
 tidspunkt, HTTP-status - ikke hele svaret). Ethvert avvik - ugyldige verdier,
 brutte referanser, databasefeil - loggføres i synk_avvik sammen med den
 konkrete posten (renset for personopplysninger) som utløste det, ikke bare en
-feiltekst. Se db/schema_kjerne_dokumentasjon.md, "Innlasting og sporbarhet".
+feiltekst. Se "9. Innlasting og sporbarhet" i Flyway-migrasjonen V1.
 
 Kjent forenkling: kommune_id settes her fra hvilken Aktiv kommune-instans
 ressursen kommer fra (f.eks. "bergen" -> kommunenr 4601). Det er riktig for
 alle de 12 instansene vi kjenner i dag, som hver betjener nøyaktig én kommune.
 Skjemaet (Flyway-migrasjonene i backend) tillater at en instans betjener flere kommuner
 via kommune_fagsystem_instans; den dagen det faktisk skjer, må kommune_id i
-stedet utledes fra en geokodet adresse. Se db/schema_kjerne_dokumentasjon.md.
+stedet utledes fra en geokodet adresse.
 """
 import argparse
 import json
