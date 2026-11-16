@@ -1,20 +1,21 @@
 package no.aktivkommune.masterdatabase.dto;
 
-// Ett ressurstreff slik frontend viser det i listen. Bare visningsfelt og
-// lenker videre - interne id-er (kommune, bygg, instans) er utelatt.
+// Ett byggkort i søkeresultatet.
+// antallRessurser er antall bookbare ressurser i bygget som traff søket.
 // avstandMeter er null når søket ikke er et nærhetssøk.
-public record RessursSokTreff(
-	Long ressursId,
+
+public record Bygg(
+	Long id,
 	String navn,
-	String byggNavn,
+	String bydelNavn,
 	String kommuneNavn,
 	String adressetekst,
 	String postnummer,
 	String poststed,
-	String lokaletypeNavn,
 	Double lat,
 	Double lon,
 	Double avstandMeter,
+	int antallRessurser,
 	String bookingUrl)
 {
 }

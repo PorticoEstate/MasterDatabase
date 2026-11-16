@@ -1,21 +1,16 @@
 package no.aktivkommune.masterdatabase.service;
 
-import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
 import no.aktivkommune.masterdatabase.dto.FilterValg;
 import no.aktivkommune.masterdatabase.dto.KommuneFilter;
-import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
-import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
-import no.aktivkommune.masterdatabase.dto.RessursSokSvar;
-import no.aktivkommune.masterdatabase.dto.SokeResultat;
+import no.aktivkommune.masterdatabase.dto.RessursSokParametere;
+import no.aktivkommune.masterdatabase.dto.ByggOgRessursResultat;
 import no.aktivkommune.masterdatabase.repository.FilterRepository;
 import no.aktivkommune.masterdatabase.repository.RessursSokRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
-import java.util.Locale;
 
 // Validerer og normaliserer søkeparametrene før de når SQL-en, slik at
 // repositoryet kan stole på at listene aldri er null, sidestørrelsen er
@@ -37,90 +32,44 @@ public class RessursSokService
 		this.filterRepository = filterRepository;
 	}
 
-	// Det controlleren bruker: normaliserer én gang og kjører begge søkene i
-	// samme transaksjon, så bygg og ressurser er hentet fra samme øyeblikk.
+	// Input er rå-parametrene som normaliseres og valideres
 	@Transactional(readOnly = true)
-	public RessursSokSvar sok(RessursSokParametre input)
+	public ByggOgRessursResultat sok(RessursSokParametere parametere)
 		{
-		RessursSokParametre p = normaliser(input);
-		return new RessursSokSvar(
+		RessursSokParametere p = mapParametere(parametere);
+		return new ByggOgRessursResultat(
 				ressursRepository.sokBygg(p),
 				ressursRepository.sokRessurser(p));
 		}
 
-	@Transactional(readOnly = true)
-	public SokeResultat<RessursSokTreff> sokRessurser(RessursSokParametre input)
+	static RessursSokParametere mapParametere(RessursSokParametere p)
 	{
-		return ressursRepository.sokRessurser(normaliser(input));
-	}
+		//Validerer og klargjør parameterdata som er skrevet inn
+		String fritekst = p.fritekst() == null || p.fritekst().isBlank() ? null : p.fritekst().trim();
+		boolean harFritekst = fritekst != null;
+		boolean harNarhet = p.harNarhet();
 
-	@Transactional(readOnly = true)
-	public SokeResultat<ByggSokTreff> sokBygg(RessursSokParametre input)
-	{
-		return ressursRepository.sokBygg(normaliser(input));
-	}
+		validerKommuner(p.kommune());
+		validerPosisjon(p);
 
-	// Pakkeprivat så den kan enhetstestes uten database.
-	static RessursSokParametre normaliser(RessursSokParametre p)
-	{
-		String q = p.q() == null || p.q().isBlank() ? null : p.q().trim();
+		String sorter = p.sorter() == null || p.sorter().isBlank() ?
+		null : p.sorter().trim().toLowerCase();
 
-		// Et navn (?kommune=Bergen) ville ellers bare gitt tomt svar, som er
-		// vanskelig å feilsøke.
-		List<String> kommune = normaliserListe(p.kommune());
-		for (String k : kommune)
-		{
-			if (!k.matches("\\d{4}"))
-			{
-				throw avvis("kommune må være et kommunenummer (4 siffer), f.eks. 4601 - ikke '" + k
-					+ "'. Gyldige verdier finnes i /masterdb/search/filters/municipalities");
-			}
+		if(sorter==null) {
+			if(harNarhet) sorter = "avstand";
+			else if(harFritekst) sorter = "relevans";
+			else sorter = "navn";
 		}
 
-		boolean harLat = p.lat() != null;
-		boolean harLon = p.lon() != null;
-		boolean harRadius = p.radiusMeter() != null;
-		if (harLat != harLon || (harLat && !harRadius) || (harRadius && !harLat))
-		{
-			throw avvis("lat, lon og radiusMeter må oppgis sammen");
-		}
-		if (harLat && (p.lat() < -90 || p.lat() > 90 || p.lon() < -180 || p.lon() > 180))
-		{
-			throw avvis("lat må være mellom -90 og 90, lon mellom -180 og 180");
-		}
-		if (harRadius && (p.radiusMeter() <= 0 || p.radiusMeter() > MAKS_RADIUS_METER))
-		{
-			throw avvis("radiusMeter må være mellom 1 og " + MAKS_RADIUS_METER);
-		}
+		validerSorter(sorter, harNarhet);
 
-		// Standard sortering: avstand ved nærhetssøk, relevans ved fritekst,
-		// ellers navn.
-		String sorter = p.sorter() == null || p.sorter().isBlank()
-			? (harLat ? "avstand" : q != null ? "relevans" : "navn")
-			: p.sorter().trim().toLowerCase(Locale.ROOT);
-		switch (sorter)
-		{
-			case "avstand" ->
-			{
-				if (!harLat)
-				{
-					throw avvis("sorter=avstand krever lat, lon og radiusMeter");
+		// Uten fritekst er alle like relevante; fall tilbake til navn.
+		boolean sorterErRelevans = sorter.equals("relevans");
+		if(sorterErRelevans && !harFritekst) {
+				sorter = "navn";
 				}
-			}
-			case "relevans" ->
-			{
-				// Uten fritekst er alle like relevante; fall tilbake til navn.
-				if (q == null)
-				{
-					sorter = "navn";
-				}
-			}
-			case "navn" ->
-			{
-			}
-			default -> throw avvis("sorter må være relevans, avstand eller navn");
-		}
 
+		//paginering
 		int side = p.side() == null ? 0 : Math.max(0, p.side());
 		int storrelse = p.storrelse() == null
 			? STANDARD_STORRELSE
@@ -128,22 +77,20 @@ public class RessursSokService
 
 		//Avvis dersom offset er urimelig stort
 		long offset = (long) side * storrelse;
+		validerOffset(offset);
 
-		if(offset > MAKS_OFFSET) {
-			throw avvis("Side er for stor");
-		}
-		return new RessursSokParametre(
-			q,
-			kommune,
-			normaliserIdListe(p.lokaletype()),
-			normaliserIdListe(p.aktivitet()),
-			normaliserIdListe(p.fasilitet()),
+		return new RessursSokParametere(
+			fritekst,
+			normaliserKommuneListe(p.kommune()),
+			normaliserFilterListe(p.lokaletype()),
+			normaliserFilterListe(p.aktivitet()),
+			normaliserFilterListe(p.fasilitet()),
 			p.lat(), p.lon(), p.radiusMeter(),
 			sorter, side, storrelse);
 	}
 
-	// null -> tom liste, og blanke verdier (?aktivitet=) fjernes.
-	private static List<String> normaliserListe(List<String> verdier)
+	// null -> tom liste, og blanke verdier fjernes. Da gir "ingen valg" et søk uten filter
+	private static List<String> normaliserKommuneListe(List<String> verdier)
 	{
 		if (verdier == null)
 		{
@@ -156,14 +103,14 @@ public class RessursSokService
 	}
 
 	// null -> tom liste; dubletter fjernes.
-	private static List<Long> normaliserIdListe(List<Long> verdier)
+	private static List<Long> normaliserFilterListe(List<Long> verdier)
 	{
 		if (verdier == null)
 		{
 			return List.of();
 		}
 		return verdier.stream()
-			.filter(v -> v != null)
+			.filter(v -> v != null)  //fjerner tomme elementer i listen
 			.distinct()
 			.toList();
 	}
@@ -171,6 +118,60 @@ public class RessursSokService
 	private static ResponseStatusException avvis(String melding)
 	{
 		return new ResponseStatusException(HttpStatus.BAD_REQUEST, melding);
+	}
+
+	//Validerer posisjonsparametre
+	private static void validerPosisjon(RessursSokParametere p){
+		boolean harLat = p.lat() != null;
+		boolean harLon = p.lon() != null;
+		boolean harRadius = p.radiusMeter() != null;
+
+		boolean ufullstendigPosisjon =  harLat != harLon || (harLat && !harRadius) || (harRadius && !harLat);
+		if (ufullstendigPosisjon)
+		{
+			throw avvis("lat, lon og radiusMeter må oppgis sammen");
+		}
+
+		boolean utenforPosisjonGrense = harLat && (p.lat() < -90 || p.lat() > 90 || p.lon() < -180 || p.lon() > 180);
+		if (utenforPosisjonGrense)
+		{
+			throw avvis("lat må være mellom -90 og 90, lon mellom -180 og 180");
+		}
+
+		boolean utenforRadius = harRadius && (p.radiusMeter() <= 0 || p.radiusMeter() > MAKS_RADIUS_METER);
+		if (utenforRadius)
+		{
+			throw avvis("radiusMeter må være mellom 1 og " + MAKS_RADIUS_METER);
+		}
+	}
+
+	private static void validerKommuner(List<String> kommuner){
+		// Et navn (?kommune=Bergen) ville ellers bare gitt tomt svar, som er
+		// vanskelig å feilsøke.
+		List<String> kommune = normaliserKommuneListe(kommuner);
+		for (String k : kommune)
+		{
+			if (!k.matches("\\d{4}"))
+			{
+				throw avvis("kommune må være et kommunenummer (4 siffer). Gyldige verdier finnes i /masterdb/search/filters/municipalities");
+			}
+		}
+	}
+
+	private static void validerSorter(String sorter, boolean harNarhet){
+		boolean erRiktigType = sorter.equals("relevans") || sorter.equals("navn") || sorter.equals("avstand");
+		if(!erRiktigType) {
+			throw avvis("sorter må være relevans, avstand eller navn");
+		}
+		if(sorter.equals("avstand") && !harNarhet){
+			throw avvis("sorter=avstand krever lat, lon og radiusMeter");
+		}
+	}
+
+	private static void validerOffset(long offset) {
+		if(offset > MAKS_OFFSET) {
+			throw avvis("Side er for stor");
+		}
 	}
 
 	//Filtervalg

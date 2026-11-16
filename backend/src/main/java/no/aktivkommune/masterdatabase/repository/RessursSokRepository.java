@@ -1,235 +1,225 @@
 package no.aktivkommune.masterdatabase.repository;
-import no.aktivkommune.masterdatabase.dto.ByggSokTreff;
-import no.aktivkommune.masterdatabase.dto.RessursSokParametre;
-import no.aktivkommune.masterdatabase.dto.RessursSokTreff;
-import no.aktivkommune.masterdatabase.dto.SokeResultat;
+
+import no.aktivkommune.masterdatabase.dto.Bygg;
+import no.aktivkommune.masterdatabase.dto.RessursSokParametere;
+import no.aktivkommune.masterdatabase.dto.Ressurs;
+import no.aktivkommune.masterdatabase.dto.ResultatSide;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.ArrayList;
 import java.util.Map;
 
-// All SQL for søket, mot v_ressurs_sok. JdbcClient i stedet for JPA fordi alt
-// som gjør søket nyttig er Postgres-spesifikt (tsvector/@@, pg_trgm, PostGIS
-// ST_DWithin, array-operatorene && og @>) og viewet er skrivebeskyttet - JPA
-// ville bare vært et lag å oversette gjennom. Når søket feiler eller er tregt,
-// kan spørringen under limes rett inn i psql med EXPLAIN ANALYZE.
-//
-// Brukerinput går alltid som navngitte parametre (:q, :kommune, ...), aldri
-// inn i SQL-strengen. Det eneste dynamiske er hvilke faste fragmenter som tas
-// med, og ORDER BY velges fra en lukket liste - det hindrer SQL-injeksjon.
+// All SQL for søket, mot v_ressurs_sok.
+// Søket bruker JdbcClient med ren SQL fordi det er Postgres-spesifikt: fulltekst
+// (tsvector/@@), PostGIS (ST_DWithin, ST_Distance) og array-operatoren &&
+// Når søket feiler eller er tregt, kan spørringen under limes rett inn i psql med EXPLAIN ANALYZE.
+
+// Brukerinput går alltid som navngitte parametre (:fritekst, :kommune, ...), aldri
+// inn i SQL-strengen.--hindrer SQL-injeksjon
+
 @Repository
-public class RessursSokRepository
-{
-	// ST_MakePoint tar lon først, så lat.
-	private static final String PUNKT = "ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography";
+public class RessursSokRepository {
+	// Lager et PostGis-punkt. SRID 4326 gjør det om til GPS-koordinater i grader.
+	// Geography gjør at det regnes i meter
+	private static final String SOKEPUNKT = "ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography";
 
 	private final JdbcClient jdbc;
 
-	public RessursSokRepository(JdbcClient jdbc)
-	{
+	public RessursSokRepository(JdbcClient jdbc) {
 		this.jdbc = jdbc;
 	}
 
-	public SokeResultat<RessursSokTreff> sokRessurser(RessursSokParametre p)
-	{
-		Treff sok = treff(p);
-		String sql = sok.sql() + """
+	// Tar imot det brukeren har valgt (p, allerede normalisert av servicen) og
+	// returnerer én side med ressurser
+	public ResultatSide<Ressurs> sokRessurser(RessursSokParametere p) {
+		// lagFiltrertSqlSok bygger WITH-delen (filter, rang og avstand) som SQL-tekst +
+		// parametre
+		SokeFilter sokeFilterSql = lagFiltrertSqlSok(p);
 
-			SELECT ressurs_id, navn, bygg_navn, kommune_navn,
-					adressetekst, postnummer, poststed,
-			       lokaletype_navn, lat, lon, avstand, booking_url,
-			       count(*) OVER () AS totalt
-			  FROM treff
-			 ORDER BY\s""" + switch (p.sorter())
-			{
-				case "relevans" -> "rang DESC, navn";
-				case "avstand" -> "avstand, navn";
-				default -> "navn";
-			} + ", ressurs_id LIMIT :limit OFFSET :offset";
+		// hele spørringen som tekst (WITH-delen + SELECT/ORDER BY). Parameterverdiene
+		// ligger i sokeFilterSql.params
+		String sql = sokeFilterSql.sql() +
+				"""
+						SELECT ressurs_id,
+							   navn,
+							   bygg_navn,
+							   kommune_navn,
+							   adressetekst, postnummer, poststed,
+						       lokaletype_navn,
+							   lat, lon, avstand,
+							   booking_url,
+						       count(*) OVER () AS totalt
+						FROM treff
+						ORDER BY\s""" + switch (p.sorter()) {
+					case "relevans" -> "rang DESC, navn";
+					case "avstand" -> "avstand, navn";
+					default -> "navn";
+				} + ", ressurs_id LIMIT :limit OFFSET :offset";
 
-		return kjorSok(sql, sok, p, rs -> new RessursSokTreff(
-			rs.getLong("ressurs_id"),
-			rs.getString("navn"),
-			rs.getString("bygg_navn"),
-			rs.getString("kommune_navn"),
-			rs.getString("adressetekst"),
-			rs.getString("postnummer"),
-			rs.getString("poststed"),
-			rs.getString("lokaletype_navn"),
-			rs.getObject("lat", Double.class),
-			rs.getObject("lon", Double.class),
-			rs.getObject("avstand", Double.class),
-			rs.getString("booking_url")));
-
+		return hentSide(sql, sokeFilterSql.params, p, (rs, radnr) -> new Ressurs(
+				rs.getLong("ressurs_id"),
+				rs.getString("navn"),
+				rs.getString("bygg_navn"),
+				rs.getString("kommune_navn"),
+				rs.getString("adressetekst"),
+				rs.getString("postnummer"),
+				rs.getString("poststed"),
+				rs.getString("lokaletype_navn"),
+				rs.getObject("lat", Double.class),
+				rs.getObject("lon", Double.class),
+				rs.getObject("avstand", Double.class),
+				rs.getString("booking_url")));
 	}
 
-	// Ett kort per bygg med minst én ressurs som traff. Ressurser uten bygg er
-	// ikke med her, men finnes i sokRessurser.
-	public SokeResultat<ByggSokTreff> sokBygg(RessursSokParametre p)
-	{
-		Treff sok = treff(p);
-		String sql = sok.sql() + """
+	// Ett kort per bygg med minst én ressurs som traff.
+	public ResultatSide<Bygg> sokBygg(RessursSokParametere p) {
+		SokeFilter sokeFilterSql = lagFiltrertSqlSok(p);
+		String sql = sokeFilterSql.sql() + """
 
-			SELECT bygg_id, bygg_navn, bydel_navn, kommune_navn, adressetekst, postnummer, poststed,
-			       lat, lon,
-				   bygg_booking_url,
-			       count(*)     AS antall_ressurser,
-			       max(rang)    AS rang,
-			       min(avstand) AS avstand,
-			       count(*) OVER () AS totalt
-			  FROM treff
-			 WHERE bygg_id IS NOT NULL
-			 GROUP BY bygg_id, bygg_navn, bydel_navn, kommune_navn, adressetekst, postnummer,
-			          poststed, lat, lon, bygg_booking_url
-			 ORDER BY\s""" + switch (p.sorter())
-			{
-				case "relevans" -> "rang DESC, bygg_navn";
-				case "avstand" -> "avstand, bygg_navn";
-				default -> "bygg_navn";
-			} + ", bygg_id LIMIT :limit OFFSET :offset";
+				SELECT bygg_id,
+					   bygg_navn,
+					   bydel_navn,
+					   kommune_navn,
+					   adressetekst, postnummer, poststed,
+				       lat, lon,
+					   bygg_booking_url,
+				       count(*)     AS antall_ressurser,
+				       max(rang)    AS rang,
+				       min(avstand) AS avstand,
+				       count(*) OVER () AS totalt
+				FROM treff
+				WHERE bygg_id IS NOT NULL
+				GROUP BY bygg_id, bygg_navn, bydel_navn, kommune_navn, adressetekst, postnummer,
+				          poststed, lat, lon, bygg_booking_url
+				ORDER BY\s""" + switch (p.sorter()) {
+			case "relevans" -> "rang DESC, bygg_navn";
+			case "avstand" -> "avstand, bygg_navn";
+			default -> "bygg_navn";
+		} + ", bygg_id LIMIT :limit OFFSET :offset";
 
-		return kjorSok(sql, sok, p, rs -> new ByggSokTreff(
-			rs.getLong("bygg_id"),
-			rs.getString("bygg_navn"),
-			rs.getString("bydel_navn"),
-			rs.getString("kommune_navn"),
-			rs.getString("adressetekst"),
-			rs.getString("postnummer"),
-			rs.getString("poststed"),
-			rs.getObject("lat", Double.class),
-			rs.getObject("lon", Double.class),
-			rs.getObject("avstand", Double.class),
-			rs.getInt("antall_ressurser"),
-			rs.getString("bygg_booking_url")));
+		return hentSide(sql, sokeFilterSql.params, p, (rs, radnr) -> new Bygg(
+				rs.getLong("bygg_id"),
+				rs.getString("bygg_navn"),
+				rs.getString("bydel_navn"),
+				rs.getString("kommune_navn"),
+				rs.getString("adressetekst"),
+				rs.getString("postnummer"),
+				rs.getString("poststed"),
+				rs.getObject("lat", Double.class),
+				rs.getObject("lon", Double.class),
+				rs.getObject("avstand", Double.class),
+				rs.getInt("antall_ressurser"),
+				rs.getString("bygg_booking_url")));
 	}
 
-	// Felles for begge søkene: en CTE som filtrerer viewet og regner ut
-	// rangering og avstand per ressurs. Ett if-blokk per filter, så et nytt
-	// filter (f.eks. bydel) er én blokk til.
-	private record Treff(String sql, Map<String, Object> params)
-	{
+	private record SokeFilter(String sql, Map<String, Object> params) {
 	}
 
-	private static Treff treff(RessursSokParametre p)
-	{
-		var where = new StringBuilder("TRUE");
+	// Bygger WITH-delen (CTE-en «treff») av søket fra de normaliserte parametrene
+	// fra servicen.
+	// Filter (WHERE), rang og avstand beregnes her, én gang per rad, og deles av
+	// bygg- og ressursspørringen.
+	private static SokeFilter lagFiltrertSqlSok(RessursSokParametere p) {
+		var betingelser = new ArrayList<String>(List.of("TRUE"));
 		var params = new HashMap<String, Object>();
 
-		if (p.q() != null)
-		{
-			// websearch_to_tsquery, ikke to_tsquery: tåler hva som helst av
-			// brukerinput uten å kaste syntaksfeil. LIKE-delen gir substreng-
-			// treff ("ng" -> "Ungdomshus") som tsvector ikke kan.
-			where.append(" AND (sokedokument @@ websearch_to_tsquery('norwegian', :q)")
-				.append(" OR navn_sok LIKE :qLike ESCAPE '\\')");
-			params.put("q", p.q());
-			params.put("qLike", "%" + escapeLike(p.q().toLowerCase(Locale.ROOT)) + "%");
+		boolean harFritekst = p.fritekst() != null;
+		if (harFritekst) {
+			// websearch_to_tsquery tåler hva som helst av brukerinput uten å kaste
+			// syntaksfeil.
+			betingelser.add("(sokedokument @@ websearch_to_tsquery('norwegian', :fritekst)"
+					+ " OR strpos(navn_sok, lower(:fritekst)) > 0)");
+			params.put("fritekst", p.fritekst());
 		}
 
-		if (!p.kommune().isEmpty())
-		{
-			where.append(" AND kommunenr IN (:kommune)");
+		if (!p.kommune().isEmpty()) {
+			betingelser.add("kommunenr IN (:kommune)");
 			params.put("kommune", p.kommune());
 		}
 
 		// Lokaletype, aktivitet og fasilitet: ELLER mellom valgene.
-		if (!p.lokaletype().isEmpty())
-		{
-			where.append("""
-				 AND lokaletype_id IN(
-				SELECT underlokaletype_id
-				FROM mv_lokaletype_hierarki
-				WHERE lokaletype_id IN (:lokaletype))
-			  """);
+		if (!p.lokaletype().isEmpty()) {
+			betingelser.add("""
+					lokaletype_id IN(
+					SELECT underlokaletype_id
+					FROM mv_lokaletype_hierarki
+					WHERE lokaletype_id IN (:lokaletype))""");
 			params.put("lokaletype", p.lokaletype());
 		}
 
-		if (!p.aktivitet().isEmpty())
-		{
-			// Hver valgte aktivitet er utvidet til seg selv + alle etterkommere (mv_aktivitet:hierarki)
-			// &&: ressursen har minst én av de valgte aktivitetene.
-			where.append("""
-					 AND aktivitet_ids && ARRAY(
+		if (!p.aktivitet().isEmpty()) {
+			betingelser.add("""
+					aktivitet_ids && ARRAY(
 					SELECT underaktivitet_id
 					FROM mv_aktivitet_hierarki
-					WHERE aktivitet_id IN (:aktivitet))
-					""");
+					WHERE aktivitet_id IN (:aktivitet))""");
 			params.put("aktivitet", p.aktivitet());
 		}
 
-		if (!p.fasilitet().isEmpty())
-		{
-			// &&: ressursen har minst én av de valgte fasilitetene.
-			where.append("""
-					AND fasilitet_ids && ARRAY(
+		if (!p.fasilitet().isEmpty()) {
+			betingelser.add("""
+					fasilitet_ids && ARRAY(
 					SELECT underfasilitet_id
 					FROM mv_fasilitet_hierarki
-					WHERE fasilitet_id IN (:fasilitet))
-					""");
+					WHERE fasilitet_id IN (:fasilitet))""");
 			params.put("fasilitet", p.fasilitet());
 		}
 
-		if (p.harNarhet())
-		{
-			where.append(" AND ST_DWithin(posisjon, ").append(PUNKT).append(", :radius)");
+		if (p.harNarhet()) {
+			betingelser.add("ST_DWithin(posisjon, " + SOKEPUNKT + ", :radius)");
 			params.put("lat", p.lat());
 			params.put("lon", p.lon());
 			params.put("radius", p.radiusMeter());
 		}
 
-		String rang = p.q() != null
-			? "ts_rank_cd(sokedokument, websearch_to_tsquery('norwegian', :q))"
-			: "0::real";
-		String avstand = p.harNarhet()
-			? "ST_Distance(posisjon, " + PUNKT + ")"
-			: "NULL::double precision";
+		// Kolonnene rang og avstand beregnes i WITH-delen, slik at de kan brukes til
+		// sortering
+		String rang = harFritekst
+				? "ts_rank_cd(sokedokument, websearch_to_tsquery('norwegian', :fritekst))"
+				: "0::real";
 
-		String sql = "WITH treff AS (SELECT v.*, " + rang + " AS rang, " + avstand + " AS avstand"
-			+ " FROM v_ressurs_sok v WHERE " + where + ")";
-		return new Treff(sql, params);
+		// avstand i meter fra søkepunktet (NULL uten nærhetssøk). Sorteringen skjer
+		// senere, i ORDER BY
+		String avstand = p.harNarhet()
+				? "ST_Distance(posisjon, " + SOKEPUNKT + ")"
+				: "NULL::double precision";
+
+		String where = String.join(" AND ", betingelser);
+
+		String sql = """
+				WITH treff AS (
+				SELECT v.*, %s AS rang, %s AS avstand
+				FROM v_ressurs_sok v WHERE %s)
+					""".formatted(rang, avstand, where);
+
+		return new SokeFilter(sql, params);
 	}
 
-	//Hver rad fra søket har to typer innhold.  (selve treffet, og totalt på hele søket)
-	private record Rad<T>(T treff, long totalt)
-	{
+	private record Rad<T>(T treff, long totalt) {
 	}
 
 	// count(*) OVER () gir totalantallet i samme spørring, så paginering
 	// ikke krever en ekstra rundtur.
-	//Kjør SQL → bygg Java-objekter → pakk dem inn i SokeResultat.
-	// <T> fordi type treffet som returneres både kan være RessursSokTreff og ByggSokTreff
-	//RadMapper<T> forteller hvordan en rad i databasen skal gjøres om til et Java-objekt
-	private <T> SokeResultat<T> kjorSok(String sql, Treff treff, RessursSokParametre p, RadMapper<T> radmapper)
-	{
-		var params = new HashMap<>(treff.params());
-		params.put("limit", p.storrelse());
-		params.put("offset", (long) p.side() * p.storrelse());
+	private <T> ResultatSide<T> hentSide(String sql, Map<String, Object> plassholder, RessursSokParametere p,
+			RowMapper<T> radmapper) {
+		long offset = (long) p.side() * p.storrelse();
 
+		// kjører spørringen
 		List<Rad<T>> rader = jdbc.sql(sql)
-			.params(params)
-			.query((rs, i) -> new Rad<>(radmapper.map(rs), rs.getLong("totalt")))
-			.list();
+				.params(plassholder)
+				.param("limit", p.storrelse())
+				.param("offset", offset)
+				.query((rs, radnr) -> new Rad<>(radmapper.mapRow(rs, radnr), rs.getLong("totalt")))
+				.list();
 
-		return new SokeResultat<>(
-			rader.stream().map(Rad::treff).toList(),
-			rader.isEmpty() ? 0 : rader.getFirst().totalt(),
-			p.side(),
-			p.storrelse());
+		return new ResultatSide<>(
+				rader.stream().map(Rad::treff).toList(),
+				rader.isEmpty() ? 0 : rader.getFirst().totalt(),
+				p.side(),
+				p.storrelse());
 	}
 
-	@FunctionalInterface
-	private interface RadMapper<T>
-	{
-		T map(ResultSet rs) throws SQLException;
-	}
-
-	// Brukerens % og _ skal være vanlige tegn i LIKE-søket, ikke jokertegn.
-	private static String escapeLike(String s)
-	{
-		return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
-	}
 }
