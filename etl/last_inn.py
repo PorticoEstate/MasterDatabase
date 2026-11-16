@@ -48,7 +48,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from helpers import ressurslenke_sql, KOMMUNER, hent_json, i_blokk, logg, q, rens, som_heltall
+from lib.kommuner import KOMMUNER
+from lib.source import hent_json, rens, som_heltall
+from lib.sqlgen import i_blokk, logg, q, ressurslenke_sql
 
 
 # Kodeverkene i kilden: (tabell i masteren, samling i searchdataall). Masteren

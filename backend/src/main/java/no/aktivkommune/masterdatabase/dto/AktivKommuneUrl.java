@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 // one subdomain label, no path, query or port. The ETL fetches data from the
 // URL that is stored, so anything else would let a caller make the ETL request
 // arbitrary hosts. The ETL checks the same rule when it reads the list
-// (etl/helpers.py); keep the two in step.
+// (etl/lib/kommuner.py); keep the two in step.
 //
 // The key format "aktiv-kommune:<name>" is the one etl/synk.py and
 // etl/last_inn.py write to fagsystem_instans.kildenokkel.

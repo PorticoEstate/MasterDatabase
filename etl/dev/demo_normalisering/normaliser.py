@@ -34,7 +34,8 @@ from pathlib import Path
 HER = Path(__file__).resolve().parent
 ETL = HER.parent.parent
 sys.path.insert(0, str(ETL))
-from helpers import hent_json, kommuner_fra_kommandolinje, rens  # noqa: E402
+from lib.kommuner import kommuner_fra_kommandolinje  # noqa: E402
+from lib.source import hent_json, rens  # noqa: E402
 
 # Mapping og vokabular per kodetype, i samme format for alle tre (se
 # activity_mapping/AktivKommune_activity_normalisation.md): mapping.json har

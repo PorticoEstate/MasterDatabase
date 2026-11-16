@@ -77,7 +77,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
 | `etl/last_inn.py` | Steg 2, bygging: oppretter kodeverkene og laster alt annet. Kjøres én gang |
 | `etl/synk.py` | Steg 2, jevnlig synkronisering: som `last_inn.py`, men skriver aldri kodeverkene |
-| `etl/helpers.py` | Hjelpefunksjoner delt av de to skriptene (`rens`, `q`, `logg`, `hent_json`, `KOMMUNER`, `les_kommuner` osv.) |
+| `etl/lib/` | Hjelpekode delt av skriptene: `kommuner.py` (`KOMMUNER`, `les_kommuner`), `source.py` (`rens`, `hent_json`, `rens_post`, `som_heltall`) og `sqlgen.py` (`q`, `logg`, `i_blokk`, `ressurslenke_sql`) |
 | `etl/sql/kommuner_query.sql` | Henter listen over kommuner som skal synkroniseres fra databasen (se "Hvilke kommuner som synkroniseres") |
 | `etl/dev/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
 | `etl/dev/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
@@ -87,7 +87,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 
 **`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
 med én rad og URL per system. `last_inn.py` og `synk.py` skriver ressursens egen
-bookinglenke (`ressurslenke_sql` i `helpers.py`), og `v_ressurs_sok.booking_url`
+bookinglenke (`ressurslenke_sql` i `lib/sqlgen.py`), og `v_ressurs_sok.booking_url`
 leses derfra. Lenker til andre systemer legges til av det som laster dem; synken
 rører dem ikke. Bygglenker bygges fortsatt i viewet.
 
@@ -173,7 +173,7 @@ gir avvik og ingen kobling til den id-en.
 
 De to skriptene får kommunelisten fra hver sin kilde, og det er ikke valgfritt:
 
-- **Bygging** (`last_inn.py`) bruker alltid den innebygde `KOMMUNER` i `helpers.py`. Den er
+- **Bygging** (`last_inn.py`) bruker alltid den innebygde `KOMMUNER` i `lib/kommuner.py`. Den er
   utgangspunktet for en tom master, og byggingen registrerer hver kommune og dens Aktiv
   kommune-instans i databasen.
 - **Synk** (`synk.py`) bruker alltid kommunene som er registrert i databasen, og nekter å
@@ -282,7 +282,7 @@ radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
 er geokodet eller satt manuelt, og en kapasitet som er satt manuelt, overskrives
 ikke. Se db/schema_kjerne_dokumentasjon.md for detaljene.
 
-De to skriptene deler hjelpefunksjonene i `helpers.py`, men har hver sin kopi
+De to skriptene deler hjelpefunksjonene i `lib/`, men har hver sin kopi
 av selve lastingen, så en rettelse i den må gjøres i begge. `diff
 etl/last_inn.py etl/synk.py` skal i praksis bare vise docstringen og
 kodeverksdelen.

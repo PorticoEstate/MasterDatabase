@@ -412,7 +412,7 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 -- bygges i v_ressurs_sok fra bygning.ekstern_id).
 --
 -- Bookingsystemet ressursen kommer fra har også en rad her (skrevet av ETL,
--- ressurslenke_sql i etl/helpers.py), og v_ressurs_sok.booking_url leses derfra.
+-- ressurslenke_sql i etl/lib/sqlgen.py), og v_ressurs_sok.booking_url leses derfra.
 -- Lenker til andre systemer (fdv, sensor, ...) legges til av det som laster
 -- dem; booking-synken rører dem ikke.
 --
