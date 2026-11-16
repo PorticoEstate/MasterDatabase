@@ -32,19 +32,22 @@ public class FagsystemInstansRepository
 	}
 
 	// Registers the instance and links it to the kommune. If an instance with this kildenokkel
-	// exists already it is reused and only its base_url is set; aktiv is never changed here,
-	// only by setAktiv. A new instance gets the column default (inactive, see V2), so it is not synced until activated. Without both rows etl/kommuner_query.sql does not list the kommune.
-	public void register(long kommuneId, String type, String kildenokkel, String navn, String baseUrl)
+	// exists already (not expected: the service rejects a URL that is linked to a kommune, so this is only an
+	// orphaned instance) it is reused and its base_url and aktiv are set from the arguments.
+	// Without both rows etl/kommuner_query.sql does not list the kommune.
+	public void register(long kommuneId, String type, String kildenokkel, String navn, String baseUrl, boolean active)
 	{
 		jdbc.sql("""
-				INSERT INTO fagsystem_instans (kildenokkel, type, navn, base_url)
-				VALUES (:kildenokkel, :type, :navn, :baseUrl)
-				ON CONFLICT (kildenokkel) DO UPDATE SET base_url = EXCLUDED.base_url""")
+				INSERT INTO fagsystem_instans (kildenokkel, type, navn, base_url, aktiv)
+				VALUES (:kildenokkel, :type, :navn, :baseUrl, :active)
+				ON CONFLICT (kildenokkel) DO UPDATE SET base_url = EXCLUDED.base_url, aktiv = EXCLUDED.aktiv""")
 			.param("kildenokkel", kildenokkel)
 			.param("type", type)
 			.param("navn", navn)
 			.param("baseUrl", baseUrl)
+			.param("active", active)
 			.update();
+
 		jdbc.sql("""
 				INSERT INTO kommune_fagsystem_instans (kommune_id, fagsystem_instans_id, type)
 				SELECT CAST(:kommuneId AS BIGINT), fi.id, fi.type
@@ -57,7 +60,7 @@ public class FagsystemInstansRepository
 	}
 
 	// Sets aktiv on the kommune's instance of this type. False if the kommune has none.
-	public boolean setAktiv(long kommuneId, String type, boolean aktiv)
+	public boolean setAktivStatus(long kommuneId, String type, boolean aktiv)
 	{
 		return jdbc.sql("""
 				UPDATE fagsystem_instans

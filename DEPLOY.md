@@ -110,19 +110,19 @@ only synced once it has an active Aktiv kommune booking system registered.
 ```bash
 curl -X POST http://localhost:8080/masterdb/kommune \
   -H "X-API-KEY: $MASTERDB_API_KEY" -H "Content-Type: application/json" \
-  -d '{"kommunenr":"4601","navn":"Bergen","fylkesnavn":"Vestland","bookingBaseUrl":"https://bergen.aktiv-kommune.no"}'
+  -d '{"kommunenr":"4601","navn":"Bergen","fylkesnavn":"Vestland","bookingBaseUrl":"https://bergen.aktiv-kommune.no","active":true}'
 ```
 
-`kommunenr` (four digits), `navn` and `bookingBaseUrl` are required. The kommune and its
-booking system are registered in the same transaction, with the booking system inactive.
-Once it is up and running, activate it (below); the next nightly sync then loads the kommune's
-data. To load it right away, run `docker compose exec etl ./run.sh sync`.
+`kommunenr` (four digits), `navn`, `bookingBaseUrl` and `active` are required. The kommune and its
+booking system are registered in the same transaction, with the booking system's active status set
+from `active`. With `active: true` the next nightly sync loads the kommune's data; with `false`,
+activate it first (below). To load it right away, run `docker compose exec etl ./run.sh sync`.
 
 - **Accepted URLs:** only `https://<name>.aktiv-kommune.no` (no path, port or
   credentials). A missing or different URL gives 400, because the sync fetches from this
   address. A URL already used by another kommune gives 409.
-- **New kommuner start inactive:** `POST` registers the booking system with `aktiv = false`, so the
-  nightly sync skips it until it is activated (below). The seed kommuner from `last_inn.py` are active.
+- **Active status is chosen at creation:** `POST` registers the booking system with `aktiv` set from
+  `active`. If `false`, the nightly sync skips it until it is activated (below). The seed kommuner from `last_inn.py` are active.
 - **Start, stop or resume syncing:** `PATCH /masterdb/kommune/{id}/booking` with `{"aktiv": false}`
   (or `true`) leaves the kommune and its data in place but includes or excludes it in the
   nightly sync. `GET` shows the state as `bookingAktiv`.

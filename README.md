@@ -15,8 +15,9 @@ the national facility register later.
   written API contract at the moment.
 - **Temporary:** the source systems are not normalised yet, so a demo normaliser
   rewrites their data before loading (`etl/demo_normalisering/`).
-- **Not built yet:** `ressurslenke`, linking the same physical resource across
-  several subsystems (booking, facility management, sensors).
+- **`ressurslenke`:** links one resource to several subsystems (booking, facility
+  management, sensors), one row with the resource's URL per system. The ETL fills in
+  the booking link; the search view reads `booking_url` from it.
 
 ## Run it
 

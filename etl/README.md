@@ -85,9 +85,11 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/hent_gater.py` | Henter ALLE gater for en kommune fra Matrikkelen inn i `gate`. Kjøres av daemonen én gang etter første bygg, og ellers for hånd med `run.sh gater` |
 | `etl/matrikkel_test/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
-**Ikke bygget ennå:** `ressurslenke` (koble samme fysiske bygg/ressurs til
-flere fagsystemer samtidig, f.eks. booking + FDV) — bevisst utsatt til det
-faktisk finnes et andre fagsystem å koble til, se `db/ressurslenke.md`.
+**`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
+med én rad og URL per system. `last_inn.py` og `synk.py` skriver ressursens egen
+bookinglenke (`ressurslenke_sql` i `helpers.py`), og `v_ressurs_sok.booking_url`
+leses derfra. Lenker til andre systemer legges til av det som laster dem; synken
+rører dem ikke. Bygglenker bygges fortsatt i viewet.
 
 ## Forutsetning: HTTPS må virke fra WSL
 
@@ -210,7 +212,7 @@ kommunen synkroniseres når kilden er aktivert (se under).
 
 ```json
 { "kommunenr": "4601", "navn": "Bergen", "fylkesnavn": "Vestland",
-  "bookingBaseUrl": "https://bergen.aktiv-kommune.no" }
+  "bookingBaseUrl": "https://bergen.aktiv-kommune.no", "active": true }
 ```
 
 - **URL-en valideres strengt:** `https`, ett subdomene under `aktiv-kommune.no`, ingen sti,
@@ -219,7 +221,7 @@ kommunen synkroniseres når kilden er aktivert (se under).
 - **En kilde tilhører én kommune.** Er URL-en allerede registrert på en annen kommune, blir
   svaret 409 og kommunen opprettes ikke.
 - **`bookingBaseUrl` er påkrevd** ved opprettelse (uten den blir svaret 400), og kilden registreres
-  som inaktiv.
+  med aktiv-status fra det påkrevde feltet `active` (boolean; manglende gir 400).
 - **URL-en settes bare ved opprettelse.** `PUT /masterdb/kommune/{id}` endrer `kommunenr`, `navn` og
   `fylkesnavn`, og rører aldri bookingkilden, fordi kommunens bygg og ressurser er knyttet til instansen
   de ble lastet fra. For å bytte URL: slett kommunen og opprett den på nytt.
