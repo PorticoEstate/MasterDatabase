@@ -15,11 +15,12 @@ headers {
 }
 
 docs {
-  Bare sync, geocode og gater kan startes utenfra. build og prune er interne. Skal gi 404.
+  Bare sync, geocode og gater kan startes utenfra. build og prune er interne. Hver type har sitt eget endepunkt,
+  og POST på /jobs/build treffer bare GET /jobs/{id}, så svaret er 405.
 }
 
 tests {
-  test("svarer 404", function() {
-    expect(res.getStatus()).to.equal(404);
+  test("svarer 405", function() {
+    expect(res.getStatus()).to.equal(405);
   });
 }
