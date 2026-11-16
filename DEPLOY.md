@@ -31,7 +31,8 @@ and one command.
 git clone <repository-url> masterdatabase
 cd masterdatabase
 cp .env.example .env
-# edit .env: set POSTGRES_PASSWORD, MATRIKKEL_BRUKER, MATRIKKEL_PASSORD, MATRIKKEL_MILJO
+# edit .env: set POSTGRES_PASSWORD, MASTERDB_API_KEY, MATRIKKEL_BRUKER, MATRIKKEL_PASSORD, MATRIKKEL_MILJO
+# (generate a key with: openssl rand -hex 32)
 docker compose up -d --build
 docker compose logs -f etl
 ```
@@ -59,9 +60,10 @@ the old values: `docker compose up -d --force-recreate etl`.
 | Variable | Default | Meaning |
 |---|---|---|
 | `POSTGRES_PASSWORD` | none (required) | Password of the database superuser. See the note below. |
+| `MASTERDB_API_KEY` | none (required) | API key for the protected backend endpoints (`/masterdb/kommune`). Clients send it in the `X-API-KEY` header. The backend does not start without it. Treat it like a password; generate one with `openssl rand -hex 32`. |
 | `MATRIKKEL_BRUKER` / `MATRIKKEL_PASSORD` | empty | Matrikkel API login. If either is empty, geocoding is skipped. |
 | `MATRIKKEL_MILJO` | `test` | `test` = `prodtest.matrikkel.no`, `prod` = `matrikkel.no`. Must match where your credentials are valid. |
-| `KOMMUNER` | `alle` | `alle`, or a single kommune name such as `bergen`. |
+| `KOMMUNER` | `alle` | `alle`, or a single kommune name such as `bergen`. In the nightly sync `alle` means every kommune with an active Aktiv kommune instance in the database. |
 | `SYNK_TID` | `03:00` | Time of the nightly sync, `HH:MM`, in `TZ`. |
 | `TZ` | `Europe/Oslo` | Time zone for the schedule and the log timestamps. |
 | `NORMALISER_DEMO` | `true` | The source systems are not normalised yet, so a demo normaliser is applied before loading. Keep `true` for now. |
@@ -98,6 +100,40 @@ volume keeps the old password. Either set it back, or start from scratch with
 | `kildeuttrekk` (metadata about each fetch) | The last two fetches per source |
 | `synk_avvik` (deviation records) | `AVVIK_RETENTION_DAYS` days, except the latest run per source |
 
+## Adding a kommune
+
+Add a kommune with `POST /masterdb/kommune` (requires the `X-API-KEY` header; the full
+request and response schema is in Swagger at `/masterdb/swagger-ui.html`). The nightly
+sync reads its list of kommuner from the database, not from the code, so a kommune is
+only synced once it has an active Aktiv kommune booking system registered.
+
+```bash
+curl -X POST http://localhost:8080/masterdb/kommune \
+  -H "X-API-KEY: $MASTERDB_API_KEY" -H "Content-Type: application/json" \
+  -d '{"kommunenr":"4601","navn":"Bergen","fylkesnavn":"Vestland","bookingBaseUrl":"https://bergen.aktiv-kommune.no","active":true}'
+```
+
+`kommunenr` (four digits), `navn`, `bookingBaseUrl` and `active` are required. The kommune and its
+booking system are registered in the same transaction, with the booking system's active status set
+from `active`. With `active: true` the next nightly sync loads the kommune's data; with `false`,
+activate it first (below). To load it right away, run `docker compose exec etl ./run.sh sync`.
+
+- **Accepted URLs:** only `https://<name>.aktiv-kommune.no` (no path, port or
+  credentials). A missing or different URL gives 400, because the sync fetches from this
+  address. A URL already used by another kommune gives 409.
+- **Active status is chosen at creation:** `POST` registers the booking system with `aktiv` set from
+  `active`. If `false`, the nightly sync skips it until it is activated (below). The seed kommuner from `last_inn.py` are active.
+- **Start, stop or resume syncing:** `PATCH /masterdb/kommune/{id}/booking` with `{"aktiv": false}`
+  (or `true`) leaves the kommune and its data in place but includes or excludes it in the
+  nightly sync. `GET` shows the state as `bookingAktiv`.
+- **The booking URL is set at creation only.** `PUT /masterdb/kommune/{id}` changes `kommunenr`,
+  `navn` and `fylkesnavn`, and never touches the booking system. To change a URL, delete the
+  kommune and create it again (this removes its buildings and resources).
+
+`DELETE /masterdb/kommune/{id}` removes the kommune and its booking system, and cascades
+to its buildings and resources. More detail under "Legge til en kommune" in
+[etl/README.md](etl/README.md).
+
 ## Day-to-day commands
 
 ```bash
@@ -124,6 +160,8 @@ docker compose exec -T db pg_dump -U postgres masterdb > masterdb-backup.sql
 | `CERTIFICATE_VERIFY_FAILED ... self-signed certificate in certificate chain` in the `etl` log | The network inspects HTTPS traffic. Add its root CA certificate to `certs/`; see [certs/README.md](certs/README.md). |
 | `geocode: skipped, MATRIKKEL_BRUKER / MATRIKKEL_PASSORD are not set` | The credentials are empty in the container. Set them in `.env`, then `docker compose up -d --force-recreate etl`, then `docker compose exec etl ./run.sh geocode`. |
 | Geocoding errors such as `Ugyldig XML fra KommuneService: '<!doctype html>...` | The Matrikkel endpoint answered with a web page instead of an API response. Check that `MATRIKKEL_MILJO` matches your credentials, run `docker compose exec etl python3 matrikkel_test/test_auth.py`, and look for a proxy or block page. |
+| `docker compose up` stops with `Set MASTERDB_API_KEY in .env` | The key is required. Add `MASTERDB_API_KEY` to `.env`, then run `docker compose up -d` again. |
+| `401` from `/masterdb/kommune` | The `X-API-KEY` header is missing or does not match `MASTERDB_API_KEY`. After changing the key in `.env`, run `docker compose up -d --force-recreate backend`. |
 | `etl` container stays `Created` and never starts | It waits for a healthy backend. Run `docker compose logs backend`. |
 | `etl` log repeats `waiting for the schema (Flyway V1)...` | The backend has not migrated the database yet; see the backend log. |
 | One kommune fails to fetch | It is logged in `synk_avvik` and the other kommuner continue. The next nightly sync tries again. |
@@ -137,5 +175,8 @@ docker compose exec -T db pg_dump -U postgres masterdb > masterdb-backup.sql
   The backend therefore starts with schema validation disabled
   (`spring.jpa.hibernate.ddl-auto=none`), and API endpoints that read the
   affected tables may fail. The data pipeline does not depend on the API.
-- The API on port 8080 has no authentication configured. Do not expose it to
-  the internet; restrict access with a firewall.
+- Every endpoint requires an API key (`X-API-KEY`) except `/masterdb/search`, Swagger UI,
+  `/masterdb/api-docs` and `/actuator/health` on port 8080, and there is one shared key.
+  The open paths are listed in `OPEN_PATHS` in `ApiKeyFilter`. In Swagger UI, use
+  Authorize to send the key when trying the protected endpoints. Do not expose the API to the internet;
+  restrict access with a firewall.

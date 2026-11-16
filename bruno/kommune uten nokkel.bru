@@ -1,0 +1,21 @@
+meta {
+  name: kommune uten nokkel
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/masterdb/kommune
+  body: none
+  auth: none
+}
+
+docs {
+  Som "5 Hent alle", men uten X-API-KEY. Skal gi 401.
+}
+
+tests {
+  test("svarer 401 uten nokkel", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+}

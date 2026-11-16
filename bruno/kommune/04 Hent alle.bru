@@ -1,0 +1,31 @@
+meta {
+  name: 04 Hent alle
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/masterdb/kommune
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  Lister alle kommuner. bookingBaseUrl viser hvilke som synkroniseres.
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("er en liste som inneholder 9999", function() {
+    const b = res.getBody();
+    expect(b).to.be.an("array");
+    expect(b.some(function(k) { return k.kommunenr === "9999"; })).to.equal(true);
+  });
+}
