@@ -62,3 +62,19 @@ def ressurslenke_sql(kn: str) -> str:
         f"ON CONFLICT (fagsystem_instans_id,ressurs_id) "
         f"DO UPDATE SET url=EXCLUDED.url, ekstern_id=EXCLUDED.ekstern_id;\n"
     )
+
+
+# Deviation logging for the jobs that read Matrikkel (geocode, gater): the source
+# is "matrikkel-*" and the record is the lookup key, not an Aktiv kommune record.
+# Different signatures from logg/i_blokk above, hence the separate names.
+def logg_matrikkel(ekstern_id, detalj, rapost, kilde="matrikkel-adresse", samling="adresse",
+                   avvikstype="geokoding_feilet", nokkelfelt="adresse_id") -> str:
+    return (f"CALL logg_avvik({q(kilde)},{q(samling)},{q(avvikstype)},{q(ekstern_id)},"
+            f"{q(detalj)},NULL,{q(nokkelfelt)},{q_json(rapost)});\n")
+
+
+def i_blokk_matrikkel(ekstern_id, sql, rapost, kilde="matrikkel-adresse", samling="adresse",
+                      nokkelfelt="adresse_id") -> str:
+    return ("DO $blk$ BEGIN\n" + sql + "EXCEPTION WHEN OTHERS THEN\n"
+            f"CALL logg_avvik({q(kilde)},{q(samling)},'db_feil',{q(ekstern_id)},"
+            f"SQLSTATE || ': ' || SQLERRM,NULL,{q(nokkelfelt)},{q_json(rapost)});\nEND $blk$;\n")
