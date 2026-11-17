@@ -1,28 +1,20 @@
 meta {
-  name: Filtre
+  name: Hent kommuner (som har minst én aktiv ressurs)
   type: http
-  seq: 3
+  seq: 5
 }
 
 get {
-  url: {{baseUrl}}/masterdb/search/filter
+  url: {{baseUrl}}/masterdb/search/filters/municipalities
   body: none
   auth: none
-}
-
-docs {
-  Valgene til filterpanelet ("More filters"): kommuner, lokaletyper,
-  aktiviteter og fasiliteter. Kommuner er { kommunenr, navn }; de tre
-  andre er { id, navn }. Bare verdier som er koblet til en bookbar ressurs er
-  med. Vis navn til brukeren, send kommunenr/id som parameter til "Sok".
-  Aktiviteter er flate (ingen forelder).
 }
 
 tests {
   test("svarer 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("har fire lister", function() {
     const b = res.getBody();
     expect(b.kommuner).to.be.an("array");
@@ -30,7 +22,7 @@ tests {
     expect(b.aktiviteter).to.be.an("array");
     expect(b.fasiliteter).to.be.an("array");
   });
-
+  
   test("kommuner har kommunenr og navn", function() {
     const kommuner = res.getBody().kommuner;
     if (kommuner.length > 0) {
@@ -38,7 +30,7 @@ tests {
       expect(kommuner[0].navn).to.be.a("string");
     }
   });
-
+  
   test("lokaletyper, aktiviteter og fasiliteter har id og navn", function() {
     const b = res.getBody();
     [b.lokaletyper, b.aktiviteter, b.fasiliteter].forEach(function(liste) {
@@ -48,4 +40,12 @@ tests {
       });
     });
   });
+}
+
+docs {
+  Valgene til filterpanelet ("More filters"): kommuner, lokaletyper,
+  aktiviteter og fasiliteter. Kommuner er { kommunenr, navn }; de tre
+  andre er { id, navn }. Bare verdier som er koblet til en bookbar ressurs er
+  med. Vis navn til brukeren, send kommunenr/id som parameter til "Sok".
+  Aktiviteter er flate (ingen forelder).
 }

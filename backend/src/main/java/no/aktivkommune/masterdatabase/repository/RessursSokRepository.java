@@ -23,7 +23,6 @@ import java.util.Map;
 @Repository
 public class RessursSokRepository {
 	// Lager et PostGis-punkt. SRID 4326 gjør det om til GPS-koordinater i grader.
-	// Geography gjør at det regnes i meter
 	private static final String SOKEPUNKT = "ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography";
 
 	private final JdbcClient jdbc;
@@ -32,11 +31,10 @@ public class RessursSokRepository {
 		this.jdbc = jdbc;
 	}
 
-	// Tar imot det brukeren har valgt (p, allerede normalisert av servicen) og
-	// returnerer én side med ressurser
+	// Tar imot det brukeren har valgt (p, allerede normalisert av servicen) og returnerer én side med ressurser
 	public ResultatSide<Ressurs> sokRessurser(RessursSokParametere p) {
-		// lagFiltrertSqlSok bygger WITH-delen (filter, rang og avstand) som SQL-tekst +
-		// parametre
+
+		// lagFiltrertSqlSok bygger WITH-delen (filter, rang og avstand) som SQL-tekst + parametre
 		SokeFilter sokeFilterSql = lagFiltrertSqlSok(p);
 
 		// hele spørringen som tekst (WITH-delen + SELECT/ORDER BY). Parameterverdiene
@@ -118,18 +116,14 @@ public class RessursSokRepository {
 	private record SokeFilter(String sql, Map<String, Object> params) {
 	}
 
-	// Bygger WITH-delen (CTE-en «treff») av søket fra de normaliserte parametrene
-	// fra servicen.
-	// Filter (WHERE), rang og avstand beregnes her, én gang per rad, og deles av
-	// bygg- og ressursspørringen.
+	// Bygger WITH-delen (CTE-en «treff») av søket fra de normaliserte parametrene fra servicen.
 	private static SokeFilter lagFiltrertSqlSok(RessursSokParametere p) {
 		var betingelser = new ArrayList<String>(List.of("TRUE"));
 		var params = new HashMap<String, Object>();
 
 		boolean harFritekst = p.fritekst() != null;
 		if (harFritekst) {
-			// websearch_to_tsquery tåler hva som helst av brukerinput uten å kaste
-			// syntaksfeil.
+			// websearch_to_tsquery tåler hva som helst av brukerinput uten å kaste syntaksfeil.
 			betingelser.add("(sokedokument @@ websearch_to_tsquery('norwegian', :fritekst)"
 					+ " OR strpos(navn_sok, lower(:fritekst)) > 0)");
 			params.put("fritekst", p.fritekst());
@@ -175,14 +169,12 @@ public class RessursSokRepository {
 			params.put("radius", p.radiusMeter());
 		}
 
-		// Kolonnene rang og avstand beregnes i WITH-delen, slik at de kan brukes til
-		// sortering
+		// Kolonnene rang og avstand beregnes i WITH-delen, slik at resultatet kan sorteres
 		String rang = harFritekst
 				? "ts_rank_cd(sokedokument, websearch_to_tsquery('norwegian', :fritekst))"
 				: "0::real";
 
-		// avstand i meter fra søkepunktet (NULL uten nærhetssøk). Sorteringen skjer
-		// senere, i ORDER BY
+		// avstand i meter fra søkepunktet (NULL uten nærhetssøk).
 		String avstand = p.harNarhet()
 				? "ST_Distance(posisjon, " + SOKEPUNKT + ")"
 				: "NULL::double precision";
@@ -201,8 +193,7 @@ public class RessursSokRepository {
 	private record Rad<T>(T treff, long totalt) {
 	}
 
-	// count(*) OVER () gir totalantallet i samme spørring, så paginering
-	// ikke krever en ekstra rundtur.
+	// count(*) OVER () gir totalantallet i samme spørring, så paginering ikke krever en ekstra rundtur.
 	private <T> ResultatSide<T> hentSide(String sql, Map<String, Object> plassholder, RessursSokParametere p,
 			RowMapper<T> radmapper) {
 		long offset = (long) p.side() * p.storrelse();

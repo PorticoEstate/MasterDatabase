@@ -26,8 +26,6 @@ public FilterRepository ( JdbcClient jdbc){
 	}
 
 	//Aktivitet, lokaletype og fasilitet hentes direkte fra sine tabeller.
-	// Hele kodeverket fra tabellen, også verdier uten ressurser
-	// Inneholder både foreldre og barn
 		public List<FilterValg> hentAktiviteter(){
 		return jdbc.sql("""
 			SELECT id, navn, parent_id

@@ -11,13 +11,10 @@ get {
 }
 
 params:query {
-  fritekst: bøneshallen
+  ~fritekst: bøneshallen
   ~kommune: 4601
   ~lokaletype: 1
-  ~aktivitet: 1
   ~fasilitet: 1
-  ~sorter: navn
-  ~side: 0
   ~storrelse: 20
 }
 
@@ -25,7 +22,7 @@ tests {
   test("svarer 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("har både bygg og ressurser", function() {
     const b = res.getBody();
     expect(b.bygg.treff).to.be.an("array");
@@ -33,7 +30,7 @@ tests {
     expect(b.bygg.totalt).to.be.a("number");
     expect(b.ressurser.totalt).to.be.a("number");
   });
-
+  
   test("bygg-treff har navn og lenke", function() {
     const bygg = res.getBody().bygg.treff;
     if (bygg.length > 0) {
@@ -48,7 +45,7 @@ docs {
   i ett svar. Parametrene med ~ foran er avslått; kryss dem av i Bruno for å
   bruke dem. Filtrene tar kommunenr og id-er, ikke navn (hent kommunenr/id + navn fra "Filtre").
   Lister kan gjentas (?aktivitet=A&aktivitet=B) eller kommasepareres.
-
+  
   Merk: aktivitet, lokaletype og fasilitet må finnes i databasen for å gi
   treff. fritekst=ng treffer også midt i ord ("Ungdomshus", "Fyllingsdalen").
 }
