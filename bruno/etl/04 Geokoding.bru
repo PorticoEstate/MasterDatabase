@@ -1,0 +1,30 @@
+meta {
+  name: 04 Geokoding
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/masterdb/etl/jobs/geocode
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  Starter Matrikkel-geokodingen nå. Tar ingen body. Hoppes over (jobben blir likevel "ok") hvis
+  Matrikkel-innloggingen ikke er satt i etl.
+}
+
+tests {
+  test("svarer 202", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+
+  test("er en geocode-jobb", function() {
+    expect(res.getBody().type).to.equal("geocode");
+  });
+}
