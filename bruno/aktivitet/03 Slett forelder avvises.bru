@@ -1,0 +1,29 @@
+meta {
+  name: 03 Slett forelder avvises
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/masterdb/aktivitet/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 9001
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  9001 er forelder til 9002 og kan derfor ikke slettes.
+}
+
+tests {
+  test("svarer 409", function() {
+    expect(res.getStatus()).to.equal(409);
+  });
+}
