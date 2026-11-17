@@ -149,8 +149,10 @@ psql -tA -F'|' -f etl/sql/kommuner_query.sql > etl/ut/kommuner.txt
 docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/synk.sql
 ```
 
-Den planlagte kjøringen gjøres av etl-containeren (`etl/main.py`, hver natt kl. 03:00; se `DEPLOY.md`). Etter hver synk
-kjøres `jobs/geocode.py` (steg 3), så nye bygg får posisjon.
+Den planlagte kjøringen gjøres av etl-containeren (`etl/main.py`, hver natt kl. 03:00; se `DEPLOY.md`). Den kjører
+tre separate jobber etter hverandre: `nightly-load` (synk), `geocode` (`jobs/geocode.py`, steg 3, så nye bygg får
+posisjon) og `prune`. Synk-jobben geokoder ikke selv: trigges `sync` alene (`main.py sync` eller jobbserveren),
+kommer ingen geokoding etter, og `geocode` må trigges for seg.
 
 Skriptene kan også lese `<mappe>/<kommune>.json` i stedet for å hente fra nettet,
 med `--fra-fil <mappe>`. Det brukes av demoen (under), og er nyttig for å kjøre
@@ -407,10 +409,17 @@ uttrekket) kommer derimot med.
    (SOAP, krever `MATRIKKEL_BRUKER`/`MATRIKKEL_PASSORD` - se
    `etl/dev/check_matrikkel_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
    allerede kjenner fra innlastingen.
-2. **Bygningsnummer og bygningsfakta** for enhver bygning som mangler det,
+2. **Bygningsnummer og bygningsfakta** for bygninger som mangler det,
    uansett om adressen ble løst i denne kjøringen eller en tidligere. Aktiv
    kommune oppgir ikke bygningsnummer i det hele tatt - dette er den eneste
-   kilden til det.
+   kilden til det. Bygningsoppslaget gjøres for hver adresse spørringen
+   under returnerer, uten å sjekke om bygget allerede har `bygningsnr`:
+   kommer et bygg med fordi `matrikkelinfo` mangler, oppdateres også
+   `bygningsnr`, `bygningstype`, `bra_m2` og `antall_etasjer` på nytt fra
+   Matrikkelen (`posisjon` overskrives ikke).
+
+Skriptet slår bare opp adressene spørringen under returnerer, ikke hele
+databasen: etter første kjøring er det restmengden som prøves på nytt.
 
 Se modulens docstring for hele kjeden av SOAP-kall.
 
@@ -440,6 +449,10 @@ også for adresser som var løst fra før): `bygning.bygningsnr`, `bygningstype`
 mislykket oppslag sett identisk ut som et som aldri ble forsøkt. Overskriver
 aldri en `'adresse'`-match adressesteget nettopp satte for samme bygg.
 
+En adresse som ikke lar seg løse får en rad i `synk_avvik` og blir stående
+som `'ukjent'`, og er dermed med i neste kjøring. Det finnes ingen egen
+`'feilet'`-status.
+
 ```bash
 docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
     SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr,
@@ -449,7 +462,7 @@ docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
     JOIN kommune k ON k.id = b.kommune_id
     LEFT JOIN gate g ON g.id = a.gate_id
     WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
-      AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
+      AND (a.geokoding = 'ukjent' OR b.bygningsnr IS NULL
            OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id));
 " > etl/ut/adresser_a_matrikkelsoke.txt
 

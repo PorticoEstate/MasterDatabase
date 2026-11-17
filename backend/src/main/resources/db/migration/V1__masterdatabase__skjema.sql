@@ -258,7 +258,7 @@ CREATE TABLE IF NOT EXISTS adresse
     -- Statusen gjør at en senere matrikkelimport trygt kan overskrive et
     -- geokodet punkt, men ikke et autoritativt representasjonspunkt.
     geokoding      TEXT NOT NULL DEFAULT 'ukjent'
-                       CHECK (geokoding IN ('ukjent','matrikkel','geokodet','manuell','feilet')),
+                       CHECK (geokoding IN ('ukjent','matrikkel','geokodet','manuell')),
     er_hovedadresse BOOLEAN NOT NULL DEFAULT FALSE,
     ekstern_id     TEXT,
     sist_oppdatert TIMESTAMPTZ,

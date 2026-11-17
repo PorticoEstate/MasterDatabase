@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
 Geokoding + bygningsberikelse: finner adresser via Matrikkelen (MatrikkelAPI)
-for alt jobs/build.py og jobs/sync.py har lastet inn - ingen av Aktiv kommune sine 12 instanser
-leverer koordinater selv. I tillegg - for enhver bygning som fortsatt mangler
-bygningsnummer - hentes selve bygningsobjektet fra Matrikkelen.
+for det jobs/build.py og jobs/sync.py har lastet inn og som fortsatt mangler noe
+(ved første kjøring i praksis alt, siden ingen av Aktiv kommune sine 12 instanser
+leverer koordinater selv; senere bare restmengden, se nederst). I tillegg hentes
+selve bygningsobjektet fra Matrikkelen for bygninger som mangler bygningsnummer.
 
 Eneste geokodingssteg i pipelinen. Et tidligere forsteg mot Kartverkets åpne
 Adresse-API (etl/geokod.py) er bevisst fjernet til fordel for denne ene
@@ -11,11 +12,6 @@ kilden: enklere å forstå og vedlikeholde, mot en målt kostnad på ca. 3
 prosentpoeng lavere automatisk treffrate (69,7 % mot 73,1 % i en nasjonal
 test av alle 12 kommunene) - et bevisst valg, ikke en forglemmelse. De
 adressene det gjelder havner i synk_avvik som før og rettes manuelt.
-
-Vi kjenner allerede kommunen hver bygning tilhører (satt av jobs/build.py/jobs/sync.py), så
-søket gjøres *innenfor riktig kommune* i stedet for fritekst nasjonalt. Se
-db/schema_kjerne_dokumentasjon.md, avsnittet om "gate", for hvorfor denne
-tabellen "må fylles av matrikkelsteget".
 
 Kjeden per adresse (alt via MatrikkelAPI, SOAP):
     KommuneService.findKommuneIdForIdent   kommunenummer -> intern KommuneId
@@ -61,7 +57,7 @@ får posisjon):
         JOIN kommune k ON k.id = b.kommune_id
         LEFT JOIN gate g ON g.id = a.gate_id
         WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
-          AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
+          AND (a.geokoding = 'ukjent' OR b.bygningsnr IS NULL
                OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id));
     " > etl/ut/adresser_a_matrikkelsoke.txt
 
@@ -69,13 +65,24 @@ får posisjon):
 
     docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/matrikkel.sql
 
-De tre OR-leddene gjør skriptet trygt å kjøre på nytt: et bygg som allerede
-har bygningsnummer, en adresse som allerede er løst, og et bygg som allerede
-har en matrikkelinfo-lenke, hentes ikke på nytt for akkurat den grunnen - men
-raden kan likevel dukke opp igjen så lenge én av de andre tingene fortsatt
-mangler. Prinsipp: ett eksakt treff brukes - på husnummer for adresse, og på
+De tre OR-leddene gjør skriptet trygt å kjøre på nytt: en rad som har
+bygningsnummer, løst adresse og matrikkelinfo-lenke er ikke med i spørringen.
+Men utvalget gjøres per rad, ikke per ledd, og skriptet vet ikke hvilket ledd
+som utløste raden. Kommer en rad med, gjøres derfor alltid adresseoppslaget,
+matrikkelinfo-steget og bygningsoppslaget; bare adresseberikelsen (gate,
+posisjon, geokoding='matrikkel') er betinget av at adressen er 'ukjent'.
+Et bygg som kom med bare fordi matrikkelinfo mangler, får altså også
+bygningsnr/bygningstype/bra_m2/antall_etasjer oppdatert på nytt.
+
+En adresse som ikke lar seg løse logges i synk_avvik og blir stående som
+'ukjent' (og er med i neste kjøring). Det finnes ingen egen 'feilet'-status.
+
+Prinsipp: ett eksakt treff brukes - på husnummer for adresse, og på
 bygg-id for bygning. Null treff, flere treff, eller manglende husnummer i
 kildedata logges som avvik og gjettes ikke på.
+
+Skriptet inngår ikke i jobs/sync.py: den nattlige kjøringen trigger geocode som
+en egen jobb etter synk, og en synk trigget alene geokoder ikke.
 """
 import re
 import sys
@@ -224,7 +231,7 @@ def main():
 
         # Full adresse-berikelse (gate/posisjon/geokodingsstatus) gjøres bare
         # om adressen ikke allerede er løst - ellers er dette allerede gjort.
-        if geokoding in ("ukjent", "feilet"):
+        if geokoding == "ukjent":
             try:
                 veg = veg_cache.get(v["veg_id"])
                 if veg is None:

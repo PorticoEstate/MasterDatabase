@@ -218,7 +218,7 @@ def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
                 # Rører ikke en adresse som allerede er geokodet eller satt manuelt.
                 f"ON CONFLICT (bygning_id) WHERE er_hovedadresse "
                 f"DO UPDATE SET adressetekst=EXCLUDED.adressetekst, postnummer=EXCLUDED.postnummer, "
-                f"poststed=EXCLUDED.poststed WHERE adresse.geokoding IN ('ukjent','feilet');\n"
+                f"poststed=EXCLUDED.poststed WHERE adresse.geokoding = 'ukjent';\n"
             )
         w(avvik)
         w(i_blokk(kn, "buildings", b["id"], sql, rapost=b))

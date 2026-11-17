@@ -10,5 +10,5 @@ JOIN bygning b ON b.id = a.bygning_id
 JOIN kommune k ON k.id = b.kommune_id
 LEFT JOIN gate g ON g.id = a.gate_id
 WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
-  AND (a.geokoding IN ('ukjent','feilet') OR b.bygningsnr IS NULL
+  AND (a.geokoding = 'ukjent' OR b.bygningsnr IS NULL
        OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id));
