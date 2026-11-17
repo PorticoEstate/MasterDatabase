@@ -1,0 +1,36 @@
+meta {
+  name: 02 Oppdater navn opptatt
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/masterdb/lokaletype/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 9002
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "navn": "Idrettshall",
+    "parentId": 9001
+  }
+}
+
+docs {
+  Navnet er unikt. Idrettshall finnes fra før, så oppdateringen avvises.
+}
+
+tests {
+  test("svarer 409", function() {
+    expect(res.getStatus()).to.equal(409);
+  });
+}

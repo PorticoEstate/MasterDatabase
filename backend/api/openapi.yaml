@@ -9,13 +9,76 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 tags:
+- name: Fasilitet
+  description: Update and delete fasiliteter. Requires an API key.
 - name: Kommune
   description: "Create, read, update and delete kommuner. Requires an API key."
+- name: Lokaletype
+  description: Update and delete lokaletyper. Requires an API key.
 - name: Aktivitet
   description: Update and delete aktiviteter. Requires an API key.
 - name: Search
   description: Search across municipalities
 paths:
+  /masterdb/lokaletype/{id}:
+    put:
+      tags:
+      - Lokaletype
+      summary: Update a lokaletype
+      description: "Replaces navn and parentId. A parentId left out of the body is\
+        \ set to null, which makes the lokaletype top-level. The id cannot be changed."
+      operationId: updateLokaletype
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LokaletypeUpdate"
+        required: true
+      responses:
+        "400":
+          description: "Invalid body (navn missing), parentId is the lokaletype itself,\
+            \ or no lokaletype with the given parentId"
+        "404":
+          description: No lokaletype with this id
+        "409":
+          description: Another lokaletype already has this navn
+        "401":
+          description: Missing or invalid API key
+      security:
+      - apiKey: []
+    delete:
+      tags:
+      - Lokaletype
+      summary: Delete a lokaletype
+      description: "Resources that have the lokaletype are kept, but lose it (lokaletype_id\
+        \ is set to null). A lokaletype that is the parent of others cannot be deleted.\
+        \ This cannot be undone."
+      operationId: deleteLokaletype
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "404":
+          description: No lokaletype with this id
+        "409":
+          description: The lokaletype is the parent of other lokaletyper
+        "401":
+          description: Missing or invalid API key
+        "204":
+          description: No Content
+      security:
+      - apiKey: []
   /masterdb/kommune/{id}:
     get:
       tags:
@@ -87,6 +150,65 @@ paths:
       responses:
         "404":
           description: No kommune with this id
+        "401":
+          description: Missing or invalid API key
+        "204":
+          description: No Content
+      security:
+      - apiKey: []
+  /masterdb/fasilitet/{id}:
+    put:
+      tags:
+      - Fasilitet
+      summary: Update a fasilitet
+      description: "Replaces navn and parentId. A parentId left out of the body is\
+        \ set to null, which makes the fasilitet top-level. The id cannot be changed."
+      operationId: updateFasilitet
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FasilitetUpdate"
+        required: true
+      responses:
+        "400":
+          description: "Invalid body (navn missing), parentId is the fasilitet itself,\
+            \ or no fasilitet with the given parentId"
+        "404":
+          description: No fasilitet with this id
+        "409":
+          description: Another fasilitet already has this navn
+        "401":
+          description: Missing or invalid API key
+      security:
+      - apiKey: []
+    delete:
+      tags:
+      - Fasilitet
+      summary: Delete a fasilitet
+      description: Also removes the links from resources to the fasilitet (ON DELETE
+        CASCADE). A fasilitet that is the parent of others cannot be deleted. This
+        cannot be undone.
+      operationId: deleteFasilitet
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "404":
+          description: No fasilitet with this id
+        "409":
+          description: The fasilitet is the parent of other fasiliteter
         "401":
           description: Missing or invalid API key
         "204":
@@ -360,6 +482,22 @@ paths:
                 $ref: "#/components/schemas/SokFiltre"
 components:
   schemas:
+    LokaletypeUpdate:
+      type: object
+      properties:
+        navn:
+          type: string
+          description: Name of the venue type. Must be unique.
+          example: Gymsal
+          minLength: 1
+        parentId:
+          type: integer
+          format: int64
+          description: Id of the parent venue type. Null or left out for a top-level
+            venue type.
+          example: 12
+      required:
+      - navn
     KommuneUpdate:
       type: object
       properties:
@@ -380,6 +518,22 @@ components:
           example: Vestland
       required:
       - kommunenr
+      - navn
+    FasilitetUpdate:
+      type: object
+      properties:
+        navn:
+          type: string
+          description: Name of the facility. Must be unique.
+          example: Garderobe
+          minLength: 1
+        parentId:
+          type: integer
+          format: int64
+          description: Id of the parent facility. Null or left out for a top-level
+            facility.
+          example: 12
+      required:
       - navn
     AktivitetUpdate:
       type: object
