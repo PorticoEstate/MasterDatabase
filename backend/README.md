@@ -1,6 +1,6 @@
 # Backend (søke-API)
 
-Spring Boot-applikasjon som lar nettsiden søke på tvers av kommuner. Brukeren kan søke på fritekst, filtrere (kommune, lokaletype, aktivitet, fasilitet), eventuelt begrense til et område rundt et punkt, og få treff som bygg-kort og ressursliste. Et treff lenker videre til det lokale bookingsystemet. API-et sjekker aldri tilgjengelighet og booker ingenting. I tillegg finnes et API for administrasjon av kommuner (`/masterdb/kommune`), beskyttet av en API-nøkkel (som resten av API-et, bortsett fra søk).
+Spring Boot-applikasjon som lar nettsiden søke på tvers av kommuner. Brukeren kan søke på fritekst, filtrere (kommune, lokaletype, aktivitet, fasilitet), eventuelt begrense til et område rundt et punkt, og få treff som bygg-kort og ressursliste. Et treff lenker videre til det lokale bookingsystemet. API-et sjekker aldri tilgjengelighet og booker ingenting. I tillegg finnes et API for administrasjon av kommuner (`/masterdb/kommune`) og av aktiviteter i kodeverket (`/masterdb/aktivitet`), beskyttet av en API-nøkkel (som resten av API-et, bortsett fra søk).
 
 ## Kjøre lokalt
 
@@ -28,12 +28,16 @@ Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-d
 | PUT | `/masterdb/kommune/{id}` | Erstatter `kommunenr`, `navn` og `fylkesnavn` (så `kommunenr` kan rettes, for eksempel etter at en kommune har fått nytt nummer). Bookingsystemet røres ikke (URL-en settes ved opprettelse). 404 hvis id-en ikke finnes, 409 hvis `kommunenr` er opptatt. Krever API-nøkkel. |
 | PATCH | `/masterdb/kommune/{id}/booking` | Tar kommunens bookingsystem med i (`{"aktiv": true}`) eller ut av (`{"aktiv": false}`) den nattlige synken. Kommunen og dataene beholdes. Idempotent; returnerer kommunen. 404 hvis id-en ikke finnes, 409 hvis kommunen ikke har bookingsystem. Krever API-nøkkel. |
 | DELETE | `/masterdb/kommune/{id}` | Sletter en kommune. **Sletter også bygg, adresser, gater og ressurser** (`ON DELETE CASCADE`) og kommunens bookingsystem hvis ingen annen kommune bruker det. 204, eller 404. Krever API-nøkkel. |
+| PUT | `/masterdb/aktivitet/{id}` | Erstatter `navn` og `parentId` på en aktivitet fra `{navn, parentId}`. Uten `parentId` blir aktiviteten et toppnivå. Id-en kan ikke endres, fordi den er delt med kommunenes instanser. 400 ved manglende `navn`, hvis `parentId` er aktiviteten selv eller ikke finnes, 404 hvis id-en ikke finnes, 409 hvis navnet er brukt av en annen aktivitet. Krever API-nøkkel. |
+| DELETE | `/masterdb/aktivitet/{id}` | Sletter en aktivitet. **Sletter også koblingene fra ressurser til aktiviteten** (`ON DELETE CASCADE`). En aktivitet som er forelder til andre kan ikke slettes. 204, 404 hvis id-en ikke finnes, 409 hvis den er forelder. Krever API-nøkkel. |
 
 Stiene er engelske, mens query-parametre (`q`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `sorter`, `side`, `storrelse`, `lat`, `lon`, `radiusMeter`) og JSON-felt er norske. Lister kan sendes som `?aktivitet=1&aktivitet=2` eller `?aktivitet=1,2`.
 
 Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java` og `dto/`.
 
 Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (kommune-tabellen) og `repository/FagsystemInstansRepository.java` (fagsystem-instanser og koblingen til kommunen); begge bruker ren SQL via `JdbcClient`. Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/helpers.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
+
+Aktivitet-endepunktene ligger i `controller/AktivitetController.java`, `service/AktivitetService.java` og `repository/AktivitetRepository.java`, med request-body i `dto/AktivitetUpdate.java`. De følger samme mønster som kommune: formatet valideres i controlleren, og reglene (egen forelder, forelder som ikke finnes, opptatt navn, sletting av en forelder) gjøres om til 400, 404 og 409 i servicen. Sirkler i hierarkiet over flere ledd (A → B → A) sjekkes ikke.
 
 ## API-dokumentasjon (Swagger / OpenAPI)
 
@@ -70,7 +74,9 @@ Husk å committe den oppdaterte filen. Hvis ingen bruker filen, kan den fjernes,
 
 Forespørslene ligger i `bruno/` i rotmappen, og `baseUrl` settes i `bruno/environments/lokal.bru`. Kjør dem etter endringer i endepunktene. Forespørslene i `bruno/kommune/` krever at hemmeligheten `apiKey` er satt én gang i miljøet `lokal` (samme verdi som `MASTERDB_API_KEY`). Kjør dem i rekkefølge: de oppretter to testkommuner (9999 med bookingsystem, 9997 uten), henter og endrer dem, registrerer bookingsystemet på 9997 med en oppdatering, sletter begge og lar databasen stå som den var.
 
+Forespørslene i `bruno/aktivitet/` krever også `apiKey`. Det finnes ikke noe endepunkt for å opprette aktiviteter, så de bruker to testrader (9001 og 9002) som må legges inn i databasen først; kommandoen står i `docs`-feltet i `01 Oppdater`. Kjør dem i rekkefølge: de endrer testaktiviteten, viser at et opptatt navn og sletting av en forelder avvises, og sletter til slutt begge testradene.
+
 ## Endre sti eller skru av docs
 
-- **Endre stiene:** `@RequestMapping` og `@GetMapping` i controlleren. Oppdater deretter Bruno-filene i `bruno/sok/` og `bruno/kommune/`, andre klienter (frontend) og `api/openapi.yaml`.
+- **Endre stiene:** `@RequestMapping` og `@GetMapping` i controlleren. Oppdater deretter Bruno-filene i `bruno/sok/`, `bruno/kommune/` og `bruno/aktivitet/`, andre klienter (frontend) og `api/openapi.yaml`.
 - **Skru av Swagger UI i produksjon:** sett `springdoc.swagger-ui.enabled=false` (og eventuelt `springdoc.api-docs.enabled=false`). Swagger UI og spesifikasjonen er ellers åpne for alle som når backend.

@@ -11,6 +11,8 @@ servers:
 tags:
 - name: Kommune
   description: "Create, read, update and delete kommuner. Requires an API key."
+- name: Aktivitet
+  description: Update and delete aktiviteter. Requires an API key.
 - name: Search
   description: Search across municipalities
 paths:
@@ -91,6 +93,65 @@ paths:
           description: No Content
       security:
       - apiKey: []
+  /masterdb/aktivitet/{id}:
+    put:
+      tags:
+      - Aktivitet
+      summary: Update an aktivitet
+      description: "Replaces navn and parentId. A parentId left out of the body is\
+        \ set to null, which makes the aktivitet top-level. The id cannot be changed."
+      operationId: updateAktivitet
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AktivitetUpdate"
+        required: true
+      responses:
+        "400":
+          description: "Invalid body (navn missing), parentId is the aktivitet itself,\
+            \ or no aktivitet with the given parentId"
+        "404":
+          description: No aktivitet with this id
+        "409":
+          description: Another aktivitet already has this navn
+        "401":
+          description: Missing or invalid API key
+      security:
+      - apiKey: []
+    delete:
+      tags:
+      - Aktivitet
+      summary: Delete an aktivitet
+      description: Also removes the links from resources to the aktivitet (ON DELETE
+        CASCADE). An aktivitet that is the parent of others cannot be deleted. This
+        cannot be undone.
+      operationId: deleteAktivitet
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "404":
+          description: No aktivitet with this id
+        "409":
+          description: The aktivitet is the parent of other aktiviteter
+        "401":
+          description: Missing or invalid API key
+        "204":
+          description: No Content
+      security:
+      - apiKey: []
   /masterdb/kommune:
     get:
       tags:
@@ -110,9 +171,10 @@ paths:
       - Kommune
       summary: Create a kommune
       description: "Returns the created kommune including its generated id. bookingBaseUrl\
-        \ (https://<name>.aktiv-kommune.no) is required: the kommune's Aktiv kommune\
-        \ booking system is registered, and active is set to false, in the same call.\
-        \ Nightly sync won't load until status is set active ."
+        \ (https://<name>.aktiv-kommune.no) and active are required: the kommune's\
+        \ Aktiv kommune booking system is registered with the given active status\
+        \ in the same call. The nightly sync only loads data from the instance when\
+        \ active is true."
       operationId: createKommune
       requestBody:
         content:
@@ -122,7 +184,7 @@ paths:
         required: true
       responses:
         "400":
-          description: "Invalid body (kommunenr not 4 digits, navn missing, or bookingBaseUrl\
+          description: "Invalid body (kommunenr not 4 digits, navn missing, bookingBaseUrl\
             \ missing or not https://<name>.aktiv-kommune.no, or active missing)"
         "409":
           description: "kommunenr already exists, or bookingBaseUrl is registered\
@@ -319,6 +381,22 @@ components:
       required:
       - kommunenr
       - navn
+    AktivitetUpdate:
+      type: object
+      properties:
+        navn:
+          type: string
+          description: Name of the activity. Must be unique.
+          example: Svømming
+          minLength: 1
+        parentId:
+          type: integer
+          format: int64
+          description: Id of the parent activity. Null or left out for a top-level
+            activity.
+          example: 12
+      required:
+      - navn
     KommuneCreate:
       type: object
       properties:
@@ -347,9 +425,9 @@ components:
             .no/?$"
         active:
           type: boolean
-          description: Whether the kommune's booking system is active. Required.
-            If true, the nightly sync loads data from the Aktiv kommune instance;
-            if false, the sync skips it until it is activated (PATCH /masterdb/kommune/{id}/booking).
+          description: "Whether the kommune's booking system is active. Required.\
+            \ If true, the nightly sync loads data from the Aktiv kommune instance;\
+            \ if false, the sync skips it until it is activated (PATCH /masterdb/kommune/{id}/booking)."
           example: true
       required:
       - active
