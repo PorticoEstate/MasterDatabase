@@ -82,6 +82,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
 | `etl/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
 | `etl/matrikkel_adresse.py` | Steg 3. Kjøres etter bygging og etter hver synk, så nye bygg får posisjon |
+| `etl/hent_gater.py` | Henter ALLE gater for en kommune fra Matrikkelen inn i `gate`. Kjøres av daemonen én gang etter første bygg, og ellers for hånd med `run.sh gater` |
 | `etl/matrikkel_test/test_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
 **`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
@@ -445,6 +446,31 @@ enten ekte stave-/formatfeil Matrikkelen heller ikke kan matche (f.eks.
 «Wolfsgate 12x» mot det offisielle «Wolffs gate»), eller mangler husnummer
 helt i kildedata (f.eks. «Festplassen», «Nygårdsparken») - et
 datakvalitetsproblem i kilden, ikke noe et adresseoppslag kan løse.
+
+## Gater for hele kommunen (`gate`)
+
+`gate` fylles på to måter. `matrikkel_adresse.py` legger inn gaten til hver
+adresse den løser. `hent_gater.py` henter i tillegg *alle* veger i kommunen
+(`AdresseService.findVegerForKommune`, så adressekode og navn via
+`StoreService.getObjects`), uten at kommunen trenger en Aktiv kommune-instans,
+bygg eller adresser. Det eneste som kreves er en rad i `kommune`.
+
+Daemonen kjører steget bare én gang: etter den første bygget av en tom
+database (rekkefølge: bygging, gater, geokoding), for *alle* kommuner i
+`kommune`. Det kjøres ikke ved senere oppstarter og ikke om natten. Etter det
+holdes `gate` oppdatert ved å kjøre steget for hånd (se under), for eksempel
+for en ny kommune eller for å fange nye og omdøpte gater. En kommune der
+henting feilet (logget i `synk_avvik`, kilde `matrikkel-gate`) prøves på nytt
+neste gang steget kjøres for den. Gater slettes aldri, siden `adresse.gate_id`
+peker på dem.
+
+```bash
+docker compose exec etl ./run.sh gater              # alle kommuner
+docker compose exec etl ./run.sh gater 4601 5601    # bestemte kommuner
+```
+
+Trygt å kjøre om igjen: eksisterende gater beholder id-en, så `adresse.gate_id`
+peker fortsatt riktig.
 
 ## Kjent forenkling
 

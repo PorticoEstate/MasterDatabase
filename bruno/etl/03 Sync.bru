@@ -1,0 +1,30 @@
+meta {
+  name: 03 Sync
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/masterdb/etl/jobs/sync
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  Starter synken (synk.py) nå, uten å vente på kl. 03:00. Tar ingen body. Jobbene kjører ett om gangen,
+  så denne venter hvis en annen jobb pågår (se queuePosition).
+}
+
+tests {
+  test("svarer 202", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+
+  test("er en sync-jobb", function() {
+    expect(res.getBody().type).to.equal("sync");
+  });
+}
