@@ -52,9 +52,9 @@ public class RessursSokRepository {
 						       count(*) OVER () AS totalt
 						FROM treff
 						ORDER BY\s""" + switch (p.sorter()) {
-					case "relevans" -> "rang DESC, navn";
-					case "avstand" -> "avstand, navn";
-					default -> "navn";
+					case "relevans" -> "rang DESC, navn COLLATE \"nb-NO-x-icu\"";
+					case "avstand" -> "avstand, navn COLLATE \"nb-NO-x-icu\"";
+					default -> "navn COLLATE \"nb-NO-x-icu\"";
 				} + ", ressurs_id LIMIT :limit OFFSET :offset";
 
 		return hentSide(sql, sokeFilterSql.params, p, (rs, radnr) -> new Ressurs(
@@ -93,9 +93,9 @@ public class RessursSokRepository {
 				GROUP BY bygg_id, bygg_navn, bydel_navn, kommune_navn, adressetekst, postnummer,
 				          poststed, lat, lon, bygg_booking_url
 				ORDER BY\s""" + switch (p.sorter()) {
-			case "relevans" -> "rang DESC, bygg_navn";
-			case "avstand" -> "avstand, bygg_navn";
-			default -> "bygg_navn";
+			case "relevans" -> "rang DESC, bygg_navn COLLATE \"nb-NO-x-icu\"";
+			case "avstand" -> "avstand, bygg_navn COLLATE \"nb-NO-x-icu\"";
+			default -> "bygg_navn COLLATE \"nb-NO-x-icu\"";
 		} + ", bygg_id LIMIT :limit OFFSET :offset";
 
 		return hentSide(sql, sokeFilterSql.params, p, (rs, radnr) -> new Bygg(
@@ -124,9 +124,11 @@ public class RessursSokRepository {
 		boolean harFritekst = p.fritekst() != null;
 		if (harFritekst) {
 			// websearch_to_tsquery tåler hva som helst av brukerinput uten å kaste syntaksfeil.
+			//LIKE-delen gir substringtreff ("ng" -> "ungdomshus") som tsvector ikke kan
 			betingelser.add("(sokedokument @@ websearch_to_tsquery('norwegian', :fritekst)"
-					+ " OR strpos(navn_sok, lower(:fritekst)) > 0)");
+					+ " OR navn_sok LIKE lower(:fritekstLike) ESCAPE '\\')");
 			params.put("fritekst", p.fritekst());
+			params.put("fritekstLike", "%" + escapeLike(p.fritekst()) + "%");
 		}
 
 		if (!p.kommune().isEmpty()) {
@@ -212,5 +214,11 @@ public class RessursSokRepository {
 				p.side(),
 				p.storrelse());
 	}
+
+// Brukerens % og _ skal være vanlige tegn i LIKE-søket, ikke jokertegn.
+private static String escapeLike(String s) {
+	return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+}
+
 
 }
