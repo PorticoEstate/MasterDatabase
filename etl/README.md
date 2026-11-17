@@ -69,15 +69,32 @@ Alle tre stegene er trygge å kjøre på nytt — de endrer kun det som fortsatt
 mangler/er ukjent, aldri manuelt satte verdier. De eksakte kommandoene for
 hvert steg står i seksjonene under, i samme rekkefølge.
 
+**Mappestruktur** (`etl/`):
+
+```
+main.py        inngangen (ENTRYPOINT): kommandoer, daemon, sender SQL til psql
+jobserver.py   jobbkø, nattlig timer og internt HTTP-API
+jobs/          én fil per jobb: build.py, sync.py, geocode.py, gater.py
+lib/           delt kode: load.py, matrikkel.py, kommuner.py, source.py, sqlgen.py
+sql/           spørringene som kjøres med psql
+dev/           bare for utvikling: demo_normalisering/, check_matrikkel_auth.py
+ut/            generert SQL og mellomfiler (i .gitignore)
+```
+
+Jobbene kjøres som moduler fra `etl/`, f.eks. `cd etl && python3 -m jobs.sync ...`.
+
 **Filoversikt:**
 
 | Fil | Rolle |
 |---|---|
 | `backend/src/main/resources/db/migration/V*.sql` | Skjemaet (steg 1), kjøres av Flyway i backend |
 | `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
+| `etl/main.py` | Inngangen til etl-containeren (`ENTRYPOINT`): kommandoene `daemon`, `build`, `sync`, `geocode`, `gater`, `prune` og `status`. Kjører jobbene som moduler og sender SQL-en til `psql` |
+| `etl/jobserver.py` | Jobbkø, nattlig timer og det interne HTTP-API-et som backend bruker (se `main.py daemon`) |
 | `etl/jobs/build.py` | Steg 2, bygging: oppretter kodeverkene og laster alt annet. Kjøres én gang |
 | `etl/jobs/sync.py` | Steg 2, jevnlig synkronisering: som `jobs/build.py`, men skriver aldri kodeverkene |
-| `etl/lib/` | Hjelpekode delt av skriptene: `kommuner.py` (`KOMMUNER`, `les_kommuner`), `source.py` (`rens`, `hent_json`, `rens_post`, `som_heltall`) og `sqlgen.py` (`q`, `logg`, `i_blokk`, `ressurslenke_sql`) |
+| `etl/lib/` | Kode delt av skriptene: `load.py` (lastingen av én kommune, brukt av bygging og synk), `matrikkel.py` (SOAP-klient mot MatrikkelAPI, brukt av `geocode.py` og `gater.py`), `kommuner.py` (`KOMMUNER`, `les_kommuner`), `source.py` (`rens`, `hent_json`, `rens_post`, `som_heltall`) og `sqlgen.py` (`q`, `logg`, `i_blokk`, `ressurslenke_sql`, `logg_matrikkel`) |
+| `etl/sql/geocode_query.sql`, `etl/sql/status.sql` | Spørringen som lager input til geokodingen, og oversikten som `main.py status` viser |
 | `etl/sql/kommuner_query.sql` | Henter listen over kommuner som skal synkroniseres fra databasen (se "Hvilke kommuner som synkroniseres") |
 | `etl/dev/demo_normalisering/normaliser.py` | DEMO: lager normalisert JSON fra rå `searchdataall`. Slettes ved normalisering |
 | `etl/dev/demo_normalisering/{lokaletype,fasilitet,activity}_mapping/` | DEMO: vokabular (`venue_types.json`, `facilities.json`, `activities.json`) og mapping (`mapping.json`) som `normaliser.py` leser |
@@ -86,7 +103,7 @@ hvert steg står i seksjonene under, i samme rekkefølge.
 | `etl/dev/check_matrikkel_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
 **`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
-med én rad og URL per system. `jobs/build.py` og `jobs/sync.py` skriver ressursens egen
+med én rad og URL per system. `lib/load.py` (for bygging og synk) skriver ressursens egen
 bookinglenke (`ressurslenke_sql` i `lib/sqlgen.py`), og `v_ressurs_sok.booking_url`
 leses derfra. Lenker til andre systemer legges til av det som laster dem; synken
 rører dem ikke. Bygglenker bygges fortsatt i viewet.
@@ -282,10 +299,11 @@ radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
 er geokodet eller satt manuelt, og en kapasitet som er satt manuelt, overskrives
 ikke. Se db/schema_kjerne_dokumentasjon.md for detaljene.
 
-De to skriptene deler hjelpefunksjonene i `lib/`, men har hver sin kopi
-av selve lastingen, så en rettelse i den må gjøres i begge. `diff
-etl/jobs/build.py etl/jobs/sync.py` skal i praksis bare vise docstringen og
-kodeverksdelen.
+De to skriptene deler selve lastingen i `lib/load.py` (`generer_sql`); forskjellen
+mellom bygging og synk er flagget `initial_build`, som styrer opprettelsen av
+kodeverkskonsepter og om instansen registreres som aktiv. En rettelse i
+lastingen gjelder derfor begge. `jobs/build.py` og `jobs/sync.py` har bare
+docstring og kommandolinje.
 
 ## Avvik og kildeuttrekk
 

@@ -34,7 +34,7 @@ public class FagsystemInstansRepository
 	// Registers the instance and links it to the kommune. If an instance with this kildenokkel
 	// exists already (not expected: the service rejects a URL that is linked to a kommune, so this is only an
 	// orphaned instance) it is reused and its base_url and aktiv are set from the arguments.
-	// Without both rows etl/kommuner_query.sql does not list the kommune.
+	// Without both rows etl/sql/kommuner_query.sql does not list the kommune.
 	public void register(long kommuneId, String type, String kildenokkel, String navn, String baseUrl, boolean active)
 	{
 		jdbc.sql("""

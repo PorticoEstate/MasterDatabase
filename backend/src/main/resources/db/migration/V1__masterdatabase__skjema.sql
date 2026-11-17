@@ -427,9 +427,9 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 -- Merk: ressurs.ekstern_id (og fagsystem_instans_id) er nå teknisk overflødig,
 -- siden ressurslenke har samme informasjon for ressursens eget bookingsystem.
 -- De beholdes fordi innlastingen og synken bruker (fagsystem_instans_id,
--- ekstern_id) på ressurs som identitet (ON CONFLICT i jobs/build.py og jobs/sync.py)
+-- ekstern_id) på ressurs som identitet (ON CONFLICT i etl/lib/load.py)
 -- og for å finne ressursen når aktiviteter og fasiliteter lastes. Skal de
--- fjernes, må begge skriptene flyttes over til oppslag via ressurslenke, og
+-- fjernes, må etl/lib/load.py flyttes over til oppslag via ressurslenke, og
 -- bilde_url i viewet må få en annen kilde enn r.ekstern_id.
 -- =============================================================================
 

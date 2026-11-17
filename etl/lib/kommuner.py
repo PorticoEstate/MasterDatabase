@@ -56,7 +56,7 @@ def les_kommuner(fil: Path | None) -> dict:
     Uten fil: den innebygde KOMMUNER, med base_url utledet fra slug (jobs/build.py
     bruker KOMMUNER direkte; dette er bare standard for demo-normaliseringen).
     Med fil: kommunene som er registrert i databasen, én linje per kommune som
-    slug|kommunenr|navn|fylke|base_url (utdata fra kommuner_query.sql; jobs/sync.py
+    slug|kommunenr|navn|fylke|base_url (utdata fra sql/kommuner_query.sql; jobs/sync.py
     bruker alltid denne). En ugyldig linje hoppes over med en advarsel, så én
     dårlig rad ikke stopper hele kjøringen."""
     if fil is None:

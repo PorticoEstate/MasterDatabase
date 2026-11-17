@@ -18,9 +18,9 @@ ikke finnes i mapping.json, eller som er exclude-konsepter, får ingen kobling;
 de skrives til standard-feil så mappingen kan utvides.
 
 Bruk:
-    python3 etl/demo_normalisering/normaliser.py bergen
-    python3 etl/demo_normalisering/normaliser.py alle --ut etl/ut/normalisert
-    python3 etl/demo_normalisering/normaliser.py bergen --fra-fil etl/ut/ra
+    python3 etl/dev/demo_normalisering/normaliser.py bergen
+    python3 etl/dev/demo_normalisering/normaliser.py alle --ut etl/ut/normalisert
+    python3 etl/dev/demo_normalisering/normaliser.py bergen --fra-fil etl/ut/ra
 
     (cd etl && python3 -m jobs.build bergen --fra-fil ut/normalisert) > etl/ut/bergen.sql
 """
