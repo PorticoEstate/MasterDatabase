@@ -1,62 +1,25 @@
-#!/usr/bin/env python3
 """
-Bygger masterdatabasen fra Aktiv kommune. Kjøres én gang, når databasen
-bygges; deretter brukes synk.py.
-
-Forutsetter normaliserte instanser (se "Kildekontrakt" i etl/README.md). Mot
-en tom database opprettes kodeverkene (lokaletype, aktivitet, fasilitet) fra
-instansenes samlinger, med id, navn og forelder, sammen med bygg, ressurser og
-koblinger. Et konsept som allerede finnes røres aldri: masteren eier
-vokabularet, og forskjeller (samme id med annet navn eller annen forelder)
-loggføres i synk_avvik.
-
-Bruker bare Pythons innebygde bibliotek (urllib, json, re) - ingen "pip install"
-er nødvendig. Skriptet gjør ingenting mot databasen selv; det skriver SQL-tekst
-til standard-ut, som du deretter sender til Postgres. Det gjør at du kan se
-nøyaktig hva som skal skje før noe faktisk endres.
-
-Bruk:
-    python3 etl/last_inn.py bergen > etl/ut/bergen.sql
-    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/bergen.sql
-
-    python3 etl/last_inn.py alle > etl/ut/alle.sql
-    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
-
-    # Les <mappe>/<kommune>.json i stedet for å hente fra nettet:
-    python3 etl/last_inn.py alle --fra-fil etl/ut/normalisert > etl/ut/alle.sql
-    docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
-
-Se etl/README.md for full forklaring.
-
-Hver kjøring registrerer et kildeuttrekk (metadata: kilde, endepunkt,
-tidspunkt, HTTP-status - ikke hele svaret). Ethvert avvik - ugyldige verdier,
-brutte referanser, databasefeil - loggføres i synk_avvik sammen med den
-konkrete posten (renset for personopplysninger) som utløste det, ikke bare en
-feiltekst. Se db/schema_kjerne_dokumentasjon.md, "Innlasting og sporbarhet".
-
-Kjent forenkling: kommune_id settes her fra hvilken Aktiv kommune-instans
-ressursen kommer fra (f.eks. "bergen" -> kommunenr 4601). Det er riktig for
-alle de 12 instansene vi kjenner i dag, som hver betjener nøyaktig én kommune.
-Skjemaet (Flyway-migrasjonene i backend) tillater at en instans betjener flere kommuner
-via kommune_fagsystem_instans; den dagen det faktisk skjer, må kommune_id i
-stedet utledes fra en geokodet adresse. Se db/schema_kjerne_dokumentasjon.md.
+Innlasting fra Aktiv kommune til masterdatabasen: SQL for én kommune. Delt av
+jobs/build.py (bygging, én gang) og jobs/sync.py (jevnlig synk); forskjellen er
+bare flagget initial_build. En rettelse her gjelder derfor begge.
 """
-import argparse
 import json
 import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from helpers import ressurslenke_sql, KOMMUNER, hent_json, i_blokk, logg, q, rens, som_heltall
+from lib.source import hent_json, rens, som_heltall
+from lib.sqlgen import i_blokk, logg, q, ressurslenke_sql
 
 
 # Kodeverkene i kilden: (tabell i masteren, samling i searchdataall). Masteren
 # eier vokabularet og hierarkiet; instansene er normalisert mot det og bruker
-# samme id-er. Ved bygging opprettes konsepter masteren ikke har; et
-# eksisterende konsept røres aldri. Kildens samlinger (id, name, parent_id)
-# sammenlignes med masteren, og avvik logges. Koblingene (ressurs ->
-# lokaletype, aktivitet, fasilitet) eies av kommunen og lastes.
+# samme id-er. Ved bygging (initial_build) opprettes konsepter masteren ikke
+# har; et eksisterende konsept røres aldri. Synk skriver aldri i kodeverkene.
+# Kildens samlinger (id, name, parent_id) sammenlignes med masteren, og avvik
+# logges. Koblingene (ressurs -> lokaletype, aktivitet, fasilitet) eies av
+# kommunen og lastes i begge moduser.
 KODEVERK = (
     ("lokaletype", "resource_categories"),
     ("aktivitet", "activities"),
@@ -64,13 +27,15 @@ KODEVERK = (
 )
 
 
-def kodeverk_sql(kn, tabell, samling, rader):
-    """SQL for ett kodeverk fra kildens samling: opprettelse av konsepter som
-    mangler i masteren, og en sammenligning mot masterens kodeverk som
-    loggfører avvik. Masteren eier navn og hierarki, så et eksisterende
-    konsept endres aldri. Avvik: en id som ikke ble opprettet, samme id med et
-    annet navn eller en annen forelder, og poster som ikke kan sammenlignes
-    (manglende eller ugyldig id, tomt navn, id som går igjen)."""
+def kodeverk_sql(kn, tabell, samling, rader, initial_build):
+    """SQL for ett kodeverk fra kildens samling: ved initial_build opprettelse
+    av konsepter som mangler i masteren, og alltid en sammenligning mot
+    masterens kodeverk som loggfører avvik. Masteren eier navn og hierarki, så
+    et eksisterende konsept endres aldri, og uten initial_build skrives ingenting
+    i kodeverkstabellen. Avvik: en id som ikke finnes (ved initial_build: ikke
+    ble opprettet), samme id med et annet navn eller en annen forelder, og
+    poster som ikke kan sammenlignes (manglende eller ugyldig id, tomt navn, id
+    som går igjen)."""
     sql = ""
     konsepter = {}   # id -> (navn, forelderens id eller None)
     for rad in rader:
@@ -94,18 +59,21 @@ def kodeverk_sql(kn, tabell, samling, rader):
     if konsepter:
         v = ("(VALUES " + ",".join(f"({nr},{q(n)},{'NULL' if f is None else f})" for nr, (n, f) in konsepter.items())
              + ") AS v(id,navn,forelder)")
-        # Opprett konsepter som mangler. Første kilde som bruker en id eller et
-        # navn vinner; at en id ikke ble opprettet (navnet er tatt av en annen
-        # id) fanges av sjekkene under. Forelder settes bare for konsepter som
-        # ble opprettet nå, og bare når forelderen finnes i masteren.
-        sql += (
-            "DO $bygg$ DECLARE ny bigint[]; BEGIN\n"
-            f"WITH ins AS (INSERT INTO {tabell} (id,navn) SELECT id,navn FROM {v} "
-            f"ON CONFLICT DO NOTHING RETURNING id) SELECT array_agg(id) INTO ny FROM ins;\n"
-            f"UPDATE {tabell} t SET parent_id=v.forelder::bigint FROM {v} "
-            f"WHERE t.id=v.id AND t.id=ANY(ny) AND EXISTS (SELECT 1 FROM {tabell} p WHERE p.id=v.forelder::bigint);\n"
-            "END $bygg$;\n")
-        mangler = "id kunne ikke opprettes i masteren (navnet brukes av en annen id)"
+        if initial_build:
+            # Opprett konsepter som mangler. Første kilde som bruker en id eller et
+            # navn vinner; at en id ikke ble opprettet (navnet er tatt av en annen
+            # id) fanges av sjekkene under. Forelder settes bare for konsepter som
+            # ble opprettet nå, og bare når forelderen finnes i masteren.
+            sql += (
+                "DO $bygg$ DECLARE ny bigint[]; BEGIN\n"
+                f"WITH ins AS (INSERT INTO {tabell} (id,navn) SELECT id,navn FROM {v} "
+                f"ON CONFLICT DO NOTHING RETURNING id) SELECT array_agg(id) INTO ny FROM ins;\n"
+                f"UPDATE {tabell} t SET parent_id=v.forelder::bigint FROM {v} "
+                f"WHERE t.id=v.id AND t.id=ANY(ny) AND EXISTS (SELECT 1 FROM {tabell} p WHERE p.id=v.forelder::bigint);\n"
+                "END $bygg$;\n")
+            mangler = "id kunne ikke opprettes i masteren (navnet brukes av en annen id)"
+        else:
+            mangler = "id finnes ikke i masteren"
         # Egen DO-blokk, siden løkkevariabelen må deklareres. Avvik mot masteren
         # er sjekker, ikke en grunn til å stoppe lastingen.
         sql += (
@@ -141,13 +109,18 @@ def ukjente_id_er_sql(kn, tabell, samling, felt, ider):
             "END LOOP;\nEND $chk$;\n")
 
 
-def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
-    """Skriver SQL for én kommune. Returnerer False hvis henting feilet. Med
-    fra_fil leses <fra_fil>/<slug>.json i stedet for endepunktet; svaret skal ha
-    samme form som searchdataall."""
-    knr, knavn, fylke = KOMMUNER[slug]
+def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
+                initial_build: bool) -> bool:
+    """Skriver SQL for én kommune. kommune er (kommunenr, navn, fylke, base_url).
+    Returnerer False hvis henting feilet. Med fra_fil leses <fra_fil>/<slug>.json
+    i stedet for endepunktet; svaret skal ha samme form som searchdataall.
+
+    initial_build=True (jobs/build.py): oppretter kodeverkskonsepter masteren
+    mangler, og registrerer instansen som aktiv. False (jobs/sync.py): skriver
+    aldri i kodeverkene, og lar instansen få databasens standard for aktiv."""
+    knr, knavn, fylke, base_url = kommune
     kn = f"aktiv-kommune:{slug}"
-    url = f"https://{slug}.aktiv-kommune.no/bookingfrontend/searchdataall"
+    url = f"{base_url}/bookingfrontend/searchdataall"
     if fra_fil:
         fil = fra_fil / f"{slug}.json"
         url = fil.resolve().as_uri()
@@ -181,8 +154,9 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
     w(f"-- {knavn}\n")
     w(f"INSERT INTO kommune (kommunenr,navn,fylkesnavn) "
       f"VALUES ({q(knr)},{q(knavn)},{q(fylke)}) ON CONFLICT (kommunenr) DO NOTHING;\n")
-    w(f"INSERT INTO fagsystem_instans (kildenokkel,type,navn,base_url,aktiv) "
-      f"VALUES ({q(kn)},'booking',{q('Aktiv kommune ' + knavn)},{q('https://' + slug + '.aktiv-kommune.no')},TRUE) "
+    # Bare bygging setter aktiv eksplisitt; ved synk gjelder databasens standard.
+    w(f"INSERT INTO fagsystem_instans (kildenokkel,type,navn,base_url{',aktiv' if initial_build else ''}) "
+      f"VALUES ({q(kn)},'booking',{q('Aktiv kommune ' + knavn)},{q(base_url)}{',TRUE' if initial_build else ''}) "
       f"ON CONFLICT (kildenokkel) DO NOTHING;\n")
     # Ekte mange-til-mange: en kommune kan ha flere instanser (booking, fdv,
     # sensor, ...), én instans kan betjene flere kommuner. uniq_kommune_
@@ -192,9 +166,9 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
       f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
       f"ON CONFLICT (kommune_id,fagsystem_instans_id) DO NOTHING;\n\n")
 
-    # --- kodeverk: masterens vokabular ---
+    # --- kodeverk: masterens vokabular (opprettes ved bygging, sjekkes alltid) ---
     for tabell, samling in KODEVERK:
-        w(kodeverk_sql(kn, tabell, samling, d.get(samling, [])))
+        w(kodeverk_sql(kn, tabell, samling, d.get(samling, []), initial_build))
     w("\n")
     # id-er i koblingene som masteren må kjenne; sjekkes samlet etter at
     # koblingene er skrevet. Nøkkel: (tabell, samling, felt i kilden).
@@ -223,7 +197,7 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
 
         # Kildedata gir ikke gatenavn og husnummer separat, bare hele
         # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
-        # den; gate_id/husnr/posisjon fylles av matrikkel_adresse.py.
+        # den; gate_id/husnr/posisjon fylles av jobs/geocode.py.
         sql = (
             f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id) "
             f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])} "
@@ -244,7 +218,7 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
                 # Rører ikke en adresse som allerede er geokodet eller satt manuelt.
                 f"ON CONFLICT (bygning_id) WHERE er_hovedadresse "
                 f"DO UPDATE SET adressetekst=EXCLUDED.adressetekst, postnummer=EXCLUDED.postnummer, "
-                f"poststed=EXCLUDED.poststed WHERE adresse.geokoding IN ('ukjent','feilet');\n"
+                f"poststed=EXCLUDED.poststed WHERE adresse.geokoding = 'ukjent';\n"
             )
         w(avvik)
         w(i_blokk(kn, "buildings", b["id"], sql, rapost=b))
@@ -356,22 +330,3 @@ def generer_sql(slug: str, ut, fra_fil: Path | None = None) -> bool:
     w("COMMIT;\n")
     print(f"  {len(d.get('buildings', []))} bygg, {len(d.get('resources', []))} ressurser", file=sys.stderr)
     return True
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Bygger masterdatabasen fra Aktiv kommune; skriver SQL til standard-ut.",
-                                     epilog="Kjente kommuner: " + ", ".join(KOMMUNER))
-    parser.add_argument("kommune", choices=(*KOMMUNER, "alle"), metavar="kommune|alle")
-    parser.add_argument("--fra-fil", type=Path, metavar="MAPPE",
-                        help="les MAPPE/<kommune>.json i stedet for å hente fra nettet")
-    args = parser.parse_args()
-
-    valg = list(KOMMUNER) if args.kommune == "alle" else [args.kommune]
-    feilet = [slug for slug in valg if not generer_sql(slug, sys.stdout, args.fra_fil)]
-    if feilet:
-        print(f"\nHenting feilet for: {', '.join(feilet)} (loggført i synk_avvik)", file=sys.stderr)
-        sys.exit(2)
-
-
-if __name__ == "__main__":
-    main()

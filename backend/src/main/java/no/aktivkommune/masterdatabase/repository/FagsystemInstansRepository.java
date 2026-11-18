@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 // fagsystem_instans and its link to kommuner (kommune_fagsystem_instans). The same rows are
-// written by etl/synk.py and etl/last_inn.py, so kildenokkel is the shared key. A kommune has
+// written by etl/jobs/sync.py and etl/jobs/build.py, so kildenokkel is the shared key. A kommune has
 // at most one instance per type (uniq_kommune_fagsystem_type).
 @Repository
 public class FagsystemInstansRepository
@@ -34,7 +34,7 @@ public class FagsystemInstansRepository
 	// Registers the instance and links it to the kommune. If an instance with this kildenokkel
 	// exists already (not expected: the service rejects a URL that is linked to a kommune, so this is only an
 	// orphaned instance) it is reused and its base_url and aktiv are set from the arguments.
-	// Without both rows etl/kommuner_query.sql does not list the kommune.
+	// Without both rows etl/sql/kommuner_query.sql does not list the kommune.
 	public void register(long kommuneId, String type, String kildenokkel, String navn, String baseUrl, boolean active)
 	{
 		jdbc.sql("""
