@@ -1,0 +1,36 @@
+meta {
+  name: 02 Gater for en kommune
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/masterdb/etl/jobs/gater
+  body: json
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "kommunenr": ["4601"]
+  }
+}
+
+docs {
+  Som 01, men bare for de oppgitte kommunene. En gater-jobb med kommunenr og en uten er ulike jobber,
+  så de slås ikke sammen. Kommunenr må være fire siffer.
+}
+
+tests {
+  test("svarer 202", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+
+  test("er en gater-jobb", function() {
+    expect(res.getBody().type).to.equal("gater");
+  });
+}

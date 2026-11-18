@@ -22,6 +22,10 @@ Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-d
 |---|---|---|
 | GET | `/masterdb/search` | Fritekstsøk med filtre. Returnerer både `bygg` og `ressurser`, hver paginert. |
 | GET | `/masterdb/search/filter` | Valgene til filterpanelet: kommuner (kode + navn), lokaletyper, aktiviteter og fasiliteter (id + navn). Hentes én gang, ikke per tastetrykk. |
+| POST | `/masterdb/etl/jobs/sync` | Setter en synk av alle kommuner i kø i etl-containeren. Krever API-nøkkel. Svarer 202 med jobb-id. |
+| POST | `/masterdb/etl/jobs/geocode` | Setter Matrikkel-geokodingen i kø. Krever API-nøkkel. Svarer 202 med jobb-id. |
+| POST | `/masterdb/etl/jobs/gater` | Setter gateuttrekket fra Matrikkelen i kø. Valgfri body `{"kommunenr": [...]}` begrenser det til de kommunene; uten body hentes alle. 400 ved ugyldig body. Krever API-nøkkel. Svarer 202 med jobb-id. |
+| GET | `/masterdb/etl/jobs` og `/masterdb/etl/jobs/{id}` | Siste jobber og status for én jobb. Krever API-nøkkel. |
 | GET | `/masterdb/kommune` | Alle kommuner, sortert på navn. `bookingBaseUrl` og `bookingAktiv` viser hvilke som synkroniseres. Krever API-nøkkel. |
 | GET | `/masterdb/kommune/{id}` | Én kommune på intern id. 404 hvis den ikke finnes. Krever API-nøkkel. |
 | POST | `/masterdb/kommune` | Oppretter en kommune fra `{kommunenr, navn, fylkesnavn, bookingBaseUrl, active}`. `bookingBaseUrl` er påkrevd (`https://<navn>.aktiv-kommune.no`) og registrerer kommunens bookingsystem i samme kall. `active` (boolean) er påkrevd og bestemmer om det er aktivt; en inaktiv kilde synkroniseres ikke før den aktiveres med `PATCH .../booking`. 201 med den opprettede kommunen, 400 ved ugyldig input, manglende eller ugyldig URL, manglende `active`, 409 hvis `kommunenr` finnes fra før eller URL-en er registrert på en annen kommune. Krever API-nøkkel. |
@@ -33,7 +37,7 @@ Stiene er engelske, mens query-parametre (`fritekst`, `kommune`, `lokaletype`, `
 
 Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java`, `repository/RessursSokRepository.java` (all SQL for søket) og `dto/`.
 
-Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (kommune-tabellen) og `repository/FagsystemInstansRepository.java` (fagsystem-instanser og koblingen til kommunen); begge bruker ren SQL via `JdbcClient`. Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/helpers.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
+Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (kommune-tabellen) og `repository/FagsystemInstansRepository.java` (fagsystem-instanser og koblingen til kommunen); begge bruker ren SQL via `JdbcClient`. Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/lib/kommuner.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
 
 ## API-dokumentasjon (Swagger / OpenAPI)
 
@@ -64,7 +68,7 @@ Husk å committe den oppdaterte filen. Hvis ingen bruker filen, kan den fjernes,
 - Legg `@Operation(summary = "...", description = "...")` på metoden og `@Tag` på controlleren.
 - Bruk `@ParameterObject` på en DTO som tar imot query-parametre. Uten den vises DTO-en som ett parameter i stedet for ett per felt.
 - Beskriv felt med `@Schema(description = "...")` i DTO-ene.
-- En controller som krever API-nøkkelen får `@SecurityRequirement(name = "apiKey")` (skjemaet er deklarert i `OpenApiConfig`). Dokumenter feilene springdoc ikke kan gjette (400, 401, 404, 409) med `@ApiResponse`; suksesskoden hentes fra `@ResponseStatus`.
+- En controller som krever API-nøkkelen får `@SecurityRequirement(name = "apiKey")` (skjemaet er deklarert i `OpenApiConfig`). Dokumenter feilene springdoc ikke kan gjette (400, 401, 404, 409) med `@ApiResponse`; svar som gjelder alle endepunktene i en controller (for eksempel 502/503 i `EtlController`) settes på klassen; suksesskoden hentes fra `@ResponseStatus`.
 
 ## Testing med Bruno
 

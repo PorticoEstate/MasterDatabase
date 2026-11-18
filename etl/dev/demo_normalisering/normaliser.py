@@ -2,7 +2,7 @@
 """
 DEMO: gjør en rå Aktiv kommune-instans om til det en normalisert instans ville
 levere. Skal slettes (sammen med mappene med mapping og vokabular) når
-instansene er normalisert - last_inn.py trenger ingen endring.
+instansene er normalisert - jobs/build.py trenger ingen endring.
 
 Skriptet leser searchdataall (fra nettet, eller fra en fil) og skriver samme
 JSON-form tilbake, men med kodeverkene erstattet:
@@ -18,11 +18,11 @@ ikke finnes i mapping.json, eller som er exclude-konsepter, får ingen kobling;
 de skrives til standard-feil så mappingen kan utvides.
 
 Bruk:
-    python3 etl/demo_normalisering/normaliser.py bergen
-    python3 etl/demo_normalisering/normaliser.py alle --ut etl/ut/normalisert
-    python3 etl/demo_normalisering/normaliser.py bergen --fra-fil etl/ut/ra
+    python3 etl/dev/demo_normalisering/normaliser.py bergen
+    python3 etl/dev/demo_normalisering/normaliser.py alle --ut etl/ut/normalisert
+    python3 etl/dev/demo_normalisering/normaliser.py bergen --fra-fil etl/ut/ra
 
-    python3 etl/last_inn.py bergen --fra-fil etl/ut/normalisert > etl/ut/bergen.sql
+    (cd etl && python3 -m jobs.build bergen --fra-fil ut/normalisert) > etl/ut/bergen.sql
 """
 import argparse
 import json
@@ -32,9 +32,10 @@ import unicodedata
 from pathlib import Path
 
 HER = Path(__file__).resolve().parent
-ETL = HER.parent
+ETL = HER.parent.parent
 sys.path.insert(0, str(ETL))
-from helpers import hent_json, kommuner_fra_kommandolinje, rens  # noqa: E402
+from lib.kommuner import kommuner_fra_kommandolinje  # noqa: E402
+from lib.source import hent_json, rens  # noqa: E402
 
 # Mapping og vokabular per kodetype, i samme format for alle tre (se
 # activity_mapping/AktivKommune_activity_normalisation.md): mapping.json har

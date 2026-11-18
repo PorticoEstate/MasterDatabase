@@ -1,10 +1,11 @@
 -- Read-only overview for checking a deployment.
--- Run with: docker compose exec etl ./run.sh status
+-- Run with: docker compose exec etl python3 main.py status
 \echo '== Row counts'
 SELECT 'kommune' AS tabell, count(*) AS antall FROM kommune
 UNION ALL SELECT 'fagsystem_instans', count(*) FROM fagsystem_instans
 UNION ALL SELECT 'bygning', count(*) FROM bygning
 UNION ALL SELECT 'adresse', count(*) FROM adresse
+UNION ALL SELECT 'gate', count(*) FROM gate
 UNION ALL SELECT 'ressurs', count(*) FROM ressurs
 UNION ALL SELECT 'lokaletype', count(*) FROM lokaletype
 UNION ALL SELECT 'aktivitet', count(*) FROM aktivitet

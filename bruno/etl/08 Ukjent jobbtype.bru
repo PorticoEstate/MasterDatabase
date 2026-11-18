@@ -1,0 +1,26 @@
+meta {
+  name: 08 Ukjent jobbtype
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/masterdb/etl/jobs/build
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  Bare sync, geocode og gater kan startes utenfra. build og prune er interne. Hver type har sitt eget endepunkt,
+  og POST på /jobs/build treffer bare GET /jobs/{id}, så svaret er 405.
+}
+
+tests {
+  test("svarer 405", function() {
+    expect(res.getStatus()).to.equal(405);
+  });
+}
