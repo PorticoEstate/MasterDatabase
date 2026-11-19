@@ -14,7 +14,7 @@ def er_persondatafelt(felt: str) -> bool:
     fritekst) eller en kopi av dem (json_representation), og som derfor ikke
     tas med i en post som lagres som rapost på et avvik. "organizations"
     (privatpersoner som søkere) brukes aldri i det hele tatt av dette
-    skriptet. Se "Personvern" i db/schema_kjerne_dokumentasjon.md."""
+    skriptet."""
     return felt.startswith("tilsyn") or felt in ("contact_info", "json_representation",
                                                 "organizations_ids")
 

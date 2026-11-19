@@ -1,9 +1,10 @@
-# ETL: innlasting til masterdatabasen
+# Innlasting fra Aktiv kommune
 
-Henter data fra Aktiv kommune (og beriker med Matrikkelen) og skriver SQL som
-fyller masterdatabasen. Skriptene rører aldri databasen selv; `main.py` sender SQL-en
-til `psql`. Hele pipelinen kjører i etl-containeren, og tabellene er beskrevet i
-`db/schema_kjerne_dokumentasjon.md`.
+To skript henter data fra Aktiv kommune og skriver SQL som fyller
+masterdatabasen: `jobs/build.py` bygger databasen (kjøres én gang), og `jobs/sync.py`
+holder den oppdatert etterpå (kjøres jevnlig, f.eks. fra cron). Se
+kommentarene i `backend/src/main/resources/db/migration/V1__masterdatabase__skjema.sql`
+for hva tabellene betyr.
 
 ## Pipelinen
 

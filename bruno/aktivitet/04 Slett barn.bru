@@ -1,0 +1,29 @@
+meta {
+  name: 04 Slett barn
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/masterdb/aktivitet/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 9002
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  Sletter testaktiviteten 9002. Koblinger fra ressurser til aktiviteten fjernes også.
+}
+
+tests {
+  test("svarer 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
