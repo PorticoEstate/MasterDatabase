@@ -109,6 +109,22 @@ def ukjente_id_er_sql(kn, tabell, samling, felt, ider):
             "END LOOP;\nEND $chk$;\n")
 
 
+def deaktiver_forsvunne_sql(kn, tabell, samling, ider):
+    """Setter aktiv=FALSE på instansens rader i `tabell` (bygning eller ressurs)
+    som ikke lenger finnes i uttrekket. Raden slettes ikke; kommer den tilbake
+    i et senere uttrekk, aktiveres den igjen av innlastingen. Bygg uten instans
+    (bare kjent fra matrikkelen) berøres ikke. Et uttrekk helt uten poster
+    tolkes som en feil i kilden, ikke som at alt er borte: da deaktiveres
+    ingenting, og det loggføres."""
+    if not ider:
+        return logg(kn, samling, "annet", None,
+                    f"uttrekket har ingen poster i {samling}; deaktivering hoppet over")
+    liste = ",".join(q(i) for i in sorted(ider, key=str))
+    return (f"UPDATE {tabell} x SET aktiv=FALSE FROM fagsystem_instans fi "
+            f"WHERE fi.id=x.fagsystem_instans_id AND fi.kildenokkel={q(kn)} AND x.aktiv "
+            f"AND x.ekstern_id <> ALL (ARRAY[{liste}]::text[]);\n")
+
+
 def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
                 initial_build: bool) -> bool:
     """Skriver SQL for én kommune. kommune er (kommunenr, navn, fylke, base_url).
@@ -206,7 +222,8 @@ def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
             # Aktiv kommune vinner på disse feltene (se "Autoritet" i dokumentasjonen).
             f"ON CONFLICT (fagsystem_instans_id,ekstern_id) "
             f"WHERE fagsystem_instans_id IS NOT NULL AND ekstern_id IS NOT NULL "
-            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn;\n"
+            # Et bygg som er i uttrekket er aktivt (også et som var borte og er tilbake).
+            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn, aktiv=TRUE;\n"
         )
         if gate:
             sql += (
@@ -273,16 +290,20 @@ def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
           f"ON CONFLICT (fagsystem_instans_id,ekstern_id) DO UPDATE SET navn=EXCLUDED.navn, "
           # Aktiv kommune har fasiten på hvilket bygg en ressurs hører til.
           f"kapasitet=EXCLUDED.kapasitet, lokaletype_id=EXCLUDED.lokaletype_id, "
-          f"bygning_id=EXCLUDED.bygning_id;\n")
+          f"bygning_id=EXCLUDED.bygning_id, aktiv=EXCLUDED.aktiv;\n")
+    # Bygg og ressurser som var i et tidligere uttrekk, men ikke i dette.
+    w(deaktiver_forsvunne_sql(kn, "bygning", "buildings",
+                              {b["id"] for b in d.get("buildings", []) if b.get("id") is not None}))
+    w(deaktiver_forsvunne_sql(kn, "ressurs", "resources",
+                              {r["id"] for r in d.get("resources", []) if r.get("id") is not None}))
     # Link to the resource in its own booking system (ressurslenke).
     w(ressurslenke_sql(kn))
     w("\n")
 
-    # --- koblinger, med avviksloggføring for brutte referanser ---
-    # searchdataall er et delvis uttrekk: koblingstabellene eksporteres
-    # komplett, mens bygg- og ressurslistene er filtrert. Rader som peker på
-    # noe utenfor uttrekket kan ikke lastes, og loggføres i stedet for å
-    # forkastes stille.
+    # --- koblinger ---
+    # Koblingstabellene i searchdataall har også rader for bygg og ressurser
+    # som ikke er med i uttrekket. De hoppes over uten avvik: bygg- og
+    # ressurslistene er fasiten på hva som finnes.
     kjente_ressurser = {r["id"] for r in d.get("resources", [])}
     # Koblingene er helt avledet av kilden, så de bygges på nytt hver gang -
     # ellers ville koblinger fra en tidligere versjon av kilden bli liggende.
@@ -296,8 +317,6 @@ def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
     ]:
         for rad in d.get(samling, []):
             if rad["resource_id"] not in kjente_ressurser:
-                w(logg(kn, samling, "manglende_forelder", rad["resource_id"],
-                       "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=rad))
                 continue
             nr, feil = som_heltall(rad[idfelt])
             if nr is None:
@@ -311,14 +330,6 @@ def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
               f"WHERE fi.kildenokkel={q(kn)} AND r.ekstern_id={q(rad['resource_id'])} "
               f"AND t.id={nr} "
               f"ON CONFLICT DO NOTHING;\n")
-
-    for br in d.get("building_resources", []):
-        if br["building_id"] not in kjente_bygg:
-            w(logg(kn, "building_resources", "manglende_forelder", br["building_id"],
-                   "building_id finnes ikke i uttrekket", "building_id", "building_id", rapost=br))
-        if br["resource_id"] not in kjente_ressurser:
-            w(logg(kn, "building_resources", "manglende_forelder", br["resource_id"],
-                   "resource_id finnes ikke i uttrekket", "resource_id", "resource_id", rapost=br))
 
     # Kommunen eier koblingene, men ikke vokabularet: en kobling til en id
     # masteren ikke kjenner lastes ikke, og avviket logges én gang per id.
