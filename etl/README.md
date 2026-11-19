@@ -102,12 +102,6 @@ Jobbene kjøres som moduler fra `etl/`, f.eks. `cd etl && python3 -m jobs.sync .
 | `etl/jobs/gater.py` | Henter ALLE gater for en kommune fra Matrikkelen inn i `gate`. Kjøres av daemonen én gang etter første bygg, og ellers for hånd med `main.py gater` |
 | `etl/dev/check_matrikkel_auth.py` | Verifiserer at Matrikkel-innlogging virker, før man kjører steg 3 |
 
-**`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
-med én rad og URL per system. `lib/load.py` (for bygging og synk) skriver ressursens egen
-bookinglenke (`ressurslenke_sql` i `lib/sqlgen.py`), og `v_ressurs_sok.booking_url`
-leses derfra. Lenker til andre systemer legges til av det som laster dem; synken
-rører dem ikke. Bygglenker bygges fortsatt i viewet.
-
 ## Forutsetning: HTTPS må virke fra WSL
 
 Skriptet henter data over internett. På en Capgemini-maskin krever det at
@@ -171,154 +165,9 @@ før du kjører skriptene.
 
 ## Bygging og synk
 
-Masteren eier vokabularet og hierarkiet (`lokaletype`, `aktivitet`, `fasilitet`).
-Kommunen eier derimot det den selv registrerer: bygg, ressurser og koblingene
-fra ressurs til bygg, lokaletype, aktivitet og fasilitet. Skriptene skiller seg
-bare på hvordan de behandler kodeverkene(`lokaletype`, `aktivitet`, `fasilitet`):
-
-| | `jobs/build.py` (bygging, én gang) | `jobs/sync.py` (jevnlig) |
-|---|---|---|
-| Kodeverk | Oppretter konsepter som mangler (`id`, `navn`, forelder). Et konsept som finnes røres aldri | Skriver aldri |
-| Avvik fra masteren (samme id med annet navn eller annen forelder) | Loggføres i `synk_avvik` | Loggføres i `synk_avvik` |
-| Bygg og ressurser, også nye | Lastes | Lastes |
-| Koblinger ressurs → bygg, lokaletype, aktivitet, fasilitet | Lastes. Kilden vinner | Lastes. Kilden vinner |
-| Kobling til en id masteren ikke kjenner | Lastes ikke, loggføres én gang per id | Lastes ikke, loggføres én gang per id |
-
-Et nytt konsept opprettes altså bare i masteren (manuelt, med id satt manuelt),
-aldri av en instans etter bygging. En instans som begynner å bruke en ny id,
-gir avvik og ingen kobling til den id-en.
-
-## Hvilke kommuner som synkroniseres
-
-De to skriptene får kommunelisten fra hver sin kilde, og det er ikke valgfritt:
-
-- **Bygging** (`jobs/build.py`) bruker alltid den innebygde `KOMMUNER` i `lib/kommuner.py`. Den er
-  utgangspunktet for en tom master, og byggingen registrerer hver kommune og dens Aktiv
-  kommune-instans i databasen.
-- **Synk** (`jobs/sync.py`) bruker alltid kommunene som er registrert i databasen, og nekter å
-  kjøre uten `--kommuner-fil`. Den faller aldri tilbake på den innebygde listen.
-  Demo-normaliseringen følger samme liste som skriptet den mater: uten `--kommuner-fil`
-  (bygging) bruker den den innebygde listen, med filen (synk) databaselisten.
-
-`main.py sync` lager synk-listen ved å kjøre `sql/kommuner_query.sql`, som lister alle kommuner
-som har en **aktiv** `fagsystem_instans` av typen `booking` med `kildenokkel` som begynner
-på `aktiv-kommune:`. Resultatet (`slug|kommunenr|navn|fylke|base_url`, én linje per kommune) skrives
-til `etl/ut/kommuner.txt` og sendes med `--kommuner-fil`. Hvis spørringen feiler,
-synkroniseres ingenting den natten.
-
-For hånd:
-
-```bash
-psql -tA -F'|' -f etl/sql/kommuner_query.sql > etl/ut/kommuner.txt
-(cd etl && python3 -m jobs.sync alle --kommuner-fil ut/kommuner.txt) > etl/ut/synk.sql
-```
-
-### `--kommuner-fil` og `--fra-fil`
-
-De to flaggene gjør hver sin ting og kan brukes sammen:
-
-| Flagg | Hva det styrer | Innhold |
-|---|---|---|
-| `--kommuner-fil FIL` | **Hvilke kommuner** som behandles | En tekstfil, én linje per kommune: `slug\|kommunenr\|navn\|fylke\|base_url` (utdata fra `sql/kommuner_query.sql`) |
-| `--fra-fil MAPPE` | **Hvor dataene hentes fra** | En mappe med `<slug>.json` i samme form som `searchdataall`, i stedet for å hente fra nettet (brukes av demo-normaliseringen) |
-
-### Legge til en kommune
-
-Opprett kommunen med `POST /masterdb/kommune` og oppgi `bookingBaseUrl`, for eksempel
-`https://bergen.aktiv-kommune.no`. Det eneste som kreves er det ene kallet: API-et
-registrerer Aktiv kommune-instansen og kobler den til kommunen i samme transaksjon, og
-kommunen synkroniseres når kilden er aktivert (se under).
-
-```json
-{ "kommunenr": "4601", "navn": "Bergen", "fylkesnavn": "Vestland",
-  "bookingBaseUrl": "https://bergen.aktiv-kommune.no", "active": true }
-```
-
-- **URL-en valideres strengt:** `https`, ett subdomene under `aktiv-kommune.no`, ingen sti,
-  ingen port. ETL henter fra URL-en som er lagret, så andre verter avvises (400) både i API-et
-  og når ETL leser listen.
-- **En kilde tilhører én kommune.** Er URL-en allerede registrert på en annen kommune, blir
-  svaret 409 og kommunen opprettes ikke.
-- **`bookingBaseUrl` er påkrevd** ved opprettelse (uten den blir svaret 400), og kilden registreres
-  med aktiv-status fra det påkrevde feltet `active` (boolean; manglende gir 400).
-- **URL-en settes bare ved opprettelse.** `PUT /masterdb/kommune/{id}` endrer `kommunenr`, `navn` og
-  `fylkesnavn`, og rører aldri bookingkilden, fordi kommunens bygg og ressurser er knyttet til instansen
-  de ble lastet fra. For å bytte URL: slett kommunen og opprett den på nytt.
-- Å fjerne en kommune med `DELETE` fjerner også kilden hvis ingen annen kommune bruker den, så
-  samme URL kan registreres på nytt.
-- En ny kommune opprettes med inaktiv bookingkilde (`aktiv = false`) og synkroniseres ikke før den
-  aktiveres med `PATCH` under. Seed-kommunene fra `jobs/build.py` er aktive.
-- **Stoppe og gjenoppta synkroniseringen** uten å slette kommunen: `PATCH /masterdb/kommune/{id}/booking`
-  med `{"aktiv": false}` (eller `true`). `bookingAktiv` i svaret fra `GET` viser status.
-
-Er kommunen opprettet på annen måte enn gjennom API-et, kan kilden også registreres for hånd.
-Bytt ut `<slug>` (subdomenet; små bokstaver, tall og `-`), `<Navn>` og
-`<kommunenr>`:
-
-```sql
-INSERT INTO fagsystem_instans (kildenokkel, type, navn, base_url)
-VALUES ('aktiv-kommune:<slug>', 'booking', 'Aktiv kommune <Navn>', 'https://<slug>.aktiv-kommune.no');
-
-INSERT INTO kommune_fagsystem_instans (kommune_id, fagsystem_instans_id, type)
-SELECT k.id, fi.id, fi.type FROM kommune k, fagsystem_instans fi
-WHERE k.kommunenr = '<kommunenr>' AND fi.kildenokkel = 'aktiv-kommune:<slug>';
-```
-
-Ting å vite:
-- Bare `jobs/sync.py` laster en kommune som er lagt til slik. Den laster bygg, ressurser og
-  koblinger, men skriver aldri kodeverkene, så id-er masteren ikke kjenner loggføres i
-  `synk_avvik` og kobles ikke.
-- Mens `NORMALISER_DEMO=true` kjenner demo-mappingfilene bare de eksisterende kildene, så
-  regn med `synk_avvik`-rader for en ny kommune helt til instansen er normalisert.
-- Kommunen lastes ved neste nattlige synk. For å laste den med en gang:
-  `docker compose exec etl python3 main.py sync`.
-- En URL med skrivefeil blir godtatt hvis formen stemmer. Den gir en mislykket henting i
-  `synk_avvik` ved neste synk, ikke en feil ved opprettelsen.
-
-## Hva skriptene gjør og ikke gjør
-
-Laster: kommune, bygg, adresser (som de står i kilden, uten koordinater) og
-ressurser. Ressursene kobles direkte til kodeverkene på id
-(`ressurs.lokaletype_id`, `ressurs_aktivitet`, `ressurs_fasilitet`). Kildens
-egne koder lagres ikke; etter normalisering er de lik masterens id-er.
-
-Skriptene gjør ingen oversettelse. Det er instansene som skal levere et
-normalisert kodeverk med masterens id-er (se "Kildekontrakt"). Brudd på
-kontrakten loggføres i `synk_avvik`. Kodeverkene er tomme i en ny database til
-`jobs/build.py` er kjørt.
-
-Koblingene (`ressurs_aktivitet`, `ressurs_fasilitet`)
-bygges på nytt for instansen ved hver kjøring. Kodeverkene selv får aldri
-konsepter fjernet; et konsept som forsvinner fra kilden, blir stående.
-
-Laster **ikke**: koordinater og matrikkeldata (eget steg, se
-"Geokoding og bygningsberikelse" under), og **ikke** `organizations`-samlingen
-fra kilden, som inneholder personopplysninger om søkere - se prosjektets
-minne om dette.
-
-Unntak: hvert bygg i kilden kan ha `cadastral_references` (en liste). Fra den
-leses høyst ett bygningsnummer (entries med `cadastral_type` `BUILDING` og et
-positivt heltall i `building_number`) og skrives til `bygning.bygningsnr` bare
-når kolonnen er NULL; en verdi Matrikkelen har gitt overskrives aldri. Tallet er
-en påstand fra kilden til geocode har bekreftet det. Flere forskjellige tall,
-en ugyldig verdi, eller en entry med `building_id`/`municipality_id` som ikke
-stemmer, gir en rad i `synk_avvik` og brukes ikke. Settes et tall på et bygg som
-geocode allerede har sett uten å få bygningsnr (`matrikkel_match` `adresse` eller
-`ikke_funnet`), tilbakestilles `matrikkel_match` til `ikke_forsokt` så tallet
-blir verifisert. Feltet er foreløpig tynt fylt i kildene (i demodataene er det
-utfylt på 2 av 720 bygg; eierne legger det inn fortløpende), så effekten er
-liten inntil videre. gnr/bnr/fnr/snr i samme entries leses ikke ennå.
-
-Kjøres et skript på nytt for en kommune som allerede er lastet inn, oppdateres
-radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
-er geokodet eller satt manuelt, og en kapasitet som er satt manuelt, overskrives
-ikke. Se db/schema_kjerne_dokumentasjon.md for detaljene.
-
-De to skriptene deler selve lastingen i `lib/load.py` (`generer_sql`); forskjellen
-mellom bygging og synk er flagget `initial_build`, som styrer opprettelsen av
-kodeverkskonsepter og om instansen registreres som aktiv. En rettelse i
-lastingen gjelder derfor begge. `jobs/build.py` og `jobs/sync.py` har bare
-docstring og kommandolinje.
+Flyttet: se [docs/jobs/build.md](docs/jobs/build.md), [docs/jobs/sync.md](docs/jobs/sync.md),
+[docs/reference/loading.md](docs/reference/loading.md) (felles for begge),
+[docs/reference/adding-a-kommune.md](docs/reference/adding-a-kommune.md) (kommunelisten, `--kommuner-fil`/`--fra-fil`, legge til en kommune).
 
 ## Avvik og kildeuttrekk
 
@@ -425,9 +274,4 @@ Flyttet: se [docs/jobs/gater.md](docs/jobs/gater.md).
 
 ## Kjent forenkling
 
-`kommune_id` settes i dag fra hvilken Aktiv kommune-instans dataene kommer
-fra (`bergen` → kommunenr 4601). Det stemmer for alle 12 instansene som
-finnes i dag. Skjemaet støtter at en instans betjener flere kommuner
-(tabellen `kommune_fagsystem_instans`); den dagen det faktisk skjer for en av
-instansene vi laster fra, må `kommune_id` i stedet utledes fra en geokodet
-adresse, ikke fra instansen.
+Flyttet: se [docs/reference/loading.md](docs/reference/loading.md#kjent-forenkling).
