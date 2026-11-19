@@ -183,6 +183,7 @@ bare på hvordan de behandler kodeverkene(`lokaletype`, `aktivitet`, `fasilitet`
 | Bygg og ressurser, også nye | Lastes | Lastes |
 | Koblinger ressurs → bygg, lokaletype, aktivitet, fasilitet | Lastes. Kilden vinner | Lastes. Kilden vinner |
 | Kobling til en id masteren ikke kjenner | Lastes ikke, loggføres én gang per id | Lastes ikke, loggføres én gang per id |
+| Bygg eller ressurs som ikke lenger er i uttrekket | Settes `aktiv = false` (ingenting å deaktivere i en tom base) | Settes `aktiv = false`. Slettes ikke, og aktiveres igjen hvis den kommer tilbake |
 
 Et nytt konsept opprettes altså bare i masteren (manuelt, med id satt manuelt),
 aldri av en instans etter bygging. En instans som begynner å bruke en ny id,
@@ -353,7 +354,7 @@ kommunen og følger kilden. Brudd lastes ikke stille:
 | Samme `id` med annet `name` eller annen `parent_id` enn i masteren | `ugyldig_verdi` | Masteren beholder sitt. Avviket sier hva begge har |
 | `id` i kodeverket som masteren ikke har | `manglende_forelder` | Ved synk opprettes den ikke. Ved bygging bare hvis navnet ikke er tatt av en annen id |
 | Kobling til en id masteren ikke kjenner (`rescategory_id`, `activity_id`, `facility_id`) | `manglende_forelder` | Koblingen lastes ikke; én avviksrad per id |
-| Kobling til en ressurs som ikke finnes i uttrekket | `manglende_forelder` | Raden lastes ikke |
+| Kobling til en ressurs eller et bygg som ikke finnes i uttrekket | (ingen) | Raden lastes ikke, og logges ikke: bygg- og ressurslistene er fasiten på hva som finnes |
 
 **Åpent: fullstendighet.** Kontrakten krever ikke at hele treet er med, men i
 dag er det ikke det. Målt på Bergen (2026-11-02) mangler 8 av 102 aktiviteter og
