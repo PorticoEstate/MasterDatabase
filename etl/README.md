@@ -42,8 +42,8 @@ Fra tomt skjema til populert database, i tre steg:
 │    seksjonen under for hvorfor Kartverkets åpne Adresse-API ikke      │
 │    lenger brukes som et eget forsteg.                                 │
 │ b) Henter bygningsnr/bygningstype/bra_m2/antall_etasjer for ALLE      │
-│    bygg som mangler det (Aktiv kommune har ikke dette feltet i det    │
-│    hele tatt — dette er eneste kilde).                                │
+│    bygg som mangler det, og bekrefter kildens bygningsnr (fra         │
+│    cadastral_references, foreløpig tynt fylt) mot Matrikkelen.        │
 │ Prinsipp: ett eksakt treff, ellers avvik.                             │
 └───────────────────────────────────────────────────┬───────────────────┘
                                                       ▼
@@ -296,6 +296,19 @@ Laster **ikke**: koordinater og matrikkeldata (eget steg, se
 fra kilden, som inneholder personopplysninger om søkere - se prosjektets
 minne om dette.
 
+Unntak: hvert bygg i kilden kan ha `cadastral_references` (en liste). Fra den
+leses høyst ett bygningsnummer (entries med `cadastral_type` `BUILDING` og et
+positivt heltall i `building_number`) og skrives til `bygning.bygningsnr` bare
+når kolonnen er NULL; en verdi Matrikkelen har gitt overskrives aldri. Tallet er
+en påstand fra kilden til geocode har bekreftet det. Flere forskjellige tall,
+en ugyldig verdi, eller en entry med `building_id`/`municipality_id` som ikke
+stemmer, gir en rad i `synk_avvik` og brukes ikke. Settes et tall på et bygg som
+geocode allerede har sett uten å få bygningsnr (`matrikkel_match` `adresse` eller
+`ikke_funnet`), tilbakestilles `matrikkel_match` til `ikke_forsokt` så tallet
+blir verifisert. Feltet er foreløpig tynt fylt i kildene (i demodataene er det
+utfylt på 2 av 720 bygg; eierne legger det inn fortløpende), så effekten er
+liten inntil videre. gnr/bnr/fnr/snr i samme entries leses ikke ennå.
+
 Kjøres et skript på nytt for en kommune som allerede er lastet inn, oppdateres
 radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
 er geokodet eller satt manuelt, og en kapasitet som er satt manuelt, overskrives
@@ -410,9 +423,10 @@ uttrekket) kommer derimot med.
    `etl/dev/check_matrikkel_auth.py`) lar oss søke *innenfor riktig kommune*, som vi
    allerede kjenner fra innlastingen.
 2. **Bygningsnummer og bygningsfakta** for bygninger som mangler det,
-   uansett om adressen ble løst i denne kjøringen eller en tidligere. Aktiv
-   kommune oppgir ikke bygningsnummer i det hele tatt - dette er den eneste
-   kilden til det. Bygningsoppslaget gjøres for hver adresse spørringen
+   uansett om adressen ble løst i denne kjøringen eller en tidligere.
+   Matrikkelen er kilden til bygningsfaktaene. Aktiv kommune kan oppgi et
+   bygningsnummer i `cadastral_references`, men det er foreløpig tynt fylt
+   (se under). Bygningsoppslaget gjøres for hver adresse spørringen
    under returnerer, uten å sjekke om bygget allerede har `bygningsnr`:
    kommer et bygg med fordi `matrikkelinfo` mangler, oppdateres også
    `bygningsnr`, `bygningstype`, `bra_m2` og `antall_etasjer` på nytt fra
@@ -443,11 +457,54 @@ bokstav` og `geokoding='matrikkel'` - den autoritative statusen, se
 `db/schema_kjerne_dokumentasjon.md`. Fyller ved bygningstreff (alltid forsøkt,
 også for adresser som var løst fra før): `bygning.bygningsnr`, `bygningstype`
 (Matrikkelens rå kodeverdi, ikke oversatt til navn ennå), `bra_m2`,
-`antall_etasjer` og `matrikkel_match='adresse'`. Mislykkes bygningsoppslaget
+`antall_etasjer` og `matrikkel_match` (`'bygningsnr'` når kildens nummer ble bekreftet, ellers `'adresse'`). Mislykkes bygningsoppslaget
 (ingen/flere bygg funnet, API-feil, eller bygg uten bygningsnummer), settes
 `matrikkel_match='ikke_funnet'` i stedet - uten dette ville et forsøkt-men-
 mislykket oppslag sett identisk ut som et som aldri ble forsøkt. Overskriver
 aldri en `'adresse'`-match adressesteget nettopp satte for samme bygg.
+
+**Kildens bygningsnummer (`cadastral_references`).** Innlastingen legger et
+bygningsnummer fra kilden i `bygning.bygningsnr` (se under innlastingen), og
+`geocode_query.sql` tar med bygg der tallet ennå ikke er bekreftet
+(`bygningsnr` satt og `matrikkel_match` `ikke_forsokt` eller `ikke_funnet`).
+Rekkefølgen per rad er: (1) kildens bygningsnr, (2) gnr/bnr fra kilden - ikke
+implementert, (3) adressen som før, for bygg uten brukbar referanse. I
+praksis brukes bygningsnummeret slik:
+
+- **Direkte oppslag først** (`BygningService.findBygning`, uten kommune), før
+  adressen slås opp. Gir det ett bygg med samme bygningsnummer, settes
+  `bygningsnr`, `bygningstype`, `bra_m2`, `antall_etasjer` og
+  `matrikkel_match='bygningsnr'` - også når adressen ikke lar seg løse, og
+  bygningsoppslaget via adressen hoppes over. `posisjon` skrives ikke her (den
+  kommer fra adressen), så et feil nummer i kilden ikke kan plassere bygget et
+  annet sted i landet. Finnes ikke nummeret, eller svaret ikke stemmer, logges
+  avvik og kjeden går videre.
+- **Adressen fra det bekreftede bygget** (`AdresseService.findAdresserForBygg`):
+  av adressene Matrikkelen har for bygget brukes bare den med samme gatenavn,
+  husnummer og bokstav som kildens adresse (nøyaktig ett treff); de andre
+  lagres ikke. Matrikkelen markerer ikke en hovedadresse, så kildens adresse
+  avgjør. Uten entydig treff slås adresseteksten opp som før. `adressetekst` er
+  fortsatt kildens tekst; `gate`, `husnr`, `bokstav`, `posisjon` og
+  `geokoding='matrikkel'` kommer fra Matrikkelen. Det finnes ennå ingen egen
+  kolonne som sier at adressen er hentet via bygget.
+- Reserveveien, når det direkte oppslaget ikke bekreftet nummeret: gir adressen **flere** bygg, hentes hvert kandidatbygg og det med samme
+  bygningsnummer som kilden velges - bare ved nøyaktig ett treff
+  (`matrikkel_match='bygningsnr'`). Ingen eller flere treff gir avvik og ingen
+  valg. Dette er der tallet hjelper mest: av 486 løste adresser i demodatabasen
+  fikk 205 ikke bygningsnr automatisk, 191 av dem fordi adressen har 2-7 bygg.
+- Gir adressen **ett** bygg med samme nummer som kilden, settes
+  `matrikkel_match='bygningsnr'`. Er nummeret et annet, logges et avvik med
+  begge verdier og Matrikkelens verdi skrives (Matrikkelen vinner på identitet;
+  `matrikkel_match='adresse'`).
+- Rader uten bygningsnr følger kjeden uendret.
+
+`findBygning` er funnet i Kartverkets dokumentasjon (parameter `bygningsnr`, type
+long; returverdien er valgfri, og dokumentasjonen nevner `FinderException` når
+ingen bygning finnes) og er lagt inn i `lib/matrikkel.py`, men er ennå ikke
+kjørt mot MatrikkelAPI (ikke testet mot det ekte API-et: krever innlogging).
+At bygningsnummeret er landsunikt er en slutning fra at kall og
+duplikatkontroll (`finnesAnnenBygningMedSammeIdent`) ikke tar kommune, ikke noe
+dokumentasjonen sier rett ut. Sammendraget på stderr teller bekreftelser (`bygningsnr bekreftet mot kildens cadastral_references`).
 
 En adresse som ikke lar seg løse får en rad i `synk_avvik` og blir stående
 som `'ukjent'`, og er dermed med i neste kjøring. Det finnes ingen egen
@@ -456,14 +513,16 @@ som `'ukjent'`, og er dermed med i neste kjøring. Det finnes ingen egen
 ```bash
 docker exec portico_masterdb psql -U postgres -d masterdb -tA -F'|' -c "
     SELECT a.id, a.adressetekst, a.postnummer, a.poststed, k.kommunenr,
-           a.bygning_id, a.geokoding, a.gate_id, a.husnr, a.bokstav, g.adressekode
+           a.bygning_id, a.geokoding, a.gate_id, a.husnr, a.bokstav, g.adressekode,
+           b.bygningsnr
     FROM adresse a
     JOIN bygning b ON b.id = a.bygning_id
     JOIN kommune k ON k.id = b.kommune_id
     LEFT JOIN gate g ON g.id = a.gate_id
     WHERE a.er_hovedadresse AND a.geokoding <> 'manuell' AND a.adressetekst IS NOT NULL
       AND (a.geokoding = 'ukjent' OR b.bygningsnr IS NULL
-           OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id));
+           OR NOT EXISTS (SELECT 1 FROM matrikkelinfo m WHERE m.bygning_id = b.id)
+           OR (b.bygningsnr IS NOT NULL AND b.matrikkel_match IN ('ikke_forsokt','ikke_funnet')));
 " > etl/ut/adresser_a_matrikkelsoke.txt
 
 (cd etl && python3 -m jobs.geocode) < etl/ut/adresser_a_matrikkelsoke.txt > etl/ut/matrikkel.sql
