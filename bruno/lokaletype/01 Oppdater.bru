@@ -1,0 +1,41 @@
+meta {
+  name: 01 Oppdater
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/masterdb/lokaletype/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 9002
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "navn": "Test barn endret",
+    "parentId": 9001
+  }
+}
+
+docs {
+  Endrer navnet på testlokaletypen 9002 og beholder 9001 som forelder. Det finnes ikke noe
+  endepunkt for å opprette lokaletyper, så testradene må legges inn først:
+
+  docker exec portico_masterdb psql -U postgres -d masterdb -c "INSERT INTO lokaletype (id, navn, parent_id) VALUES (9001, 'Test forelder', NULL), (9002, 'Test barn', 9001)"
+
+  Kjør mappen i rekkefølge. 04 og 05 sletter testradene igjen.
+}
+
+tests {
+  test("svarer 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

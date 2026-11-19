@@ -10,9 +10,10 @@ the national facility register later.
 - **Working:** the data pipeline. It loads all configured kommuner, geocodes
   addresses and fetches building data from the Matrikkel, and syncs every night.
 - **Schema:** owned by Flyway migrations in the backend.
-- **Early:** the Spring Boot API is minimal (one resource endpoint,
-  `/api/ressurser`) and parts of it are out of date with the schema. There is no
-  written API contract at the moment.
+- **API:** the Spring Boot backend serves cross-kommune search
+  (`/masterdb/search`, open) and kommune administration (`/masterdb/kommune`,
+  API key). The OpenAPI contract is generated from the code (Swagger UI at
+  `/masterdb/swagger-ui.html`); see [backend/README.md](backend/README.md).
 - **Temporary:** the source systems are not normalised yet, so a demo normaliser
   rewrites their data before loading (`etl/dev/demo_normalisering/`).
 - **`ressurslenke`:** links one resource to several subsystems (booking, facility
@@ -53,7 +54,7 @@ Aktiv kommune instances --jobs/build.py / jobs/sync.py--> PostGIS <--jobs/geocod
 | Path | Contents |
 |---|---|
 | [etl/](etl/README.md) | The pipeline: `main.py`, `jobs/build.py`, `jobs/sync.py`, `jobs/geocode.py`, and the demo normaliser |
-| [backend/](backend/) | Spring Boot application. The Flyway migration in `src/main/resources/db/migration/` is the schema, and its comments document the tables |
+| [backend/](backend/README.md) | Spring Boot application. The Flyway migration in `src/main/resources/db/migration/` is the schema, and its comments document the tables |
 | [bruno/](bruno/) | Bruno request collection for trying the local API |
 | [certs/](certs/README.md) | Optional extra CA certificates for networks that inspect TLS |
 | [DEPLOY.md](DEPLOY.md) | Deployment guide |

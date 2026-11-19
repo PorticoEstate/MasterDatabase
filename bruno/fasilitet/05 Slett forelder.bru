@@ -1,0 +1,29 @@
+meta {
+  name: 05 Slett forelder
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/masterdb/fasilitet/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 9001
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
+
+docs {
+  9001 har ikke lenger barn (04 slettet 9002) og kan slettes. Databasen står da som før.
+}
+
+tests {
+  test("svarer 204", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

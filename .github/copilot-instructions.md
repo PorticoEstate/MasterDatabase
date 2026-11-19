@@ -1,19 +1,24 @@
 # Copilot instructions for MasterDatabase
 
-This repo defines a master database that unifies multiple local building/asset databases and enriches them with authoritative registries (Matrikkel, Nasjonalt anleggsregister). See `modellutvikling.md` for domain and data requirements; `README.md` for repo overview.
+This repo is a master database that unifies building, address and resource data from the municipal "Aktiv kommune" booking instances and enriches it with the Matrikkel. See `README.md` for the overview, `etl/README.md` for the pipeline and `backend/README.md` for the API.
 
-## Big picture
-- Core goal: a single master identity (bygg/anlegg) with source-of-truth rules, provenance, versioning, and synchronization to/from local systems and registries.
-- Integrations (from `modellutvikling.md`):
-  - Matrikkel: authoritative for property/identity.
-  - Lokale driftsdatabaser: operations and technical data.
-  - Nasjonalt anleggsregister: structured catalog of installations.
-- Spatial search: target a spatial DB (e.g., PostGIS) for map/tematic queries; results link to master building IDs.
-- API boundaries:
-  - Internal API: sync with underlying databases (push/pull metadata).
-  - External API: integration endpoints to registries and external request handling.
-- Request routing: forward context-specific requests (leie, skade, drift) to the correct fagsystem; reflect status back in the master UI.
-- Data governance: each data element tracks last_updated, source, and authoritative status; rule engine decides precedence per field.
+## What exists today
+- **Database:** PostgreSQL + PostGIS. The schema is owned by the Flyway migrations in `backend/src/main/resources/db/migration/`; their comments document the tables. Change the schema with a new migration, never by editing an applied one.
+- **ETL (`etl/`):** Python, standard library only. `last_inn.py` (initial build) and `synk.py` (nightly sync) only write SQL, which `run.sh` pipes to `psql`. `matrikkel_adresse.py` geocodes addresses and fetches building data from the Matrikkel.
+- **Backend (`backend/`):** Spring Boot with plain SQL via `JdbcClient`. Open search under `/masterdb/search`, kommune administration under `/masterdb/kommune` (API key in `X-API-KEY`). The OpenAPI documentation is generated from the code by springdoc.
+- **Run it:** `docker compose up -d --build` starts the database, backend and ETL. See `DEPLOY.md`.
+
+## Rules to keep
+- The master owns the vocabulary (`lokaletype`, `aktivitet`, `fasilitet`); the municipalities own buildings, resources and the links to the vocabulary. The sync never creates vocabulary.
+- ETL steps are idempotent and never overwrite manually set values. Anything that fails is logged in `synk_avvik` instead of stopping the run; each run is recorded in `kildeuttrekk`.
+- Personal data in the source (`organizations`) is never loaded.
+- The Matrikkel is authoritative for building identity and position: one exact match, otherwise a deviation.
+- New backend endpoints are protected by the API key by default (`config/ApiKeyFilter.java`). Document them with springdoc annotations as described in `backend/README.md`, and update the Bruno requests in `bruno/`.
+
+## Not built yet (direction, not current state)
+- Integration with the national facility register (Nasjonalt anleggsregister).
+- More subsystems per resource (facility management, sensors) through `ressurslenke`; only the booking link is filled in today.
+- Request routing to subsystems, field-level provenance and precedence rules, role-based access and audit.
 
 ## Conventions in this repo
 - Code style: Allman braces + tabs (width 4), LF line endings.
@@ -22,7 +27,8 @@ This repo defines a master database that unifies multiple local building/asset d
   - `.eslintrc.json` (brace-style: allman; indent: tab) for JS/TS.
   - `.vscode/settings.json` aligns editor behavior; ESLint fixes on save for JS/TS.
   - `.gitattributes` enforces LF in git.
-- Language: documentation is in Norwegian; keep comments/docs consistent.
+- YAML uses 2 spaces. The existing Python in `etl/` is the reference for its own style.
+- Language: older documentation and code comments are in Norwegian; new documents are written in English.
 
 Example (brace + tabs):
 ```
@@ -35,21 +41,3 @@ else
 	fallback();
 }
 ```
-
-## How to extend this codebase
-- Source-of-truth first: model entities and field-level precedence (Matrikkel > others for identity) as explicit rules and metadata.
-- Provenance everywhere: ensure new tables/APIs include last_updated, source, authoritative flags as in section 7 of `modellutvikling.md`.
-- Spatial first-class: queries that return objects should accept spatial/tematic filters and return master IDs.
-- Request routing: new features that create “forespørsler” must propagate to the correct fagsystem and surface status in master.
-- Security: design with role-based access, read tracking, and change audit; approvals for modifications when needed.
-
-## Developer workflow (current state)
-- There is no build system or runtime yet in this repo. Add language-specific tooling under these constraints:
-  - Respect Allman + tabs via the existing configs (.editorconfig, .clang-format, ESLint).
-  - YAML must use spaces (2). Makefiles must use real tabs.
-- Suggest placing future components by responsibility: `api/` (internal/external), `ingest/` (sync/ETL), `rules/` (precedence engine), `db/` (migrations, PostGIS), `ui/` if applicable. Keep domain docs under root.
-
-## References
-- Domain/design: `modellutvikling.md`
-- Repo overview + style summary: `README.md`
-- Formatting/tooling: `.editorconfig`, `.clang-format`, `.eslintrc.json`, `.vscode/settings.json`, `.gitattributes`
