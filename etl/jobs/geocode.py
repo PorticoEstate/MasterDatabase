@@ -37,7 +37,7 @@ gnr/bnr/fnr/snr) uansett geokodingsstatus - billig og idempotent, så det
 forsøkes for enhver adresse vi klarer å slå opp. Skriver ved adresse-treff
 som fortsatt mangler geokoding: i tillegg gate (upsert) og adresse (gate_id,
 husnr, bokstav, posisjon, geokoding='matrikkel' - den autoritative statusen,
-se schema_kjerne_dokumentasjon.md). Skriver ved bygningstreff (uavhengig av
+se kommentarene ved adresse i Flyway-migrasjonen V1). Skriver ved bygningstreff (uavhengig av
 om adressen var løst fra før): bygning.bygningsnr/bygningstype/bra_m2/
 antall_etasjer/posisjon.
 
