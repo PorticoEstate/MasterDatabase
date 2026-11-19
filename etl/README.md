@@ -421,28 +421,7 @@ Flyttet: se [docs/jobs/geocode.md](docs/jobs/geocode.md) (bruk og oppførsel) og
 
 ## Gater for hele kommunen (`gate`)
 
-`gate` fylles på to måter. `jobs/geocode.py` legger inn gaten til hver
-adresse den løser. `jobs/gater.py` henter i tillegg *alle* veger i kommunen
-(`AdresseService.findVegerForKommune`, så adressekode og navn via
-`StoreService.getObjects`), uten at kommunen trenger en Aktiv kommune-instans,
-bygg eller adresser. Det eneste som kreves er en rad i `kommune`.
-
-Daemonen kjører steget bare én gang: etter den første bygget av en tom
-database (rekkefølge: bygging, gater, geokoding), for *alle* kommuner i
-`kommune`. Det kjøres ikke ved senere oppstarter og ikke om natten. Etter det
-holdes `gate` oppdatert ved å kjøre steget for hånd (se under), for eksempel
-for en ny kommune eller for å fange nye og omdøpte gater. En kommune der
-henting feilet (logget i `synk_avvik`, kilde `matrikkel-gate`) prøves på nytt
-neste gang steget kjøres for den. Gater slettes aldri, siden `adresse.gate_id`
-peker på dem.
-
-```bash
-docker compose exec etl python3 main.py gater              # alle kommuner
-docker compose exec etl python3 main.py gater 4601 5601    # bestemte kommuner
-```
-
-Trygt å kjøre om igjen: eksisterende gater beholder id-en, så `adresse.gate_id`
-peker fortsatt riktig.
+Flyttet: se [docs/jobs/gater.md](docs/jobs/gater.md).
 
 ## Kjent forenkling
 
