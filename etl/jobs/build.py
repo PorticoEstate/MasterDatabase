@@ -3,7 +3,7 @@
 Bygger masterdatabasen fra Aktiv kommune. Kjøres én gang, når databasen
 bygges; deretter brukes jobs/sync.py.
 
-Forutsetter normaliserte instanser (se "Kildekontrakt" i etl/README.md). Mot
+Forutsetter normaliserte instanser (se etl/docs/reference/source-contract.md). Mot
 en tom database opprettes kodeverkene (lokaletype, aktivitet, fasilitet) fra
 instansenes samlinger, med id, navn og forelder, sammen med bygg, ressurser og
 koblinger. Et konsept som allerede finnes røres aldri: masteren eier
@@ -26,7 +26,7 @@ Bruk:
     (cd etl && python3 -m jobs.build alle --fra-fil ut/normalisert) > etl/ut/alle.sql
     docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
 
-Se etl/README.md for full forklaring.
+Se etl/docs/jobs/build.md for full forklaring.
 
 Hver kjøring registrerer et kildeuttrekk (metadata: kilde, endepunkt,
 tidspunkt, HTTP-status - ikke hele svaret). Ethvert avvik - ugyldige verdier,

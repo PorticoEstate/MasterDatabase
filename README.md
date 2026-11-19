@@ -52,7 +52,7 @@ Aktiv kommune instances --jobs/build.py / jobs/sync.py--> PostGIS <--jobs/geocod
 
 | Path | Contents |
 |---|---|
-| [etl/](etl/README.md) | The pipeline: `main.py`, `jobs/build.py`, `jobs/sync.py`, `jobs/geocode.py`, and the demo normaliser |
+| [etl/](etl/README.md) | The pipeline: `main.py`, `jobs/build.py`, `jobs/sync.py`, `jobs/geocode.py`, and the demo normaliser. The index links to the docs in `etl/docs/` |
 | [backend/](backend/) | Spring Boot application. The Flyway migration in `src/main/resources/db/migration/` is the schema, and its comments document the tables |
 | [bruno/](bruno/) | Bruno request collection for trying the local API |
 | [certs/](certs/README.md) | Optional extra CA certificates for networks that inspect TLS |

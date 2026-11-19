@@ -2,7 +2,7 @@
 """Minimalt sjekk-skript: bekrefter at Basic Auth mot MatrikkelAPI virker.
 Kaller KodelisteService.getKodelisterEnkel - den enkleste tjenesten som finnes,
 krever ingen søkeparametre. Leser brukernavn/passord fra miljøvariablene
-MATRIKKEL_BRUKER / MATRIKKEL_PASSORD - se etl/README.md-tilsvarende for Matrikkel.
+MATRIKKEL_BRUKER / MATRIKKEL_PASSORD - se etl/docs/jobs/geocode.md.
 MATRIKKEL_MILJO velger miljø: "test" (standard) eller "prod".
 """
 import sys

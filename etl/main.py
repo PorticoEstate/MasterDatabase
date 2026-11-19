@@ -32,7 +32,7 @@ geocoding, the Matrikkel credentials):
   DRY_RUN=false           write the SQL but do not apply it
   AVVIK_RETENTION_DAYS=30 synk_avvik rows older than this are deleted nightly
   ETL_PORT=8000           port of the job server (daemon only; never publish it)
-  MATRIKKEL_BRUKER / MATRIKKEL_PASSORD / MATRIKKEL_MILJO   see etl/README.md
+  MATRIKKEL_BRUKER / MATRIKKEL_PASSORD / MATRIKKEL_MILJO   see etl/docs/jobs/daemon.md
 
 Networks that inspect TLS re-sign HTTPS traffic with their own certificate
 authority. Put its certificate (PEM, *.crt or *.pem) in ./certs on the host;
