@@ -21,18 +21,9 @@
 -- de grove rektangelsøkene en vanlig indeks på (lon, lat) er begrenset til.
 
 CREATE EXTENSION IF NOT EXISTS postgis;
--- Trigram-indeks på ressurs.navn: dekker det sokevektor (se der) ikke kan,
--- siden norsk er et sammensatt-ord-språk og Postgres' innebygde stemmer ikke
--- splitter dem - "svømme" stammer ikke til samme rot som "svømmebasseng".
--- Trigram gir substreng-/fuzzy-treff uavhengig av ord-grenser.
+
+-- Trigram gir substrengtreff (LIKE %) uavhengig av ord-grenser.
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
--- Senket fra standard 0.3: et søk uten æøå ("svomme" for "svømme") endrer
--- 3 av 7 trigram og lander på ~0.2 - rett under standardterskelen, så treffet
--- ville ellers blitt filtrert bort tross at det er det brukeren mente.
--- Satt på databasen, ikke per spørring, så alle `%`-søk får dette automatisk.
-ALTER DATABASE masterdb SET pg_trgm.similarity_threshold = 0.2;
-
 
 CREATE OR REPLACE FUNCTION sett_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
@@ -41,7 +32,6 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-
 
 -- =============================================================================
 -- 1. Kildesystem og kommune
@@ -361,11 +351,6 @@ CREATE TABLE IF NOT EXISTS ressurs
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-    sokevektor     tsvector GENERATED ALWAYS AS (
-                       to_tsvector('norwegian',
-                           coalesce(navn,'') || ' ' || coalesce(beskrivelse,''))
-                   ) STORED,
-
     -- Sammensatt fremmednøkkel: hindrer at en ressurs havner i et bygg som
     -- ligger i en annen kommune enn ressursen selv.
     CONSTRAINT fk_ressurs_bygning FOREIGN KEY (bygning_id, kommune_id)
@@ -378,12 +363,6 @@ CREATE TABLE IF NOT EXISTS ressurs
 
 CREATE INDEX IF NOT EXISTS ix_ressurs_kommune ON ressurs (kommune_id);
 CREATE INDEX IF NOT EXISTS ix_ressurs_bygning ON ressurs (bygning_id);
-CREATE INDEX IF NOT EXISTS ix_ressurs_sokevektor ON ressurs USING GIN (sokevektor);
--- Trigram-indeks på navn, for substreng-/fuzzy-søk som sokevektor ikke
--- fanger opp (sammensatte ord, stavefeil) - se kommentar ved pg_trgm over.
-CREATE INDEX IF NOT EXISTS ix_ressurs_navn_trgm ON ressurs USING GIN (navn gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS ix_ressurs_sok
-    ON ressurs (lokaletype_id, kommune_id) WHERE aktiv AND bookbar;
 
 CREATE TABLE IF NOT EXISTS ressurs_aktivitet
 (
@@ -409,10 +388,10 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 --
 -- Én rad per (ressurs, fagsystem_instans), med ressursens url i det systemet og
 -- dens ekstern_id der. Bare ressurser har lenker; bygg har ingen (bygglenkene
--- bygges i v_ressurs_sok fra bygning.ekstern_id).
+-- bygges i mv_ressurs_sok fra bygning.ekstern_id).
 --
 -- Bookingsystemet ressursen kommer fra har også en rad her (skrevet av ETL,
--- ressurslenke_sql i etl/lib/sqlgen.py), og v_ressurs_sok.booking_url leses derfra.
+-- ressurslenke_sql i etl/lib/sqlgen.py), og mv_ressurs_sok.booking_url leses derfra.
 -- Lenker til andre systemer (fdv, sensor, ...) legges til av det som laster
 -- dem; booking-synken rører dem ikke.
 --
@@ -564,26 +543,10 @@ $$;
 -- 10. Søkevisninger
 -- =============================================================================
 
--- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
--- bare "id" internt; visningen gir hver id et beskrivende navn i output, slik
--- at resultatet er lesbart uten å kjenne navnekonvensjonen i skjemaet.
--- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte -
--- det finnes ingen JPA-entitet for det.
---
--- Kodeverkene (lokaletype, aktivitet, fasilitet) har ingen kode-kolonne; id er
--- den delte nøkkelen på tvers av instansene. Filtrene går derfor på id:
---   aktivitet_ids / fasilitet_ids - bigint[], tom liste i stedet for NULL, slik
---                      at @>/&& i filtrene oppfører seg likt for alle rader
---   aktivitet_navn / fasilitet_navn - samme rekkefølge som visningsnavn
--- Alle aktiviteter er med (flatt, ingen hierarki); søket bruker bare id og navn.
---
--- Vanlig view, ikke materialisert: med rundt 5 000 ressurser er det raskt nok
--- å regne ut søkedokumentet per spørring, og vi slipper et refresh-steg i ETL
--- og risikoen for utdaterte søketreff. Skulle det bli for tregt, kan
--- CREATE MATERIALIZED VIEW ... AS SELECT * FROM v_ressurs_sok legges oppå med
--- GIN/GiST-indekser, uten at Java-koden endres utover tabellnavnet.
+-- mv_ressurs_sok er et materialisert view. Refresh etter build, sync og geokode.
+-- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte.
 
-CREATE OR REPLACE VIEW v_ressurs_sok AS
+CREATE MATERIALIZED VIEW mv_ressurs_sok AS
 SELECT
     r.id                           AS ressurs_id,
     r.navn,
@@ -607,73 +570,158 @@ SELECT
     rl.url                         AS booking_url,
     COALESCE(akt.ids, '{}')        AS aktivitet_ids,
     COALESCE(fas.ids, '{}')        AS fasilitet_ids,
-    r.sokevektor,
     r.sist_oppdatert,
 
     -- Søke-API-kolonner:
     k.fylkesnavn,
-    p.navn                         AS lokaletype_hovedgruppe_navn,
-    COALESCE(akt.navn_liste, '{}') AS aktivitet_navn,
-    COALESCE(fas.navn_liste, '{}') AS fasilitet_navn,
 
-    -- Lenker til det lokale systemet. Søket selv kaller det aldri; frontend
-    -- bruker lenkene til videresending og til å hente hovedbildet.
     -- Instansens base_url + ekstern_id er både identitet og ruting: ekstern_id
-    -- er kun gyldig i sin egen instans.
-    --
-    -- Bygg-siden er bekreftet mot Bergen (Bøneshallen):
-    --   https://bergen.aktiv-kommune.no/bookingfrontend/client/en/building/74
-    -- Språksegmentet ('en') er det som ble brukt i den bekreftede lenken;
-    -- TODO: sjekk om 'no' fungerer og er ønsket.
-    -- TODO: ressurs-siden (booking_url over, fra ressurslenke) og bildestiene
-    -- ({ownertype} i /main-picture) er ikke bekreftet mot Aktiv kommune.
-    fi.base_url || '/bookingfrontend/resource/' || r.ekstern_id || '/main-picture' AS bilde_url,
+    -- er kun gyldig i sin egen instans. Søket selv kaller det aldri; frontend
+    -- bruker lenkene til videresending.
     CASE WHEN b.ekstern_id IS NOT NULL THEN
-        bfi.base_url || '/bookingfrontend/client/en/building/' || b.ekstern_id END AS bygg_booking_url,
-    CASE WHEN b.ekstern_id IS NOT NULL THEN
-        bfi.base_url || '/bookingfrontend/building/' || b.ekstern_id || '/main-picture' END AS bygg_bilde_url,
+        bfi.base_url || '/bookingfrontend/client/building/' || b.ekstern_id END AS bygg_booking_url,
 
-    -- Fritekst. ressurs.sokevektor dekker bare navn og beskrivelse; her tas
+    -- Fritekstsøk:
     -- bygg, type, aktiviteter, fasiliteter og sted med, vektet så treff i
     -- navn (A) rangerer over treff i beskrivelse (D).
     setweight(to_tsvector('norwegian', r.navn || ' ' || coalesce(b.navn, '')), 'A') ||
-    setweight(to_tsvector('norwegian', coalesce(lt.navn, '') || ' ' ||
-              coalesce(akt.navn_tekst, '') || ' ' || coalesce(fas.navn_tekst, '')), 'B') ||
-    setweight(to_tsvector('norwegian', coalesce(a.adressetekst, '') || ' ' ||
-              coalesce(a.poststed, '') || ' ' || k.navn), 'C') ||
-    setweight(to_tsvector('norwegian', coalesce(r.beskrivelse, '')), 'D') AS sokedokument,
-    -- Substreng-/trigramsøk ("ng" skal treffe "Ungdomshus"), som tsvector ikke
-    -- kan - se kommentaren ved pg_trgm i V1.
-    lower(r.navn || ' ' || coalesce(b.navn, '')) AS navn_sok
+    setweight(to_tsvector('norwegian',
+						   coalesce(lt.navn, '') || ' ' ||
+						   coalesce(p.navn, '') || ' ' ||
+             			   coalesce(akt.navn_tekst, '') || ' ' ||
+						   coalesce(fas.navn_tekst, '')), 'B') ||
+    setweight(to_tsvector('norwegian',
+						   coalesce(a.adressetekst, '') || ' ' ||
+                           coalesce(a.poststed, '') || ' ' || k.navn), 'C') ||
+    setweight(to_tsvector('norwegian',
+					   	   coalesce(r.beskrivelse, '')), 'D')
+					AS sokedokument,
+
+	-- Substreng-/trigramsøk ("ng" skal treffe "Ungdomshus"), som tsvector ikke kan
+    lower(r.navn || ' ' ||
+		coalesce(b.navn, '')|| ' ' ||
+		coalesce(lt.navn, ''))  AS navn_sok
 FROM ressurs r
 JOIN kommune k                  ON k.id = r.kommune_id
-JOIN fagsystem_instans fi       ON fi.id = r.fagsystem_instans_id
 LEFT JOIN lokaletype lt         ON lt.id = r.lokaletype_id
 LEFT JOIN lokaletype p          ON p.id = lt.parent_id
 LEFT JOIN bygning b             ON b.id = r.bygning_id
 LEFT JOIN fagsystem_instans bfi ON bfi.id = b.fagsystem_instans_id
+
 -- Lenken til ressursens eget bookingsystem. Maks én rad (uniq_ressurslenke_ressurs).
 LEFT JOIN ressurslenke rl       ON rl.ressurs_id = r.id
                                AND rl.fagsystem_instans_id = r.fagsystem_instans_id
 -- Maks én hovedadresse per bygg (ux_adresse_hovedadresse), så ingen duplikater.
 LEFT JOIN adresse a             ON a.bygning_id = b.id AND a.er_hovedadresse
+
+-- sub-query som finner alle tilknyttede aktiviteter og samler dem som ID-er, navneliste og søketekst
 LEFT JOIN LATERAL (
     SELECT array_agg(ak.id   ORDER BY ak.navn) AS ids,
-           array_agg(ak.navn ORDER BY ak.navn) AS navn_liste,
            string_agg(ak.navn, ' ')            AS navn_tekst
       FROM ressurs_aktivitet ra
       JOIN aktivitet ak ON ak.id = ra.aktivitet_id
      WHERE ra.ressurs_id = r.id
 ) akt ON TRUE
+
+-- sub-query som finner alle tilknyttede fasiliteter og samler dem som ID-er, navneliste og søketekst
 LEFT JOIN LATERAL (
     SELECT array_agg(f.id   ORDER BY f.navn) AS ids,
-           array_agg(f.navn ORDER BY f.navn) AS navn_liste,
            string_agg(f.navn, ' ')           AS navn_tekst
       FROM ressurs_fasilitet rf
       JOIN fasilitet f ON f.id = rf.fasilitet_id
      WHERE rf.ressurs_id = r.id
 ) fas ON TRUE
 WHERE r.aktiv AND r.bookbar;
+
+-- Indekser på det materialiserte søkeviewet
+--Fritekst (ordstammer): sokedokument @@ websearch_to_tsquery(..) - se RessursSokRepository
+CREATE INDEX ix_mv_ressurs_sok_sokedokument
+	ON mv_ressurs_sok USING GIN(sokedokument);
+
+--Substring (LIKE)
+CREATE INDEX ix_mv_ressurs_sok_navn_trgm
+ON mv_ressurs_sok USING GIN(navn_sok gin_trgm_ops);
+
+--Nærhetssøk: ST_DWithin / ST_Distance mot posisjon
+CREATE INDEX ix_mv_ressurs_sok_posisjon
+ON mv_ressurs_sok USING GIST(posisjon);
+
+-- Indekser som gjør søket raskere når datamengden vokser
+CREATE INDEX ix_mv_ressurs_sok_aktivitet
+    ON mv_ressurs_sok USING GIN (aktivitet_ids);
+CREATE INDEX ix_mv_ressurs_sok_fasilitet
+    ON mv_ressurs_sok USING GIN (fasilitet_ids);
+
+
+-- View for aktiviteter som viser hierarkiet, inkluderer seg selv og alle etterkommere
+CREATE VIEW v_aktivitet_hierarki AS
+WITH RECURSIVE aktivitet_tre AS (
+	-- hver aktivitet inneholder seg selv
+	SELECT
+	id AS aktivitet_id,
+	id AS underaktivitet_id
+	FROM aktivitet
+
+	UNION
+
+	--finner aktivitetens etterkommer(e)
+	SELECT
+	aktivitet_tre.aktivitet_id,
+	aktivitet.id AS underaktivitet_id
+	FROM aktivitet
+	JOIN aktivitet_tre
+		ON aktivitet.parent_id = aktivitet_tre.underaktivitet_id
+)
+
+SELECT *
+FROM aktivitet_tre;
+
+-- View for fasiliteter som viser hierarkiet, inkluderer seg selv og alle etterkommere
+CREATE VIEW v_fasilitet_hierarki AS
+WITH RECURSIVE fasilitet_tre AS (
+	SELECT
+	id as fasilitet_id,
+	id as underfasilitet_id
+	FROM fasilitet
+
+	UNION
+
+	--finner fasilitetenes etterkommer(e)
+	SELECT
+	fasilitet_tre.fasilitet_id,
+	fasilitet.id AS underfasilitet_id
+	FROM fasilitet
+	JOIN fasilitet_tre
+		ON fasilitet.parent_id = fasilitet_tre.underfasilitet_id
+)
+
+SELECT *
+FROM fasilitet_tre;
+
+
+-- View for lokaletyper som viser hierarkiet, inkluderer seg selv og alle etterkommere
+CREATE VIEW v_lokaletype_hierarki AS
+WITH RECURSIVE lokaletype_tre AS (
+
+--hver lokaletype inneholder seg selv i underkategorien
+SELECT
+id AS lokaletype_id,
+id AS underlokaletype_id
+FROM lokaletype
+
+UNION
+
+SELECT
+lokaletype_tre.lokaletype_id,
+lokaletype.id AS underlokaletype_id
+FROM lokaletype
+JOIN lokaletype_tre
+	ON lokaletype.parent_id = lokaletype_tre.underlokaletype_id
+)
+
+SELECT *
+FROM lokaletype_tre;
+
 
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
 -- synk_avvik som historikk, men er ikke lenger "åpne": hvis feilen fortsatt

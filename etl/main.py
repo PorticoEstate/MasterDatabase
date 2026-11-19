@@ -290,6 +290,18 @@ def do_gater(kommunenr=()):
     return apply(os.path.join(UT, "gater.sql"))
 
 
+def do_refresh():
+    """Refreshes mv_ressurs_sok, the materialized view the search reads."""
+    if is_true(DRY_RUN):
+        log("DRY_RUN: not refreshing mv_ressurs_sok")
+        return True
+    log("refresh: mv_ressurs_sok")
+    if psql_query("REFRESH MATERIALIZED VIEW mv_ressurs_sok") is None:
+        log("refresh: failed, the view keeps its old content")
+        return False
+    return True
+
+
 def retention_valid():
     return re.fullmatch(r"[1-9][0-9]*", AVVIK_RETENTION_DAYS) is not None
 
@@ -370,6 +382,7 @@ RUNNERS = {
     "geocode": lambda args: do_geocode(),
     "gater": lambda args: do_gater(args),
     "build": lambda args: do_build(),
+    "refresh": lambda args: do_refresh(),
     "prune": lambda args: prune_avvik(),
     "startup": lambda args: startup_sequence(),
     "nightly-load": lambda args: nightly_load(),

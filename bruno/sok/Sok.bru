@@ -11,13 +11,10 @@ get {
 }
 
 params:query {
-  q: bøneshallen
+  ~fritekst: bøneshallen
   ~kommune: 4601
   ~lokaletype: 1
-  ~aktivitet: 1
   ~fasilitet: 1
-  ~sorter: navn
-  ~side: 0
   ~storrelse: 20
 }
 
@@ -37,7 +34,7 @@ tests {
   test("bygg-treff har navn og lenke", function() {
     const bygg = res.getBody().bygg.treff;
     if (bygg.length > 0) {
-      expect(bygg[0].byggNavn).to.be.a("string");
+      expect(bygg[0].navn).to.be.a("string");
       expect(bygg[0].antallRessurser).to.be.above(0);
     }
   });
@@ -46,9 +43,9 @@ tests {
 docs {
   Fritekstsøk + filtre. Returnerer både bygg (ett kort per bygg) og ressurser
   i ett svar. Parametrene med ~ foran er avslått; kryss dem av i Bruno for å
-  bruke dem. Filtrene tar kommunenr og id-er, ikke navn (hent kode/id + navn fra "Filtre").
+  bruke dem. Filtrene tar kommunenr og id-er, ikke navn (hent kommunenr/id + navn fra "Filtre").
   Lister kan gjentas (?aktivitet=A&aktivitet=B) eller kommasepareres.
   
   Merk: aktivitet, lokaletype og fasilitet må finnes i databasen for å gi
-  treff. q=ng treffer også midt i ord ("Ungdomshus", "Fyllingsdalen").
+  treff. fritekst=ng treffer også midt i ord ("Ungdomshus", "Fyllingsdalen").
 }

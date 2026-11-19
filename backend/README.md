@@ -39,9 +39,9 @@ Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-d
 | PUT | `/masterdb/lokaletype/{id}` | Som for aktivitet: erstatter `navn` og `parentId` på en lokaletype. Samme statuskoder. Krever API-nøkkel. |
 | DELETE | `/masterdb/lokaletype/{id}` | Sletter en lokaletype. **Ressurser som har lokaletypen beholdes, men mister den** (`ressurs.lokaletype_id` settes til null, `ON DELETE SET NULL`). 204, 404 hvis id-en ikke finnes, 409 hvis den er forelder. Krever API-nøkkel. |
 
-Stiene er engelske, mens query-parametre (`q`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `sorter`, `side`, `storrelse`, `lat`, `lon`, `radiusMeter`) og JSON-felt er norske. Lister kan sendes som `?aktivitet=1&aktivitet=2` eller `?aktivitet=1,2`.
+Stiene er engelske, mens query-parametre (`fritekst`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `sorter`, `side`, `storrelse`, `lat`, `lon`, `radiusMeter`) og JSON-felt er norske. Lister kan sendes som `?aktivitet=1&aktivitet=2` eller `?aktivitet=1,2`.
 
-Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java` og `dto/`.
+Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java`, `repository/RessursSokRepository.java` (all SQL for søket) og `dto/`.
 
 Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (kommune-tabellen) og `repository/FagsystemInstansRepository.java` (fagsystem-instanser og koblingen til kommunen); begge bruker ren SQL via `JdbcClient`. Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/lib/kommuner.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
 
