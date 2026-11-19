@@ -171,97 +171,15 @@ Flyttet: se [docs/jobs/build.md](docs/jobs/build.md), [docs/jobs/sync.md](docs/j
 
 ## Avvik og kildeuttrekk
 
-Hver kjøring registrerer et `kildeuttrekk` (kilde, endepunkt, tidspunkt,
-HTTP-status - ikke hele svaret fra kilden). Alt som ikke lar seg laste
-loggføres i `synk_avvik` sammen med selve posten som feilet (`rapost`, renset
-for personopplysninger som `organizations` og andre persondatafelt): ugyldige
-verdier, koblinger til noe som ikke finnes i uttrekket, brudd på kildekontrakten,
-databasefeil og feilet henting. En enkelt dårlig post stopper aldri hele lasten.
-
-Gå gjennom avvikene fra siste kjøring slik:
-
-```bash
-docker exec portico_masterdb psql -U postgres -d masterdb -c "
-    SELECT d.avvik_id, d.kilde, d.avvikstype, d.felt, d.detalj, d.post
-    FROM v_synk_avvik_gjeldende g JOIN v_synk_avvik_detalj d ON d.avvik_id = g.id
-    WHERE g.avvikstype <> 'manglende_forelder';"
-```
-
-`post` er selve posten fra kilden som feilet, lagret direkte på avviket. De to
-nyeste uttrekkene per kilde beholdes, uforbeholdent - bevis for et avvik ligger
-på avviket selv, ikke i uttrekket, så gammel metadata kan ryddes trygt bort.
+Flyttet: se [docs/reference/avvik-and-extracts.md](docs/reference/avvik-and-extracts.md).
 
 ## Kildekontrakt: hva en normalisert instans må levere
 
-Skriptene laster kodeverkene direkte fra `searchdataall`, uten mapping, og
-kobler på id. Det forutsetter at hver instans er normalisert og
-leverer kodeverkene med masterens id-er:
-
-| Samling | Felt | Krav |
-|---|---|---|
-| `resource_categories` (lokaletype), `activities`, `facilities` | `id` | Unik i samlingen, og **den samme id-en på tvers av instanser**: masterens `id` er den delte id-en. Nye konsepter opprettes manuelt i masteren med manuelt satt id (neste ledige tall, aldri gjenbruk) |
-| | `name` | Samme navn som masteren har for denne id-en. Navnet er unikt per tabell |
-| | `parent_id` | Samme forelder som masteren. `id` i samme samling, eller `null` for en rot. Én forelder, ingen sykluser. `facilities` har ikke dette feltet i dag |
-| `resources` | `rescategory_id` | `id` i `resource_categories`, og masteren kjenner den |
-| `resource_activities`, `resource_facilities` | `resource_id`, `activity_id`/`facility_id` | Peker på en rad i `resources`, og på en id masteren kjenner |
-
-Masteren eier vokabularet og hierarkiet, så en instans som viker fra det
-påvirker aldri masteren, men loggføres i `synk_avvik`. Koblingene eies av
-kommunen og følger kilden. Brudd lastes ikke stille:
-
-| Brudd | Avvikstype | Følge |
-|---|---|---|
-| Manglende eller ugyldig `id`, tomt `name`, id som går igjen | `ugyldig_verdi` | Posten sammenlignes ikke med masteren |
-| Samme `id` med annet `name` eller annen `parent_id` enn i masteren | `ugyldig_verdi` | Masteren beholder sitt. Avviket sier hva begge har |
-| `id` i kodeverket som masteren ikke har | `manglende_forelder` | Ved synk opprettes den ikke. Ved bygging bare hvis navnet ikke er tatt av en annen id |
-| Kobling til en id masteren ikke kjenner (`rescategory_id`, `activity_id`, `facility_id`) | `manglende_forelder` | Koblingen lastes ikke; én avviksrad per id |
-| Kobling til en ressurs som ikke finnes i uttrekket | `manglende_forelder` | Raden lastes ikke |
-
-**Åpent: fullstendighet.** Kontrakten krever ikke at hele treet er med, men i
-dag er det ikke det. Målt på Bergen (2026-11-02) mangler 8 av 102 aktiviteter og
-4 av 56 lokaletyper sin forelder i samlingen, fem aktivitets-id-er brukes av
-koblinger uten å finnes, og 389 ressurser og 28 bygg er referert uten å være med
-i uttrekket. Årsaken er ikke avklart (filtrering i `searchdataall`, eller et
-annet endepunkt som gir alt). Med masteren som eier av vokabularet er det
-mindre kritisk at hver instans leverer hele treet, men koblingene må fortsatt
-peke på id-er som finnes.
+Flyttet: se [docs/reference/source-contract.md](docs/reference/source-contract.md).
 
 ## Demo-normalisering
 
-Mappingen er midlertidig. Den viser hvordan masterdatabasen blir når instansene
-er normalisert, og brukes ikke i produksjon. Alt den trenger ligger i
-`etl/dev/demo_normalisering/`, og mappen slettes når normaliseringen er på plass.
-
-`normaliser.py` leser `searchdataall` (nettet, eller `--fra-fil`), og skriver
-`<kommune>.json` med samme form, men med kodeverkene erstattet av vokabularet
-fra filene (`id`, `name`, `parent_id`) og koblingene omskrevet. Kildenavn uten
-mapping, eller som mappes til et exclude-konsept, får ingen kobling og skrives
-til standard-feil.
-
-```bash
-python3 etl/dev/demo_normalisering/normaliser.py alle              # skriver etl/ut/normalisert/
-(cd etl && python3 -m jobs.build alle --fra-fil ut/normalisert) > etl/ut/alle.sql
-docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/alle.sql
-```
-
-`jobs/sync.py` tar samme `--fra-fil`.
-
-Konseptene i vokabularfilene har hver en fast `id` (den delte id-en), og
-`broader` er forelderens navn. Et nytt konsept får neste ledige id; en id
-endres eller gjenbrukes aldri. En endring i `mapping.json` eller
-vokabularfilene slår igjennom ved neste kjøring av `normaliser.py`, men
-`jobs/build.py` oppretter bare konsepter som mangler, så en omdøping eller en
-ny forelder i filene når ikke en database som allerede er bygget. Fasettene
-(`facets`) er bare en gruppering i filene og havner ikke i databasen.
-
-I produksjon finnes ingen vokabularfiler i prosjektet: kodeverkene bygges fra
-de normaliserte instansene ved bygging, og eies deretter av masteren.
-
-Demoen skjuler brudd på kontrakten: den bygger vokabularet fra filene, så
-manglende foreldre og ukjente kodeverks-id-er i kilden gir ingen avvik. Et rent
-`synk_avvik` for kodeverkene etter en demokjøring sier derfor ingenting om
-kildens kvalitet. Avvikene på koblingene (til ressurser som ikke er med i
-uttrekket) kommer derimot med.
+Flyttet: se [dev/demo_normalisering/README.md](dev/demo_normalisering/README.md).
 
 ## Geokoding og bygningsberikelse (MatrikkelAPI)
 
