@@ -3,7 +3,8 @@
 To skript henter data fra Aktiv kommune og skriver SQL som fyller
 masterdatabasen: `jobs/build.py` bygger databasen (kjøres én gang), og `jobs/sync.py`
 holder den oppdatert etterpå (kjøres jevnlig, f.eks. fra cron). Se
-`db/schema_kjerne_dokumentasjon.md` for hva tabellene betyr.
+kommentarene i `backend/src/main/resources/db/migration/V1__masterdatabase__skjema.sql`
+for hva tabellene betyr.
 
 ## Oversikt over hele pipelinen
 
@@ -87,8 +88,7 @@ Jobbene kjøres som moduler fra `etl/`, f.eks. `cd etl && python3 -m jobs.sync .
 
 | Fil | Rolle |
 |---|---|
-| `backend/src/main/resources/db/migration/V*.sql` | Skjemaet (steg 1), kjøres av Flyway i backend |
-| `db/schema_kjerne_dokumentasjon.md` | Hva hver tabell/kolonne betyr og hvorfor |
+| `backend/src/main/resources/db/migration/V*.sql` | Skjemaet (steg 1), kjøres av Flyway i backend. Kommentarene forklarer hva hver tabell/kolonne betyr og hvorfor |
 | `etl/main.py` | Inngangen til etl-containeren (`ENTRYPOINT`): kommandoene `daemon`, `build`, `sync`, `geocode`, `gater`, `prune` og `status`. Kjører jobbene som moduler og sender SQL-en til `psql` |
 | `etl/jobserver.py` | Jobbkø, nattlig timer og det interne HTTP-API-et som backend bruker (se `main.py daemon`) |
 | `etl/jobs/build.py` | Steg 2, bygging: oppretter kodeverkene og laster alt annet. Kjøres én gang |
@@ -299,7 +299,7 @@ minne om dette.
 Kjøres et skript på nytt for en kommune som allerede er lastet inn, oppdateres
 radene i stedet for å dupliseres (`ON CONFLICT ... DO UPDATE`). En adresse som
 er geokodet eller satt manuelt, og en kapasitet som er satt manuelt, overskrives
-ikke. Se db/schema_kjerne_dokumentasjon.md for detaljene.
+ikke.
 
 De to skriptene deler selve lastingen i `lib/load.py` (`generer_sql`); forskjellen
 mellom bygging og synk er flagget `initial_build`, som styrer opprettelsen av
@@ -440,7 +440,7 @@ DO NOTHING`), så det forsøkes for enhver adresse vi klarer å slå opp i
 Matrikkelen, ikke bare de som fortsatt mangler geokoding. Fyller ved adressetreff som *fortsatt* mangler
 geokoding: i tillegg `gate` (adressekode+gatenavn), `adresse.posisjon/husnr/
 bokstav` og `geokoding='matrikkel'` - den autoritative statusen, se
-`db/schema_kjerne_dokumentasjon.md`. Fyller ved bygningstreff (alltid forsøkt,
+kommentarene ved `adresse` i Flyway-migrasjonen. Fyller ved bygningstreff (alltid forsøkt,
 også for adresser som var løst fra før): `bygning.bygningsnr`, `bygningstype`
 (Matrikkelens rå kodeverdi, ikke oversatt til navn ennå), `bra_m2`,
 `antall_etasjer` og `matrikkel_match='adresse'`. Mislykkes bygningsoppslaget

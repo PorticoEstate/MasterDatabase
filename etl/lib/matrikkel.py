@@ -296,7 +296,7 @@ def hent_bygning(bygg_id: int) -> dict:
     """Henter bygningsnummer + de få andre faktafeltene vi lagrer
     (bygningstype som rå kode - se kommentar ved bruk - bruksareal og antall
     etasjer). antall_etasjer telles fra etasjelisten (én rad per etasjeplan i
-    Matrikkelen), ikke et eget enkelttall - se db/schema_kjerne_dokumentasjon.md."""
+    Matrikkelen), ikke et eget enkelttall."""
     svar = _kall("StoreService", f"""
         <store:getObject xmlns:store="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/store"
             xmlns:dom="{NS_DOM}" xmlns:dombyg="{NS_DOMBYG}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
