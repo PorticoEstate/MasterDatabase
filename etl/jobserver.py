@@ -27,6 +27,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 # startup / nightly-load jobs are not exposed.
 HTTP_TYPES = ("sync", "geocode", "gater")
 
+# Jobs that change what mv_ressurs_sok is built from. A refresh is queued after each;
+# identical waiting refreshes are merged by submit(), so a nightly run gets one.
+REFRESH_AFTER = ("sync", "geocode", "nightly-load", "build", "startup")
+
 KOMMUNENR = re.compile(r"[0-9]{4}")
 MAX_KOMMUNENR = 500
 MAX_BODY = 64 * 1024
@@ -148,6 +152,8 @@ class JobServer:
                 job.finished_at = now_iso()
                 self.running = None
             self.log("job %s finished: %s (%s)" % (job.id[:8], job.status, job.type))
+            if job.type in REFRESH_AFTER:
+                self.submit("refresh")
 
     # --- nightly timer -------------------------------------------------
 
@@ -163,7 +169,7 @@ class JobServer:
             venting = seconds_until_sync()
             self.log("next sync at %s (in %ds)" % (synk_tid, venting))
             time.sleep(venting)
-            for job_type in ("nightly-load", "geocode", "prune"):
+            for job_type in ("nightly-load", "geocode", "refresh", "prune"):
                 self.submit(job_type)
             time.sleep(60)  # never fire twice for the same minute
 

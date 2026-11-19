@@ -364,7 +364,7 @@ paths:
         \ a resource list. Never checks availability or books anything."
       operationId: sok
       parameters:
-      - name: q
+      - name: fritekst
         in: query
         description: "Fritekst. Treffer navn, bygg, lokaletype, aktiviteter, fasiliteter\
           \ og sted."

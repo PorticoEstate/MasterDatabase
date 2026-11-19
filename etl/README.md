@@ -104,7 +104,7 @@ Jobbene kjøres som moduler fra `etl/`, f.eks. `cd etl && python3 -m jobs.sync .
 
 **`ressurslenke`** kobler samme ressurs til flere fagsystemer (f.eks. booking + FDV),
 med én rad og URL per system. `lib/load.py` (for bygging og synk) skriver ressursens egen
-bookinglenke (`ressurslenke_sql` i `lib/sqlgen.py`), og `v_ressurs_sok.booking_url`
+bookinglenke (`ressurslenke_sql` i `lib/sqlgen.py`), og `mv_ressurs_sok.booking_url`
 leses derfra. Lenker til andre systemer legges til av det som laster dem; synken
 rører dem ikke. Bygglenker bygges fortsatt i viewet.
 
