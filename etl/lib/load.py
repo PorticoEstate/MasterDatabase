@@ -287,7 +287,7 @@ def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
             f"ON CONFLICT (fagsystem_instans_id,ekstern_id) "
             f"WHERE fagsystem_instans_id IS NOT NULL AND ekstern_id IS NOT NULL "
             # Et bygg som er i uttrekket er aktivt (også et som var borte og er tilbake).
-            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn, aktiv=TRUE;\n"
+            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn, aktiv=TRUE, "
             f"bygningsnr=COALESCE(bygning.bygningsnr, EXCLUDED.bygningsnr), "
             f"matrikkel_match=CASE WHEN bygning.bygningsnr IS NULL AND EXCLUDED.bygningsnr IS NOT NULL "
             f"AND bygning.matrikkel_match IN ('adresse','ikke_funnet') "
