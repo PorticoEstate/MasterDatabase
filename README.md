@@ -15,7 +15,7 @@ the national facility register later.
   API key). The OpenAPI contract is generated from the code (Swagger UI at
   `/masterdb/swagger-ui.html`); see [backend/README.md](backend/README.md).
 - **Temporary:** the source systems are not normalised yet, so a demo normaliser
-  rewrites their data before loading (`etl/demo_normalisering/`).
+  rewrites their data before loading (`etl/dev/demo_normalisering/`).
 - **`ressurslenke`:** links one resource to several subsystems (booking, facility
   management, sensors), one row with the resource's URL per system. The ETL fills in
   the booking link; the search view reads `booking_url` from it.
@@ -37,12 +37,12 @@ Behind a corporate proxy, also see [DEVELOPMENT_WSL2.md](DEVELOPMENT_WSL2.md) an
 ## How it works
 
 ```
-Aktiv kommune instances --last_inn.py / synk.py--> PostGIS <--matrikkel_adresse.py-- Matrikkel
+Aktiv kommune instances --jobs/build.py / jobs/sync.py--> PostGIS <--jobs/geocode.py-- Matrikkel
                                                       ^
                                     Spring Boot backend (Flyway owns the schema)
 ```
 
-- The ETL scripts only write SQL, which `etl/run.sh` pipes to `psql`. They are
+- The ETL scripts only write SQL, which `etl/main.py` pipes to `psql`. They are
   idempotent, and anything that fails is logged in `synk_avvik` instead of
   stopping the run.
 - The master owns the vocabulary (`lokaletype`, `aktivitet`, `fasilitet`); the
@@ -53,7 +53,7 @@ Aktiv kommune instances --last_inn.py / synk.py--> PostGIS <--matrikkel_adresse.
 
 | Path | Contents |
 |---|---|
-| [etl/](etl/README.md) | The pipeline: `last_inn.py`, `synk.py`, `matrikkel_adresse.py`, `run.sh`, and the demo normaliser |
+| [etl/](etl/README.md) | The pipeline: `main.py`, `jobs/build.py`, `jobs/sync.py`, `jobs/geocode.py`, and the demo normaliser |
 | [backend/](backend/README.md) | Spring Boot application. The Flyway migration in `src/main/resources/db/migration/` is the schema, and its comments document the tables |
 | [bruno/](bruno/) | Bruno request collection for trying the local API |
 | [certs/](certs/README.md) | Optional extra CA certificates for networks that inspect TLS |

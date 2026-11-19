@@ -13,7 +13,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 # psql is how the generated SQL reaches the database; tzdata makes TZ (the time
 # of the nightly sync) work; ca-certificates provides update-ca-certificates
-# for the optional extra CA in ./certs (see run.sh). Pass proxies explicitly:
+# for the optional extra CA in ./certs (see main.py). Pass proxies explicitly:
 # APT does not consistently use the proxy environment variables for HTTPS.
 RUN apt-get -o Acquire::http::Proxy="${http_proxy:-DIRECT}" \
 		-o Acquire::https::Proxy="${https_proxy:-DIRECT}" update \
@@ -24,7 +24,5 @@ RUN apt-get -o Acquire::http::Proxy="${http_proxy:-DIRECT}" \
 
 WORKDIR /app
 COPY . /app
-RUN chmod +x /app/run.sh
-
-ENTRYPOINT ["/app/run.sh"]
+ENTRYPOINT ["python3", "/app/main.py"]
 CMD ["daemon"]
