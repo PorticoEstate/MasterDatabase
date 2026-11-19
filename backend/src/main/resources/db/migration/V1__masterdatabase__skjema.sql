@@ -22,15 +22,8 @@
 
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- Trigram gir substreng-/fuzzy-treff uavhengig av ord-grenser.
+-- Trigram gir substrengtreff (LIKE %) uavhengig av ord-grenser.
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
--- Senket fra standard 0.3: et søk uten æøå ("svomme" for "svømme") endrer
--- 3 av 7 trigram og lander på ~0.2 - rett under standardterskelen, så treffet
--- ville ellers blitt filtrert bort tross at det er det brukeren mente.
--- Satt på databasen, ikke per spørring, så alle `%`-søk får dette automatisk.
-ALTER DATABASE masterdb SET pg_trgm.similarity_threshold = 0.2;
-
 
 CREATE OR REPLACE FUNCTION sett_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
@@ -550,9 +543,7 @@ $$;
 -- 10. Søkevisninger
 -- =============================================================================
 
--- mv_ressurs_sok er et materialisert view. Refresh etter build, sync og geokode. Basetabellene bruker
--- bare "id" internt; visningen gir hver id et beskrivende navn i output, slik
--- at resultatet er lesbart uten å kjenne navnekonvensjonen i skjemaet.
+-- mv_ressurs_sok er et materialisert view. Refresh etter build, sync og geokode.
 -- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte.
 
 CREATE MATERIALIZED VIEW mv_ressurs_sok AS
@@ -606,8 +597,7 @@ SELECT
 					   	   coalesce(r.beskrivelse, '')), 'D')
 					AS sokedokument,
 
-	-- Substreng-/trigramsøk ("ng" skal treffe "Ungdomshus"), som tsvector ikke
-    -- kan - se kommentaren ved pg_trgm i V1.
+	-- Substreng-/trigramsøk ("ng" skal treffe "Ungdomshus"), som tsvector ikke kan
     lower(r.navn || ' ' ||
 		coalesce(b.navn, '')|| ' ' ||
 		coalesce(lt.navn, ''))  AS navn_sok

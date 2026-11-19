@@ -123,8 +123,7 @@ public class RessursSokRepository {
 			// websearch_to_tsquery tåler hva som helst av brukerinput uten å kaste syntaksfeil.
 			//LIKE-delen gir substringtreff ("ng" -> "ungdomshus") som tsvector ikke kan
 			betingelser.add("(sokedokument @@ websearch_to_tsquery('norwegian', :fritekst)"
-					+ " OR navn_sok LIKE lower(:fritekstLike) ESCAPE '\\'"
-					+ " OR navn_sok %> lower(:fritekst))"); //fuzzy-sok
+					+ " OR navn_sok LIKE lower(:fritekstLike) ESCAPE '\\')");
 			params.put("fritekst", p.fritekst());
 			params.put("fritekstLike", "%" + escapeLike(p.fritekst()) + "%");
 		}
