@@ -19,7 +19,7 @@ public FilterRepository ( JdbcClient jdbc){
 		public  List<KommuneFilter> hentKommuner(){
 		return jdbc.sql("""
 				SELECT DISTINCT kommunenr, kommune_navn AS navn
-				  FROM v_ressurs_sok
+				  FROM mv_ressurs_sok
 				 ORDER BY navn""")
 				 .query(KommuneFilter.class)
 				 .list();

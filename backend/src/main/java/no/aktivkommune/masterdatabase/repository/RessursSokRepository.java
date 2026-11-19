@@ -12,13 +12,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
-// All SQL for søket, mot v_ressurs_sok.
+// All SQL for søket, mot mv_ressurs_sok.
 // Søket bruker JdbcClient med ren SQL fordi det er Postgres-spesifikt: fulltekst
 // (tsvector/@@), PostGIS (ST_DWithin, ST_Distance) og array-operatoren &&
-// Når søket feiler eller er tregt, kan spørringen under limes rett inn i psql med EXPLAIN ANALYZE.
-
-// Brukerinput går alltid som navngitte parametre (:fritekst, :kommune, ...), aldri
-// inn i SQL-strengen.--hindrer SQL-injeksjon
+// Brukerinput går alltid som navngitte parametre (:fritekst, :kommune, ...), for å hindre SQL-injeksjon
 
 @Repository
 public class RessursSokRepository {
@@ -126,7 +123,8 @@ public class RessursSokRepository {
 			// websearch_to_tsquery tåler hva som helst av brukerinput uten å kaste syntaksfeil.
 			//LIKE-delen gir substringtreff ("ng" -> "ungdomshus") som tsvector ikke kan
 			betingelser.add("(sokedokument @@ websearch_to_tsquery('norwegian', :fritekst)"
-					+ " OR navn_sok LIKE lower(:fritekstLike) ESCAPE '\\')");
+					+ " OR navn_sok LIKE lower(:fritekstLike) ESCAPE '\\'"
+					+ " OR navn_sok %> lower(:fritekst))"); //fuzzy-sok
 			params.put("fritekst", p.fritekst());
 			params.put("fritekstLike", "%" + escapeLike(p.fritekst()) + "%");
 		}
@@ -171,7 +169,7 @@ public class RessursSokRepository {
 			params.put("radius", p.radiusMeter());
 		}
 
-		// Kolonnene rang og avstand beregnes i WITH-delen, slik at resultatet kan sorteres
+		// Kolonnene rang og avstand beregnes i WITH-delen, slik at resultatet kan sorteres. Brukes bare hvis sorter = "relevans"
 		String rang = harFritekst
 				? "ts_rank_cd(sokedokument, websearch_to_tsquery('norwegian', :fritekst))"
 				: "0::real";
@@ -186,7 +184,7 @@ public class RessursSokRepository {
 		String sql = """
 				WITH treff AS (
 				SELECT v.*, %s AS rang, %s AS avstand
-				FROM v_ressurs_sok v WHERE %s)
+				FROM mv_ressurs_sok v WHERE %s)
 					""".formatted(rang, avstand, where);
 
 		return new SokeFilter(sql, params);

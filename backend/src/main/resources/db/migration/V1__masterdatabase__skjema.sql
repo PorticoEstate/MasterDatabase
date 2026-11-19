@@ -21,9 +21,7 @@
 -- de grove rektangelsøkene en vanlig indeks på (lon, lat) er begrenset til.
 
 CREATE EXTENSION IF NOT EXISTS postgis;
--- Trigram-indeks på ressurs.navn: dekker det sokevektor (se der) ikke kan,
--- siden norsk er et sammensatt-ord-språk og Postgres' innebygde stemmer ikke
--- splitter dem - "svømme" stammer ikke til samme rot som "svømmebasseng".
+
 -- Trigram gir substreng-/fuzzy-treff uavhengig av ord-grenser.
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -41,7 +39,6 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-
 
 -- =============================================================================
 -- 1. Kildesystem og kommune
@@ -361,11 +358,6 @@ CREATE TABLE IF NOT EXISTS ressurs
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-    sokevektor     tsvector GENERATED ALWAYS AS (
-                       to_tsvector('norwegian',
-                           coalesce(navn,'') || ' ' || coalesce(beskrivelse,''))
-                   ) STORED,
-
     -- Sammensatt fremmednøkkel: hindrer at en ressurs havner i et bygg som
     -- ligger i en annen kommune enn ressursen selv.
     CONSTRAINT fk_ressurs_bygning FOREIGN KEY (bygning_id, kommune_id)
@@ -378,12 +370,6 @@ CREATE TABLE IF NOT EXISTS ressurs
 
 CREATE INDEX IF NOT EXISTS ix_ressurs_kommune ON ressurs (kommune_id);
 CREATE INDEX IF NOT EXISTS ix_ressurs_bygning ON ressurs (bygning_id);
-CREATE INDEX IF NOT EXISTS ix_ressurs_sokevektor ON ressurs USING GIN (sokevektor);
--- Trigram-indeks på navn, for substreng-/fuzzy-søk som sokevektor ikke
--- fanger opp (sammensatte ord, stavefeil) - se kommentar ved pg_trgm over.
-CREATE INDEX IF NOT EXISTS ix_ressurs_navn_trgm ON ressurs USING GIN (navn gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS ix_ressurs_sok
-    ON ressurs (lokaletype_id, kommune_id) WHERE aktiv AND bookbar;
 
 CREATE TABLE IF NOT EXISTS ressurs_aktivitet
 (
@@ -409,10 +395,10 @@ CREATE INDEX IF NOT EXISTS ix_ressurs_fasilitet_fas ON ressurs_fasilitet (fasili
 --
 -- Én rad per (ressurs, fagsystem_instans), med ressursens url i det systemet og
 -- dens ekstern_id der. Bare ressurser har lenker; bygg har ingen (bygglenkene
--- bygges i v_ressurs_sok fra bygning.ekstern_id).
+-- bygges i mv_ressurs_sok fra bygning.ekstern_id).
 --
 -- Bookingsystemet ressursen kommer fra har også en rad her (skrevet av ETL,
--- ressurslenke_sql i etl/lib/sqlgen.py), og v_ressurs_sok.booking_url leses derfra.
+-- ressurslenke_sql i etl/lib/sqlgen.py), og mv_ressurs_sok.booking_url leses derfra.
 -- Lenker til andre systemer (fdv, sensor, ...) legges til av det som laster
 -- dem; booking-synken rører dem ikke.
 --
@@ -569,14 +555,7 @@ $$;
 -- at resultatet er lesbart uten å kjenne navnekonvensjonen i skjemaet.
 -- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte.
 
---
--- Vanlig view, ikke materialisert: med rundt 5 000 ressurser er det raskt nok
--- å regne ut søkedokumentet per spørring, og vi slipper et refresh-steg i ETL
--- og risikoen for utdaterte søketreff. Skulle det bli for tregt, kan
--- CREATE MATERIALIZED VIEW ... AS SELECT * FROM v_ressurs_sok legges oppå med
--- GIN/GiST-indekser, uten at Java-koden endres utover tabellnavnet.
-
-CREATE OR REPLACE VIEW v_ressurs_sok AS
+CREATE MATERIALIZED VIEW mv_ressurs_sok AS
 SELECT
     r.id                           AS ressurs_id,
     r.navn,
@@ -600,14 +579,10 @@ SELECT
     rl.url                         AS booking_url,
     COALESCE(akt.ids, '{}')        AS aktivitet_ids,
     COALESCE(fas.ids, '{}')        AS fasilitet_ids,
-    r.sokevektor,
     r.sist_oppdatert,
 
     -- Søke-API-kolonner:
     k.fylkesnavn,
-    p.navn                         AS lokaletype_hovedgruppe_navn,
-    COALESCE(akt.navn_liste, '{}') AS aktivitet_navn,
-    COALESCE(fas.navn_liste, '{}') AS fasilitet_navn,
 
     -- Lenker til det lokale systemet. Søket selv kaller det aldri; frontend
     -- bruker lenkene til videresending.
@@ -616,18 +591,27 @@ SELECT
     CASE WHEN b.ekstern_id IS NOT NULL THEN
         bfi.base_url || '/bookingfrontend/client/en/building/' || b.ekstern_id END AS bygg_booking_url,
 
-    -- Fritekst. ressurs.sokevektor dekker bare navn og beskrivelse; her tas
+    -- Fritekstsøk:
     -- bygg, type, aktiviteter, fasiliteter og sted med, vektet så treff i
     -- navn (A) rangerer over treff i beskrivelse (D).
     setweight(to_tsvector('norwegian', r.navn || ' ' || coalesce(b.navn, '')), 'A') ||
-    setweight(to_tsvector('norwegian', coalesce(lt.navn, '') || ' ' ||
-              coalesce(akt.navn_tekst, '') || ' ' || coalesce(fas.navn_tekst, '')), 'B') ||
-    setweight(to_tsvector('norwegian', coalesce(a.adressetekst, '') || ' ' ||
-              coalesce(a.poststed, '') || ' ' || k.navn), 'C') ||
-    setweight(to_tsvector('norwegian', coalesce(r.beskrivelse, '')), 'D') AS sokedokument,
-    -- Substreng-/trigramsøk ("ng" skal treffe "Ungdomshus"), som tsvector ikke
+    setweight(to_tsvector('norwegian',
+						   coalesce(lt.navn, '') || ' ' ||
+						   coalesce(p.navn, '') || ' ' ||
+             			   coalesce(akt.navn_tekst, '') || ' ' ||
+						   coalesce(fas.navn_tekst, '')), 'B') ||
+    setweight(to_tsvector('norwegian',
+						   coalesce(a.adressetekst, '') || ' ' ||
+                           coalesce(a.poststed, '') || ' ' || k.navn), 'C') ||
+    setweight(to_tsvector('norwegian',
+					   	   coalesce(r.beskrivelse, '')), 'D')
+					AS sokedokument,
+
+	-- Substreng-/trigramsøk ("ng" skal treffe "Ungdomshus"), som tsvector ikke
     -- kan - se kommentaren ved pg_trgm i V1.
-    lower(r.navn || ' ' || coalesce(b.navn, '')) AS navn_sok
+    lower(r.navn || ' ' ||
+		coalesce(b.navn, '')|| ' ' ||
+		coalesce(lt.navn, ''))  AS navn_sok
 FROM ressurs r
 JOIN kommune k                  ON k.id = r.kommune_id
 JOIN fagsystem_instans fi       ON fi.id = r.fagsystem_instans_id
@@ -635,6 +619,7 @@ LEFT JOIN lokaletype lt         ON lt.id = r.lokaletype_id
 LEFT JOIN lokaletype p          ON p.id = lt.parent_id
 LEFT JOIN bygning b             ON b.id = r.bygning_id
 LEFT JOIN fagsystem_instans bfi ON bfi.id = b.fagsystem_instans_id
+
 -- Lenken til ressursens eget bookingsystem. Maks én rad (uniq_ressurslenke_ressurs).
 LEFT JOIN ressurslenke rl       ON rl.ressurs_id = r.id
                                AND rl.fagsystem_instans_id = r.fagsystem_instans_id
@@ -644,7 +629,6 @@ LEFT JOIN adresse a             ON a.bygning_id = b.id AND a.er_hovedadresse
 -- sub-query som finner alle tilknyttede aktiviteter og samler dem som ID-er, navneliste og søketekst
 LEFT JOIN LATERAL (
     SELECT array_agg(ak.id   ORDER BY ak.navn) AS ids,
-           array_agg(ak.navn ORDER BY ak.navn) AS navn_liste,
            string_agg(ak.navn, ' ')            AS navn_tekst
       FROM ressurs_aktivitet ra
       JOIN aktivitet ak ON ak.id = ra.aktivitet_id
@@ -654,13 +638,32 @@ LEFT JOIN LATERAL (
 -- sub-query som finner alle tilknyttede fasiliteter og samler dem som ID-er, navneliste og søketekst
 LEFT JOIN LATERAL (
     SELECT array_agg(f.id   ORDER BY f.navn) AS ids,
-           array_agg(f.navn ORDER BY f.navn) AS navn_liste,
            string_agg(f.navn, ' ')           AS navn_tekst
       FROM ressurs_fasilitet rf
       JOIN fasilitet f ON f.id = rf.fasilitet_id
      WHERE rf.ressurs_id = r.id
 ) fas ON TRUE
 WHERE r.aktiv AND r.bookbar;
+
+-- Indekser på det materialisert søkeviewet
+--Fritekst (ordstammer): sokedokument @@ websearch_to_tsquery(..) - se RessursSokRepository
+CREATE INDEX ix_mv_ressurs_sok_sokedokument
+	ON mv_ressurs_sok USING GIN(sokedokument);
+
+--Substring (LIKE)
+CREATE INDEX ix_mv_ressurs_sok_navn_trgm
+ON mv_ressurs_sok USING GIN(navn_sok gin_trgm_ops);
+
+--Nærhetssøk: ST_DWithin / ST_Distance mot posisjon
+CREATE INDEX ix_mv_ressurs_sok_posisjon
+ON mv_ressurs_sok USING GIST(posisjon);
+
+-- Indekser som gjør søket raskere når datamengden vokser
+CREATE INDEX ix_mv_ressurs_sok_aktivitet
+    ON mv_ressurs_sok USING GIN (aktivitet_ids);
+CREATE INDEX ix_mv_ressurs_sok_fasilitet
+    ON mv_ressurs_sok USING GIN (fasilitet_ids);
+
 
 -- Et materialisert view for aktiviteter som viser hierarkiet, inkluderer forfedre og etterkommere
 CREATE MATERIALIZED VIEW mv_aktivitet_hierarki AS
