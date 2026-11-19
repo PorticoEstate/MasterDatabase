@@ -44,7 +44,7 @@ def i_blokk(kn, samling, ekstern_id, sql, rapost=None) -> str:
 
 # Path of a resource in an Aktiv kommune booking system, appended to the
 # instance's base_url. Stored in ressurslenke.url.
-RESSURS_URL_MONSTER = "/bookingfrontend/resource/client/"
+RESSURS_URL_MONSTER = "/bookingfrontend/client/resource/"
 
 
 def ressurslenke_sql(kn: str) -> str:

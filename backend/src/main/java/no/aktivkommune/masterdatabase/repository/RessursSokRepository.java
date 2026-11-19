@@ -139,7 +139,7 @@ public class RessursSokRepository {
 			betingelser.add("""
 					lokaletype_id IN(
 					SELECT underlokaletype_id
-					FROM mv_lokaletype_hierarki
+					FROM v_lokaletype_hierarki
 					WHERE lokaletype_id IN (:lokaletype))""");
 			params.put("lokaletype", p.lokaletype());
 		}
@@ -148,7 +148,7 @@ public class RessursSokRepository {
 			betingelser.add("""
 					aktivitet_ids && ARRAY(
 					SELECT underaktivitet_id
-					FROM mv_aktivitet_hierarki
+					FROM v_aktivitet_hierarki
 					WHERE aktivitet_id IN (:aktivitet))""");
 			params.put("aktivitet", p.aktivitet());
 		}
@@ -157,7 +157,7 @@ public class RessursSokRepository {
 			betingelser.add("""
 					fasilitet_ids && ARRAY(
 					SELECT underfasilitet_id
-					FROM mv_fasilitet_hierarki
+					FROM v_fasilitet_hierarki
 					WHERE fasilitet_id IN (:fasilitet))""");
 			params.put("fasilitet", p.fasilitet());
 		}

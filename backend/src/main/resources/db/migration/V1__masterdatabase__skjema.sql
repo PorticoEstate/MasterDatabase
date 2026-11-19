@@ -550,7 +550,7 @@ $$;
 -- 10. Søkevisninger
 -- =============================================================================
 
--- Alt et søk trenger i én flat rad per bookbar ressurs. Basetabellene bruker
+-- mv_ressurs_sok er et materialisert view. Refresh etter build, sync og geokode. Basetabellene bruker
 -- bare "id" internt; visningen gir hver id et beskrivende navn i output, slik
 -- at resultatet er lesbart uten å kjenne navnekonvensjonen i skjemaet.
 -- Søket kjøres av RessursSokRepository (JdbcClient), som leser viewet direkte.
@@ -584,12 +584,11 @@ SELECT
     -- Søke-API-kolonner:
     k.fylkesnavn,
 
-    -- Lenker til det lokale systemet. Søket selv kaller det aldri; frontend
-    -- bruker lenkene til videresending.
     -- Instansens base_url + ekstern_id er både identitet og ruting: ekstern_id
-    -- er kun gyldig i sin egen instans.
+    -- er kun gyldig i sin egen instans. Søket selv kaller det aldri; frontend
+    -- bruker lenkene til videresending.
     CASE WHEN b.ekstern_id IS NOT NULL THEN
-        bfi.base_url || '/bookingfrontend/client/en/building/' || b.ekstern_id END AS bygg_booking_url,
+        bfi.base_url || '/bookingfrontend/client/building/' || b.ekstern_id END AS bygg_booking_url,
 
     -- Fritekstsøk:
     -- bygg, type, aktiviteter, fasiliteter og sted med, vektet så treff i
@@ -614,7 +613,6 @@ SELECT
 		coalesce(lt.navn, ''))  AS navn_sok
 FROM ressurs r
 JOIN kommune k                  ON k.id = r.kommune_id
-JOIN fagsystem_instans fi       ON fi.id = r.fagsystem_instans_id
 LEFT JOIN lokaletype lt         ON lt.id = r.lokaletype_id
 LEFT JOIN lokaletype p          ON p.id = lt.parent_id
 LEFT JOIN bygning b             ON b.id = r.bygning_id
@@ -645,7 +643,7 @@ LEFT JOIN LATERAL (
 ) fas ON TRUE
 WHERE r.aktiv AND r.bookbar;
 
--- Indekser på det materialisert søkeviewet
+-- Indekser på det materialiserte søkeviewet
 --Fritekst (ordstammer): sokedokument @@ websearch_to_tsquery(..) - se RessursSokRepository
 CREATE INDEX ix_mv_ressurs_sok_sokedokument
 	ON mv_ressurs_sok USING GIN(sokedokument);
@@ -665,8 +663,8 @@ CREATE INDEX ix_mv_ressurs_sok_fasilitet
     ON mv_ressurs_sok USING GIN (fasilitet_ids);
 
 
--- Et materialisert view for aktiviteter som viser hierarkiet, inkluderer forfedre og etterkommere
-CREATE MATERIALIZED VIEW mv_aktivitet_hierarki AS
+-- View for aktiviteter som viser hierarkiet, inkluderer seg selv og alle etterkommere
+CREATE VIEW v_aktivitet_hierarki AS
 WITH RECURSIVE aktivitet_tre AS (
 	-- hver aktivitet inneholder seg selv
 	SELECT
@@ -688,11 +686,8 @@ WITH RECURSIVE aktivitet_tre AS (
 SELECT *
 FROM aktivitet_tre;
 
-CREATE INDEX idx_mv_aktivitet_hierarki
-ON mv_aktivitet_hierarki (aktivitet_id);
-
--- Et materialisert view for fasiliteter som viser hierarkiet, inkluderer forfedre og etterkommere
-CREATE MATERIALIZED VIEW mv_fasilitet_hierarki AS
+-- View for fasiliteter som viser hierarkiet, inkluderer seg selv og alle etterkommere
+CREATE VIEW v_fasilitet_hierarki AS
 WITH RECURSIVE fasilitet_tre AS (
 	SELECT
 	id as fasilitet_id,
@@ -713,11 +708,9 @@ WITH RECURSIVE fasilitet_tre AS (
 SELECT *
 FROM fasilitet_tre;
 
-CREATE INDEX idx_mv_fasilitet_hierarki
-ON mv_fasilitet_hierarki(fasilitet_id);
 
--- Et materialisert view for lokaletyper som viser hierarkiet, inkluderer forfedre og etterkommere
-CREATE MATERIALIZED VIEW mv_lokaletype_hierarki AS
+-- View for lokaletyper som viser hierarkiet, inkluderer seg selv og alle etterkommere
+CREATE VIEW v_lokaletype_hierarki AS
 WITH RECURSIVE lokaletype_tre AS (
 
 --hver lokaletype inneholder seg selv i underkategorien
@@ -738,9 +731,6 @@ JOIN lokaletype_tre
 
 SELECT *
 FROM lokaletype_tre;
-
-CREATE INDEX idx_mv_lokaletype_hierarki
-ON mv_lokaletype_hierarki(lokaletype_id);
 
 
 -- Avvikene fra den siste kjøringen per kilde. Eldre avvik ligger fortsatt i
