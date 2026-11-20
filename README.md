@@ -18,7 +18,8 @@ the national facility register later.
   rewrites their data before loading (`etl/dev/demo_normalisering/`).
 - **`ressurslenke`:** links one resource to several subsystems (booking, facility
   management, sensors), one row with the resource's URL per system. The ETL fills in
-  the booking link; the search view reads `booking_url` from it.
+  the booking link; the materialized search view (`mv_ressurs_sok`) reads
+  `booking_url` from it and is refreshed by the ETL after each sync.
 
 ## Run it
 

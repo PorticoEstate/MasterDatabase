@@ -21,7 +21,10 @@ Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-d
 | Metode | Sti | Beskrivelse |
 |---|---|---|
 | GET | `/masterdb/search` | Fritekstsøk med filtre. Returnerer både `bygg` og `ressurser`, hver paginert. |
-| GET | `/masterdb/search/filter` | Valgene til filterpanelet: kommuner (kode + navn), lokaletyper, aktiviteter og fasiliteter (id + navn). Hentes én gang, ikke per tastetrykk. |
+| GET | `/masterdb/search/filters/municipalities` | Kommunevalg til filterpanelet: kommunenummer + navn, for kommuner som har minst én aktiv ressurs. Hentes én gang, ikke per tastetrykk. |
+| GET | `/masterdb/search/filters/activities` | Alle aktiviteter som flat liste med `id`, `navn` og `parentId` (`null` for toppnivå); endepunktet bygger ikke noe tre. I søket holder det å sende forelderens id: serveren tar med alle etterkommere selv (se «Slik virker søket»). |
+| GET | `/masterdb/search/filters/facilities` | Som over, for fasiliteter. |
+| GET | `/masterdb/search/filters/resource-categories` | Som over, for lokaletyper. |
 | POST | `/masterdb/etl/jobs/sync` | Setter en synk av alle kommuner i kø i etl-containeren. Krever API-nøkkel. Svarer 202 med jobb-id. |
 | POST | `/masterdb/etl/jobs/geocode` | Setter Matrikkel-geokodingen i kø. Krever API-nøkkel. Svarer 202 med jobb-id. |
 | POST | `/masterdb/etl/jobs/gater` | Setter gateuttrekket fra Matrikkelen i kø. Valgfri body `{"kommunenr": [...]}` begrenser det til de kommunene; uten body hentes alle. 400 ved ugyldig body. Krever API-nøkkel. Svarer 202 med jobb-id. |
@@ -41,7 +44,25 @@ Alle endepunkter unntatt søk (`/masterdb/search`), Swagger UI, `/masterdb/api-d
 
 Stiene er engelske, mens query-parametre (`fritekst`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `sorter`, `side`, `storrelse`, `lat`, `lon`, `radiusMeter`) og JSON-felt er norske. Lister kan sendes som `?aktivitet=1&aktivitet=2` eller `?aktivitet=1,2`.
 
-Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java`, `repository/RessursSokRepository.java` (all SQL for søket) og `dto/`.
+Koden ligger i `controller/RessursSokController.java`, `service/RessursSokService.java`, `repository/RessursSokRepository.java` (all SQL for søket), `repository/FilterRepository.java` (valgene til filterpanelet) og `dto/`.
+
+### Slik virker søket
+
+**Parametre** (alle valgfrie): `fritekst`, `kommune`, `lokaletype`, `aktivitet`, `fasilitet`, `lat` + `lon` + `radiusMeter`, `sorter`, `side` og `storrelse`. Validering og normalisering skjer i `RessursSokService.mapParametere`; ugyldig input gir 400.
+
+**Filtre:** verdiene i én liste kombineres med ELLER, og ulike filtre kombineres med OG. `kommune` er kommunenummer (4 siffer), ikke navn. `lokaletype`, `aktivitet` og `fasilitet` er id-er, og et valg dekker også alle undernivåer: `RessursSokRepository` utvider valget til alle etterkommere ved hjelp av de rekursive viewene `v_lokaletype_hierarki`, `v_aktivitet_hierarki` og `v_fasilitet_hierarki` (hver rad gir en forelder og én av dens etterkommere, inkludert den selv). Klienten trenger derfor bare sende id-en til det som er valgt, ikke id-ene til barna.
+
+**Fritekst:** treffer navn, bygg, lokaletype (inkludert hovedgruppen), aktiviteter, fasiliteter, adresse, sted, kommune og beskrivelse. Det er to søk i ett: ordstammesøk på norsk (`websearch_to_tsquery` mot `sokedokument`), og substringsøk (`LIKE`) på ressursnavn, byggnavn og lokaletype, slik at «ng» treffer «Ungdomshus». Treff i navn og bygg veier tyngst, deretter lokaletype, aktiviteter og fasiliteter, så adresse og sted, og til slutt beskrivelsen. Det finnes ikke lenger noe fuzzy-/stavefeilsøk.
+
+**Nærhetssøk:** `lat`, `lon` og `radiusMeter` må oppgis sammen (ellers 400). `lat` må være mellom -90 og 90, `lon` mellom -180 og 180, og `radiusMeter` mellom 1 og 50 000.
+
+**Sortering** (`sorter`): `relevans`, `avstand` eller `navn`. Uten `sorter` brukes `avstand` hvis nærhetssøk er satt, ellers `relevans` hvis det er fritekst, ellers `navn`. `relevans` uten fritekst faller tilbake til `navn`. `avstand` uten nærhetssøk gir 400. Likt rangerte treff sorteres på navn.
+
+**Paginering:** `side` er 0-indeksert (standard 0). `storrelse` er standard 20 og begrenses til 1–100 (høyere verdier kappes, de avvises ikke). Er `side × storrelse` over 50 000, svarer API-et 400 («Side er for stor»). `bygg` og `ressurser` pagineres hver for seg.
+
+### Søkedata: `mv_ressurs_sok`
+
+Søket leser aldri fra grunntabellene, men fra det **materialiserte viewet** `mv_ressurs_sok` (definert i Flyway-migrasjonen, med GIN-/GiST-indekser for fritekst, trigram, posisjon, aktivitet og fasilitet). Det har én flat rad per aktiv, bookbar ressurs, og er et lagret øyeblikksbilde: **det oppdateres ikke av seg selv.** ETL-jobben `refresh` kjører `REFRESH MATERIALIZED VIEW` etter bygging, synk og geokoding (se [etl/README.md](../etl/README.md)). Det gjelder også jobber startet gjennom API-et (`POST /masterdb/etl/jobs/sync` og `/geocode`), men refresh er da en egen jobb som køes etter at synken eller geokodingen er ferdig. Jobben du får jobb-id for, står som `ok` før viewet er oppdatert, og refresh-jobben vises for seg i `GET /masterdb/etl/jobs`. Søket viser endringene først når den er ferdig. Endres data på annen måte, for eksempel direkte i databasen, vises ikke endringen i søket før viewet er oppdatert. `GET /masterdb/search/filters/municipalities` leser også fra viewet, så kommuner uten aktive ressurser vises ikke der.
 
 Kommune-endepunktene ligger i `controller/KommuneController.java`, `service/KommuneService.java` og `repository/KommuneRepository.java` (kommune-tabellen) og `repository/FagsystemInstansRepository.java` (fagsystem-instanser og koblingen til kommunen); begge bruker ren SQL via `JdbcClient`. Request-body er `dto/KommuneCreate.java` og `dto/KommuneUpdate.java`; regelen for `bookingBaseUrl` ligger i `dto/AktivKommuneUrl.java` (samme regel sjekkes i `etl/lib/kommuner.py`). Formatet på input valideres i controlleren (`@Valid`); «finnes ikke» og «finnes fra før» gjøres om til 404 og 409 i servicen.
 

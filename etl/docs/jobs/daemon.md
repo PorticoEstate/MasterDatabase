@@ -22,6 +22,7 @@ docker compose exec etl python3 main.py <build|sync|geocode|gater [kommunenr...]
 | `geocode` | Spørring, `jobs/geocode.py`, `psql` | [geocode](geocode.md) |
 | `gater [kommunenr...]` | `jobs/gater.py` og `psql`. Uten argument: alle kommuner | [gater](gater.md) |
 | `prune` | Sletter gamle `synk_avvik`-rader | [avvik](../reference/avvik-and-extracts.md) |
+| `refresh` | Bare jobbtype i jobbserveren, ikke en `main.py`-kommando ennå | [under](#refresh-av-søkeviewet) |
 | `status` | Kjører `sql/status.sql` (skriver ikke) | |
 
 ## Innstillinger (miljøvariabler)
@@ -55,12 +56,15 @@ avslutter den slik at docker starter den på nytt). Så sjekker den kodeverkene:
 
 ## Nattsyklusen
 
-Ved `SYNK_TID` legges tre jobber i køen, i denne rekkefølgen:
+Ved `SYNK_TID` (standard kl. 03:00) legges fire jobber i køen, i denne rekkefølgen:
 
 1. `nightly-load`: [synk](sync.md), eller bygging (med gater etterpå) hvis
    kodeverkene fortsatt er tomme.
-2. `geocode`: kjører selv om synken feilet.
-3. `prune`: sletter `synk_avvik` eldre enn `AVVIK_RETENTION_DAYS`, unntatt rader
+2. `geocode`: kjører selv om synken feilet, så nye bygg får posisjon. Synk-jobben
+   geokoder ikke selv: trigges `sync` alene (`main.py sync` eller jobbserveren),
+   kommer ingen geokoding etter, og `geocode` må trigges for seg.
+3. `refresh`: oppdaterer søkeviewet, se [Refresh av søkeviewet](#refresh-av-søkeviewet).
+4. `prune`: sletter `synk_avvik` eldre enn `AVVIK_RETENTION_DAYS`, unntatt rader
    i `v_synk_avvik_gjeldende` (siste kjøring per kilde), så en kilde som slutter
    å kjøre beholder sine aktuelle problemer synlige.
 
@@ -73,6 +77,33 @@ All jobbkjøring går gjennom én kø med én worker, så jobber overlapper aldr
 lagt i køen. En identisk jobb (samme type og argumenter) som fortsatt venter,
 legges ikke i køen på nytt. De siste 50 jobbene beholdes, med opptil 200
 linjer output hver.
+
+### Refresh av søkeviewet
+
+`refresh` kjører `REFRESH MATERIALIZED VIEW mv_ressurs_sok`, viewet søket i
+backend leser fra. Uten refresh ser søket gamle data. Feiler refresh, beholder
+viewet det gamle innholdet.
+
+Jobbserveren setter selv en `refresh` i kø etter `sync`, `geocode`,
+`nightly-load`, `build` og `startup` (`REFRESH_AFTER` i `jobserver.py`). Like
+ventende refresh slås sammen. Kjøres jobbene direkte med `main.py` (for
+eksempel `main.py sync`), skjer ikke dette. `refresh` finnes foreløpig ikke som
+kommando i `main.py`, så viewet må da oppdateres med:
+
+```bash
+docker compose exec etl psql -c "REFRESH MATERIALIZED VIEW mv_ressurs_sok"
+```
+
+Refresh som følge av en jobb gjennom API-et (`POST /masterdb/etl/jobs/sync`
+eller `/geocode`) er en **egen jobb som køes etter at den første er ferdig**:
+
+- Jobb-id-en API-et svarer med, gjelder bare synken eller geokodingen, som står
+  som `ok` før viewet er oppdatert.
+- Refresh-jobben dukker opp for seg i `GET /masterdb/etl/jobs`, og søket viser
+  endringene først når den er ferdig.
+- Refresh køes uavhengig av om jobben gikk bra (jobbserveren ser bare på
+  jobbtypen), så en `failed`-jobb kan likevel følges av en refresh.
+- Går selve refresh-jobben feil, vises det bare i status og logg for den jobben.
 
 ### Internt HTTP-API
 
