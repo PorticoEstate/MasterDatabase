@@ -550,11 +550,12 @@ CREATE MATERIALIZED VIEW mv_ressurs_sok AS
 SELECT
     r.id                           AS ressurs_id,
     r.navn,
-    r.kapasitet,
+    r.kapasitet,                   -- ikke brukt av søket enda. Beholdt for mulighet for videre bruk (eksempelvis kapasitetsfilter)
     r.beskrivelse,
     k.id                           AS kommune_id,
     k.kommunenr,
     k.navn                         AS kommune_navn,
+	k.fylkesnavn,                  -- ikke brukt av søket enda. Beholdt for mulighet for videre bruk (eksempelvis fylkesfilter)
     lt.id                          AS lokaletype_id,
     lt.navn                        AS lokaletype_navn,
     p.navn                         AS lokaletype_hovedgruppe,
@@ -568,18 +569,16 @@ SELECT
     a.postnummer,
     a.poststed,
     rl.url                         AS booking_url,
+
+-- Lenke til bygget i bookingsystemet. base_url + ekstern_id er både identitet
+	--og ruting: ekstern_id er kun gyldig i sin egen instans. Søket selv kaller
+	--det aldri; frontend bruker lenkene til videresending.
+    CASE WHEN b.ekstern_id IS NOT NULL THEN
+        bfi.base_url || '/bookingfrontend/client/building/' || b.ekstern_id END AS bygg_booking_url,
+
     COALESCE(akt.ids, '{}')        AS aktivitet_ids,
     COALESCE(fas.ids, '{}')        AS fasilitet_ids,
     r.sist_oppdatert,
-
-    -- Søke-API-kolonner:
-    k.fylkesnavn,
-
-    -- Instansens base_url + ekstern_id er både identitet og ruting: ekstern_id
-    -- er kun gyldig i sin egen instans. Søket selv kaller det aldri; frontend
-    -- bruker lenkene til videresending.
-    CASE WHEN b.ekstern_id IS NOT NULL THEN
-        bfi.base_url || '/bookingfrontend/client/building/' || b.ekstern_id END AS bygg_booking_url,
 
     -- Fritekstsøk:
     -- bygg, type, aktiviteter, fasiliteter og sted med, vektet så treff i

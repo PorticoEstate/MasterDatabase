@@ -54,8 +54,8 @@ public class RessursSokController
 	//Valgmuligheter for aktivitetsfilteret (alle aktiviteter).
 	@Operation (summary = "All activities (id, name, parentId)",
 			description = "Every row in the activity table, including top-level categories "
-					+ "(parentId = null). The client builds the tree and sends the ids of all "
-					+ "descendants when a parent is selected in the search.")
+					+ "(parentId = null). The list is flat; no tree is built here. When a parent is "
+					+ "selected in the search, its id is enough: the search includes all descendants.")
 	@GetMapping ("/filters/activities")
 	public List<FilterValg> getActivities()
 	{
@@ -65,8 +65,8 @@ public class RessursSokController
 	//Valgmuligheter for fasilitetsfilteret (alle fasiliteter).
 	@Operation (summary = "All facilities (id, name, parentId)",
 			description = "Every row in the facility table, including top-level categories "
-					+ "(parentId = null). The client builds the tree and sends the ids of all "
-					+ "descendants when a parent is selected in the search.")
+					+ "(parentId = null). The list is flat; no tree is built here. When a parent is "
+					+ "selected in the search, its id is enough: the search includes all descendants.")
 	@GetMapping ("/filters/facilities")
 	public List<FilterValg> getFacilities()
 	{
@@ -76,8 +76,8 @@ public class RessursSokController
 	//Valgmuligheter for lokaletypefilteret (alle lokaletyper).
 	@Operation (summary = "All venue types (id, name, parentId)",
 			description = "Every row in the venue type table, including top-level categories "
-					+ "(parentId = null). The client builds the tree and sends the ids of all "
-					+ "descendants when a parent is selected in the search.")
+					+ "(parentId = null). The list is flat; no tree is built here. When a parent is "
+					+ "selected in the search, its id is enough: the search includes all descendants.")
 	@GetMapping ("/filters/resource-categories")
 	public List<FilterValg> getResourceCategories()
 	{

@@ -150,9 +150,23 @@ docker exec -i portico_masterdb psql -U postgres -d masterdb < etl/ut/synk.sql
 ```
 
 Den planlagte kjøringen gjøres av etl-containeren (`etl/main.py`, hver natt kl. 03:00; se `DEPLOY.md`). Den kjører
-tre separate jobber etter hverandre: `nightly-load` (synk), `geocode` (`jobs/geocode.py`, steg 3, så nye bygg får
-posisjon) og `prune`. Synk-jobben geokoder ikke selv: trigges `sync` alene (`main.py sync` eller jobbserveren),
+fire separate jobber etter hverandre: `nightly-load` (synk), `geocode` (`jobs/geocode.py`, steg 3, så nye bygg får
+posisjon), `refresh` og `prune`. Synk-jobben geokoder ikke selv: trigges `sync` alene (`main.py sync` eller jobbserveren),
 kommer ingen geokoding etter, og `geocode` må trigges for seg.
+
+`refresh` kjører `REFRESH MATERIALIZED VIEW mv_ressurs_sok`, viewet søket i backend leser fra. Uten refresh ser
+søket gamle data. Jobbserveren setter selv en `refresh` i kø etter `sync`, `geocode`, `nightly-load`, `build` og
+`startup` (`REFRESH_AFTER` i `jobserver.py`); like ventende refresh slås sammen. Kjøres jobbene direkte med
+`main.py` (for eksempel `main.py sync`), skjer ikke dette. `refresh` finnes foreløpig ikke som kommando i
+`main.py`, så viewet må da oppdateres med `docker compose exec etl psql -c "REFRESH MATERIALIZED VIEW mv_ressurs_sok"`.
+Feiler refresh, beholder viewet det gamle innholdet.
+
+Refresh som følge av en jobb gjennom API-et (`POST /masterdb/etl/jobs/sync` eller `/geocode`) er en **egen jobb som
+køes etter at den første er ferdig**. Jobb-id-en API-et svarer med, gjelder bare synken eller geokodingen, som står
+som `ok` før viewet er oppdatert. Refresh-jobben dukker opp for seg i `GET /masterdb/etl/jobs`, og søket viser
+endringene først når den er ferdig. Refresh køes uavhengig av om jobben gikk bra (jobbserveren ser bare på
+jobbtypen), så en `failed`-jobb kan likevel følges av en refresh. Går selve refresh-jobben feil, vises det bare i
+status og logg for den jobben.
 
 Skriptene kan også lese `<mappe>/<kommune>.json` i stedet for å hente fra nettet,
 med `--fra-fil <mappe>`. Det brukes av demoen (under), og er nyttig for å kjøre

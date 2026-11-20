@@ -133,7 +133,7 @@ public class RessursSokRepository {
 			params.put("kommune", p.kommune());
 		}
 
-		// Lokaletype, aktivitet og fasilitet: ELLER mellom valgene.
+		// Lokaletype, aktivitet og fasilitet: ELLER mellom valgene. Inkluderer barna også
 		if (!p.lokaletype().isEmpty()) {
 			betingelser.add("""
 					lokaletype_id IN(
