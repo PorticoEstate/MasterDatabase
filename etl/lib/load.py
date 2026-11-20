@@ -96,6 +96,59 @@ def kodeverk_sql(kn, tabell, samling, rader, initial_build):
     return sql
 
 
+MAKS_BYGNINGSNR = 999_999_999_999   # bygning.bygningsnr is BIGINT; real numbers have ~7-9 digits
+
+
+def bygningsnr_fra_kilde(kn, knr, b):
+    """(bygningsnr eller None, avviks-SQL) fra `cadastral_references` på ett bygg.
+
+    Bare entries med cadastral_type 'BUILDING' og et positivt heltall i
+    building_number teller. En entry der building_id/municipality_id ikke
+    stemmer med bygget/kommunen, og en ugyldig verdi, gir avvik og brukes ikke.
+    Flere forskjellige numre gir ett avvik og ingen verdi. Tallet er en
+    påstand fra kilden, ikke en bekreftet matrikkelverdi: jobs/geocode.py
+    bekrefter det mot Matrikkelen. Feltet er foreløpig tynt fylt i kildene."""
+    refs = b.get("cadastral_references")
+    if not refs:
+        return None, ""
+    if not isinstance(refs, list):
+        return None, logg(kn, "buildings", "ugyldig_verdi", b["id"],
+                          "cadastral_references er ikke en liste", "cadastral_references", rapost=b)
+    avvik = ""
+    numre = set()
+    for ref in refs:
+        if not isinstance(ref, dict) or ref.get("cadastral_type") != "BUILDING":
+            continue
+        raa = ref.get("building_number")
+        if raa is None or raa == "":
+            continue
+        nr, feil = som_heltall(raa)
+        if not feil and (isinstance(raa, bool) or not nr or nr > MAKS_BYGNINGSNR):
+            feil = f"ikke et gyldig bygningsnummer: {str(raa)[:60]}"
+        if feil:
+            avvik += logg(kn, "buildings", "ugyldig_verdi", b["id"],
+                          "cadastral_references.building_number " + feil, "cadastral_references", rapost=b)
+            continue
+        if ref.get("building_id") is not None and str(ref["building_id"]) != str(b["id"]):
+            avvik += logg(kn, "buildings", "ugyldig_verdi", b["id"],
+                          f"cadastral_references.building_id {str(ref['building_id'])[:20]} er ikke bygget selv; "
+                          f"entry ignorert", "cadastral_references", rapost=b)
+            continue
+        if ref.get("municipality_id") is not None and str(ref["municipality_id"]) != str(knr):
+            avvik += logg(kn, "buildings", "ugyldig_verdi", b["id"],
+                          f"cadastral_references.municipality_id {str(ref['municipality_id'])[:20]} "
+                          f"er ikke kommunenr {knr}; entry ignorert", "cadastral_references", rapost=b)
+            continue
+        numre.add(nr)
+    if len(numre) > 1:
+        avvik += logg(kn, "buildings", "ugyldig_verdi", b["id"],
+                      "cadastral_references har flere forskjellige bygningsnumre: "
+                      + ", ".join(str(n) for n in sorted(numre)) + "; ingen brukt",
+                      "cadastral_references", rapost=b)
+        return None, avvik
+    return (next(iter(numre)) if numre else None), avvik
+
+
 def ukjente_id_er_sql(kn, tabell, samling, felt, ider):
     """Loggfører de id-ene i koblingene som masteren ikke kjenner. Koblingen
     lastes ikke (den peker på ingenting), og avviket logges én gang per id."""
@@ -214,16 +267,31 @@ def generer_sql(slug: str, kommune: tuple, ut, fra_fil: Path | None = None, *,
         # Kildedata gir ikke gatenavn og husnummer separat, bare hele
         # gateadressen i ett felt ("Breimyra 68 A"). adressetekst fylles fra
         # den; gate_id/husnr/posisjon fylles av jobs/geocode.py.
+        # Bygningsnummer fra cadastral_references: en påstand fra kilden som
+        # geocode bekrefter mot Matrikkelen (matrikkel_match røres ikke her,
+        # bortsett fra det som er forklart under).
+        kilde_bnr, bnr_avvik = bygningsnr_fra_kilde(kn, knr, b)
+        avvik += bnr_avvik
         sql = (
-            f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id) "
-            f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])} "
+            f"INSERT INTO bygning (kommune_id,navn,bydel_navn,fagsystem_instans_id,ekstern_id,bygningsnr) "
+            f"SELECT k.id,{q(navn)},{q(bydel_per_bygg.get(b['id']))},fi.id,{q(b['id'])},"
+            f"{kilde_bnr if kilde_bnr is not None else 'NULL'} "
             f"FROM kommune k, fagsystem_instans fi "
             f"WHERE k.kommunenr={q(knr)} AND fi.kildenokkel={q(kn)} "
             # Aktiv kommune vinner på disse feltene (se "Autoritet" i dokumentasjonen).
+            # bygningsnr: Matrikkelen vinner på identitet, så kildens tall settes bare
+            # når kolonnen er NULL (COALESCE beholder en eksisterende verdi). Når et
+            # tall settes på et bygg som geocode har sett uten å få bygningsnr
+            # ('adresse'/'ikke_funnet'), tilbakestilles matrikkel_match til
+            # 'ikke_forsokt' så tallet blir verifisert av neste geocode-kjøring.
             f"ON CONFLICT (fagsystem_instans_id,ekstern_id) "
             f"WHERE fagsystem_instans_id IS NOT NULL AND ekstern_id IS NOT NULL "
             # Et bygg som er i uttrekket er aktivt (også et som var borte og er tilbake).
-            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn, aktiv=TRUE;\n"
+            f"DO UPDATE SET navn=EXCLUDED.navn, bydel_navn=EXCLUDED.bydel_navn, aktiv=TRUE, "
+            f"bygningsnr=COALESCE(bygning.bygningsnr, EXCLUDED.bygningsnr), "
+            f"matrikkel_match=CASE WHEN bygning.bygningsnr IS NULL AND EXCLUDED.bygningsnr IS NOT NULL "
+            f"AND bygning.matrikkel_match IN ('adresse','ikke_funnet') "
+            f"THEN 'ikke_forsokt' ELSE bygning.matrikkel_match END;\n"
         )
         if gate:
             sql += (

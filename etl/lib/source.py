@@ -27,7 +27,7 @@ def rens_post(d: dict) -> dict:
 
 def hent_json(url: str) -> tuple[int, dict]:
     """Henter JSON fra url med Pythons innebygde urllib. Krever at Capgeminis
-    CA-sertifikat er installert i systemets tillitslager (se etl/README.md).
+    CA-sertifikat er installert i systemets tillitslager (se etl/docs/running.md).
     Prøver to ganger: enkelte instanser (Stavanger) svarer av og til tregere
     enn tidsavbruddet. Returnerer (http_status, innhold)."""
     for forsok in (1, 2):

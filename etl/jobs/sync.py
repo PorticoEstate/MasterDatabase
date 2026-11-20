@@ -11,8 +11,8 @@ lokaletype, aktivitet og fasilitet. En kobling til en id masteren ikke kjenner
 lastes ikke, og loggføres.
 
 jobs/build.py brukes én gang, når databasen bygges; dette skriptet brukes
-etterpå. Begge forutsetter normaliserte instanser (se "Kildekontrakt" i
-etl/README.md).
+etterpå. Begge forutsetter normaliserte instanser (se
+etl/docs/reference/source-contract.md).
 
 Bruk:
     (cd etl && python3 -m jobs.sync alle) > etl/ut/synk.sql
@@ -22,7 +22,7 @@ Bruk:
     (cd etl && python3 -m jobs.sync alle --fra-fil ut/normalisert) > etl/ut/synk.sql
 
 Skriptet gjør ingenting mot databasen selv; det skriver SQL-tekst til
-standard-ut. Se etl/README.md for full forklaring.
+standard-ut. Se etl/docs/jobs/sync.md for full forklaring.
 
 Hver kjøring registrerer et kildeuttrekk (metadata: kilde, endepunkt,
 tidspunkt, HTTP-status - ikke hele svaret). Ethvert avvik - ugyldige verdier,

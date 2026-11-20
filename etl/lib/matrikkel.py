@@ -292,6 +292,46 @@ def finn_bygg_ider_for_adresse(vegadresse_id: int) -> list[int]:
     return [int(_tekst(item, "value")) for item in _alle(_forste(svar, "return"), "item")]
 
 
+XSI_TYPE = "{http://www.w3.org/2001/XMLSchema-instance}type"
+
+
+def finn_adresser_for_bygg(bygg_id: int) -> list[dict]:
+    """AdresseService.findAdresserForBygg: adresser knyttet til bygget (via
+    Bruksenhet). Listen er polymorf: hvert element er en VegadresseId eller en
+    MatrikkeladresseId, gitt ved xsi:type. Returnerer [{"id": int, "type": str|None}]
+    der type er det lokale typenavnet ("VegadresseId", ...) eller None når
+    svaret ikke oppgir det. Ingen markering av hovedadresse finnes i API-et."""
+    svar = _kall("AdresseService", f"""
+        <adr:findAdresserForBygg xmlns:adr="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/adresse"
+            xmlns:dom="{NS_DOM}" xmlns:dombyg="{NS_DOMBYG}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <adr:byggId xsi:type="dombyg:BygningId"><dom:value>{int(bygg_id)}</dom:value></adr:byggId>
+            <adr:matrikkelContext>{MATRIKKEL_CONTEXT}</adr:matrikkelContext>
+        </adr:findAdresserForBygg>""")
+    resultat = []
+    for item in _alle(_forste(svar, "return"), "item"):
+        verdi = _tekst(item, "value")
+        if verdi is None:
+            continue
+        t = item.get(XSI_TYPE)
+        resultat.append({"id": int(verdi), "type": t.split(":")[-1] if t else None})
+    return resultat
+
+
+def finn_bygg_id_for_bygningsnr(bygningsnr: int) -> int | None:
+    """BygningService.findBygning: bygningsnummer -> BygningId. Kalles uten kommune
+    (bygningsnummeret er Matrikkelens logiske identifikator for et bygg). Skjemaet
+    (BygningServiceWS?xsd=...) har returverdien som valgfri, og dokumentasjonen
+    sier FinderException når ingen bygning finnes: ingen treff kan altså komme
+    som None eller som MatrikkelFeil."""
+    svar = _kall("BygningService", f"""
+        <byg:findBygning xmlns:byg="http://matrikkel.statkart.no/matrikkelapi/wsapi/v1/service/bygning"
+            xmlns:dom="{NS_DOM}">
+            <byg:bygningsnr>{int(bygningsnr)}</byg:bygningsnr>
+            <byg:matrikkelContext>{MATRIKKEL_CONTEXT}</byg:matrikkelContext>
+        </byg:findBygning>""")
+    return _id_verdi(svar, "return")
+
+
 def hent_bygning(bygg_id: int) -> dict:
     """Henter bygningsnummer + de få andre faktafeltene vi lagrer
     (bygningstype som rå kode - se kommentar ved bruk - bruksareal og antall
