@@ -18,7 +18,7 @@ tests {
   test("svarer 400", function() {
     expect(res.getStatus()).to.equal(400);
   });
-  
+
   test("forklarer hva som er galt", function() {
     expect(res.getBody().detail).to.include("lat, lon og radiusMeter");
   });
