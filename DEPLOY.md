@@ -131,8 +131,8 @@ activate it first (below). To load it right away, run `docker compose exec etl p
   kommune and create it again (this removes its buildings and resources).
 
 `DELETE /masterdb/kommune/{id}` removes the kommune and its booking system, and cascades
-to its buildings and resources. More detail under "Legge til en kommune" in
-[etl/README.md](etl/README.md).
+to its buildings and resources. More detail in
+[etl/docs/reference/adding-a-kommune.md](etl/docs/reference/adding-a-kommune.md).
 
 ## Day-to-day commands
 
